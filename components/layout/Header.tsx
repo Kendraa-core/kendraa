@@ -104,13 +104,13 @@ export default function Header() {
               className="w-8 h-8"
             />
             <span className="text-xl font-bold text-gray-900">Kendraa</span>
-          </Link>
+            </Link>
 
           {/* Navigation */}
           <nav className="flex items-center space-x-6">
             {/* Profile Dropdown */}
             <div className="relative">
-              <button
+                <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="flex items-center space-x-2 hover:bg-gray-50 p-2 rounded-lg"
               >
@@ -128,7 +128,7 @@ export default function Header() {
                 <span className="text-sm font-medium text-gray-700">
                   {profile?.full_name || 'Profile'}
                 </span>
-              </button>
+                </button>
 
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5">
@@ -148,12 +148,12 @@ export default function Header() {
                       >
                         <item.icon className="w-5 h-5 mr-3 text-gray-400" />
                         {item.label}
-                      </Link>
+                </Link>
                     ))}
                   </div>
                 </div>
-              )}
-            </div>
+            )}
+          </div>
           </nav>
         </div>
       </div>

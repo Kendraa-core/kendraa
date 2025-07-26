@@ -63,7 +63,7 @@ export default function ProfilePage() {
   }, [id, user?.id]);
 
   useEffect(() => {
-    fetchProfile();
+      fetchProfile();
   }, [fetchProfile]);
 
   if (loading) {
@@ -79,7 +79,7 @@ export default function ProfilePage() {
         </div>
       </div>
     );
-  }
+    }
 
   if (!profile) {
     return (
@@ -109,7 +109,7 @@ export default function ProfilePage() {
             ) : (
               <div className="h-full bg-gradient-to-r from-blue-400 to-blue-600" />
             )}
-          </div>
+            </div>
           <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2">
             <div className="relative">
               <div className="w-32 h-32 rounded-full overflow-hidden ring-4 ring-white bg-white">
@@ -144,8 +144,8 @@ export default function ProfilePage() {
             <ConnectionButton
               profileId={profile.id}
               onStatusChange={fetchProfile}
-            />
-          </div>
+              />
+            </div>
         </div>
 
         {/* About */}
@@ -205,7 +205,7 @@ export default function ProfilePage() {
               {profile.education.map((edu) => (
                 <div key={edu.id} className="flex gap-4">
                   <div className="w-12 h-12 flex-shrink-0 bg-gray-100 rounded-lg" />
-                  <div>
+          <div>
                     <h3 className="font-medium text-gray-900">{edu.school}</h3>
                     <p className="text-gray-600">
                       {edu.degree} • {edu.field}
@@ -220,8 +220,8 @@ export default function ProfilePage() {
                     </p>
                     {edu.description && (
                       <p className="mt-2 text-gray-600">{edu.description}</p>
-                    )}
-                  </div>
+                )}
+              </div>
                 </div>
               ))}
             </div>

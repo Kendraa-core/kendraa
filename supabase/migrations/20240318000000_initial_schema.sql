@@ -402,7 +402,7 @@ ALTER TABLE organization_posts ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Organization posts are viewable by everyone"
 ON organization_posts FOR SELECT
-USING (true);
+    USING (true);
 
 CREATE POLICY "Organization posts can be created by admins"
 ON organization_posts FOR INSERT
