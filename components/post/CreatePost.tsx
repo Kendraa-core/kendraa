@@ -1,18 +1,31 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/lib/supabase';
-import Image from 'next/image';
+import { Button } from '@/components/ui/Button';
+import { Card, CardContent } from '@/components/ui/Card';
+import { cn } from '@/lib/utils';
+import { createPost } from '@/lib/queries';
+import Avatar from '@/components/common/Avatar';
 import {
   PhotoIcon,
   VideoCameraIcon,
-  DocumentTextIcon,
-  PencilIcon,
+  DocumentIcon,
+  FaceSmileIcon,
   XMarkIcon,
-  UserCircleIcon,
+  GlobeAltIcon,
+  UserGroupIcon,
+  LockClosedIcon,
 } from '@heroicons/react/24/outline';
-import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
+import toast from 'react-hot-toast';
+
+const VISIBILITY_OPTIONS = [
+  { value: 'public', label: 'Anyone', icon: GlobeAltIcon, description: 'Anyone on or off the platform' },
+  { value: 'connections', label: 'Connections only', icon: UserGroupIcon, description: 'Only your connections' },
+  { value: 'private', label: 'Only me', icon: LockClosedIcon, description: 'Only visible to you' },
+];
 
 interface CreatePostProps {
   onPostCreated?: () => void;
@@ -20,198 +33,378 @@ interface CreatePostProps {
 
 export default function CreatePost({ onPostCreated }: CreatePostProps) {
   const { user } = useAuth();
-  const [showModal, setShowModal] = useState(false);
   const [content, setContent] = useState('');
-  const [image, setImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [images, setImages] = useState<File[]>([]);
+  const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isPosting, setIsPosting] = useState(false);
+  const [visibility, setVisibility] = useState<'public' | 'connections' | 'private'>('public');
+  const [showVisibilityDropdown, setShowVisibilityDropdown] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImage(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+  // Debug logging
+  const debugLog = (message: string, data?: unknown) => {
+    console.log(`[CreatePost] ${message}`, data);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user?.id || !content.trim()) return;
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-    setLoading(true);
+    debugLog('Uploading images', { count: files.length });
+
+    // Limit to 10 images
+    const totalImages = images.length + files.length;
+    if (totalImages > 10) {
+      toast.error('You can only upload up to 10 images per post');
+      return;
+    }
+
+    // Check file sizes (5MB limit per image)
+    const oversizedFiles = files.filter(file => file.size > 5 * 1024 * 1024);
+    if (oversizedFiles.length > 0) {
+      toast.error('Each image must be less than 5MB');
+      return;
+    }
+
+    // Add new images
+    setImages(prev => [...prev, ...files]);
+
+    // Create preview URLs
+    const newPreviewUrls = files.map(file => URL.createObjectURL(file));
+    setImagePreviewUrls(prev => [...prev, ...newPreviewUrls]);
+  };
+
+  const removeImage = (index: number) => {
+    // Revoke the preview URL to prevent memory leaks
+    URL.revokeObjectURL(imagePreviewUrls[index]);
+    
+    setImages(prev => prev.filter((_, i) => i !== index));
+    setImagePreviewUrls(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const uploadImages = async (): Promise<string[]> => {
+    if (images.length === 0) return [];
+
+    debugLog('Processing image uploads', { count: images.length });
+
+    // For demo purposes, we'll use the blob URLs
+    // In production, you'd upload to your storage service (Supabase Storage, AWS S3, etc.)
+    return imagePreviewUrls;
+  };
+
+  const handleSubmit = async () => {
+    debugLog('Starting post submission', { 
+      content: content.trim(), 
+      imagesCount: images.length, 
+      user: user?.id,
+      visibility 
+    });
+
+    if (!content.trim() && images.length === 0) {
+      toast.error('Please add some content or images to your post');
+      return;
+    }
+
+    if (!user) {
+      toast.error('You must be logged in to post');
+      debugLog('No user found', { user });
+      return;
+    }
+
+    setIsPosting(true);
+
     try {
-      let imageUrl = null;
-
-      if (image) {
-        const fileExt = image.name.split('.').pop();
-        const fileName = `${Math.random()}.${fileExt}`;
-        const filePath = `${user.id}/${fileName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('posts')
-          .upload(filePath, image);
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('posts')
-          .getPublicUrl(filePath);
-
-        imageUrl = publicUrl;
+      // Upload images if any
+      let imageUrls: string[] = [];
+      if (images.length > 0) {
+        debugLog('Uploading images...');
+        imageUrls = await uploadImages();
+        debugLog('Images uploaded', { urls: imageUrls });
       }
 
-      const { error } = await supabase
-        .from('posts')
-        .insert({
-          author_id: user.id,
-          content: content.trim(),
-          image_url: imageUrl,
-        });
+      // Create the post
+      const postData = {
+        content: content.trim(),
+        author_id: user.id,
+        visibility,
+        image_url: imageUrls[0] || undefined,
+        images: imageUrls.length > 0 ? imageUrls : undefined,
+      };
 
-      if (error) throw error;
+      debugLog('Creating post with data', postData);
 
-      setContent('');
-      setImage(null);
-      setImagePreview(null);
-      setShowModal(false);
-      if (onPostCreated) onPostCreated();
+      const post = await createPost(postData);
+
+      debugLog('Post creation result', { post });
+
+      if (post) {
+        // Reset form
+        setContent('');
+        setImages([]);
+        setImagePreviewUrls([]);
+        setIsExpanded(false);
+        setVisibility('public');
+        setShowVisibilityDropdown(false);
+
+        // Clear file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+
+        toast.success('Post created successfully!');
+        onPostCreated?.();
+        debugLog('Post created successfully', { postId: post.id });
+      } else {
+        debugLog('Post creation failed - no post returned');
+        toast.error('Failed to create post. Please try again.');
+      }
     } catch (error) {
+      debugLog('Error creating post', error);
       console.error('Error creating post:', error);
+      toast.error('Failed to create post. Please try again.');
     } finally {
-      setLoading(false);
+      setIsPosting(false);
     }
   };
 
+  const adjustTextareaHeight = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
+    }
+  };
+
+  const selectedVisibility = VISIBILITY_OPTIONS.find(option => option.value === visibility);
+
+  if (!user) {
+    debugLog('User not authenticated - hiding create post');
+    return null;
+  }
+
   return (
-    <>
-      <div className="bg-white rounded-xl p-4 shadow-sm">
-        <div className="flex gap-3">
+    <Card className="mb-6 modern-card border-0 shadow-modern-lg">
+      <CardContent className="p-6">
+        <div className="flex items-start space-x-4">
+          {/* User Avatar */}
           <div className="flex-shrink-0">
-            <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-              <UserCircleIcon className="w-12 h-12 text-gray-400" />
-            </div>
+            <Avatar
+              src={user.user_metadata?.avatar_url}
+              alt={user.user_metadata?.full_name || user.email || 'User'}
+              size="lg"
+              className="ring-2 ring-slate-100"
+            />
           </div>
-          <button
-            onClick={() => setShowModal(true)}
-            className="flex-1 text-left px-4 py-3 rounded-2xl border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors"
-          >
-            Start a post
-          </button>
-        </div>
-        <div className="mt-4 flex justify-between">
-          <button
-            onClick={() => setShowModal(true)}
-            className="flex items-center text-gray-600 hover:bg-gray-50 px-6 py-2 rounded-lg transition-colors"
-          >
-            <PhotoIcon className="w-6 h-6 text-blue-500 mr-2" />
-            <span className="text-sm font-medium">Photo</span>
-          </button>
-          <button
-            onClick={() => setShowModal(true)}
-            className="flex items-center text-gray-600 hover:bg-gray-50 px-6 py-2 rounded-lg transition-colors"
-          >
-            <VideoCameraIcon className="w-6 h-6 text-green-500 mr-2" />
-            <span className="text-sm font-medium">Video</span>
-          </button>
-          <button
-            onClick={() => setShowModal(true)}
-            className="flex items-center text-gray-600 hover:bg-gray-50 px-6 py-2 rounded-lg transition-colors"
-          >
-            <DocumentTextIcon className="w-6 h-6 text-orange-500 mr-2" />
-            <span className="text-sm font-medium">Document</span>
-          </button>
-          <button
-            onClick={() => setShowModal(true)}
-            className="flex items-center text-gray-600 hover:bg-gray-50 px-6 py-2 rounded-lg transition-colors"
-          >
-            <PencilIcon className="w-6 h-6 text-rose-500 mr-2" />
-            <span className="text-sm font-medium">Write</span>
-          </button>
-        </div>
-      </div>
 
-      {/* Create Post Modal */}
-      <AnimatePresence>
-        {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          {/* Post Content */}
+          <div className="flex-1">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-xl shadow-lg w-full max-w-2xl"
+              layout
+              className="space-y-4"
             >
-              <div className="flex justify-between items-center px-6 py-4 border-b">
-                <h2 className="text-xl font-semibold text-gray-900">Create a post</h2>
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <XMarkIcon className="w-6 h-6" />
-                </button>
-              </div>
-
-              <form onSubmit={handleSubmit} className="p-6">
+              {/* Text Area */}
+              <div className="relative">
                 <textarea
+                  ref={textareaRef}
                   value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  placeholder="What do you want to talk about?"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                  rows={5}
+                  onChange={(e) => {
+                    setContent(e.target.value);
+                    adjustTextareaHeight();
+                  }}
+                  onFocus={() => setIsExpanded(true)}
+                  placeholder="What's on your mind?"
+                  className={cn(
+                    "w-full resize-none border-none outline-none text-slate-900 placeholder-slate-500",
+                    "text-lg leading-relaxed overflow-hidden bg-transparent",
+                    isExpanded ? "min-h-[120px]" : "min-h-[60px]"
+                  )}
+                  style={{ maxHeight: '200px' }}
+                  maxLength={3000}
                 />
-
-                {imagePreview && (
-                  <div className="relative mt-4">
-                    <div className="aspect-video relative">
-                      <Image
-                        src={imagePreview}
-                        alt="Post preview"
-                        fill
-                        className="rounded-lg object-cover"
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setImage(null);
-                        setImagePreview(null);
-                      }}
-                      className="absolute top-2 right-2 p-1 bg-gray-800 bg-opacity-50 rounded-full text-white hover:bg-opacity-75 transition-opacity"
-                    >
-                      <XMarkIcon className="w-5 h-5" />
-                    </button>
+                
+                {/* Character Counter */}
+                {isExpanded && (
+                  <div className="absolute bottom-2 right-2 text-xs text-slate-400">
+                    {content.length}/3000
                   </div>
                 )}
+              </div>
 
-                <div className="mt-4 flex items-center justify-between">
-                  <div className="flex space-x-2">
-                    <label className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors">
-                      <PhotoIcon className="w-6 h-6 text-blue-500" />
+              {/* Image Previews */}
+              <AnimatePresence>
+                {imagePreviewUrls.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="grid grid-cols-2 md:grid-cols-3 gap-3"
+                  >
+                    {imagePreviewUrls.map((url, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        className="relative group aspect-square rounded-xl overflow-hidden bg-slate-100"
+                      >
+                        <Image
+                          src={url}
+                          alt={`Upload preview ${index + 1}`}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-200"
+                        />
+                        <button
+                          onClick={() => removeImage(index)}
+                          className="absolute top-2 right-2 w-6 h-6 bg-black/50 backdrop-blur-sm text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-black/70"
+                        >
+                          <XMarkIcon className="w-4 h-4" />
+                        </button>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Action Buttons */}
+              <AnimatePresence>
+                {isExpanded && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="flex items-center justify-between pt-4 border-t border-slate-100"
+                  >
+                    {/* Media Buttons */}
+                    <div className="flex items-center space-x-2">
                       <input
+                        ref={fileInputRef}
                         type="file"
                         accept="image/*"
-                        onChange={handleImageChange}
+                        multiple
+                        onChange={handleImageUpload}
                         className="hidden"
                       />
-                    </label>
-                  </div>
+                      
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded-xl"
+                      >
+                        <PhotoIcon className="w-5 h-5 mr-2" />
+                        Photo
+                      </Button>
 
-                  <button
-                    type="submit"
-                    disabled={!content.trim() || loading}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {loading ? 'Posting...' : 'Post'}
-                  </button>
-                </div>
-              </form>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded-xl"
+                        disabled
+                      >
+                        <VideoCameraIcon className="w-5 h-5 mr-2" />
+                        Video
+                      </Button>
+
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded-xl"
+                        disabled
+                      >
+                        <DocumentIcon className="w-5 h-5 mr-2" />
+                        Document
+                      </Button>
+
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded-xl"
+                        disabled
+                      >
+                        <FaceSmileIcon className="w-5 h-5 mr-2" />
+                        Feeling
+                      </Button>
+                    </div>
+
+                    {/* Visibility and Post Button */}
+                    <div className="flex items-center space-x-3">
+                      {/* Visibility Dropdown */}
+                      <div className="relative">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowVisibilityDropdown(!showVisibilityDropdown)}
+                          className="flex items-center space-x-2 border-slate-200 rounded-xl"
+                        >
+                          {selectedVisibility && (
+                            <selectedVisibility.icon className="w-4 h-4" />
+                          )}
+                          <span>{selectedVisibility?.label}</span>
+                        </Button>
+
+                        <AnimatePresence>
+                          {showVisibilityDropdown && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              className="absolute bottom-full mb-2 right-0 w-64 bg-white rounded-xl shadow-modern-lg border border-slate-200 p-2 z-50"
+                            >
+                              {VISIBILITY_OPTIONS.map((option) => (
+                                <button
+                                  key={option.value}
+                                  onClick={() => {
+                                    setVisibility(option.value as 'public' | 'connections' | 'private');
+                                    setShowVisibilityDropdown(false);
+                                  }}
+                                  className={cn(
+                                    "w-full text-left p-3 rounded-lg hover:bg-slate-50 transition-colors",
+                                    visibility === option.value && "bg-primary-50 text-primary-700"
+                                  )}
+                                >
+                                  <div className="flex items-center space-x-3">
+                                    <option.icon className="w-5 h-5 text-slate-600" />
+                                    <div>
+                                      <div className="font-medium text-slate-900">{option.label}</div>
+                                      <div className="text-sm text-slate-500">{option.description}</div>
+                                    </div>
+                                  </div>
+                                </button>
+                              ))}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+
+                      {/* Post Button */}
+                      <Button
+                        onClick={handleSubmit}
+                        disabled={(!content.trim() && images.length === 0) || isPosting}
+                        className="modern-button-primary min-w-[100px]"
+                      >
+                        {isPosting ? (
+                          <div className="flex items-center space-x-2">
+                            <div className="loading-dots">
+                              <span></span>
+                              <span></span>
+                              <span></span>
+                            </div>
+                            <span>Posting</span>
+                          </div>
+                        ) : (
+                          'Post'
+                        )}
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           </div>
-        )}
-      </AnimatePresence>
-    </>
+        </div>
+      </CardContent>
+    </Card>
   );
 } 

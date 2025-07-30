@@ -1,178 +1,141 @@
 'use client';
 
-import { useState } from 'react';
 import { motion } from 'framer-motion';
-import Image from 'next/image';
-import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import {
-  XMarkIcon,
   UserPlusIcon,
-  HandThumbUpIcon,
+  HeartIcon,
   ChatBubbleLeftIcon,
+  CheckCircleIcon,
 } from '@heroicons/react/24/outline';
-import { useNotifications } from '@/contexts/NotificationContext';
 import type { Notification } from '@/types/database.types';
 
-interface NotificationItemProps {
-  notification: Notification;
-  onRead: (id: string) => void;
-  onDelete: (id: string) => void;
+interface NotificationListProps {
+  notifications: Notification[];
+  onMarkAsRead?: (notificationId: string) => void;
 }
 
-function NotificationItem({ notification, onRead, onDelete }: NotificationItemProps) {
-  const getNotificationContent = () => {
+export default function NotificationList({ notifications, onMarkAsRead }: NotificationListProps) {
+  const getNotificationConfig = (notification: Notification) => {
     switch (notification.type) {
       case 'connection_request':
         return {
           icon: UserPlusIcon,
-          text: 'sent you a connection request',
-          link: `/profile/${notification.actor?.id}`,
+          color: 'text-blue-600',
+          bgColor: 'bg-blue-100',
+          text: notification.message,
+          link: notification.data?.profileId ? `/profile/${notification.data.profileId}` : '#',
         };
       case 'connection_accepted':
         return {
-          icon: UserPlusIcon,
-          text: 'accepted your connection request',
-          link: `/profile/${notification.actor?.id}`,
+          icon: CheckCircleIcon,
+          color: 'text-green-600',
+          bgColor: 'bg-green-100',
+          text: notification.message,
+          link: notification.data?.profileId ? `/profile/${notification.data.profileId}` : '#',
         };
-      case 'post_like':
+      case 'like':
         return {
-          icon: HandThumbUpIcon,
-          text: 'liked your post',
-          link: `/post/${notification.post?.id}`,
+          icon: HeartIcon,
+          color: 'text-red-600',
+          bgColor: 'bg-red-100',
+          text: notification.message,
+          link: notification.data?.postId ? `/post/${notification.data.postId}` : '#',
         };
-      case 'post_comment':
+      case 'comment':
         return {
           icon: ChatBubbleLeftIcon,
-          text: 'commented on your post',
-          link: `/post/${notification.post?.id}`,
+          color: 'text-purple-600',
+          bgColor: 'bg-purple-100',
+          text: notification.message,
+          link: notification.data?.postId ? `/post/${notification.data.postId}` : '#',
+        };
+      case 'post_mention':
+        return {
+          icon: ChatBubbleLeftIcon,
+          color: 'text-indigo-600',
+          bgColor: 'bg-indigo-100',
+          text: notification.message,
+          link: notification.data?.postId ? `/post/${notification.data.postId}` : '#',
         };
       default:
         return {
-          icon: ChatBubbleLeftIcon,
-          text: 'interacted with your profile',
+          icon: UserPlusIcon,
+          color: 'text-gray-600',
+          bgColor: 'bg-gray-100',
+          text: notification.message,
           link: '#',
         };
     }
   };
 
-  const content = getNotificationContent();
+  if (notifications.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <UserPlusIcon className="w-8 h-8 text-gray-400" />
+        </div>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">No notifications yet</h3>
+        <p className="text-gray-500">When you get notifications, they&apos;ll show up here.</p>
+      </div>
+    );
+  }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      className={`p-4 hover:bg-gray-50 ${!notification.read ? 'bg-blue-50' : ''}`}
-    >
-      <div className="flex items-start space-x-3">
-        <Link href={`/profile/${notification.actor?.id}`} className="flex-shrink-0">
-          {notification.actor?.avatar_url ? (
-            <Image
-              src={notification.actor.avatar_url}
-              alt={notification.actor.full_name}
-              width={40}
-              height={40}
-              className="rounded-full"
-            />
-          ) : (
-            <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-              <UserPlusIcon className="w-6 h-6 text-gray-500" />
-            </div>
-          )}
-        </Link>
-
-        <div className="flex-1 min-w-0">
-          <Link href={content.link} className="block">
-            <p className="text-sm text-gray-900">
-              <span className="font-medium">{notification.actor?.full_name}</span>{' '}
-              {content.text}
-            </p>
-            <p className="mt-1 text-xs text-gray-500">
-              {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
-            </p>
-          </Link>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          {!notification.read && (
-            <button
-              onClick={() => onRead(notification.id)}
-              className="p-1 text-blue-600 hover:bg-blue-50 rounded-full"
-            >
-              <span className="sr-only">Mark as read</span>
-              <div className="w-2 h-2 bg-blue-600 rounded-full" />
-            </button>
-          )}
-          <button
-            onClick={() => onDelete(notification.id)}
-            className="p-1 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-full"
+    <div className="space-y-2">
+      {notifications.map((notification, index) => {
+        const config = getNotificationConfig(notification);
+        
+        return (
+          <motion.div
+            key={notification.id}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: index * 0.1 }}
+            className={`p-4 rounded-lg border cursor-pointer hover:shadow-sm transition-all duration-200 ${
+              notification.read 
+                ? 'bg-white border-gray-200' 
+                : 'bg-blue-50 border-blue-200 shadow-sm'
+            }`}
+            onClick={() => {
+              if (!notification.read && onMarkAsRead) {
+                onMarkAsRead(notification.id);
+              }
+            }}
           >
-            <span className="sr-only">Delete</span>
-            <XMarkIcon className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
+            <div className="flex items-start space-x-3">
+              {/* Icon */}
+              <div className={`flex-shrink-0 w-10 h-10 rounded-full ${config.bgColor} flex items-center justify-center`}>
+                <config.icon className={`w-5 h-5 ${config.color}`} />
+              </div>
 
-export default function NotificationList() {
-  const { notifications, markAsRead, deleteNotification } = useNotifications();
-  const [filter, setFilter] = useState<'all' | 'unread'>('all');
+              {/* Content */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h4 className="text-sm font-medium text-gray-900 mb-1">
+                      {notification.title}
+                    </h4>
+                    <p className="text-sm text-gray-600 leading-relaxed">
+                      {config.text}
+                    </p>
+                  </div>
+                  
+                  {/* Unread indicator */}
+                  {!notification.read && (
+                    <div className="w-2 h-2 bg-blue-600 rounded-full flex-shrink-0 mt-2"></div>
+                  )}
+                </div>
 
-  const filteredNotifications = filter === 'all'
-    ? notifications
-    : notifications.filter(n => !n.read);
-
-  return (
-    <div className="bg-white rounded-lg shadow-lg overflow-hidden max-w-lg w-full">
-      {/* Header */}
-      <div className="px-4 py-3 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Notifications</h2>
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => setFilter('all')}
-              className={`px-3 py-1 text-sm rounded-full ${
-                filter === 'all'
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              All
-            </button>
-            <button
-              onClick={() => setFilter('unread')}
-              className={`px-3 py-1 text-sm rounded-full ${
-                filter === 'unread'
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              Unread
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Notification List */}
-      <div className="divide-y divide-gray-200 max-h-[calc(100vh-16rem)] overflow-y-auto">
-        {filteredNotifications.length > 0 ? (
-          filteredNotifications.map((notification) => (
-            <NotificationItem
-              key={notification.id}
-              notification={notification}
-              onRead={markAsRead}
-              onDelete={deleteNotification}
-            />
-          ))
-        ) : (
-          <div className="p-4 text-center text-gray-500">
-            No notifications to show
-          </div>
-        )}
-      </div>
+                {/* Timestamp */}
+                <p className="text-xs text-gray-500 mt-2">
+                  {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        );
+      })}
     </div>
   );
 } 

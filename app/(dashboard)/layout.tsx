@@ -181,7 +181,10 @@ export default function DashboardLayout({
               onClick={(e) => e.stopPropagation()}
               className="w-full max-w-md mx-4"
             >
-              <NotificationList />
+              <NotificationList 
+                notifications={[]} 
+                onMarkAsRead={() => {}} 
+              />
             </motion.div>
           </motion.div>
         )}

@@ -96,10 +96,10 @@ export default function ProfileSetupPage() {
                 Cover Photo
               </label>
               <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg relative">
-                {profile.cover_url ? (
+                {profile.banner_url ? (
                   <div className="w-full aspect-[3/1] relative">
                     <Image
-                      src={profile.cover_url}
+                      src={profile.banner_url}
                       alt="Cover"
                       fill
                       className="rounded-lg object-cover"
@@ -148,17 +148,7 @@ export default function ProfileSetupPage() {
                 />
               </div>
 
-              <div>
-                <label htmlFor="industry" className="block text-sm font-medium text-gray-700">
-                  Industry
-                </label>
-                <input
-                  type="text"
-                  id="industry"
-                  value={profile.industry || ''}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                />
-              </div>
+              {/* Industry field removed as it's not in the new Profile schema */}
 
               <div>
                 <label htmlFor="location" className="block text-sm font-medium text-gray-700">

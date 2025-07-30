@@ -31,7 +31,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(profile.avatar_url || null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
-  const [coverPreview, setCoverPreview] = useState<string | null>(profile.cover_url || null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(profile.banner_url || null);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'cover') => {
     const file = e.target.files?.[0];
@@ -57,7 +57,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
     setLoading(true);
     try {
       let avatarUrl = profile.avatar_url;
-      let coverUrl = profile.cover_url;
+      let coverUrl = profile.banner_url;
 
       // Upload avatar if changed
       if (avatarFile) {
@@ -95,7 +95,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
         .update({
           ...formData,
           avatar_url: avatarUrl,
-          cover_url: coverUrl,
+          banner_url: coverUrl,
           updated_at: new Date().toISOString(),
         })
         .eq('id', user.id);
