@@ -137,10 +137,10 @@ export default function FeedPage() {
                   ))}
                 </div>
               ) : (
-                <InfinitePostList
-                  initialPosts={posts}
-                  fetchMorePosts={fetchMorePosts}
-                />
+                                  <InfinitePostList
+                    initialPosts={posts as unknown as (PostWithAuthor & { author: Profile })[] }
+                    fetchMorePosts={fetchMorePosts as unknown as (page: number) => Promise<(PostWithAuthor & { author: Profile })[]>}
+                  />
               )}
             </div>
 
@@ -293,10 +293,10 @@ export default function FeedPage() {
                   ))}
                 </div>
               ) : (
-                <InfinitePostList
-                  initialPosts={posts}
-                  fetchMorePosts={fetchMorePosts}
-                />
+                                  <InfinitePostList
+                    initialPosts={posts as unknown as (PostWithAuthor & { author: Profile })[] }
+                    fetchMorePosts={fetchMorePosts as unknown as (page: number) => Promise<(PostWithAuthor & { author: Profile })[]>}
+                  />
               )}
             </motion.div>
           </div>

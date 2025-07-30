@@ -1,21 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import Avatar from '@/components/common/Avatar';
-import { cn, formatDateTime } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import {
   CalendarIcon,
   MagnifyingGlassIcon,
   MapPinIcon,
-  ClockIcon,
   UserGroupIcon,
   PlusIcon,
-  GlobeAltIcon,
   VideoCameraIcon,
   CurrencyDollarIcon,
   TicketIcon,
@@ -54,19 +52,11 @@ export default function EventsPage() {
   const [showOnlyFree, setShowOnlyFree] = useState(false);
 
   // Debug logging
-  const debugLog = (message: string, data?: unknown) => {
+  const debugLog = useCallback((message: string, data?: unknown) => {
     console.log(`[EventsPage] ${message}`, data);
-  };
-
-  useEffect(() => {
-    fetchEvents();
   }, []);
 
-  useEffect(() => {
-    filterEvents();
-  }, [events, searchQuery, selectedType, selectedSpecialization, showOnlyVirtual, showOnlyFree]);
-
-  const fetchEvents = async () => {
+  const fetchEvents = useCallback(async () => {
     setLoading(true);
     debugLog('Fetching events');
     
@@ -80,9 +70,9 @@ export default function EventsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [debugLog]);
 
-  const filterEvents = () => {
+  const filterEvents = useCallback(() => {
     let filtered = events;
 
     // Filter by search query
@@ -118,7 +108,15 @@ export default function EventsPage() {
 
     setFilteredEvents(filtered);
     debugLog('Events filtered', { total: events.length, filtered: filtered.length });
-  };
+  }, [events, searchQuery, selectedType, selectedSpecialization, showOnlyVirtual, showOnlyFree, debugLog]);
+
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
+
+  useEffect(() => {
+    filterEvents();
+  }, [events, searchQuery, selectedType, selectedSpecialization, showOnlyVirtual, showOnlyFree, filterEvents]);
 
   const handleRegister = async (event: EventWithOrganizer) => {
     if (!user?.id) {
@@ -355,8 +353,8 @@ export default function EventsPage() {
                         <div className="flex items-start space-x-4 flex-1">
                           {/* Organizer Avatar */}
                           <Avatar
-                            src={(event.organizer as any).avatar_url || (event.organizer as any).logo_url}
-                            alt={(event.organizer as any).full_name || (event.organizer as any).name}
+                            src={('avatar_url' in event.organizer ? event.organizer.avatar_url : event.organizer.logo_url) || undefined}
+                            alt={('full_name' in event.organizer ? event.organizer.full_name : event.organizer.name) || 'Organizer'}
                             size="lg"
                           />
 
@@ -380,7 +378,7 @@ export default function EventsPage() {
                                     href={`/${event.organizer_type === 'institution' ? 'institutions' : 'profile'}/${event.organizer.id}`}
                                     className="font-medium hover:text-primary-600 transition-colors"
                                   >
-                                    {(event.organizer as any).full_name || (event.organizer as any).name}
+                                    {('full_name' in event.organizer ? event.organizer.full_name : event.organizer.name) || 'Organizer'}
                                   </Link>
                                 </p>
                               </div>
@@ -465,28 +463,26 @@ export default function EventsPage() {
                             </Button>
                           )}
                           
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="min-w-[120px]"
-                            asChild
-                          >
-                            <Link href={`/events/${event.id}`}>
-                              View Details
-                            </Link>
-                          </Button>
-
-                          {event.meeting_link && event.status === 'ongoing' && (
+                          <Link href={`/events/${event.id}`}>
                             <Button
                               variant="outline"
                               size="sm"
-                              className="min-w-[120px] text-green-600 border-green-200 hover:bg-green-50"
-                              asChild
+                              className="min-w-[120px]"
                             >
-                              <Link href={event.meeting_link} target="_blank">
-                                Join Now
-                              </Link>
+                              View Details
                             </Button>
+                          </Link>
+
+                          {event.meeting_link && event.status === 'ongoing' && (
+                            <Link href={event.meeting_link} target="_blank">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="min-w-[120px] text-green-600 border-green-200 hover:bg-green-50"
+                              >
+                                Join Now
+                              </Button>
+                            </Link>
                           )}
                         </div>
                       </div>

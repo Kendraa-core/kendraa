@@ -9,70 +9,76 @@ import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/Button';
 
 // Memoized loading skeleton component
-const PostSkeleton = React.memo(() => (
-  <Card className="modern-card mb-6">
-    <CardContent className="p-6">
-      <div className="animate-pulse">
-        <div className="flex items-center space-x-3 mb-4">
-          <div className="w-12 h-12 bg-slate-200 rounded-full"></div>
-          <div className="flex-1">
-            <div className="h-4 bg-slate-200 rounded w-1/3 mb-2"></div>
-            <div className="h-3 bg-slate-200 rounded w-1/4"></div>
+const PostSkeleton = React.memo(function PostSkeleton() {
+  return (
+    <Card className="modern-card mb-6">
+      <CardContent className="p-6">
+        <div className="animate-pulse">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="w-12 h-12 bg-slate-200 rounded-full"></div>
+            <div className="flex-1">
+              <div className="h-4 bg-slate-200 rounded w-1/3 mb-2"></div>
+              <div className="h-3 bg-slate-200 rounded w-1/4"></div>
+            </div>
+          </div>
+          <div className="space-y-2 mb-4">
+            <div className="h-4 bg-slate-200 rounded"></div>
+            <div className="h-4 bg-slate-200 rounded w-3/4"></div>
+          </div>
+          <div className="flex space-x-4">
+            <div className="h-8 bg-slate-200 rounded w-16"></div>
+            <div className="h-8 bg-slate-200 rounded w-20"></div>
+            <div className="h-8 bg-slate-200 rounded w-16"></div>
           </div>
         </div>
-        <div className="space-y-2 mb-4">
-          <div className="h-4 bg-slate-200 rounded"></div>
-          <div className="h-4 bg-slate-200 rounded w-3/4"></div>
-        </div>
-        <div className="flex space-x-4">
-          <div className="h-8 bg-slate-200 rounded w-16"></div>
-          <div className="h-8 bg-slate-200 rounded w-20"></div>
-          <div className="h-8 bg-slate-200 rounded w-16"></div>
-        </div>
-      </div>
-    </CardContent>
-  </Card>
-));
+      </CardContent>
+    </Card>
+  );
+});
 
 // Memoized empty state component
-const EmptyState = React.memo(() => (
-  <Card className="modern-card">
-    <CardContent className="p-12 text-center">
-      <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-      </div>
-      <h3 className="text-lg font-medium text-slate-900 mb-2">No posts yet</h3>
-      <p className="text-slate-500">Be the first to share something with the community!</p>
-    </CardContent>
-  </Card>
-));
+const EmptyState = React.memo(function EmptyState() {
+  return (
+    <Card className="modern-card">
+      <CardContent className="p-12 text-center">
+        <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <h3 className="text-lg font-medium text-slate-900 mb-2">No posts yet</h3>
+        <p className="text-slate-500">Be the first to share something with the community!</p>
+      </CardContent>
+    </Card>
+  );
+});
 
 // Memoized error state component
-const ErrorState = React.memo(({ onRetry }: { onRetry: () => void }) => (
-  <Card className="modern-card">
-    <CardContent className="p-12 text-center">
-      <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.732 15.5c-.77.833.192 2.5 1.732 2.5z" />
-        </svg>
-      </div>
-      <h3 className="text-lg font-medium text-slate-900 mb-2">Failed to load posts</h3>
-      <p className="text-slate-500 mb-4">Something went wrong while loading the posts.</p>
-             <Button onClick={onRetry} variant="outline" size="sm">
-         <ArrowPathIcon className="w-4 h-4 mr-2" />
-         Try Again
-       </Button>
-    </CardContent>
-  </Card>
-));
+const ErrorState = React.memo(function ErrorState({ onRetry }: { onRetry: () => void }) {
+  return (
+    <Card className="modern-card">
+      <CardContent className="p-12 text-center">
+        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.732 15.5c-.77.833.192 2.5 1.732 2.5z" />
+          </svg>
+        </div>
+        <h3 className="text-lg font-medium text-slate-900 mb-2">Failed to load posts</h3>
+        <p className="text-slate-500 mb-4">Something went wrong while loading the posts.</p>
+        <Button onClick={onRetry} variant="outline" size="sm">
+          <ArrowPathIcon className="w-4 h-4 mr-2" />
+          Try Again
+        </Button>
+      </CardContent>
+    </Card>
+  );
+});
 
 interface PostListProps {
   refreshTrigger?: number;
 }
 
-const PostList = React.memo(({ refreshTrigger = 0 }: PostListProps) => {
+const PostList = React.memo(function PostList({ refreshTrigger = 0 }: PostListProps) {
   const [posts, setPosts] = useState<PostWithAuthor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -106,7 +112,7 @@ const PostList = React.memo(({ refreshTrigger = 0 }: PostListProps) => {
       }
 
       if (append) {
-        setPosts(prev => {
+        setPosts((prev: PostWithAuthor[]) => {
           const existingIds = new Set(prev.map(p => p.id));
           const uniqueNewPosts = newPosts.filter(p => !existingIds.has(p.id));
           return [...prev, ...uniqueNewPosts];
@@ -136,7 +142,7 @@ const PostList = React.memo(({ refreshTrigger = 0 }: PostListProps) => {
     setPage(0);
     setHasMore(true);
     fetchPosts(0, false);
-  }, [refreshTrigger]); // Only depend on refreshTrigger
+  }, [refreshTrigger, fetchPosts]);
 
   // Load more posts
   const loadMore = useCallback(() => {
@@ -230,7 +236,7 @@ const PostList = React.memo(({ refreshTrigger = 0 }: PostListProps) => {
       {/* End of posts indicator */}
       {!hasMore && posts.length > 0 && (
         <div className="text-center py-6 text-slate-500">
-          <p>You've reached the end! 🎉</p>
+          <p>You&apos;ve reached the end! 🎉</p>
         </div>
       )}
     </div>

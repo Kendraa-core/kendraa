@@ -192,7 +192,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-                 title: `Post by ${(post.author as any).full_name || (post.author as any).name}`,
+                 title: `Post by ${('full_name' in post.author ? post.author.full_name : post.author.name) || 'User'}`,
         text: post.content,
         url: window.location.href,
       });
@@ -218,16 +218,16 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-3">
             <Avatar
-              src={(post.author as any).avatar_url || (post.author as any).logo_url}
-              alt={(post.author as any).full_name || (post.author as any).name || 'User'}
+              src={('avatar_url' in post.author ? post.author.avatar_url : post.author.logo_url) || undefined}
+              alt={('full_name' in post.author ? post.author.full_name : post.author.name) || 'User'}
               size="lg"
             />
             <div className="flex-1 min-w-0">
               <h3 className="font-semibold text-slate-900 truncate">
-                {(post.author as any).full_name || (post.author as any).name}
+                {('full_name' in post.author ? post.author.full_name : post.author.name) || 'User'}
               </h3>
               <p className="text-sm text-slate-600 truncate">
-                {(post.author as any).headline || (post.author as any).type}
+                {('headline' in post.author ? post.author.headline : post.author.type) || ''}
               </p>
               <p className="text-xs text-slate-500">
                 {formatRelativeTime(post.created_at)}
@@ -433,15 +433,15 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
                   {comments.map((comment) => (
                     <div key={comment.id} className="flex items-start space-x-3">
                                              <Avatar
-                         src={(comment.author as any).avatar_url || (comment.author as any).logo_url}
-                         alt={(comment.author as any).full_name || (comment.author as any).name || 'User'}
+                         src={('avatar_url' in comment.author ? comment.author.avatar_url : comment.author.logo_url) || undefined}
+                         alt={('full_name' in comment.author ? comment.author.full_name : comment.author.name) || 'User'}
                          size="sm"
                        />
                        <div className="flex-1 min-w-0">
                          <div className="bg-slate-50 rounded-xl p-3">
                            <div className="flex items-center space-x-2 mb-1">
                              <h4 className="font-medium text-sm text-slate-900">
-                               {(comment.author as any).full_name || (comment.author as any).name}
+                               {('full_name' in comment.author ? comment.author.full_name : comment.author.name) || 'User'}
                              </h4>
                             <span className="text-xs text-slate-500">
                               {formatRelativeTime(comment.created_at)}

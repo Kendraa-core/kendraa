@@ -34,7 +34,7 @@ export default function NotificationList({ notifications, onMarkAsRead }: Notifi
           text: notification.message,
           link: notification.data?.profileId ? `/profile/${notification.data.profileId}` : '#',
         };
-      case 'like':
+      case 'post_like':
         return {
           icon: HeartIcon,
           color: 'text-red-600',
@@ -42,7 +42,7 @@ export default function NotificationList({ notifications, onMarkAsRead }: Notifi
           text: notification.message,
           link: notification.data?.postId ? `/post/${notification.data.postId}` : '#',
         };
-      case 'comment':
+      case 'post_comment':
         return {
           icon: ChatBubbleLeftIcon,
           color: 'text-purple-600',
@@ -50,7 +50,7 @@ export default function NotificationList({ notifications, onMarkAsRead }: Notifi
           text: notification.message,
           link: notification.data?.postId ? `/post/${notification.data.postId}` : '#',
         };
-      case 'post_mention':
+      case 'mention':
         return {
           icon: ChatBubbleLeftIcon,
           color: 'text-indigo-600',

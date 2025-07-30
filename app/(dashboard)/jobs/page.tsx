@@ -143,6 +143,11 @@ export default function JobsPage() {
         job_id: selectedJob.id,
         applicant_id: user.id,
         cover_letter: coverLetter,
+        status: 'pending',
+        resume_url: null,
+        reviewed_by: null,
+        reviewed_at: null,
+        notes: null,
       });
 
       if (application) {
@@ -444,16 +449,15 @@ export default function JobsPage() {
                           Apply Now
                         </Button>
                         
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="min-w-[100px]"
-                          asChild
-                        >
-                          <Link href={`/jobs/${job.id}`}>
+                        <Link href={`/jobs/${job.id}`}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="min-w-[100px]"
+                          >
                             View Details
-                          </Link>
-                        </Button>
+                          </Button>
+                        </Link>
                       </div>
                     </div>
                   </CardContent>

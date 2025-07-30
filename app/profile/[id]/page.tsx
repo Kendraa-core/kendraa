@@ -24,7 +24,6 @@ import {
   ShareIcon,
 } from '@heroicons/react/24/outline';
 import { CheckBadgeIcon } from '@heroicons/react/24/solid';
-import Link from 'next/link';
 import toast from 'react-hot-toast';
 import {
   getProfile,
@@ -41,12 +40,13 @@ import {
 } from '@/lib/queries';
 
 // Memoized components for better performance
-const ProfileHeader = React.memo(({ profile, isOwnProfile, connectionStatus, onConnect }: {
+const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile, connectionStatus, onConnect }: {
   profile: Profile;
   isOwnProfile: boolean;
   connectionStatus: string;
   onConnect: () => void;
-}) => (
+}) {
+  return (
   <div className="relative">
     {/* Banner */}
     <div className="h-48 bg-gradient-to-br from-primary-400 via-primary-500 to-primary-600 rounded-t-xl overflow-hidden">
@@ -155,9 +155,11 @@ const ProfileHeader = React.memo(({ profile, isOwnProfile, connectionStatus, onC
       </div>
     </div>
   </div>
-));
+  );
+});
 
-const ContactInfo = React.memo(({ profile }: { profile: Profile }) => (
+const ContactInfo = React.memo(function ContactInfo({ profile }: { profile: Profile }) {
+  return (
   <Card className="modern-card">
     <CardHeader>
       <CardTitle className="text-lg text-slate-900">Contact Information</CardTitle>
@@ -191,9 +193,10 @@ const ContactInfo = React.memo(({ profile }: { profile: Profile }) => (
           </a>
         </div>
       )}
-    </CardContent>
-  </Card>
-));
+         </CardContent>
+   </Card>
+  );
+});
 
 export default function ProfilePage() {
   const params = useParams();
