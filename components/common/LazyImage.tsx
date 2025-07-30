@@ -61,15 +61,17 @@ export default function LazyImage({
     onError?.();
   };
 
-  // Generate a simple blur placeholder
-  const generateBlurDataURL = (w = 10, h = 10) => {
+  // Generate a simple blur placeholder (client-side only)
+  const generateBlurDataURL = () => {
+    if (typeof window === 'undefined') return '';
+    
     const canvas = document.createElement('canvas');
-    canvas.width = w;
-    canvas.height = h;
+    canvas.width = 10;
+    canvas.height = 10;
     const ctx = canvas.getContext('2d');
     if (ctx) {
       ctx.fillStyle = '#f3f4f6';
-      ctx.fillRect(0, 0, w, h);
+      ctx.fillRect(0, 0, 10, 10);
     }
     return canvas.toDataURL();
   };
@@ -133,8 +135,7 @@ export default function LazyImage({
             onError={handleError}
             className={cn(
               'transition-opacity duration-300',
-              isLoaded ? 'opacity-100' : 'opacity-0',
-              className
+              isLoaded ? 'opacity-100' : 'opacity-0'
             )}
             {...props}
           />
