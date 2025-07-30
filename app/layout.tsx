@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
@@ -13,7 +13,12 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'Kendraa - Professional Network for Healthcare',
   description: 'Connect with healthcare professionals, institutions, and organizations.',
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
   themeColor: '#0a66c2',
 };
 

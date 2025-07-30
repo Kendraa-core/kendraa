@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
     unoptimized: process.env.NODE_ENV === 'development',
   },
   experimental: {
-    optimizeCss: true,
+    optimizeCss: false, // Disable to fix critters issue
     optimizePackageImports: ['@heroicons/react', 'framer-motion'],
   },
   compiler: {
