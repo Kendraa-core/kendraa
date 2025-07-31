@@ -299,6 +299,8 @@ export default function DashboardLayout({
       <main className="pt-16">
         {children}
       </main>
+      
+      {/* No bottom navigation - removed as requested */}
     </div>
   );
 } 
