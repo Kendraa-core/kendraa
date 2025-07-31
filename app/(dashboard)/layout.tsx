@@ -132,7 +132,7 @@ export default function DashboardLayout({
             {/* Logo */}
             <div className="flex items-center">
               <Link href="/feed" className="flex-shrink-0">
-                <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-lg">
+                <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg">
                   K
                 </div>
               </Link>

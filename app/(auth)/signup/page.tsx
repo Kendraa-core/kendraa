@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
-import { EyeIcon, EyeSlashIcon, UserIcon, AcademicCapIcon, BuildingOffice2Icon } from '@heroicons/react/24/outline';
+import { EyeIcon, EyeSlashIcon, UserIcon, AcademicCapIcon, BuildingOffice2Icon, SparklesIcon } from '@heroicons/react/24/outline';
 
 const PROFILE_TYPES = [
   {
@@ -81,11 +81,16 @@ export default function SignUp() {
             K
           </div>
         </Link>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Join Kendra Healthcare Network
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          Connect with healthcare professionals worldwide
+        <div className="flex items-center justify-center mb-8">
+          <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-2xl shadow-purple-500/25">
+            <SparklesIcon className="w-8 h-8 text-white" />
+          </div>
+        </div>
+        <h1 className="text-3xl font-bold text-center mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+          Join Kendraa
+        </h1>
+        <p className="text-gray-600 text-center mb-8">
+          The Royal Network for Healthcare Professionals
         </p>
       </div>
 
