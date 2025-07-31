@@ -1,7 +1,7 @@
--- Migration: Add profile types and follow system
--- This migration adds support for different profile types and implements the follow system
+-- Migration: Fix profile types and follow system
+-- This migration properly adds support for different profile types without FK constraint issues
 
--- First, add new columns to profiles table
+-- First, add new columns to profiles table if they don't exist
 ALTER TABLE public.profiles 
 ADD COLUMN IF NOT EXISTS profile_type VARCHAR(20) DEFAULT 'individual' CHECK (profile_type IN ('individual', 'student', 'institution'));
 
@@ -26,7 +26,7 @@ ADD COLUMN IF NOT EXISTS graduation_year INTEGER;
 ALTER TABLE public.profiles 
 ADD COLUMN IF NOT EXISTS current_institution VARCHAR(255);
 
--- Create follows table for the follow system
+-- Create follows table for the follow system if it doesn't exist
 CREATE TABLE IF NOT EXISTS public.follows (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     follower_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
@@ -56,10 +56,6 @@ CREATE INDEX IF NOT EXISTS idx_profiles_institution_type ON public.profiles(inst
 UPDATE public.profiles 
 SET profile_type = 'individual', user_type = 'individual' 
 WHERE profile_type IS NULL;
-
--- Note: Sample institution profiles should be created through the application
--- with proper auth.users entries to avoid foreign key constraint violations
--- The sample data below has been removed to prevent FK constraint errors
 
 -- Update jobs table to only allow institutions to post jobs
 ALTER TABLE public.jobs 

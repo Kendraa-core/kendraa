@@ -1,7 +1,10 @@
--- Migration: Add profile types and follow system
--- This migration adds support for different profile types and implements the follow system
+-- Fix for the foreign key constraint issue in migration 004
+-- Run this in the Supabase SQL Editor to fix the current issue
 
--- First, add new columns to profiles table
+-- First, let's check what profiles exist
+SELECT id, full_name, profile_type FROM public.profiles LIMIT 10;
+
+-- Add the new columns to profiles table (safe to run multiple times)
 ALTER TABLE public.profiles 
 ADD COLUMN IF NOT EXISTS profile_type VARCHAR(20) DEFAULT 'individual' CHECK (profile_type IN ('individual', 'student', 'institution'));
 
@@ -57,13 +60,16 @@ UPDATE public.profiles
 SET profile_type = 'individual', user_type = 'individual' 
 WHERE profile_type IS NULL;
 
--- Note: Sample institution profiles should be created through the application
--- with proper auth.users entries to avoid foreign key constraint violations
--- The sample data below has been removed to prevent FK constraint errors
-
 -- Update jobs table to only allow institutions to post jobs
 ALTER TABLE public.jobs 
 ADD COLUMN IF NOT EXISTS posted_by_type VARCHAR(20) DEFAULT 'institution' CHECK (posted_by_type = 'institution');
 
--- Add constraint to ensure only institutions can post jobs
--- This will be enforced at the application level as well 
+-- Verify the changes
+SELECT column_name, data_type, is_nullable 
+FROM information_schema.columns 
+WHERE table_name = 'profiles' 
+AND column_name IN ('profile_type', 'institution_type', 'accreditations', 'departments', 'contact_info', 'education_level', 'graduation_year', 'current_institution')
+ORDER BY column_name;
+
+-- Check if follows table was created
+SELECT table_name FROM information_schema.tables WHERE table_name = 'follows'; 
