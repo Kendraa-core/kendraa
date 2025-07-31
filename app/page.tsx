@@ -322,7 +322,7 @@ export default function LandingPage() {
                     <StarSolidIcon key={star} className="w-4 h-4 text-yellow-400" />
                   ))}
                 </div>
-                <p className="text-gray-700 mb-6 italic">"{testimonial.content}"</p>
+                <p className="text-gray-700 mb-6 italic">&quot;{testimonial.content}&quot;</p>
                 <div className="flex items-center space-x-3">
                   <img 
                     className="w-12 h-12 rounded-full object-cover"

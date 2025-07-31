@@ -61,7 +61,7 @@ export default function EventsPage() {
     debugLog('Fetching events');
     
     try {
-      const data = await getEvents(50);
+      const data = await getEvents();
       setEvents(data);
       debugLog('Events fetched successfully', { count: data.length });
     } catch (error) {
@@ -127,24 +127,24 @@ export default function EventsPage() {
     debugLog('Registering for event', { eventId: event.id, userId: user.id });
 
     try {
-      const success = await registerForEvent(event.id, user.id);
+      const success = await registerForEvent({
+        event_id: event.id,
+        attendee_id: user.id,
+        attendee_type: 'individual',
+        status: 'registered',
+        registration_date: new Date().toISOString(),
+      });
       
       if (success) {
         toast.success(`Successfully registered for ${event.title}!`);
-        // Update the event's attendees count locally
-        setEvents(prev => prev.map(e => 
-          e.id === event.id 
-            ? { ...e, attendees_count: e.attendees_count + 1 }
-            : e
-        ));
-        debugLog('Event registration successful', { eventId: event.id });
+        // Refresh events to update registration status
+        await fetchEvents();
       } else {
-        toast.error('Failed to register for event');
-        debugLog('Failed to register for event', { eventId: event.id });
+        toast.error('Failed to register for event. Please try again.');
       }
     } catch (error) {
       debugLog('Error registering for event', error);
-      toast.error('Failed to register for event');
+      toast.error('Failed to register for event. Please try again.');
     }
   };
 

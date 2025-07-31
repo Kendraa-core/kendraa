@@ -230,7 +230,7 @@ export default function ProfilePage() {
         getProfile(profileId),
         getExperiences(profileId),
         getEducation(profileId),
-        getPostsByAuthor(profileId, 10),
+        getPostsByAuthor(profileId),
       ]);
 
       if (!profileData) {
@@ -253,7 +253,7 @@ export default function ProfilePage() {
       // Get connection status if not own profile
       if (!isOwnProfile && user?.id) {
         const status = await getConnectionStatus(user.id, profileId);
-        setConnectionStatus(status);
+        setConnectionStatus((status as 'none' | 'pending' | 'connected') || 'none');
       }
 
       debugLog('Profile data loaded successfully', {

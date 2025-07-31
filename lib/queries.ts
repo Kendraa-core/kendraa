@@ -2,19 +2,34 @@ import { supabase } from './supabase';
 import type { 
   Profile, 
   Post, 
+  PostComment,
+  PostWithAuthor, 
+  CommentWithAuthor, 
   Connection, 
+  Institution, 
+  Job, 
+  JobApplication, 
+  JobWithCompany,
+  Event, 
+  EventAttendee,
+  EventWithOrganizer,
   Experience, 
   Education, 
   Notification,
-  PostWithAuthor,
-  CommentWithAuthor,
-  Institution,
-  Job,
-  Event,
-  PostComment,
-  JobApplication,
-  EventAttendee
+  ConnectionWithProfile
 } from '@/types/database.types';
+
+// Re-export types for convenience
+export type { 
+  EventWithOrganizer, 
+  Institution, 
+  JobWithCompany, 
+  Profile,
+  Experience,
+  Education,
+  PostWithAuthor,
+  ConnectionWithProfile
+};
 
 const debugLog = (message: string, data?: unknown) => {
   console.log(`[Queries] ${message}`, data || '');
@@ -536,7 +551,7 @@ export async function getSuggestedConnections(userId: string, limit = 10): Promi
   }
 }
 
-export async function getConnectionRequests(userId: string): Promise<Connection[]> {
+export async function getConnectionRequests(userId: string): Promise<ConnectionWithProfile[]> {
   try {
     debugLog('Getting connection requests', { userId });
     
@@ -557,10 +572,7 @@ export async function getConnectionRequests(userId: string): Promise<Connection[
       .eq('status', 'pending')
       .order('created_at', { ascending: false });
 
-    if (error) {
-      debugLog('Error fetching connection requests', error);
-      return [];
-    }
+    if (error) throw error;
     
     debugLog('Connection requests fetched successfully', data);
     return data || [];
@@ -960,7 +972,7 @@ export async function createJob(job: Omit<Job, 'id' | 'created_at' | 'updated_at
   }
 }
 
-export async function getJobs(): Promise<Job[]> {
+export async function getJobs(): Promise<JobWithCompany[]> {
   try {
     debugLog('Getting jobs');
     
@@ -972,7 +984,11 @@ export async function getJobs(): Promise<Job[]> {
     
     const { data, error } = await supabase
       .from('jobs')
-      .select('*')
+      .select(`
+        *,
+        company:institutions!jobs_company_id_fkey(*),
+        posted_by_user:profiles!jobs_posted_by_fkey(*)
+      `)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -1046,7 +1062,7 @@ export async function createEvent(event: Omit<Event, 'id' | 'created_at' | 'upda
   }
 }
 
-export async function getEvents(): Promise<Event[]> {
+export async function getEvents(): Promise<EventWithOrganizer[]> {
   try {
     debugLog('Getting events');
     
@@ -1058,8 +1074,11 @@ export async function getEvents(): Promise<Event[]> {
     
     const { data, error } = await supabase
       .from('events')
-      .select('*')
-      .order('event_date', { ascending: true });
+      .select(`
+        *,
+        organizer:profiles!events_organizer_id_fkey(*)
+      `)
+      .order('start_date', { ascending: true });
 
     if (error) throw error;
     

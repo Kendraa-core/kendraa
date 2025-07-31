@@ -75,7 +75,7 @@ export default function NetworkPage() {
           const status = await getConnectionStatus(user.id, profile.id);
           return {
             ...profile,
-            connection_status: status,
+            connection_status: (status as 'none' | 'pending' | 'connected') || 'none',
             mutual_connections: Math.floor(Math.random() * 20) + 1, // Mock for demo
           };
         })

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -74,12 +74,12 @@ export default function JobsPage() {
     filterJobs();
   }, [jobs, searchQuery, selectedType, selectedLevel, selectedLocation]);
 
-  const fetchJobs = async () => {
+  const fetchJobs = useCallback(async () => {
     setLoading(true);
     debugLog('Fetching jobs');
     
     try {
-      const data = await getJobs(50);
+      const data = await getJobs();
       setJobs(data);
       debugLog('Jobs fetched successfully', { count: data.length });
     } catch (error) {
@@ -88,7 +88,7 @@ export default function JobsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [debugLog]);
 
   const filterJobs = () => {
     let filtered = jobs;

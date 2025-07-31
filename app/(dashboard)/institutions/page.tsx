@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -54,12 +54,12 @@ export default function InstitutionsPage() {
     filterInstitutions();
   }, [institutions, searchQuery, selectedType]);
 
-  const fetchInstitutions = async () => {
+  const fetchInstitutions = useCallback(async () => {
     setLoading(true);
     debugLog('Fetching institutions');
     
     try {
-      const data = await getInstitutions(50);
+      const data = await getInstitutions();
       setInstitutions(data);
       debugLog('Institutions fetched successfully', { count: data.length });
     } catch (error) {
@@ -68,7 +68,7 @@ export default function InstitutionsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [debugLog]);
 
   const filterInstitutions = () => {
     let filtered = institutions;
