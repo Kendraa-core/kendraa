@@ -12,7 +12,7 @@ type AuthContextType = {
   profile: Profile | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ data: any; error: any }>;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ data: any; error: any }>;
+  signUp: (email: string, password: string, fullName: string, profileType?: 'individual' | 'student' | 'institution') => Promise<{ data: any; error: any }>;
   signOut: () => Promise<void>;
 };
 
@@ -78,7 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return result;
   };
 
-  const signUp = async (email: string, password: string, fullName: string) => {
+  const signUp = async (email: string, password: string, fullName: string, profileType: 'individual' | 'student' | 'institution' = 'individual') => {
     setLoading(true);
     const result = await supabase.auth.signUp({
       email,
@@ -86,6 +86,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       options: {
         data: {
           full_name: fullName,
+          profile_type: profileType,
+          user_type: profileType === 'institution' ? 'institution' : 'individual',
         },
       },
     });

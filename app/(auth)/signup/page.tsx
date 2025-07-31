@@ -5,7 +5,31 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, EyeSlashIcon, UserIcon, AcademicCapIcon, BuildingOffice2Icon } from '@heroicons/react/24/outline';
+
+const PROFILE_TYPES = [
+  {
+    id: 'individual',
+    title: 'Individual Professional',
+    description: 'Doctors, nurses, therapists, technicians, and other healthcare professionals',
+    icon: UserIcon,
+    features: ['Connect with professionals', 'Follow institutions', 'Share knowledge', 'Apply to jobs']
+  },
+  {
+    id: 'student',
+    title: 'Healthcare Student',
+    description: 'Medical students, nursing students, residents, interns, and trainees',
+    icon: AcademicCapIcon,
+    features: ['Connect with peers & professionals', 'Access learning resources', 'Find mentorship', 'Apply to jobs']
+  },
+  {
+    id: 'institution',
+    title: 'Healthcare Institution',
+    description: 'Hospitals, clinics, medical colleges, research centers',
+    icon: BuildingOffice2Icon,
+    features: ['Post job openings', 'Build follower base', 'Share updates', 'Host events']
+  }
+];
 
 export default function SignUp() {
   const [email, setEmail] = useState('');
@@ -14,6 +38,7 @@ export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [fullName, setFullName] = useState('');
+  const [profileType, setProfileType] = useState<'individual' | 'student' | 'institution'>('individual');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -31,9 +56,15 @@ export default function SignUp() {
     }
 
     try {
-      const { error } = await signUp(email, password, fullName);
+      const { error } = await signUp(email, password, fullName, profileType);
       if (error) throw error;
-      router.push('/feed');
+      
+      // Redirect based on profile type
+      if (profileType === 'institution') {
+        router.push('/institution/setup');
+      } else {
+        router.push('/profile/setup');
+      }
     } catch (error) {
       console.error('Error creating account:', error);
       setError('Error creating account. Please try again.');
@@ -44,7 +75,7 @@ export default function SignUp() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+      <div className="sm:mx-auto sm:w-full sm:max-w-2xl">
         <Link href="/" className="flex justify-center">
           <div className="w-20 h-20 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center text-white text-4xl font-bold shadow-xl">
             K
@@ -58,7 +89,7 @@ export default function SignUp() {
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-2xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -75,9 +106,58 @@ export default function SignUp() {
               </motion.div>
             )}
 
+            {/* Profile Type Selection */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-4">
+                Choose Your Profile Type
+              </label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {PROFILE_TYPES.map((type) => {
+                  const IconComponent = type.icon;
+                  return (
+                    <motion.div
+                      key={type.id}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className={`relative cursor-pointer rounded-xl border-2 p-4 transition-all duration-200 ${
+                        profileType === type.id
+                          ? 'border-indigo-500 bg-indigo-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      onClick={() => setProfileType(type.id as typeof profileType)}
+                    >
+                      <div className="flex flex-col items-center text-center">
+                        <IconComponent className={`h-8 w-8 mb-2 ${
+                          profileType === type.id ? 'text-indigo-600' : 'text-gray-400'
+                        }`} />
+                        <h3 className={`font-semibold text-sm mb-1 ${
+                          profileType === type.id ? 'text-indigo-900' : 'text-gray-900'
+                        }`}>
+                          {type.title}
+                        </h3>
+                        <p className="text-xs text-gray-600 mb-2">
+                          {type.description}
+                        </p>
+                        <ul className="text-xs text-gray-500 space-y-1">
+                          {type.features.slice(0, 2).map((feature, index) => (
+                            <li key={index}>• {feature}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      {profileType === type.id && (
+                        <div className="absolute -top-2 -right-2 w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center">
+                          <span className="text-white text-xs">✓</span>
+                        </div>
+                      )}
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </div>
+
             <div>
               <label htmlFor="fullName" className="block text-sm font-semibold text-gray-700 mb-2">
-                Full Name
+                {profileType === 'institution' ? 'Institution Name' : 'Full Name'}
               </label>
               <div className="relative">
                 <input
@@ -89,7 +169,7 @@ export default function SignUp() {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   className="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
-                  placeholder="Enter your full name"
+                  placeholder={profileType === 'institution' ? 'Enter institution name' : 'Enter your full name'}
                 />
               </div>
             </div>

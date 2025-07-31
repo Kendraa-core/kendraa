@@ -12,18 +12,15 @@ import {
   ChatBubbleLeftRightIcon,
   UserCircleIcon,
   MagnifyingGlassIcon,
+  BuildingOffice2Icon,
+  PlusIcon,
+  UsersIcon,
 } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
 import UserSearch from '@/components/search/UserSearch';
 import NotificationList from '@/components/notifications/NotificationList';
 import { useNotifications } from '@/contexts/NotificationContext';
-
-const navItems = [
-  { icon: HomeIcon, label: 'Home', href: '/feed' },
-  { icon: UserGroupIcon, label: 'Network', href: '/network' },
-  { icon: BriefcaseIcon, label: 'Jobs', href: '/jobs' },
-  { icon: ChatBubbleLeftRightIcon, label: 'Messages', href: '/messages' },
-];
+import { getProfile, type Profile } from '@/lib/queries';
 
 export default function DashboardLayout({
   children,
@@ -36,6 +33,8 @@ export default function DashboardLayout({
   const [showSearch, setShowSearch] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [userProfile, setUserProfile] = useState<Profile | null>(null);
+  const [profileLoading, setProfileLoading] = useState(true);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -43,6 +42,26 @@ export default function DashboardLayout({
       router.push('/signin');
     }
   }, [user, loading, router]);
+
+  // Load user profile to determine navigation options
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      if (user?.id) {
+        try {
+          const profile = await getProfile(user.id);
+          setUserProfile(profile);
+        } catch (error) {
+          console.error('Error loading user profile:', error);
+        } finally {
+          setProfileLoading(false);
+        }
+      } else {
+        setProfileLoading(false);
+      }
+    };
+
+    loadUserProfile();
+  }, [user?.id]);
 
   // Click outside handler for profile dropdown
   useEffect(() => {
@@ -61,72 +80,106 @@ export default function DashboardLayout({
     };
   }, [showProfileDropdown]);
 
-  if (loading) {
+  if (loading || profileLoading) {
     return (
-      <div className="min-h-screen bg-[#fafafa] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
       </div>
     );
   }
 
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
+
+  // Determine navigation items based on user type
+  const getNavigationItems = () => {
+    const isInstitution = userProfile?.profile_type === 'institution';
+    
+    const baseItems = [
+      { href: '/feed', icon: HomeIcon, label: 'Home' },
+    ];
+
+    if (isInstitution) {
+      // Institution navigation
+      return [
+        ...baseItems,
+        { href: '/jobs', icon: BriefcaseIcon, label: 'Jobs' },
+        { href: '/jobs/create', icon: PlusIcon, label: 'Post Job' },
+        { href: '/followers', icon: UsersIcon, label: 'Followers' },
+        { href: '/institutions', icon: BuildingOffice2Icon, label: 'Institutions' },
+      ];
+    } else {
+      // Individual/Student navigation
+      return [
+        ...baseItems,
+        { href: '/network', icon: UserGroupIcon, label: 'Network' },
+        { href: '/jobs', icon: BriefcaseIcon, label: 'Jobs' },
+        { href: '/institutions', icon: BuildingOffice2Icon, label: 'Institutions' },
+      ];
+    }
+  };
+
+  const navigationItems = getNavigationItems();
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
-      {/* Top Navigation */}
-      <header className="fixed top-0 w-full glass-morphism backdrop-blur-xl border-b border-white/10 z-50">
-        <div className="container-responsive">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center flex-1 gap-2 sm:gap-8">
-              <Link href="/feed" className="flex-shrink-0 group">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 premium-gradient rounded-xl flex items-center justify-center text-white font-bold text-lg sm:text-xl shadow-lg hover:shadow-xl transition-all duration-300 group-hover:scale-110">
-                  <span className="text-white">K</span>
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo */}
+            <div className="flex items-center">
+              <Link href="/feed" className="flex-shrink-0">
+                <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-lg">
+                  K
                 </div>
               </Link>
-              <button
-                onClick={() => setShowSearch(true)}
-                className="hidden sm:block max-w-md w-full relative group"
-              >
-                <div className="w-full pl-12 pr-4 py-3 glass-effect rounded-xl text-sm text-gray-700 cursor-pointer hover:bg-white/20 transition-all duration-300 hover:shadow-md">
-                  Search professionals, jobs, events...
-                </div>
-                <MagnifyingGlassIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500 group-hover:text-indigo-500 transition-colors duration-300" />
-              </button>
-              <button
-                onClick={() => setShowSearch(true)}
-                className="sm:hidden p-3 glass-effect rounded-xl text-gray-600 hover:text-indigo-500 transition-all duration-300 hover:shadow-md hover:scale-110"
-              >
-                <MagnifyingGlassIcon className="h-5 w-5" />
-              </button>
             </div>
 
-            <nav className="flex items-center space-x-1 sm:space-x-2">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="relative inline-flex flex-col items-center justify-center px-3 sm:px-4 py-2 text-gray-700 hover:text-indigo-600 transition-all duration-300 rounded-xl hover:bg-white/10 group"
-                >
-                  <item.icon className="h-5 w-5 sm:h-6 sm:w-6 group-hover:scale-110 transition-transform duration-300" />
-                  <span className="hidden sm:block text-xs mt-1 font-medium">{item.label}</span>
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                </Link>
-              ))}
+            {/* Navigation */}
+            <nav className="hidden md:flex space-x-1">
+              {navigationItems.map((item) => {
+                const IconComponent = item.icon;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="relative group flex flex-col items-center justify-center px-3 sm:px-4 py-2 text-gray-700 hover:text-indigo-600 transition-all duration-300 rounded-xl hover:bg-white/10"
+                  >
+                    <IconComponent className="h-6 w-6 sm:h-7 sm:w-7 group-hover:scale-110 transition-transform duration-300" />
+                    <span className="hidden sm:block text-xs mt-1 font-medium">{item.label}</span>
+                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  </Link>
+                );
+              })}
+            </nav>
+
+            {/* Right side items */}
+            <nav className="flex items-center space-x-1">
+              {/* Search */}
+              <button
+                onClick={() => setShowSearch(true)}
+                className="relative group flex flex-col items-center justify-center px-3 sm:px-4 py-2 text-gray-700 hover:text-indigo-600 transition-all duration-300 rounded-xl hover:bg-white/10"
+              >
+                <MagnifyingGlassIcon className="h-6 w-6 sm:h-7 sm:w-7 group-hover:scale-110 transition-transform duration-300" />
+                <span className="hidden sm:block text-xs mt-1 font-medium">Search</span>
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              </button>
 
               {/* Notifications */}
               <button
-                onClick={() => setShowNotifications(prev => !prev)}
-                className="relative inline-flex flex-col items-center justify-center px-3 sm:px-4 py-2 text-gray-700 hover:text-indigo-600 transition-all duration-300 rounded-xl hover:bg-white/10 group"
+                onClick={() => setShowNotifications(true)}
+                className="relative group flex flex-col items-center justify-center px-3 sm:px-4 py-2 text-gray-700 hover:text-indigo-600 transition-all duration-300 rounded-xl hover:bg-white/10"
               >
-                <BellIcon className="h-5 w-5 sm:h-6 sm:w-6 group-hover:scale-110 transition-transform duration-300" />
+                <BellIcon className="h-6 w-6 sm:h-7 sm:w-7 group-hover:scale-110 transition-transform duration-300" />
                 <span className="hidden sm:block text-xs mt-1 font-medium">Notifications</span>
                 {unreadCount > 0 && (
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="absolute -top-1 -right-1 sm:top-0 sm:right-1 w-5 h-5 sm:w-6 sm:h-6 premium-gradient text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg animate-pulse-slow"
+                    className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold"
                   >
                     {unreadCount}
                   </motion.div>
@@ -163,7 +216,10 @@ export default function DashboardLayout({
                           </div>
                           <div>
                             <div className="font-semibold text-gray-900 text-sm sm:text-base">
-                              {user.email?.split('@')[0]}
+                              {userProfile?.full_name || user.email?.split('@')[0]}
+                            </div>
+                            <div className="text-xs text-gray-500 capitalize">
+                              {userProfile?.profile_type || 'Individual'} Profile
                             </div>
                             <Link 
                               href={`/profile/${user.id}`}

@@ -16,7 +16,9 @@ import type {
   Experience, 
   Education, 
   Notification,
-  ConnectionWithProfile
+  ConnectionWithProfile,
+  Follow,
+  FollowWithProfile
 } from '@/types/database.types';
 
 // Re-export types for convenience
@@ -28,7 +30,9 @@ export type {
   Experience,
   Education,
   PostWithAuthor,
-  ConnectionWithProfile
+  ConnectionWithProfile,
+  Follow,
+  FollowWithProfile
 };
 
 const debugLog = (message: string, data?: unknown) => {
@@ -74,6 +78,7 @@ export async function getProfile(userId: string): Promise<Profile | null> {
         is_premium: false,
         profile_views: 0,
         user_type: 'individual',
+        profile_type: 'individual',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
@@ -106,6 +111,7 @@ export async function getProfile(userId: string): Promise<Profile | null> {
           is_premium: false,
           profile_views: 0,
           user_type: 'individual',
+          profile_type: 'individual',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         };
@@ -171,6 +177,7 @@ export async function ensureProfileExists(userId: string, email: string, fullNam
         is_premium: false,
         profile_views: 0,
         user_type: 'individual',
+        profile_type: 'individual',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
@@ -1116,5 +1123,192 @@ export async function registerForEvent(registration: Omit<EventAttendee, 'id' | 
   } catch (error) {
     debugLog('Error registering for event', error);
     return null;
+  }
+} 
+
+// Follow system functions
+export async function followUser(followerId: string, followingId: string, followerType: 'individual' | 'student' | 'institution', followingType: 'individual' | 'student' | 'institution'): Promise<Follow | null> {
+  try {
+    debugLog('Following user', { followerId, followingId, followerType, followingType });
+    
+    const schemaExists = await checkSchemaExists();
+    if (!schemaExists) {
+      debugLog('Database schema not found, cannot follow user');
+      return null;
+    }
+    
+    const { data, error } = await supabase
+      .from('follows')
+      .insert({
+        follower_id: followerId,
+        following_id: followingId,
+        follower_type: followerType,
+        following_type: followingType,
+        created_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    
+    debugLog('User followed successfully', data);
+    return data;
+  } catch (error) {
+    debugLog('Error following user', error);
+    return null;
+  }
+}
+
+export async function unfollowUser(followerId: string, followingId: string): Promise<boolean> {
+  try {
+    debugLog('Unfollowing user', { followerId, followingId });
+    
+    const schemaExists = await checkSchemaExists();
+    if (!schemaExists) {
+      debugLog('Database schema not found, cannot unfollow user');
+      return false;
+    }
+    
+    const { error } = await supabase
+      .from('follows')
+      .delete()
+      .eq('follower_id', followerId)
+      .eq('following_id', followingId);
+
+    if (error) throw error;
+    
+    debugLog('User unfollowed successfully');
+    return true;
+  } catch (error) {
+    debugLog('Error unfollowing user', error);
+    return false;
+  }
+}
+
+export async function isFollowing(followerId: string, followingId: string): Promise<boolean> {
+  try {
+    debugLog('Checking if following', { followerId, followingId });
+    
+    const schemaExists = await checkSchemaExists();
+    if (!schemaExists) {
+      debugLog('Database schema not found, returning false for follow status');
+      return false;
+    }
+    
+    const { data, error } = await supabase
+      .from('follows')
+      .select('id')
+      .eq('follower_id', followerId)
+      .eq('following_id', followingId)
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      throw error;
+    }
+    
+    const following = !!data;
+    debugLog('Follow status checked', following);
+    return following;
+  } catch (error) {
+    debugLog('Error checking follow status', error);
+    return false;
+  }
+}
+
+export async function getFollowers(userId: string): Promise<FollowWithProfile[]> {
+  try {
+    debugLog('Getting followers', { userId });
+    
+    const schemaExists = await checkSchemaExists();
+    if (!schemaExists) {
+      debugLog('Database schema not found, returning empty followers');
+      return [];
+    }
+    
+    const { data, error } = await supabase
+      .from('follows')
+      .select(`
+        *,
+        follower:profiles!follows_follower_id_fkey(*)
+      `)
+      .eq('following_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    
+    debugLog('Followers fetched successfully', data);
+    return data || [];
+  } catch (error) {
+    debugLog('Error fetching followers', error);
+    return [];
+  }
+}
+
+export async function getFollowing(userId: string): Promise<FollowWithProfile[]> {
+  try {
+    debugLog('Getting following', { userId });
+    
+    const schemaExists = await checkSchemaExists();
+    if (!schemaExists) {
+      debugLog('Database schema not found, returning empty following');
+      return [];
+    }
+    
+    const { data, error } = await supabase
+      .from('follows')
+      .select(`
+        *,
+        following:profiles!follows_following_id_fkey(*)
+      `)
+      .eq('follower_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    
+    debugLog('Following fetched successfully', data);
+    return data || [];
+  } catch (error) {
+    debugLog('Error fetching following', error);
+    return [];
+  }
+}
+
+export async function getSuggestedInstitutions(userId: string, limit: number = 10): Promise<Profile[]> {
+  try {
+    debugLog('Getting suggested institutions', { userId, limit });
+    
+    const schemaExists = await checkSchemaExists();
+    if (!schemaExists) {
+      debugLog('Database schema not found, returning empty suggestions');
+      return [];
+    }
+    
+    // Get institutions that the user is not already following
+    const { data: following } = await supabase
+      .from('follows')
+      .select('following_id')
+      .eq('follower_id', userId);
+    
+    const followingIds = following?.map(f => f.following_id) || [];
+    
+    let query = supabase
+      .from('profiles')
+      .select('*')
+      .eq('profile_type', 'institution')
+      .limit(limit);
+    
+    if (followingIds.length > 0) {
+      query = query.not('id', 'in', `(${followingIds.join(',')})`);
+    }
+    
+    const { data, error } = await query;
+
+    if (error) throw error;
+    
+    debugLog('Suggested institutions fetched successfully', data);
+    return data || [];
+  } catch (error) {
+    debugLog('Error fetching suggested institutions', error);
+    return [];
   }
 } 

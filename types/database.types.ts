@@ -83,10 +83,25 @@ export interface Profile {
   location: string | null;
   website: string | null;
   phone: string | null;
-  specialization: string[] | null; // Changed from skills to specialization
+  specialization: string[] | null;
   is_premium: boolean;
   profile_views: number;
-  user_type: 'individual' | 'institution'; // Added user type
+  user_type: 'individual' | 'institution';
+  profile_type: 'individual' | 'student' | 'institution'; // New field for specific profile type
+  // Institution-specific fields
+  institution_type?: 'hospital' | 'clinic' | 'medical_college' | 'research_center' | 'pharmaceutical' | 'other';
+  accreditations?: string[];
+  departments?: string[];
+  contact_info?: {
+    address?: string;
+    phone?: string;
+    email?: string;
+    website?: string;
+  };
+  // Student-specific fields
+  education_level?: 'undergraduate' | 'graduate' | 'postgraduate' | 'resident' | 'fellow';
+  graduation_year?: number;
+  current_institution?: string;
 }
 
 export interface Institution {
@@ -153,6 +168,20 @@ export interface Connection {
   requester_id: string;
   recipient_id: string;
   status: 'pending' | 'accepted' | 'rejected';
+}
+
+export interface Follow {
+  id: string;
+  created_at: string;
+  follower_id: string; // User who is following
+  following_id: string; // User being followed (usually institution)
+  follower_type: 'individual' | 'student' | 'institution';
+  following_type: 'individual' | 'student' | 'institution';
+}
+
+export interface FollowWithProfile extends Follow {
+  follower: Profile;
+  following: Profile;
 }
 
 export interface Job {
