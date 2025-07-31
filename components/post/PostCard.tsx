@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
@@ -27,9 +27,8 @@ import {
   isPostLiked,
   getPostComments,
   createComment,
-  type PostWithAuthor,
-  type CommentWithAuthor,
 } from '@/lib/queries';
+import type { PostWithAuthor, CommentWithAuthor, Profile } from '@/types/database.types';
 
 interface PostCardProps {
   post: PostWithAuthor;
@@ -51,6 +50,29 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
   // Debug logging
   const debugLog = (message: string, data?: unknown) => {
     console.log(`[PostCard] ${message}`, data);
+  };
+
+  // Type guard to check if author is a Profile
+  const isProfile = (author: typeof post.author): author is Profile => {
+    return author && 'full_name' in author;
+  };
+
+  // Helper function to get author display name
+  const getAuthorName = () => {
+    if (!post.author) return 'Unknown User';
+    return isProfile(post.author) ? (post.author.full_name || 'Unknown User') : (post.author.name || 'Unknown Institution');
+  };
+
+  // Helper function to get author avatar
+  const getAuthorAvatar = () => {
+    if (!post.author) return '';
+    return isProfile(post.author) ? (post.author.avatar_url || '') : (post.author.logo_url || '');
+  };
+
+  // Helper function to get author headline
+  const getAuthorHeadline = () => {
+    if (!post.author) return 'Healthcare Professional';
+    return isProfile(post.author) ? (post.author.headline || 'Healthcare Professional') : (post.author.type || 'Institution');
   };
 
   useEffect(() => {
@@ -105,12 +127,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
     }
   };
 
-  const handleComment = () => {
-    if (!user?.id) {
-      toast.error('Please log in to comment');
-      return;
-    }
-    
+  const toggleComments = () => {
     setShowComments(!showComments);
     if (!showComments) {
       loadComments();
@@ -133,57 +150,36 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
     }
   };
 
-  const handleSubmitComment = async () => {
-    if (!user?.id || !newComment.trim()) return;
+  const submitComment = async () => {
+    if (!newComment.trim() || !user?.id) return;
 
     setIsCommenting(true);
-    debugLog('Submitting comment', { postId: post.id, content: newComment.trim() });
+    debugLog('Submitting comment', { postId: post.id, comment: newComment });
 
     try {
-      const comment = await createComment({
+      const commentData = {
+        content: newComment.trim(),
         post_id: post.id,
         author_id: user.id,
-        author_type: 'individual',
-        content: newComment.trim(),
-      });
+      };
 
-      if (comment) {
-        // Add the new comment to the local state
-        const commentWithAuthor: CommentWithAuthor = {
-          ...comment,
-          author: {
-            id: user.id,
-            full_name: user.user_metadata?.full_name || user.email || 'Anonymous',
-            avatar_url: user.user_metadata?.avatar_url,
-            email: user.email || '',
-            created_at: '',
-            updated_at: '',
-            headline: null,
-            bio: null,
-            location: null,
-            website: null,
-            phone: null,
-            specialization: null,
-            is_premium: false,
-            profile_views: 0,
-            user_type: 'individual',
-            banner_url: null,
-          }
-        };
-
-                 setComments((prev: CommentWithAuthor[]) => [commentWithAuthor, ...prev]);
-         setCommentsCount((prev: number) => prev + 1);
+      const result = await createComment(commentData);
+      
+      if (result) {
+        debugLog('Comment created successfully', result);
         setNewComment('');
-        toast.success('Comment added!');
-        debugLog('Comment submitted successfully');
+        setCommentsCount(prev => prev + 1);
+        // Refresh comments
+        await loadComments();
+        toast.success('Comment added successfully!');
         onInteraction?.();
       } else {
-        debugLog('Failed to submit comment');
-        toast.error('Failed to add comment');
+        debugLog('Failed to create comment');
+        toast.error('Failed to add comment. Please try again.');
       }
     } catch (error) {
-      debugLog('Error submitting comment', error);
-      toast.error('Failed to add comment');
+      debugLog('Error creating comment', error);
+      toast.error('Failed to add comment. Please try again.');
     } finally {
       setIsCommenting(false);
     }
@@ -192,7 +188,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-                 title: `Post by ${('full_name' in post.author ? post.author.full_name : post.author.name) || 'User'}`,
+                 title: `Post by ${getAuthorName()}`,
         text: post.content,
         url: window.location.href,
       });
@@ -211,150 +207,183 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="modern-card mb-6"
+      exit={{ opacity: 0, y: -20 }}
+      className="card-premium hover:glow-effect transition-all duration-500 group"
     >
       {/* Post Header */}
-      <div className="p-6 pb-4">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-3">
+      <div className="flex items-start justify-between p-6 pb-4">
+        <div className="flex items-center space-x-4">
+          <div className="relative">
             <Avatar
-              src={('avatar_url' in post.author ? post.author.avatar_url : post.author.logo_url) || undefined}
-              alt={('full_name' in post.author ? post.author.full_name : post.author.name) || 'User'}
+              src={getAuthorAvatar()}
+              alt={getAuthorName()}
               size="lg"
+              className="ring-2 ring-white/20 group-hover:ring-indigo-400/50 transition-all duration-300"
             />
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-slate-900 truncate">
-                {('full_name' in post.author ? post.author.full_name : post.author.name) || 'User'}
-              </h3>
-              <p className="text-sm text-slate-600 truncate">
-                {('headline' in post.author ? post.author.headline : post.author.type) || ''}
-              </p>
-              <p className="text-xs text-slate-500">
-                {formatRelativeTime(post.created_at)}
-              </p>
-            </div>
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 premium-gradient rounded-full border-2 border-white"></div>
           </div>
-          
-          <Button variant="ghost" size="sm" className="text-slate-400 hover:text-slate-600">
-            <EllipsisHorizontalIcon className="w-5 h-5" />
-          </Button>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center space-x-2">
+              <h3 className="font-semibold text-gray-900 text-lg truncate hover:text-indigo-600 transition-colors duration-300">
+                {getAuthorName()}
+              </h3>
+              <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-pulse-slow"></div>
+            </div>
+            <p className="text-sm text-gray-600 mt-1 font-medium">
+              {getAuthorHeadline()}
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+              {formatRelativeTime(post.created_at)} • 🌍 Public
+            </p>
+          </div>
         </div>
+        
+        <Button
+          variant="ghost"
+          size="sm"
+          className="glass-effect rounded-xl hover:bg-white/20 transition-all duration-300 hover:scale-110"
+        >
+          <EllipsisHorizontalIcon className="h-5 w-5 text-gray-500 hover:text-indigo-500 transition-colors duration-300" />
+        </Button>
       </div>
 
       {/* Post Content */}
       <div className="px-6 pb-4">
-        <p className="text-slate-900 leading-relaxed whitespace-pre-line">
-          {post.content}
-        </p>
+        <div className="prose prose-sm max-w-none">
+          <p className="whitespace-pre-wrap leading-relaxed text-base text-gray-900 font-medium">
+            {post.content}
+          </p>
+        </div>
         
         {post.image_url && (
-          <div className="mt-4 rounded-xl overflow-hidden">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="mt-4 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500"
+          >
             <img
               src={post.image_url}
-              alt="Post content"
-              className="w-full h-auto max-h-96 object-cover"
+              alt="Post image"
+              className="w-full h-auto max-h-96 object-cover hover:scale-105 transition-transform duration-700"
             />
-          </div>
+          </motion.div>
         )}
 
-        {post.images && post.images.length > 1 && (
-          <div className="mt-4 grid grid-cols-2 gap-2 rounded-xl overflow-hidden">
-                         {post.images.slice(0, 4).map((image: string, index: number) => (
-              <div key={index} className="relative aspect-square">
+        {post.images && post.images.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-4 grid grid-cols-2 gap-3"
+          >
+            {post.images.slice(0, 4).map((image, index) => (
+              <div key={index} className="relative rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300">
                 <img
                   src={image}
                   alt={`Post image ${index + 1}`}
-                  className="w-full h-full object-cover"
+                  className="w-full h-32 object-cover hover:scale-110 transition-transform duration-500"
                 />
                 {index === 3 && post.images!.length > 4 && (
-                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                    <span className="text-white font-semibold">
+                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
+                    <span className="text-white font-bold text-lg">
                       +{post.images!.length - 4}
                     </span>
                   </div>
                 )}
               </div>
             ))}
-          </div>
+          </motion.div>
         )}
       </div>
 
       {/* Engagement Stats */}
-      {(likesCount > 0 || commentsCount > 0) && (
-        <div className="px-6 py-2 border-t border-slate-100">
-          <div className="flex items-center justify-between text-sm text-slate-500">
-            <div className="flex items-center space-x-4">
-              {likesCount > 0 && (
-                <span>{likesCount} {likesCount === 1 ? 'like' : 'likes'}</span>
-              )}
-              {commentsCount > 0 && (
-                <span>{commentsCount} {commentsCount === 1 ? 'comment' : 'comments'}</span>
-              )}
-            </div>
-            {post.shares_count > 0 && (
-              <span>{post.shares_count} {post.shares_count === 1 ? 'share' : 'shares'}</span>
+      <div className="px-6 py-3 border-t border-gray-200">
+        <div className="flex items-center justify-between text-sm text-gray-600">
+          <div className="flex items-center space-x-4">
+            {likesCount > 0 && (
+              <motion.span
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="flex items-center space-x-1 hover:text-indigo-500 transition-colors duration-300"
+              >
+                <div className="w-5 h-5 premium-gradient rounded-full flex items-center justify-center">
+                  <HeartSolidIcon className="h-3 w-3 text-white" />
+                </div>
+                <span className="font-medium text-gray-700">{likesCount}</span>
+              </motion.span>
+            )}
+            {commentsCount > 0 && (
+              <span className="hover:text-indigo-500 transition-colors duration-300 font-medium text-gray-700">
+                {commentsCount} comments
+              </span>
             )}
           </div>
+          <span className="text-xs font-medium text-gray-500">{post.shares_count || 0} shares</span>
         </div>
-      )}
+      </div>
 
       {/* Action Buttons */}
-      <div className="px-6 py-3 border-t border-slate-100">
+      <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleLike}
-              className={cn(
-                'flex items-center space-x-2 text-slate-600 hover:bg-red-50 hover:text-red-600 transition-colors',
-                isLiked && 'text-red-600 bg-red-50'
-              )}
-            >
-              {isLiked ? (
-                <HeartSolidIcon className="w-5 h-5" />
-              ) : (
-                <HeartIcon className="w-5 h-5" />
-              )}
-              <span className="text-sm">Like</span>
-            </Button>
+          {/* Like Button */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleLike}
+            className={cn(
+              "flex items-center space-x-2 px-4 py-2.5 rounded-xl font-medium transition-all duration-300",
+              isLiked
+                ? "text-red-500 bg-red-50 hover:bg-red-100"
+                : "text-gray-700 hover:text-red-500 hover:bg-red-50"
+            )}
+          >
+            {isLiked ? (
+              <HeartSolidIcon className="h-5 w-5 animate-pulse-slow" />
+            ) : (
+              <HeartIcon className="h-5 w-5" />
+            )}
+            <span className="text-sm">Like</span>
+          </motion.button>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleComment}
-              className="flex items-center space-x-2 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-            >
-              <ChatBubbleOvalLeftIcon className="w-5 h-5" />
-              <span className="text-sm">Comment</span>
-            </Button>
+          {/* Comment Button */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={toggleComments}
+            className="flex items-center space-x-2 px-4 py-2.5 rounded-xl font-medium text-gray-700 hover:text-blue-500 hover:bg-blue-50 transition-all duration-300"
+          >
+            <ChatBubbleOvalLeftIcon className="h-5 w-5" />
+            <span className="text-sm">Comment</span>
+          </motion.button>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleShare}
-              className="flex items-center space-x-2 text-slate-600 hover:bg-green-50 hover:text-green-600 transition-colors"
-            >
-              <ShareIcon className="w-5 h-5" />
-              <span className="text-sm">Share</span>
-            </Button>
-          </div>
+          {/* Share Button */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleShare}
+            className="flex items-center space-x-2 px-4 py-2.5 rounded-xl font-medium text-gray-700 hover:text-green-500 hover:bg-green-50 transition-all duration-300"
+          >
+            <ShareIcon className="h-5 w-5" />
+            <span className="text-sm">Share</span>
+          </motion.button>
 
-          <Button
-            variant="ghost"
-            size="sm"
+          {/* Bookmark Button */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={handleBookmark}
             className={cn(
-              'text-slate-600 hover:bg-amber-50 hover:text-amber-600 transition-colors',
-              isBookmarked && 'text-amber-600 bg-amber-50'
+              "flex items-center space-x-2 px-4 py-2.5 rounded-xl font-medium transition-all duration-300",
+              isBookmarked
+                ? "text-yellow-500 bg-yellow-50 hover:bg-yellow-100"
+                : "text-gray-700 hover:text-yellow-500 hover:bg-yellow-50"
             )}
           >
             {isBookmarked ? (
-              <BookmarkSolidIcon className="w-5 h-5" />
+              <BookmarkSolidIcon className="h-5 w-5" />
             ) : (
-              <BookmarkIcon className="w-5 h-5" />
+              <BookmarkIcon className="h-5 w-5" />
             )}
-          </Button>
+          </motion.button>
         </div>
       </div>
 
@@ -384,7 +413,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
                           e.preventDefault();
-                          handleSubmitComment();
+                          submitComment();
                         }
                       }}
                       className="border-slate-200 focus:border-primary-500"
@@ -393,7 +422,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
                       <div className="flex justify-end mt-2">
                         <Button
                           size="sm"
-                          onClick={handleSubmitComment}
+                          onClick={submitComment}
                           disabled={isCommenting}
                           className="modern-button-primary"
                         >

@@ -70,23 +70,8 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
           actor_id,
           post_id,
           connection_id,
-          actor:actor_id (
-            id,
-            full_name,
-            avatar_url,
-            headline
-          ),
-          post:post_id (
-            id,
-            content,
-            image_url
-          ),
-          connection:connection_id (
-            id,
-            status,
-            requester_id,
-            recipient_id
-          )
+          title,
+          message
         `)
         .eq('recipient_id', user.id)
         .order('created_at', { ascending: false });
@@ -97,9 +82,9 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
       const formattedData = data.map(notification => ({
         ...notification,
-        actor: notification.actor?.[0] || null,
-        post: notification.post?.[0] || null,
-        connection: notification.connection?.[0] || null,
+        actor: null, // Will be fetched separately if needed
+        post: null,  // Will be fetched separately if needed  
+        connection: null, // Will be fetched separately if needed
       }));
 
       setNotifications(formattedData);

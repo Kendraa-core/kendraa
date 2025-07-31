@@ -1,0 +1,26 @@
+{
+  "name": "Kendra - Healthcare Professional Network",
+  "short_name": "Kendra",
+  "description": "The professional network designed specifically for healthcare professionals",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#6366f1",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "16x16 32x32",
+      "type": "image/x-icon"
+    }
+  ],
+  "categories": ["business", "medical", "social"],
+  "lang": "en",
+  "dir": "ltr"
+} 

@@ -4,9 +4,12 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import { getProfile, ensureProfileExists } from '@/lib/queries';
+import type { Profile } from '@/types/database.types';
 
 type AuthContextType = {
   user: User | null;
+  profile: Profile | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ data: any; error: any }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ data: any; error: any }>;
@@ -17,6 +20,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -25,132 +29,90 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        ensureProfile(session.user);
+        loadUserProfile(session.user);
+      } else {
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     // Listen for changes on auth state
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        await ensureProfile(session.user);
+        await loadUserProfile(session.user);
+      } else {
+        setProfile(null);
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const ensureProfile = async (user: User) => {
+  const loadUserProfile = async (user: User) => {
     try {
-      // Check if profile exists
-      const { data: existingProfile, error: fetchError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .maybeSingle();
-
-      if (fetchError) throw fetchError;
-
+      // First try to get existing profile
+      let userProfile = await getProfile(user.id);
+      
       // If no profile exists, create one
-      if (!existingProfile) {
-        const email = user.email || '';
-        const defaultName = email.split('@')[0].replace(/[^a-zA-Z0-9]/g, ' ');
-        const capitalizedName = defaultName
-          .split(' ')
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(' ');
-
-        const { error: insertError } = await supabase
-          .from('profiles')
-          .insert([
-            {
-              id: user.id,
-              email: email,
-              full_name: capitalizedName,
-              headline: 'LinkedIn Member',
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-              skills: [],
-              experiences: [],
-              education: []
-            },
-          ])
-          .select()
-          .single();
-
-        if (insertError) throw insertError;
-        
-        // Redirect to profile creation
-        router.push('/profile/create');
+      if (!userProfile) {
+        userProfile = await ensureProfileExists(
+          user.id,
+          user.email || '',
+          user.user_metadata?.full_name || user.email?.split('@')[0] || 'User'
+        );
       }
+      
+      setProfile(userProfile);
     } catch (error) {
-      console.error('Error ensuring profile exists:', error);
+      console.error('Error loading user profile:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const signIn = async (email: string, password: string) => {
-    try {
-      const result = await supabase.auth.signInWithPassword({ email, password });
-      if (!result.error && result.data.user) {
-        await ensureProfile(result.data.user);
-        router.push('/feed');
-      }
-      return result;
-    } catch (error) {
-      console.error('Error signing in:', error);
-      return { data: null, error };
-    }
+    setLoading(true);
+    const result = await supabase.auth.signInWithPassword({ email, password });
+    setLoading(false);
+    return result;
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
-    try {
-      const result = await supabase.auth.signUp({ email, password });
-      if (!result.error && result.data.user) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert([
-            {
-              id: result.data.user.id,
-              email: email,
-              full_name: fullName,
-              headline: 'LinkedIn Member',
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-              skills: [],
-              experiences: [],
-              education: []
-            },
-          ])
-          .select()
-          .single();
-
-        if (profileError) {
-          console.error('Error creating profile:', profileError);
-        } else {
-          router.push('/profile/create');
-        }
-      }
-      return result;
-    } catch (error) {
-      console.error('Error signing up:', error);
-      return { data: null, error };
-    }
+    setLoading(true);
+    const result = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+        },
+      },
+    });
+    setLoading(false);
+    return result;
   };
 
   const signOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      router.push('/signin');
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
+    setLoading(true);
+    await supabase.auth.signOut();
+    setUser(null);
+    setProfile(null);
+    setLoading(false);
+    router.push('/');
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider 
+      value={{ 
+        user, 
+        profile, 
+        loading, 
+        signIn, 
+        signUp, 
+        signOut 
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

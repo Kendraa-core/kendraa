@@ -56,7 +56,7 @@ export default function FeedPage() {
   const fetchInitialPosts = useCallback(async () => {
     setLoading(true);
     try {
-      const postsData = await getPosts(10);
+      const postsData = await getPosts(0, 10); // Start from page 0, limit 10
       setPosts(postsData);
     } catch (error) {
       console.error('Error fetching posts:', error);
@@ -66,9 +66,9 @@ export default function FeedPage() {
     }
   }, []);
 
-  const fetchMorePosts = async (offset: number): Promise<PostWithAuthor[]> => {
+  const fetchMorePosts = async (page: number): Promise<PostWithAuthor[]> => {
     try {
-      return await getPosts(5, offset);
+      return await getPosts(page, 5); // Use page number, limit 5
     } catch (error) {
       console.error('Error fetching more posts:', error);
       return [];
@@ -174,7 +174,7 @@ export default function FeedPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 text-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Sidebar */}
@@ -186,7 +186,7 @@ export default function FeedPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
               >
-                <Card className="overflow-hidden">
+                <Card className="overflow-hidden bg-white shadow-lg">
                   <div className="relative h-16 bg-gradient-to-r from-linkedin-primary to-linkedin-secondary">
                     <div className="absolute -bottom-6 left-4">
                       <Avatar
@@ -200,28 +200,27 @@ export default function FeedPage() {
                   
                   <CardContent className="pt-8 pb-4">
                     <div className="space-y-3">
-                      <div>
-                        <Link href={`/profile/${profile.id}`} className="font-semibold text-gray-900 hover:text-linkedin-primary transition-colors">
-                          {profile.full_name || 'Add your name'}
-                        </Link>
-                        <p className="text-sm text-gray-600 mt-1">{profile.headline || 'Add a headline'}</p>
-                      </div>
-                      
-                      <div className="border-t pt-3 space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">Profile views</span>
-                          <span className="text-linkedin-primary font-medium">{profile.profile_views || 0}</span>
+                      <h3 className="font-semibold text-gray-900 text-lg">
+                        {profile.full_name || 'User'}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {profile.headline || 'Add a headline'}
+                      </p>
+                      <div className="space-y-2 pt-3 border-t border-gray-100">
+                        <div className="text-sm text-gray-600">
+                          Profile views <span className="font-semibold text-gray-900">0</span>
                         </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">Connections</span>
-                          <span className="text-linkedin-primary font-medium">{profile.connections_count || 0}</span>
+                        <div className="text-sm text-gray-600">
+                          Connections <span className="font-semibold text-gray-900">{profile.connections_count || 0}</span>
                         </div>
                       </div>
-                      
-                      <div className="border-t pt-3">
-                        <Link href="/premium" className="text-sm text-gray-600 hover:text-linkedin-primary transition-colors flex items-center">
-                          <span className="mr-2">🎯</span>
-                          Try Premium for free
+                      <div className="pt-2">
+                        <Link
+                          href="#"
+                          className="flex items-center text-sm text-red-600 hover:text-red-700 font-medium"
+                        >
+                          <span className="mr-1">Try Premium for free</span>
+                          <span className="text-xs">🔥</span>
                         </Link>
                       </div>
                     </div>
@@ -230,172 +229,139 @@ export default function FeedPage() {
               </motion.div>
             )}
 
-            {/* Quick Access */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-            >
-              <Card>
-                <CardContent className="p-4">
-                  <div className="space-y-3">
-                    <Link href="/network" className="flex items-center text-sm text-gray-700 hover:text-linkedin-primary transition-colors">
-                      <UserGroupIcon className="w-4 h-4 mr-3 text-gray-500" />
-                      My network
-                    </Link>
-                    <Link href="/saved" className="flex items-center text-sm text-gray-700 hover:text-linkedin-primary transition-colors">
-                      <BookmarkSolidIcon className="w-4 h-4 mr-3 text-gray-500" />
-                      Saved items
-                    </Link>
-                    <Link href="/learning" className="flex items-center text-sm text-gray-700 hover:text-linkedin-primary transition-colors">
-                      <AcademicCapIcon className="w-4 h-4 mr-3 text-gray-500" />
-                      Learning
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+            {/* Navigation Links */}
+            <Card className="bg-white shadow-lg">
+              <CardContent className="p-4">
+                <div className="space-y-3">
+                  <Link
+                    href="/network"
+                    className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 hover:text-gray-900"
+                  >
+                    <UserGroupIcon className="h-5 w-5" />
+                    <span className="text-sm font-medium">My network</span>
+                  </Link>
+                  <Link
+                    href="/saved"
+                    className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 hover:text-gray-900"
+                  >
+                    <BookmarkSolidIcon className="h-5 w-5" />
+                    <span className="text-sm font-medium">Saved items</span>
+                  </Link>
+                  <Link
+                    href="/learning"
+                    className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 hover:text-gray-900"
+                  >
+                    <AcademicCapIcon className="h-5 w-5" />
+                    <span className="text-sm font-medium">Learning</span>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Main Content */}
           <div className="lg:col-span-6 space-y-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <CreatePost onPostCreated={handlePostCreated} />
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-            >
-              {loading ? (
-                <div className="space-y-6">
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <Card key={i} className="animate-pulse">
-                      <CardContent className="p-6">
-                        <div className="flex items-center space-x-4 mb-4">
-                          <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
-                          <div className="space-y-2 flex-1">
-                            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-                            <div className="h-3 bg-gray-200 rounded w-1/3"></div>
-                          </div>
+            <CreatePost onPostCreated={handlePostCreated} />
+            
+            {loading ? (
+              <div className="space-y-6">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Card key={i} className="animate-pulse bg-white shadow-lg">
+                    <CardContent className="p-6">
+                      <div className="flex items-center space-x-4 mb-4">
+                        <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
+                        <div className="space-y-2 flex-1">
+                          <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                          <div className="h-3 bg-gray-200 rounded w-1/3"></div>
                         </div>
-                        <div className="space-y-3">
-                          <div className="h-4 bg-gray-200 rounded"></div>
-                          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              ) : (
-                                  <InfinitePostList
-                    initialPosts={posts as unknown as (PostWithAuthor & { author: Profile })[] }
-                    fetchMorePosts={fetchMorePosts as unknown as (page: number) => Promise<(PostWithAuthor & { author: Profile })[]>}
-                  />
-              )}
-            </motion.div>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="h-4 bg-gray-200 rounded"></div>
+                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <InfinitePostList
+                initialPosts={posts as unknown as (PostWithAuthor & { author: Profile })[] }
+                fetchMorePosts={fetchMorePosts as unknown as (page: number) => Promise<(PostWithAuthor & { author: Profile })[]>}
+              />
+            )}
           </div>
 
           {/* Right Sidebar */}
           <div className="lg:col-span-3 space-y-6">
-            {/* Trending Topics */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-            >
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center">
-                    <ArrowTrendingUpIcon className="w-5 h-5 mr-2 text-linkedin-primary" />
-                    LinkedIn News
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="space-y-3">
-                    <div className="text-sm space-y-3">
-                      <div className="cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors">
-                        <p className="font-medium text-gray-900">Remote work trends in 2024</p>
-                        <p className="text-xs text-gray-500">2 hours ago • 1,234 readers</p>
-                      </div>
-                      <div className="cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors">
-                        <p className="font-medium text-gray-900">AI transforming healthcare</p>
-                        <p className="text-xs text-gray-500">4 hours ago • 856 readers</p>
-                      </div>
-                      <div className="cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors">
-                        <p className="font-medium text-gray-900">Startup funding reaches new high</p>
-                        <p className="text-xs text-gray-500">6 hours ago • 2,891 readers</p>
-                      </div>
-                    </div>
+            {/* LinkedIn News */}
+            <Card className="bg-white shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2 text-gray-900">
+                  <ArrowTrendingUpIcon className="h-5 w-5" />
+                  <span>LinkedIn News</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-gray-900">Remote work trends in 2024</h4>
+                    <p className="text-xs text-gray-500">2 hours ago • 1,234 readers</p>
                   </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-gray-900">AI transforming healthcare</h4>
+                    <p className="text-xs text-gray-500">4 hours ago • 856 readers</p>
+                  </div>
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-gray-900">Startup funding reaches new high</h4>
+                    <p className="text-xs text-gray-500">6 hours ago • 2,891 readers</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* People You May Know */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.5 }}
-            >
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">People you may know</CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="space-y-4">
-                    {connections.slice(0, 3).map((connection) => (
-                      <div key={connection.id} className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <Avatar
-                            src={connection.avatar_url}
-                            alt={connection.full_name || 'User'}
-                            size="md"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 truncate">{connection.full_name}</p>
-                            <p className="text-xs text-gray-500 truncate">{connection.headline}</p>
-                          </div>
-                        </div>
-                        <Button size="sm" variant="outline" className="text-xs">
-                          <PlusIcon className="w-3 h-3 mr-1" />
-                          Connect
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* LinkedIn Learning */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.6 }}
-            >
-              <Card className="bg-gradient-to-br from-linkedin-primary to-linkedin-secondary text-white">
-                <CardContent className="p-6">
-                  <div className="space-y-4">
+            <Card className="bg-white shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-gray-900">People you may know</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <AcademicCapIcon className="w-8 h-8" />
+                      <Avatar
+                        src=""
+                        alt="P padmamithul123"
+                        size="sm"
+                        className="bg-blue-500 text-white"
+                      />
                       <div>
-                        <h3 className="font-semibold">Level up your skills</h3>
-                        <p className="text-sm opacity-90">Explore courses on LinkedIn Learning</p>
+                        <p className="text-sm font-medium text-gray-900">P padmamithul123</p>
+                        <p className="text-xs text-gray-500">Healthcare Professional</p>
                       </div>
                     </div>
-                    <Button variant="secondary" size="sm" className="w-full">
-                      Start learning
+                    <Button size="sm" variant="outline" className="text-xs">
+                      + Connect
                     </Button>
                   </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Level Up Your Skills */}
+            <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg">
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-3 mb-3">
+                  <AcademicCapIcon className="h-6 w-6" />
+                  <h3 className="font-semibold">Level up your skills</h3>
+                </div>
+                <p className="text-sm mb-4 opacity-90">
+                  Explore courses on LinkedIn Learning
+                </p>
+                <Button size="sm" className="bg-white text-blue-600 hover:bg-gray-100">
+                  Start learning
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>

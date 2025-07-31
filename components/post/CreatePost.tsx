@@ -185,7 +185,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
   }
 
   return (
-    <Card className="mb-6 modern-card border-0 shadow-modern-lg">
+    <Card className="mb-6 bg-white border border-gray-200 shadow-lg">
       <CardContent className="p-6">
         <div className="flex items-start space-x-4">
           {/* User Avatar */}
@@ -194,7 +194,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
               src={user.user_metadata?.avatar_url}
               alt={user.user_metadata?.full_name || user.email || 'User'}
               size="lg"
-              className="ring-2 ring-slate-100"
+              className="ring-2 ring-gray-100"
             />
           </div>
 
@@ -216,7 +216,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                   onFocus={() => setIsExpanded(true)}
                   placeholder="What's on your mind?"
                   className={cn(
-                    "w-full resize-none border-none outline-none text-slate-900 placeholder-slate-500",
+                    "w-full resize-none border-none outline-none text-gray-900 placeholder-gray-500",
                     "text-lg leading-relaxed overflow-hidden bg-transparent",
                     isExpanded ? "min-h-[120px]" : "min-h-[60px]"
                   )}
@@ -226,7 +226,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                 
                 {/* Character Counter */}
                 {isExpanded && (
-                  <div className="absolute bottom-2 right-2 text-xs text-slate-400">
+                  <div className="absolute bottom-2 right-2 text-xs text-gray-400">
                     {content.length}/3000
                   </div>
                 )}
@@ -274,7 +274,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="flex items-center justify-between pt-4 border-t border-slate-100"
+                    className="flex items-center justify-between pt-4 border-t border-gray-200"
                   >
                     {/* Media Buttons */}
                     <div className="flex items-center space-x-2">
@@ -291,7 +291,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                         variant="ghost"
                         size="sm"
                         onClick={() => fileInputRef.current?.click()}
-                        className="text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded-xl"
+                        className="text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl"
                       >
                         <PhotoIcon className="w-5 h-5 mr-2" />
                         Photo
@@ -300,7 +300,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded-xl"
+                        className="text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl"
                         disabled
                       >
                         <VideoCameraIcon className="w-5 h-5 mr-2" />
@@ -310,7 +310,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded-xl"
+                        className="text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl"
                         disabled
                       >
                         <DocumentIcon className="w-5 h-5 mr-2" />
@@ -320,7 +320,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded-xl"
+                        className="text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl"
                         disabled
                       >
                         <FaceSmileIcon className="w-5 h-5 mr-2" />
@@ -336,7 +336,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                           variant="outline"
                           size="sm"
                           onClick={() => setShowVisibilityDropdown(!showVisibilityDropdown)}
-                          className="flex items-center space-x-2 border-slate-200 rounded-xl"
+                          className="flex items-center space-x-2 border-gray-200 rounded-xl"
                         >
                           {selectedVisibility && (
                             <selectedVisibility.icon className="w-4 h-4" />
@@ -350,7 +350,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                               initial={{ opacity: 0, y: -10 }}
                               animate={{ opacity: 1, y: 0 }}
                               exit={{ opacity: 0, y: -10 }}
-                              className="absolute bottom-full mb-2 right-0 w-64 bg-white rounded-xl shadow-modern-lg border border-slate-200 p-2 z-50"
+                              className="absolute bottom-full mb-2 right-0 w-64 bg-white rounded-xl shadow-xl border border-gray-200 p-2 z-50"
                             >
                               {VISIBILITY_OPTIONS.map((option) => (
                                 <button
@@ -360,15 +360,15 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                                     setShowVisibilityDropdown(false);
                                   }}
                                   className={cn(
-                                    "w-full text-left p-3 rounded-lg hover:bg-slate-50 transition-colors",
-                                    visibility === option.value && "bg-primary-50 text-primary-700"
+                                    "w-full text-left p-3 rounded-lg hover:bg-gray-50 transition-colors",
+                                    visibility === option.value && "bg-indigo-50 text-indigo-700"
                                   )}
                                 >
                                   <div className="flex items-center space-x-3">
-                                    <option.icon className="w-5 h-5 text-slate-600" />
+                                    <option.icon className="w-5 h-5 text-gray-600" />
                                     <div>
-                                      <div className="font-medium text-slate-900">{option.label}</div>
-                                      <div className="text-sm text-slate-500">{option.description}</div>
+                                      <div className="font-medium text-gray-900">{option.label}</div>
+                                      <div className="text-sm text-gray-500">{option.description}</div>
                                     </div>
                                   </div>
                                 </button>
@@ -381,21 +381,10 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                       {/* Post Button */}
                       <Button
                         onClick={handleSubmit}
-                        disabled={(!content.trim() && images.length === 0) || isPosting}
-                        className="modern-button-primary min-w-[100px]"
+                        disabled={!content.trim() || isPosting}
+                        className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 disabled:opacity-50"
                       >
-                        {isPosting ? (
-                          <div className="flex items-center space-x-2">
-                            <div className="loading-dots">
-                              <span></span>
-                              <span></span>
-                              <span></span>
-                            </div>
-                            <span>Posting</span>
-                          </div>
-                        ) : (
-                          'Post'
-                        )}
+                        {isPosting ? 'Posting...' : 'Post'}
                       </Button>
                     </div>
                   </motion.div>
