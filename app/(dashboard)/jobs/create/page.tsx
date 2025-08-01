@@ -9,13 +9,11 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import Breadcrumb from '@/components/common/Breadcrumb';
 import BackButton from '@/components/common/BackButton';
-import { cn } from '@/lib/utils';
 import {
   BriefcaseIcon,
   MapPinIcon,
   CurrencyDollarIcon,
   CalendarIcon,
-  AcademicCapIcon,
   BuildingOfficeIcon,
   PlusIcon,
   XMarkIcon,
@@ -70,10 +68,6 @@ export default function CreateJobPage() {
   const [newRequirement, setNewRequirement] = useState('');
   const [newSpecialization, setNewSpecialization] = useState('');
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
-
   const fetchProfile = async () => {
     if (!user?.id) return;
     
@@ -90,6 +84,10 @@ export default function CreateJobPage() {
       toast.error('Failed to load profile');
     }
   };
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
 
   const handleInputChange = (field: string, value: string | string[]) => {
     setFormData(prev => ({ ...prev, [field]: value }));

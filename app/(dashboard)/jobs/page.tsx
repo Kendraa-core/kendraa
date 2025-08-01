@@ -3,11 +3,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import Avatar from '@/components/common/Avatar';
-import { cn, formatRelativeTime } from '@/lib/utils';
+import { formatRelativeTime } from '@/lib/utils';
 import {
   BriefcaseIcon,
   MagnifyingGlassIcon,
@@ -16,7 +16,6 @@ import {
   ClockIcon,
   BuildingOfficeIcon,
   PlusIcon,
-  CheckBadgeIcon,
   StarIcon,
   UserGroupIcon,
 } from '@heroicons/react/24/outline';
@@ -43,13 +42,6 @@ const EXPERIENCE_LEVELS = [
   { value: 'executive', label: 'Executive' },
 ];
 
-const MEDICAL_SPECIALIZATIONS = [
-  'Cardiology', 'Neurology', 'Pediatrics', 'Oncology', 'Radiology',
-  'Emergency Medicine', 'Surgery', 'Internal Medicine', 'Psychiatry',
-  'Dermatology', 'Anesthesiology', 'Pathology', 'Nursing', 'Pharmacy',
-  'Physical Therapy', 'Medical Research', 'Healthcare Administration'
-];
-
 export default function JobsPage() {
   const { user } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -68,11 +60,6 @@ export default function JobsPage() {
     console.log(`[JobsPage] ${message}`, data);
   };
 
-  useEffect(() => {
-    fetchProfile();
-    fetchJobs();
-  }, []);
-
   const fetchProfile = useCallback(async () => {
     if (!user?.id) return;
     
@@ -83,10 +70,6 @@ export default function JobsPage() {
       debugLog('Error fetching profile', error);
     }
   }, [user?.id]);
-
-  useEffect(() => {
-    filterJobs();
-  }, [jobs, searchQuery, selectedType, selectedLevel, selectedLocation]);
 
   const fetchJobs = useCallback(async () => {
     setLoading(true);
@@ -103,6 +86,15 @@ export default function JobsPage() {
       setLoading(false);
     }
   }, [debugLog]);
+
+  useEffect(() => {
+    fetchProfile();
+    fetchJobs();
+  }, [fetchProfile, fetchJobs]);
+
+  useEffect(() => {
+    filterJobs();
+  }, [jobs, searchQuery, selectedType, selectedLevel, selectedLocation]);
 
   // Add a refresh mechanism for when returning from job creation
   useEffect(() => {
@@ -368,7 +360,7 @@ export default function JobsPage() {
                     Browse and apply for job opportunities posted by healthcare institutions.
                   </p>
                   <p className="text-sm text-slate-500">
-                    Only healthcare institutions can post jobs. If you're an institution, please contact support to upgrade your account.
+                    Only healthcare institutions can post jobs. If you&apos;re an institution, please contact support to upgrade your account.
                   </p>
                 </div>
               </CardContent>
@@ -597,7 +589,7 @@ function ApplicationModal({ job, onClose, onSubmit }: ApplicationModalProps) {
             <textarea
               value={coverLetter}
               onChange={(e) => setCoverLetter(e.target.value)}
-              placeholder="Write a compelling cover letter explaining why you're the perfect fit for this role..."
+              placeholder="Write a compelling cover letter explaining why you&apos;re the perfect fit for this role..."
               className="modern-input min-h-[200px] resize-y"
               required
             />
