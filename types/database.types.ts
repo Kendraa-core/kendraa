@@ -87,7 +87,7 @@ export interface Profile {
   is_premium: boolean;
   profile_views: number;
   user_type: 'individual' | 'institution';
-  profile_type: 'individual' | 'student' | 'institution'; // New field for specific profile type
+  profile_type: 'individual' | 'institution'; // Only two profile types
   // Institution-specific fields
   institution_type?: 'hospital' | 'clinic' | 'medical_college' | 'research_center' | 'pharmaceutical' | 'other';
   accreditations?: string[];
@@ -175,8 +175,8 @@ export interface Follow {
   created_at: string;
   follower_id: string; // User who is following
   following_id: string; // User being followed (usually institution)
-  follower_type: 'individual' | 'student' | 'institution';
-  following_type: 'individual' | 'student' | 'institution';
+  follower_type: 'individual' | 'institution';
+  following_type: 'individual' | 'institution';
 }
 
 export interface FollowWithProfile extends Follow {

@@ -17,7 +17,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
-import { getProfile, getPosts, getConnections } from '@/lib/queries';
+import { getProfile, getPosts, getConnections, getSuggestedConnections } from '@/lib/queries';
 import type { PostWithAuthor, Profile } from '@/types/database.types';
 import toast from 'react-hot-toast';
 
@@ -31,14 +31,16 @@ export default function FeedPage() {
   const [posts, setPosts] = useState<PostWithAuthor[]>([]);
   const [loading, setLoading] = useState(false); // Start with false for faster perceived loading
   const [connections, setConnections] = useState<Profile[]>([]);
+  const [suggestedConnections, setSuggestedConnections] = useState<Profile[]>([]);
 
   const fetchProfile = useCallback(async () => {
     if (!user?.id) return;
 
     try {
-      const [profileData, connectionsData] = await Promise.all([
+      const [profileData, connectionsData, suggestedData] = await Promise.all([
         getProfile(user.id),
-        getConnections(user.id)
+        getConnections(user.id),
+        getSuggestedConnections(user.id, 3) // Get 3 suggested connections
       ]);
 
       if (profileData) {
@@ -48,6 +50,7 @@ export default function FeedPage() {
         });
       }
       setConnections(connectionsData);
+      setSuggestedConnections(suggestedData);
     } catch (error) {
       console.error('Error fetching profile:', error);
     }
@@ -326,23 +329,43 @@ export default function FeedPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <Avatar
-                        src=""
-                        alt="P padmamithul123"
-                        size="sm"
-                        className="bg-blue-500 text-white"
-                      />
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">P padmamithul123</p>
-                        <p className="text-xs text-gray-500">Healthcare Professional</p>
+                  {suggestedConnections.length > 0 ? (
+                    suggestedConnections.map((connection) => (
+                      <div key={connection.id} className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <Avatar
+                            src={connection.avatar_url || undefined}
+                            alt={connection.full_name || 'User'}
+                            size="sm"
+                            className="bg-blue-500 text-white"
+                          />
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">
+                              {connection.full_name || 'User'}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {connection.headline || connection.profile_type === 'institution' ? 'Healthcare Institution' : 'Healthcare Professional'}
+                            </p>
+                          </div>
+                        </div>
+                        <Button size="sm" variant="outline" className="text-xs">
+                          + Connect
+                        </Button>
                       </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-4">
+                      <p className="text-sm text-gray-500">No suggestions available</p>
                     </div>
-                    <Button size="sm" variant="outline" className="text-xs">
-                      + Connect
-                    </Button>
-                  </div>
+                  )}
+                  {suggestedConnections.length > 0 && (
+                    <Link 
+                      href="/network" 
+                      className="text-sm text-blue-600 hover:text-blue-700 flex items-center justify-center mt-2"
+                    >
+                      See all
+                    </Link>
+                  )}
                 </div>
               </CardContent>
             </Card>

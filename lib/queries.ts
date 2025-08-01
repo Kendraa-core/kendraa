@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import toast from 'react-hot-toast';
 import type { 
   Profile, 
   Post, 
@@ -155,9 +156,9 @@ export async function updateProfile(userId: string, updates: Partial<Profile>): 
   }
 }
 
-export async function ensureProfileExists(userId: string, email: string, fullName: string): Promise<Profile | null> {
+export async function ensureProfileExists(userId: string, email: string, fullName: string, profileType: 'individual' | 'institution' = 'individual'): Promise<Profile | null> {
   try {
-    debugLog('Ensuring profile exists', { userId, email, fullName });
+    debugLog('Ensuring profile exists', { userId, email, fullName, profileType });
     
     const schemaExists = await checkSchemaExists();
     if (!schemaExists) {
@@ -166,7 +167,7 @@ export async function ensureProfileExists(userId: string, email: string, fullNam
         id: userId,
         email,
         full_name: fullName,
-        headline: 'Healthcare Professional',
+        headline: profileType === 'institution' ? 'Healthcare Institution' : 'Healthcare Professional',
         bio: '',
         location: '',
         avatar_url: '',
@@ -176,8 +177,8 @@ export async function ensureProfileExists(userId: string, email: string, fullNam
         specialization: ['General Medicine'],
         is_premium: false,
         profile_views: 0,
-        user_type: 'individual',
-        profile_type: 'individual',
+        user_type: profileType,
+        profile_type: profileType,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
@@ -202,6 +203,9 @@ export async function ensureProfileExists(userId: string, email: string, fullNam
           id: userId,
           email,
           full_name: fullName,
+          user_type: profileType,
+          profile_type: profileType,
+          headline: profileType === 'institution' ? 'Healthcare Institution' : 'Healthcare Professional',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
@@ -539,10 +543,35 @@ export async function getSuggestedConnections(userId: string, limit = 10): Promi
       return [];
     }
     
+    // Get existing connections to exclude them from suggestions
+    const { data: existingConnections } = await supabase
+      .from('connections')
+      .select('requester_id, recipient_id')
+      .or(`requester_id.eq.${userId},recipient_id.eq.${userId}`)
+      .eq('status', 'accepted');
+    
+    const connectedUserIds = existingConnections?.map(conn => 
+      conn.requester_id === userId ? conn.recipient_id : conn.requester_id
+    ) || [];
+    
+    // Get pending connection requests to exclude them
+    const { data: pendingRequests } = await supabase
+      .from('connections')
+      .select('requester_id, recipient_id')
+      .or(`requester_id.eq.${userId},recipient_id.eq.${userId}`)
+      .eq('status', 'pending');
+    
+    const pendingUserIds = pendingRequests?.map(conn => 
+      conn.requester_id === userId ? conn.recipient_id : conn.requester_id
+    ) || [];
+    
+    // Combine all users to exclude
+    const excludeUserIds = [userId, ...connectedUserIds, ...pendingUserIds];
+    
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
-      .neq('id', userId)
+      .not('id', 'in', `(${excludeUserIds.join(',')})`)
       .limit(limit);
 
     if (error) {
@@ -753,6 +782,14 @@ export async function createComment(comment: {
       return null;
     }
     
+    // Check if post_comments table exists
+    const tableExists = await ensurePostCommentsTable();
+    if (!tableExists) {
+      debugLog('Post_comments table does not exist, cannot create comment');
+      toast.error('Comments feature is not available yet. Please try again later.');
+      return null;
+    }
+    
     const { data, error } = await supabase
       .from('post_comments')
       .insert({
@@ -763,6 +800,9 @@ export async function createComment(comment: {
       .single();
 
     if (error) throw error;
+    
+    // Increment comments count
+    await supabase.rpc('increment_comments_count', { post_id: comment.post_id });
     
     debugLog('Comment created successfully', data);
     return data;
@@ -779,6 +819,13 @@ export async function getPostComments(postId: string): Promise<CommentWithAuthor
     const schemaExists = await checkSchemaExists();
     if (!schemaExists) {
       debugLog('Database schema not found, returning empty comments');
+      return [];
+    }
+    
+    // Check if post_comments table exists
+    const tableExists = await ensurePostCommentsTable();
+    if (!tableExists) {
+      debugLog('Post_comments table does not exist, returning empty comments');
       return [];
     }
     
@@ -985,8 +1032,148 @@ export async function getJobs(): Promise<JobWithCompany[]> {
     
     const schemaExists = await checkSchemaExists();
     if (!schemaExists) {
-      debugLog('Database schema not found, returning empty jobs');
-      return [];
+      debugLog('Database schema not found, returning mock jobs');
+      // Return mock data for testing
+      return [
+        {
+          id: '1',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          title: 'Senior Cardiologist',
+          description: 'We are seeking a highly qualified cardiologist to join our team. The ideal candidate will have extensive experience in interventional cardiology and a passion for patient care.',
+          requirements: ['Board certified in Cardiology', '5+ years experience', 'Interventional cardiology skills'],
+          salary_min: 250000,
+          salary_max: 350000,
+          currency: 'USD',
+          location: 'New York, NY',
+          job_type: 'full_time',
+          experience_level: 'senior',
+          specializations: ['Cardiology'],
+          company_id: 'inst-1',
+          posted_by: 'user-1',
+          status: 'active',
+          application_deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          applications_count: 12,
+          company: {
+            id: 'inst-1',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            name: 'Mount Sinai Hospital',
+            type: 'hospital',
+            description: 'Leading healthcare institution in New York',
+            location: 'New York, NY',
+            website: 'https://mountsinai.org',
+            phone: '+1-212-241-6500',
+            email: 'hr@mountsinai.org',
+            logo_url: null,
+            banner_url: null,
+            specialties: ['Cardiology', 'Neurology', 'Oncology'],
+            license_number: 'NY123456',
+            accreditation: ['JCAHO', 'AHA'],
+            established_year: 1852,
+            size: 'large',
+            verified: true,
+            admin_user_id: 'user-1',
+          },
+          posted_by_user: {
+            id: 'user-1',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            full_name: 'Dr. Sarah Johnson',
+            email: 'sarah.johnson@mountsinai.org',
+            avatar_url: null,
+            banner_url: null,
+            headline: 'Chief of Cardiology',
+            bio: 'Experienced cardiologist with over 15 years in the field.',
+            location: 'New York, NY',
+            website: null,
+            phone: null,
+            specialization: ['Cardiology'],
+            is_premium: true,
+            profile_views: 150,
+            user_type: 'institution',
+            profile_type: 'institution',
+            institution_type: 'hospital',
+            accreditations: ['JCAHO', 'AHA'],
+            departments: ['Cardiology', 'Emergency Medicine'],
+            contact_info: {
+              address: '1 Gustave L. Levy Place, New York, NY 10029',
+              phone: '+1-212-241-6500',
+              email: 'hr@mountsinai.org',
+              website: 'https://mountsinai.org',
+            },
+          },
+        },
+        {
+          id: '2',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          title: 'Pediatric Nurse Practitioner',
+          description: 'Join our pediatric team to provide comprehensive care to children and adolescents. Experience in primary care pediatrics required.',
+          requirements: ['NP license', 'Pediatric certification', '2+ years experience'],
+          salary_min: 80000,
+          salary_max: 120000,
+          currency: 'USD',
+          location: 'Los Angeles, CA',
+          job_type: 'full_time',
+          experience_level: 'mid',
+          specializations: ['Pediatrics', 'Nursing'],
+          company_id: 'inst-2',
+          posted_by: 'user-2',
+          status: 'active',
+          application_deadline: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString(),
+          applications_count: 8,
+          company: {
+            id: 'inst-2',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            name: 'Children\'s Hospital Los Angeles',
+            type: 'hospital',
+            description: 'Premier pediatric hospital in Southern California',
+            location: 'Los Angeles, CA',
+            website: 'https://chla.org',
+            phone: '+1-323-660-2450',
+            email: 'hr@chla.org',
+            logo_url: null,
+            banner_url: null,
+            specialties: ['Pediatrics', 'Emergency Medicine'],
+            license_number: 'CA789012',
+            accreditation: ['JCAHO', 'AAP'],
+            established_year: 1901,
+            size: 'large',
+            verified: true,
+            admin_user_id: 'user-2',
+          },
+          posted_by_user: {
+            id: 'user-2',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            full_name: 'Dr. Michael Chen',
+            email: 'michael.chen@chla.org',
+            avatar_url: null,
+            banner_url: null,
+            headline: 'Director of Nursing',
+            bio: 'Experienced healthcare administrator with focus on pediatric care.',
+            location: 'Los Angeles, CA',
+            website: null,
+            phone: null,
+            specialization: ['Pediatrics', 'Nursing'],
+            is_premium: true,
+            profile_views: 89,
+            user_type: 'institution',
+            profile_type: 'institution',
+            institution_type: 'hospital',
+            accreditations: ['JCAHO', 'AAP'],
+            departments: ['Pediatrics', 'Nursing'],
+            contact_info: {
+              address: '4650 Sunset Blvd, Los Angeles, CA 90027',
+              phone: '+1-323-660-2450',
+              email: 'hr@chla.org',
+              website: 'https://chla.org',
+            },
+          },
+        },
+      ];
     }
     
     const { data, error } = await supabase
@@ -1127,7 +1314,7 @@ export async function registerForEvent(registration: Omit<EventAttendee, 'id' | 
 } 
 
 // Follow system functions
-export async function followUser(followerId: string, followingId: string, followerType: 'individual' | 'student' | 'institution', followingType: 'individual' | 'student' | 'institution'): Promise<Follow | null> {
+export async function followUser(followerId: string, followingId: string, followerType: 'individual' | 'institution', followingType: 'individual' | 'institution'): Promise<Follow | null> {
   try {
     debugLog('Following user', { followerId, followingId, followerType, followingType });
     
@@ -1310,5 +1497,33 @@ export async function getSuggestedInstitutions(userId: string, limit: number = 1
   } catch (error) {
     debugLog('Error fetching suggested institutions', error);
     return [];
+  }
+}
+
+// Function to ensure post_comments table exists
+export async function ensurePostCommentsTable(): Promise<boolean> {
+  try {
+    debugLog('Ensuring post_comments table exists');
+    
+    // Check if table exists by trying to select from it
+    const { data, error } = await supabase
+      .from('post_comments')
+      .select('id')
+      .limit(1);
+    
+    if (error && error.code === '42P01') {
+      // Table doesn't exist, create it
+      debugLog('Post_comments table does not exist, creating it');
+      
+      // Since we can't run DDL through the client, we'll just return false
+      // and handle this in the application logic
+      return false;
+    }
+    
+    debugLog('Post_comments table exists');
+    return true;
+  } catch (error) {
+    debugLog('Error checking post_comments table', error);
+    return false;
   }
 } 

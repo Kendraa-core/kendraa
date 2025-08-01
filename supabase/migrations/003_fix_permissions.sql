@@ -94,6 +94,25 @@ INSERT INTO public.posts (author_id, content, visibility) VALUES
     ('27f2aec2-daf1-46e2-a06e-f77ba1d332a0', 'Just attended an amazing cardiology conference. The latest research on minimally invasive procedures is groundbreaking! 💓 #Cardiology #Innovation', 'public'),
     ('27f2aec2-daf1-46e2-a06e-f77ba1d332a0', 'Looking for collaboration opportunities in telemedicine research. DM me if you''re working on remote patient monitoring solutions! 📱 #Telemedicine #Research', 'public');
 
+-- Create post_comments table if it doesn't exist
+CREATE TABLE IF NOT EXISTS public.post_comments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    post_id UUID NOT NULL REFERENCES public.posts(id) ON DELETE CASCADE,
+    author_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    parent_id UUID REFERENCES public.post_comments(id) ON DELETE CASCADE,
+    likes_count INTEGER DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+GRANT ALL ON public.post_comments TO anon, authenticated;
+ALTER TABLE public.post_comments ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Enable all operations for post_comments" ON public.post_comments
+    USING (true)
+    WITH CHECK (true);
+
 -- Create post_likes table if it doesn't exist
 CREATE TABLE IF NOT EXISTS public.post_likes (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -129,9 +148,30 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Create RPC functions for comment counts
+CREATE OR REPLACE FUNCTION increment_comments_count(post_id UUID)
+RETURNS void AS $$
+BEGIN
+    UPDATE posts 
+    SET comments_count = comments_count + 1 
+    WHERE id = post_id;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION decrement_comments_count(post_id UUID)
+RETURNS void AS $$
+BEGIN
+    UPDATE posts 
+    SET comments_count = GREATEST(comments_count - 1, 0)
+    WHERE id = post_id;
+END;
+$$ LANGUAGE plpgsql;
+
 -- Grant execute permissions on RPC functions
 GRANT EXECUTE ON FUNCTION increment_likes_count(UUID) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION decrement_likes_count(UUID) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION increment_comments_count(UUID) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION decrement_comments_count(UUID) TO anon, authenticated;
 
 -- Final permissions grant
 GRANT USAGE ON SCHEMA public TO anon, authenticated;

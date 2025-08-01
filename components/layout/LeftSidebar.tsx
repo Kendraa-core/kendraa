@@ -50,13 +50,6 @@ const navigationItems = [
     iconActive: UserGroupSolidIcon,
   },
   {
-    name: 'Institutions',
-    href: '/institutions',
-    icon: BuildingOfficeIcon,
-    iconActive: BuildingOfficeSolidIcon,
-    isNew: true,
-  },
-  {
     name: 'Jobs',
     href: '/jobs',
     icon: BriefcaseIcon,

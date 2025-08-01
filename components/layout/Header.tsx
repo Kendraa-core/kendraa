@@ -27,7 +27,6 @@ const navItems = [
   { name: 'Jobs', href: '/jobs', icon: BriefcaseIcon },
   { name: 'Messaging', href: '/messaging', icon: ChatBubbleLeftRightIcon },
   { name: 'Events', href: '/events', icon: CalendarDaysIcon },
-  { name: 'Institutions', href: '/institutions', icon: BuildingOfficeIcon },
 ];
 
 export default function Header() {

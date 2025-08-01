@@ -296,12 +296,9 @@ export default function FollowersPage() {
                     <p className="text-gray-500">
                       Institutions you follow will appear here
                     </p>
-                    <Button 
-                      className="mt-4"
-                      onClick={() => router.push('/institutions')}
-                    >
-                      Discover Institutions
-                    </Button>
+                    <p className="text-sm text-gray-400 mt-2">
+                      Use the search bar to discover and follow institutions
+                    </p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

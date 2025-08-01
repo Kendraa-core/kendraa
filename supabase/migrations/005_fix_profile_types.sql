@@ -52,10 +52,10 @@ CREATE INDEX IF NOT EXISTS idx_follows_following_id ON public.follows(following_
 CREATE INDEX IF NOT EXISTS idx_profiles_profile_type ON public.profiles(profile_type);
 CREATE INDEX IF NOT EXISTS idx_profiles_institution_type ON public.profiles(institution_type);
 
--- Update existing profiles to have profile_type
+-- Update existing profiles to have profile_type (only individual and institution)
 UPDATE public.profiles 
 SET profile_type = 'individual', user_type = 'individual' 
-WHERE profile_type IS NULL;
+WHERE profile_type IS NULL OR profile_type = 'student';
 
 -- Update jobs table to only allow institutions to post jobs
 ALTER TABLE public.jobs 

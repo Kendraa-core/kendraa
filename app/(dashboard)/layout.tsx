@@ -15,10 +15,13 @@ import {
   BuildingOffice2Icon,
   PlusIcon,
   UsersIcon,
+  CalendarDaysIcon,
 } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
 import UserSearch from '@/components/search/UserSearch';
 import NotificationList from '@/components/notifications/NotificationList';
+import MobileNavigation from '@/components/layout/MobileNavigation';
+import QuickNav from '@/components/common/QuickNav';
 import { useNotifications } from '@/contexts/NotificationContext';
 import { getProfile, type Profile } from '@/lib/queries';
 
@@ -107,8 +110,8 @@ export default function DashboardLayout({
         ...baseItems,
         { href: '/jobs', icon: BriefcaseIcon, label: 'Jobs' },
         { href: '/jobs/create', icon: PlusIcon, label: 'Post Job' },
+        { href: '/events', icon: CalendarDaysIcon, label: 'Events' },
         { href: '/followers', icon: UsersIcon, label: 'Followers' },
-        { href: '/institutions', icon: BuildingOffice2Icon, label: 'Institutions' },
       ];
     } else {
       // Individual/Student navigation
@@ -116,7 +119,7 @@ export default function DashboardLayout({
         ...baseItems,
         { href: '/network', icon: UserGroupIcon, label: 'Network' },
         { href: '/jobs', icon: BriefcaseIcon, label: 'Jobs' },
-        { href: '/institutions', icon: BuildingOffice2Icon, label: 'Institutions' },
+        { href: '/events', icon: CalendarDaysIcon, label: 'Events' },
       ];
     }
   };
@@ -158,14 +161,16 @@ export default function DashboardLayout({
 
             {/* Right side items */}
             <nav className="flex items-center space-x-1">
+              {/* Mobile Navigation */}
+              <MobileNavigation />
+
               {/* Search */}
               <button
                 onClick={() => setShowSearch(true)}
-                className="relative group flex flex-col items-center justify-center px-3 sm:px-4 py-2 text-gray-700 hover:text-indigo-600 transition-all duration-300 rounded-xl hover:bg-white/10"
+                className="relative group flex flex-col items-center justify-center px-3 sm:px-4 py-2 text-gray-700 hover:text-blue-600 transition-all duration-300 rounded-xl hover:bg-white/10"
               >
                 <MagnifyingGlassIcon className="h-6 w-6 sm:h-7 sm:w-7 group-hover:scale-110 transition-transform duration-300" />
                 <span className="hidden sm:block text-xs mt-1 font-medium">Search</span>
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </button>
 
               {/* Notifications */}
@@ -299,6 +304,9 @@ export default function DashboardLayout({
       <main className="pt-16">
         {children}
       </main>
+      
+      {/* Quick Navigation */}
+      <QuickNav />
       
       {/* No bottom navigation - removed as requested */}
     </div>

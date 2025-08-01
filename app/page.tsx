@@ -21,68 +21,68 @@ import {
 const features = [
   {
     icon: SparklesSolidIcon,
-    title: 'AI-Powered Matching',
-    description: 'Advanced algorithms connect you with the perfect healthcare professionals.',
+    title: 'Intelligent Matching',
+    description: 'Connect with healthcare professionals who share your expertise and goals.',
   },
   {
     icon: CalendarDaysIcon,
-    title: 'Smart Scheduling',
-    description: 'Seamless coordination for meetings, consultations, and collaborations.',
+    title: 'Seamless Scheduling',
+    description: 'Coordinate meetings and consultations with built-in calendar integration.',
   },
   {
     icon: UserGroupIcon,
-    title: 'Exclusive Networks',
-    description: 'Join curated communities where meaningful healthcare discussions thrive.',
+    title: 'Professional Networks',
+    description: 'Join specialty-focused communities for meaningful collaboration.',
   },
   {
     icon: StarSolidIcon,
-    title: 'Premium Connections',
-    description: 'Build lasting relationships with verified healthcare professionals worldwide.',
+    title: 'Verified Connections',
+    description: 'Build trust with verified healthcare professionals worldwide.',
   },
 ];
 
 const stats = [
-  { number: '50K+', label: 'Healthcare professionals connected' },
+  { number: '50K+', label: 'Healthcare professionals' },
   { number: '98%', label: 'Satisfaction rate' },
-  { number: '2M+', label: 'Successful collaborations' },
-  { number: '95%', label: 'Users recommend Kendraa' },
+  { number: '2M+', label: 'Successful connections' },
+  { number: '95%', label: 'User recommendation rate' },
 ];
 
 const testimonials = [
   {
     name: 'Dr. Sarah Chen',
     title: 'Cardiothoracic Surgeon, Johns Hopkins',
-    quote: 'Kendraa has revolutionized how I connect with fellow specialists. The AI matching is incredibly accurate.',
+    quote: 'Kendraa connects me with the right specialists. The matching is precise and valuable.',
     avatar: 'SC',
   },
   {
     name: 'Dr. Michael Rodriguez',
     title: 'Emergency Medicine, Mayo Clinic',
-    quote: 'Finally, a platform that understands the unique needs of healthcare professionals.',
+    quote: 'A platform that understands healthcare professionals. Simple, effective, professional.',
     avatar: 'MR',
   },
   {
     name: 'Dr. Emily Thompson',
     title: 'Research Director, Harvard Medical',
-    quote: 'The exclusive networks feature is game-changing for meaningful medical collaborations.',
+    quote: 'The networking features enable meaningful medical collaborations.',
     avatar: 'ET',
   },
   {
     name: 'Dr. Lisa Martinez',
     title: 'Pediatrician, Stanford Health',
-    quote: 'Smart scheduling saves me hours every week. Highly recommend!',
+    quote: 'Scheduling tools save me hours every week. Highly recommended.',
     avatar: 'LM',
   },
   {
     name: 'Dr. Chris Brown',
     title: 'Neurologist, Cleveland Clinic',
-    quote: 'The AI matching is spot-on. I&apos;ve made more valuable connections here than anywhere else.',
+    quote: 'The matching algorithm is accurate. I\'ve made valuable connections here.',
     avatar: 'CB',
   },
   {
     name: 'Dr. Amanda Kim',
     title: 'Oncologist, MD Anderson',
-    quote: 'Kendraa understands the difference between networking and building real medical partnerships.',
+    quote: 'Kendraa focuses on real professional relationships, not just networking.',
     avatar: 'AK',
   },
 ];
@@ -93,25 +93,25 @@ const pricingPlans = [
     price: '$0',
     period: '/month',
     features: [
-      'AI-powered matching (standard)',
+      'Basic matching algorithm',
       'Access to 5 specialty networks',
       '10 connection requests per day',
-      'Basic scheduling tools',
-      'Join medical events',
-      'Community support',
+      'Standard scheduling tools',
+      'Community access',
+      'Email support',
     ],
     buttonText: 'Get Started',
     popular: false,
   },
   {
-    name: 'Kendraa Premium',
+    name: 'Premium',
     price: '$29',
     period: '/month',
     features: [
-      'Advanced AI matching',
+      'Advanced matching algorithm',
       'Unlimited specialty networks',
       'Unlimited connections',
-      'Smart scheduling',
+      'Advanced scheduling',
       'Priority event access',
       'Dedicated support',
     ],
@@ -123,23 +123,23 @@ const pricingPlans = [
 const faqs = [
   {
     question: 'How does Kendraa match healthcare professionals?',
-    answer: 'Kendraa uses advanced AI to analyze your specialty, interests, and professional goals, ensuring every connection is relevant and valuable for your medical career.',
+    answer: 'Kendraa analyzes your specialty, experience, and professional interests to connect you with relevant healthcare professionals who can add value to your practice.',
   },
   {
     question: 'Is Kendraa free to use?',
-    answer: 'Yes, Kendraa offers a free plan with basic features. For advanced features, we offer Kendraa Premium at $29/month.',
+    answer: 'Yes, Kendraa offers a free plan with essential features. Premium features are available for $29/month.',
   },
   {
-    question: 'Can I control who I connect with?',
-    answer: 'Absolutely. You have full control over your connections and can choose who to engage with based on your professional preferences.',
+    question: 'Can I control my connections?',
+    answer: 'Yes, you have complete control over your connections and can choose who to engage with based on your professional criteria.',
   },
   {
     question: 'How secure is my data on Kendraa?',
     answer: 'We prioritize your privacy and security. All data is encrypted and we never share your information with third parties.',
   },
   {
-    question: 'Does Kendraa support medical conferences and events?',
-    answer: 'Yes, Kendraa integrates with various medical event platforms and helps you connect with attendees before, during, and after events.',
+    question: 'Does Kendraa support medical events?',
+    answer: 'Yes, Kendraa integrates with medical event platforms and helps you connect with attendees before, during, and after events.',
   },
 ];
 
@@ -151,31 +151,31 @@ export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState(0);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
+    <div className="min-h-screen bg-white text-gray-900">
       {/* Header */}
-      <header className="fixed top-0 w-full bg-slate-900/95 backdrop-blur-sm border-b border-purple-500/20 z-50">
+      <header className="fixed top-0 w-full bg-white/95 backdrop-blur-sm border-b border-gray-200 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                 <SparklesIcon className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Kendraa</span>
+              <span className="text-xl font-bold text-gray-900">Kendraa</span>
             </Link>
 
             {/* Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
-              <Link href="#features" className="text-gray-300 hover:text-purple-400 transition-colors">
+              <Link href="#features" className="text-gray-600 hover:text-blue-600 transition-colors">
                 Features
               </Link>
-              <Link href="#testimonials" className="text-gray-300 hover:text-purple-400 transition-colors">
+              <Link href="#testimonials" className="text-gray-600 hover:text-blue-600 transition-colors">
                 Testimonials
               </Link>
-              <Link href="#pricing" className="text-gray-300 hover:text-purple-400 transition-colors">
+              <Link href="#pricing" className="text-gray-600 hover:text-blue-600 transition-colors">
                 Pricing
               </Link>
-              <Link href="#faq" className="text-gray-300 hover:text-purple-400 transition-colors">
+              <Link href="#faq" className="text-gray-600 hover:text-blue-600 transition-colors">
                 FAQs
               </Link>
             </nav>
@@ -183,7 +183,7 @@ export default function LandingPage() {
             {/* CTA Button */}
             <Link
               href="/signup"
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-300 shadow-lg hover:shadow-purple-500/25"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
             >
               Sign Up
             </Link>
@@ -200,20 +200,19 @@ export default function LandingPage() {
             transition={{ duration: 0.8 }}
           >
             <div className="mb-8">
-              <div className="w-24 h-24 bg-gradient-to-r from-purple-500 to-pink-500 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-purple-500/25">
+              <div className="w-24 h-24 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
                 <SparklesIcon className="w-12 h-12 text-white" />
               </div>
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">
-              The Royal Network for{' '}
-              <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Healthcare</span>
+            <h1 className="text-5xl md:text-6xl font-bold mb-6 text-gray-900">
+              Connect Healthcare Professionals
             </h1>
-            <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
-              AI-powered, premium networking that connects healthcare professionals with the right opportunities and collaborations.
+            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+              Intelligent networking platform that connects healthcare professionals with meaningful opportunities and collaborations.
             </p>
             <Link
               href="/signup"
-              className="inline-flex items-center bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 shadow-xl hover:shadow-purple-500/25"
+              className="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-colors"
             >
               Get Started for Free
               <ChevronRightIcon className="w-5 h-5 ml-2" />
@@ -231,12 +230,11 @@ export default function LandingPage() {
               {[1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className="w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center border-2 border-purple-400/30 relative shadow-lg"
+                  className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center border-2 border-blue-200 relative shadow-md"
                 >
-                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-purple-600 font-bold">
+                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-blue-600 font-bold">
                     {String.fromCharCode(64 + i)}
                   </div>
-                  <div className="absolute inset-0 rounded-full border-2 border-purple-400/20 animate-pulse"></div>
                 </div>
               ))}
             </div>
@@ -245,12 +243,12 @@ export default function LandingPage() {
       </section>
 
       {/* Trusted By Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
         <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-2xl font-semibold mb-8">Trusted By Leading Medical Institutions</h2>
-          <div className="flex justify-center items-center space-x-12 opacity-60">
+          <h2 className="text-2xl font-semibold mb-8 text-gray-900">Trusted By Leading Medical Institutions</h2>
+          <div className="flex justify-center items-center space-x-12 text-gray-600">
             {trustedInstitutions.map((institution) => (
-              <div key={institution} className="text-gray-300 font-semibold">
+              <div key={institution} className="font-medium">
                 {institution}
               </div>
             ))}
@@ -259,7 +257,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-slate-800 to-purple-900">
+      <section id="features" className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -268,12 +266,11 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl font-bold mb-4">
-              Designed for{' '}
-              <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Royal Connections</span>
+            <h2 className="text-4xl font-bold mb-4 text-gray-900">
+              Designed for Professional Connections
             </h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              With Kendraa, connecting with the right healthcare professionals is effortless, ensuring every interaction has real value.
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Kendraa makes connecting with the right healthcare professionals simple and effective.
             </p>
           </motion.div>
 
@@ -285,13 +282,13 @@ export default function LandingPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="text-center bg-gradient-to-br from-slate-800 to-purple-900 rounded-2xl p-6 border border-purple-500/20 hover:border-purple-400/40 transition-all duration-300"
+                className="text-center bg-white rounded-xl p-6 border border-gray-200 hover:border-blue-300 transition-colors shadow-sm"
               >
-                <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <div className="w-16 h-16 bg-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <feature.icon className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                <p className="text-gray-300">{feature.description}</p>
+                <h3 className="text-xl font-semibold mb-2 text-gray-900">{feature.title}</h3>
+                <p className="text-gray-600">{feature.description}</p>
               </motion.div>
             ))}
           </div>
@@ -299,7 +296,7 @@ export default function LandingPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -308,8 +305,8 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl font-bold mb-4">Kendraa by the Numbers</h2>
-            <p className="text-xl text-gray-300">A glance at how Kendraa is revolutionizing healthcare networking.</p>
+            <h2 className="text-4xl font-bold mb-4 text-gray-900">Kendraa by the Numbers</h2>
+            <p className="text-xl text-gray-600">How Kendraa is transforming healthcare networking.</p>
           </motion.div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
@@ -320,10 +317,10 @@ export default function LandingPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="text-center bg-gradient-to-br from-slate-800 to-purple-900 rounded-2xl p-6 border border-purple-500/20"
+                className="text-center bg-white rounded-xl p-6 border border-gray-200 shadow-sm"
               >
-                <div className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-2">{stat.number}</div>
-                <div className="text-gray-300">{stat.label}</div>
+                <div className="text-4xl font-bold text-blue-600 mb-2">{stat.number}</div>
+                <div className="text-gray-600">{stat.label}</div>
               </motion.div>
             ))}
           </div>
@@ -331,7 +328,7 @@ export default function LandingPage() {
       </section>
 
       {/* Testimonials Section */}
-      <section id="testimonials" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-slate-800 to-purple-900">
+      <section id="testimonials" className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -340,8 +337,8 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl font-bold mb-4">What our Healthcare Professionals Say</h2>
-            <p className="text-xl text-gray-300">Real professionals, real connections. See what they&apos;re saying.</p>
+            <h2 className="text-4xl font-bold mb-4 text-gray-900">What Healthcare Professionals Say</h2>
+            <p className="text-xl text-gray-600">Real professionals, real connections.</p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -352,18 +349,18 @@ export default function LandingPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="bg-gradient-to-br from-slate-800 to-purple-900 rounded-2xl p-6 border border-purple-500/20 hover:border-purple-400/40 transition-all duration-300"
+                className="bg-white rounded-xl p-6 border border-gray-200 hover:border-blue-300 transition-colors shadow-sm"
               >
                 <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white font-bold mr-4">
+                  <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold mr-4">
                     {testimonial.avatar}
                   </div>
                   <div>
-                    <div className="font-semibold">{testimonial.name}</div>
-                    <div className="text-gray-400 text-sm">{testimonial.title}</div>
+                    <div className="font-semibold text-gray-900">{testimonial.name}</div>
+                    <div className="text-gray-500 text-sm">{testimonial.title}</div>
                   </div>
                 </div>
-                <p className="text-gray-300">&quot;{testimonial.quote}&quot;</p>
+                <p className="text-gray-600">&quot;{testimonial.quote}&quot;</p>
               </motion.div>
             ))}
           </div>
@@ -371,7 +368,7 @@ export default function LandingPage() {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8">
+      <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -380,11 +377,10 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl font-bold mb-4">
-              Premium Plans for Every{' '}
-              <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Professional</span>
+            <h2 className="text-4xl font-bold mb-4 text-gray-900">
+              Plans for Every Professional
             </h2>
-            <p className="text-xl text-gray-300">Whatever your healthcare networking goals, Kendraa has a plan tailored for you.</p>
+            <p className="text-xl text-gray-600">Choose the plan that fits your networking needs.</p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
@@ -395,31 +391,31 @@ export default function LandingPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className={`bg-gradient-to-br from-slate-800 to-purple-900 rounded-2xl p-8 border ${
-                  plan.popular ? 'border-purple-500 ring-2 ring-purple-500/50' : 'border-purple-500/20'
-                }`}
+                className={`bg-white rounded-xl p-8 border ${
+                  plan.popular ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-gray-200'
+                } shadow-sm`}
               >
                 {plan.popular && (
-                  <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-medium px-3 py-1 rounded-full inline-block mb-4">
+                  <div className="bg-blue-600 text-white text-sm font-medium px-3 py-1 rounded-full inline-block mb-4">
                     Most Popular
                   </div>
                 )}
-                <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
+                <h3 className="text-2xl font-bold mb-2 text-gray-900">{plan.name}</h3>
                 <div className="mb-6">
-                  <span className="text-4xl font-bold">{plan.price}</span>
-                  <span className="text-gray-400">{plan.period}</span>
+                  <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
+                  <span className="text-gray-500">{plan.period}</span>
                 </div>
                 <ul className="space-y-3 mb-8">
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex items-center">
-                      <CheckIcon className="w-5 h-5 text-purple-500 mr-3" />
-                      <span className="text-gray-300">{feature}</span>
+                      <CheckIcon className="w-5 h-5 text-blue-600 mr-3" />
+                      <span className="text-gray-600">{feature}</span>
                     </li>
                   ))}
                 </ul>
                 <Link
                   href="/signup"
-                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-purple-500/25 block text-center"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-colors block text-center"
                 >
                   {plan.buttonText}
                 </Link>
@@ -430,7 +426,7 @@ export default function LandingPage() {
       </section>
 
       {/* FAQ Section */}
-      <section id="faq" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-slate-800 to-purple-900">
+      <section id="faq" className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -439,7 +435,7 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl font-bold mb-4">Frequently Asked Questions</h2>
+            <h2 className="text-4xl font-bold mb-4 text-gray-900">Frequently Asked Questions</h2>
           </motion.div>
 
           <div className="space-y-4">
@@ -450,21 +446,21 @@ export default function LandingPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="bg-gradient-to-br from-slate-800 to-purple-900 rounded-xl border border-purple-500/20"
+                className="bg-white rounded-lg border border-gray-200 shadow-sm"
               >
                 <button
                   onClick={() => setOpenFaq(openFaq === index ? -1 : index)}
-                  className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-purple-900/20 transition-colors rounded-xl"
+                  className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors rounded-lg"
                 >
-                  <span className="font-medium">{faq.question}</span>
+                  <span className="font-medium text-gray-900">{faq.question}</span>
                   {openFaq === index ? (
-                    <ChevronUpIcon className="w-5 h-5" />
+                    <ChevronUpIcon className="w-5 h-5 text-gray-500" />
                   ) : (
-                    <ChevronDownIcon className="w-5 h-5" />
+                    <ChevronDownIcon className="w-5 h-5 text-gray-500" />
                   )}
                 </button>
                 {openFaq === index && (
-                  <div className="px-6 pb-4 text-gray-300">
+                  <div className="px-6 pb-4 text-gray-600">
                     {faq.answer}
                   </div>
                 )}
@@ -475,7 +471,7 @@ export default function LandingPage() {
       </section>
 
       {/* Bottom CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -483,13 +479,13 @@ export default function LandingPage() {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-4xl font-bold mb-4">Network Like Royalty</h2>
-            <p className="text-xl text-gray-300 mb-8">
-              Join thousands of healthcare professionals using AI-powered networking to build real connections.
+            <h2 className="text-4xl font-bold mb-4 text-gray-900">Join Healthcare Professionals</h2>
+            <p className="text-xl text-gray-600 mb-8">
+              Connect with thousands of healthcare professionals using intelligent networking.
             </p>
             <Link
               href="/signup"
-              className="inline-flex items-center bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 shadow-xl hover:shadow-purple-500/25"
+              className="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-colors"
             >
               Get Started For Free
               <ChevronRightIcon className="w-5 h-5 ml-2" />
@@ -499,54 +495,54 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gradient-to-r from-slate-800 to-purple-900 border-t border-purple-500/20 py-12 px-4 sm:px-6 lg:px-8">
+      <footer className="bg-white border-t border-gray-200 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                   <SparklesIcon className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Kendraa</span>
+                <span className="text-xl font-bold text-gray-900">Kendraa</span>
               </div>
-              <p className="text-gray-400">Royal networking, powered by AI.</p>
+              <p className="text-gray-600">Professional networking for healthcare.</p>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">Navigation</h3>
+              <h3 className="font-semibold mb-4 text-gray-900">Navigation</h3>
               <div className="space-y-2">
-                <Link href="#features" className="block text-gray-400 hover:text-purple-400 transition-colors">
+                <Link href="#features" className="block text-gray-600 hover:text-blue-600 transition-colors">
                   Features
                 </Link>
-                <Link href="#testimonials" className="block text-gray-400 hover:text-purple-400 transition-colors">
+                <Link href="#testimonials" className="block text-gray-600 hover:text-blue-600 transition-colors">
                   Testimonials
                 </Link>
-                <Link href="#pricing" className="block text-gray-400 hover:text-purple-400 transition-colors">
+                <Link href="#pricing" className="block text-gray-600 hover:text-blue-600 transition-colors">
                   Pricing
                 </Link>
-                <Link href="#faq" className="block text-gray-400 hover:text-purple-400 transition-colors">
+                <Link href="#faq" className="block text-gray-600 hover:text-blue-600 transition-colors">
                   FAQs
                 </Link>
               </div>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">Connect with us</h3>
+              <h3 className="font-semibold mb-4 text-gray-900">Connect with us</h3>
               <div className="flex space-x-4">
-                <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
                   <span className="text-white">in</span>
                 </div>
-                <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
                   <span className="text-white">X</span>
                 </div>
-                <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
                   <span className="text-white">D</span>
                 </div>
-                <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
                   <span className="text-white">💬</span>
                 </div>
               </div>
             </div>
           </div>
-          <div className="border-t border-purple-500/20 mt-8 pt-8 text-center text-gray-400">
+          <div className="border-t border-gray-200 mt-8 pt-8 text-center text-gray-500">
             © 2025 Kendraa. All rights reserved.
           </div>
         </div>

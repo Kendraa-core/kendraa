@@ -3,7 +3,6 @@ import { Inter } from 'next/font/google';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
-import Header from '@/components/layout/Header';
 import './globals.css';
 
 const inter = Inter({ 
@@ -102,12 +101,7 @@ export default function RootLayout({
       <body className="min-h-screen bg-gray-50 antialiased" suppressHydrationWarning>
         <AuthProvider>
           <NotificationProvider>
-            <div className="flex flex-col min-h-screen">
-              <Header />
-              <main className="flex-1 pt-16">
-                {children}
-              </main>
-            </div>
+            {children}
             <Toaster
               position="top-right"
               toastOptions={{

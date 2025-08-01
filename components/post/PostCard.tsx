@@ -461,17 +461,17 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
                 <div className="space-y-4 p-6">
                   {comments.map((comment) => (
                     <div key={comment.id} className="flex items-start space-x-3">
-                                             <Avatar
-                         src={('avatar_url' in comment.author ? comment.author.avatar_url : comment.author.logo_url) || undefined}
-                         alt={('full_name' in comment.author ? comment.author.full_name : comment.author.name) || 'User'}
-                         size="sm"
-                       />
-                       <div className="flex-1 min-w-0">
-                         <div className="bg-slate-50 rounded-xl p-3">
-                           <div className="flex items-center space-x-2 mb-1">
-                             <h4 className="font-medium text-sm text-slate-900">
-                               {('full_name' in comment.author ? comment.author.full_name : comment.author.name) || 'User'}
-                             </h4>
+                      <Avatar
+                        src={('avatar_url' in comment.author ? comment.author.avatar_url : comment.author.logo_url) || undefined}
+                        alt={('full_name' in comment.author ? comment.author.full_name : comment.author.name) || 'User'}
+                        size="sm"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="bg-slate-50 rounded-xl p-3">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <h4 className="font-medium text-sm text-slate-900">
+                              {('full_name' in comment.author ? comment.author.full_name : comment.author.name) || 'User'}
+                            </h4>
                             <span className="text-xs text-slate-500">
                               {formatRelativeTime(comment.created_at)}
                             </span>
@@ -496,6 +496,9 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
                 <div className="p-6 text-center text-slate-500">
                   <ChatBubbleOvalLeftIcon className="w-8 h-8 mx-auto mb-2 text-slate-300" />
                   <p>No comments yet. Be the first to comment!</p>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Comments feature may need setup. Check COMMENTS_SETUP.md for details.
+                  </p>
                 </div>
               )}
             </div>

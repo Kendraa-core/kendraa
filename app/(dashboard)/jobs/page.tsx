@@ -23,7 +23,8 @@ import {
 import { CheckBadgeIcon as CheckBadgeSolidIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { getJobs, applyToJob, type JobWithCompany } from '@/lib/queries';
+import { getJobs, applyToJob, getProfile, type JobWithCompany } from '@/lib/queries';
+import type { Profile } from '@/types/database.types';
 
 const JOB_TYPES = [
   { value: 'all', label: 'All Types' },
@@ -51,6 +52,7 @@ const MEDICAL_SPECIALIZATIONS = [
 
 export default function JobsPage() {
   const { user } = useAuth();
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [jobs, setJobs] = useState<JobWithCompany[]>([]);
   const [filteredJobs, setFilteredJobs] = useState<JobWithCompany[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,8 +69,20 @@ export default function JobsPage() {
   };
 
   useEffect(() => {
+    fetchProfile();
     fetchJobs();
   }, []);
+
+  const fetchProfile = useCallback(async () => {
+    if (!user?.id) return;
+    
+    try {
+      const profileData = await getProfile(user.id);
+      setProfile(profileData);
+    } catch (error) {
+      debugLog('Error fetching profile', error);
+    }
+  }, [user?.id]);
 
   useEffect(() => {
     filterJobs();
@@ -89,6 +103,16 @@ export default function JobsPage() {
       setLoading(false);
     }
   }, [debugLog]);
+
+  // Add a refresh mechanism for when returning from job creation
+  useEffect(() => {
+    const handleFocus = () => {
+      fetchJobs();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [fetchJobs]);
 
   const filterJobs = () => {
     let filtered = jobs;
@@ -210,6 +234,9 @@ export default function JobsPage() {
     );
   }
 
+  // Check if user is an institution
+  const isInstitution = profile?.profile_type === 'institution';
+
   return (
     <div className="min-h-screen modern-gradient-surface">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -222,14 +249,18 @@ export default function JobsPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-slate-900 mb-2">Medical Jobs</h1>
-              <p className="text-slate-600">Find your next opportunity in healthcare</p>
+              <p className="text-slate-600">
+                {isInstitution ? 'Post and manage job opportunities' : 'Find your next opportunity in healthcare'}
+              </p>
             </div>
             
-            {user && (
-              <Button className="modern-button-primary">
-                <PlusIcon className="w-4 h-4 mr-2" />
-                Post Job
-              </Button>
+            {user && isInstitution && (
+              <Link href="/jobs/create">
+                <Button className="modern-button-primary">
+                  <PlusIcon className="w-4 h-4 mr-2" />
+                  Post Job
+                </Button>
+              </Link>
             )}
           </div>
         </motion.div>
@@ -326,6 +357,24 @@ export default function JobsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
+          {/* Show message for individual users */}
+          {!isInstitution && profile && (
+            <Card className="modern-card mb-6">
+              <CardContent className="p-6">
+                <div className="text-center">
+                  <BuildingOfficeIcon className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">Jobs for Healthcare Professionals</h3>
+                  <p className="text-slate-600 mb-4">
+                    Browse and apply for job opportunities posted by healthcare institutions.
+                  </p>
+                  <p className="text-sm text-slate-500">
+                    Only healthcare institutions can post jobs. If you're an institution, please contact support to upgrade your account.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {filteredJobs.length > 0 ? (
             <div className="space-y-6">
               {filteredJobs.map((job) => (
@@ -362,7 +411,7 @@ export default function JobsPage() {
                               </h3>
                               <div className="flex items-center space-x-2 text-sm text-slate-600">
                                 <Link
-                                  href={`/institutions/${job.company.id}`}
+                                  href={`/profile/${job.company.admin_user_id}`}
                                   className="font-medium hover:text-primary-600 transition-colors"
                                 >
                                   {job.company.name}

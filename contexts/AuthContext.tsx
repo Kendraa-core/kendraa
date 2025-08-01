@@ -12,7 +12,7 @@ type AuthContextType = {
   profile: Profile | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ data: any; error: any }>;
-  signUp: (email: string, password: string, fullName: string, profileType?: 'individual' | 'student' | 'institution') => Promise<{ data: any; error: any }>;
+  signUp: (email: string, password: string, fullName: string, profileType?: 'individual' | 'institution') => Promise<{ data: any; error: any }>;
   signOut: () => Promise<void>;
 };
 
@@ -56,10 +56,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       // If no profile exists, create one
       if (!userProfile) {
+        const profileType = user.user_metadata?.profile_type || 'individual';
         userProfile = await ensureProfileExists(
           user.id,
           user.email || '',
-          user.user_metadata?.full_name || user.email?.split('@')[0] || 'User'
+          user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
+          profileType
         );
       }
       
@@ -78,7 +80,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return result;
   };
 
-  const signUp = async (email: string, password: string, fullName: string, profileType: 'individual' | 'student' | 'institution' = 'individual') => {
+  const signUp = async (email: string, password: string, fullName: string, profileType: 'individual' | 'institution' = 'individual') => {
     setLoading(true);
     const result = await supabase.auth.signUp({
       email,

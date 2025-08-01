@@ -51,6 +51,7 @@ module.exports = {
         // Legacy LinkedIn colors (keeping for compatibility)
         'linkedin-primary': '#0a66c2',
         'linkedin-secondary': '#004182',
+        'linkedin-accent': '#0073b1',
         'linkedin-light': '#eef3f8',
         // Modern theme colors
         'modern-primary': '#6366f1', // Indigo-500
