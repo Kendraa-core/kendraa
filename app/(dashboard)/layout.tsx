@@ -31,7 +31,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const { user, loading, signOut } = useAuth();
-  const { unreadCount } = useNotifications();
+  const { unreadCount, notifications, markAsRead } = useNotifications();
   const router = useRouter();
   const [showSearch, setShowSearch] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -280,8 +280,8 @@ export default function DashboardLayout({
               className="w-full max-w-md"
             >
               <NotificationList 
-                notifications={[]} 
-                onMarkAsRead={() => {}} 
+                notifications={notifications} 
+                onMarkAsRead={markAsRead} 
               />
             </motion.div>
           </motion.div>

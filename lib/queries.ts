@@ -511,6 +511,9 @@ export async function sendConnectionRequest(requesterId: string, recipientId: st
       return null;
     }
     
+    // Get requester profile for notification
+    const requesterProfile = await getProfile(requesterId);
+    
     const { data, error } = await supabase
       .from('connections')
       .insert({
@@ -523,6 +526,19 @@ export async function sendConnectionRequest(requesterId: string, recipientId: st
       .single();
 
     if (error) throw error;
+    
+    // Create notification for recipient
+    if (data && requesterProfile) {
+      await createNotification({
+        user_id: recipientId,
+        type: 'connection_request',
+        title: 'New Connection Request',
+        message: `${requesterProfile.full_name || 'Someone'} wants to connect with you`,
+        read: false,
+        data: { profileId: requesterId },
+        action_url: null,
+      });
+    }
     
     debugLog('Connection request sent successfully', data);
     return data;
@@ -628,6 +644,16 @@ export async function acceptConnectionRequest(connectionId: string): Promise<boo
       return false;
     }
     
+    // First, get the connection details to know who to notify
+    const { data: connection, error: fetchError } = await supabase
+      .from('connections')
+      .select('*')
+      .eq('id', connectionId)
+      .single();
+
+    if (fetchError) throw fetchError;
+    
+    // Update the connection status
     const { error } = await supabase
       .from('connections')
       .update({ 
@@ -637,6 +663,22 @@ export async function acceptConnectionRequest(connectionId: string): Promise<boo
       .eq('id', connectionId);
 
     if (error) throw error;
+    
+    // Create notification for the requester
+    if (connection) {
+      const accepterProfile = await getProfile(connection.recipient_id);
+      if (accepterProfile) {
+        await createNotification({
+          user_id: connection.requester_id,
+          type: 'connection_accepted',
+          title: 'Connection Accepted',
+          message: `${accepterProfile.full_name || 'Someone'} accepted your connection request`,
+          read: false,
+          data: { profileId: connection.recipient_id },
+          action_url: null,
+        });
+      }
+    }
     
     debugLog('Connection request accepted successfully');
     return true;
@@ -728,15 +770,121 @@ export async function getEducation(profileId: string): Promise<Education[]> {
   }
 }
 
-// Notifications - returning empty array for now due to schema issues
+// Notifications - returning mock data for now
 export async function getNotifications(userId: string): Promise<Notification[]> {
   try {
-    debugLog('Getting notifications (placeholder)', { userId });
-    // TODO: Fix notification schema and re-enable
-    return [];
+    debugLog('Getting notifications', { userId });
+    
+    const schemaExists = await checkSchemaExists();
+    if (!schemaExists) {
+      debugLog('Database schema not found, returning mock notifications');
+      // Return mock notifications for testing
+      return [
+        {
+          id: '1',
+          created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+          user_id: userId,
+          type: 'connection_request',
+          title: 'New Connection Request',
+          message: 'Dr. Sarah Johnson wants to connect with you',
+          read: false,
+          data: { profileId: 'user-1' },
+          action_url: null,
+        },
+        {
+          id: '2',
+          created_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(), // 4 hours ago
+          user_id: userId,
+          type: 'connection_accepted',
+          title: 'Connection Accepted',
+          message: 'Dr. Michael Chen accepted your connection request',
+          read: true,
+          data: { profileId: 'user-2' },
+          action_url: null,
+        },
+        {
+          id: '3',
+          created_at: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(), // 6 hours ago
+          user_id: userId,
+          type: 'post_like',
+          title: 'Post Liked',
+          message: 'Dr. Emily Rodriguez liked your post about healthcare innovation',
+          read: true,
+          data: { postId: 'post-1' },
+          action_url: null,
+        },
+      ];
+    }
+    
+    const { data, error } = await supabase
+      .from('notifications')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    
+    debugLog('Notifications fetched successfully', data);
+    return data || [];
   } catch (error) {
     debugLog('Error fetching notifications', error);
     return [];
+  }
+}
+
+// Create notification function
+export async function createNotification(notification: Omit<Notification, 'id' | 'created_at'>): Promise<Notification | null> {
+  try {
+    debugLog('Creating notification', notification);
+    
+    const schemaExists = await checkSchemaExists();
+    if (!schemaExists) {
+      debugLog('Database schema not found, cannot create notification');
+      return null;
+    }
+    
+    const { data, error } = await supabase
+      .from('notifications')
+      .insert({
+        ...notification,
+        created_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    
+    debugLog('Notification created successfully', data);
+    return data;
+  } catch (error) {
+    debugLog('Error creating notification', error);
+    return null;
+  }
+}
+
+// Mark notification as read
+export async function markNotificationAsRead(notificationId: string): Promise<boolean> {
+  try {
+    debugLog('Marking notification as read', { notificationId });
+    
+    const schemaExists = await checkSchemaExists();
+    if (!schemaExists) {
+      debugLog('Database schema not found, cannot mark notification as read');
+      return false;
+    }
+    
+    const { error } = await supabase
+      .from('notifications')
+      .update({ read: true })
+      .eq('id', notificationId);
+
+    if (error) throw error;
+    
+    debugLog('Notification marked as read successfully');
+    return true;
+  } catch (error) {
+    debugLog('Error marking notification as read', error);
+    return false;
   }
 }
 
