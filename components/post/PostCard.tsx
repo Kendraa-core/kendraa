@@ -219,16 +219,16 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center space-x-2 mb-1">
-              <h3 className="font-semibold text-gray-900 text-sm">
+              <h3 className="font-semibold text-gray-900 text-sm truncate">
                 {('full_name' in post.author ? post.author.full_name : post.author.name) || post.author?.email?.split('@')[0] || 'User'}
               </h3>
               {('verified' in post.author && post.author.verified) && (
-                <div className="w-3 h-3 bg-blue-600 rounded-full flex items-center justify-center">
+                <div className="w-3 h-3 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
                   <CheckBadgeIcon className="w-2 h-2 text-white" />
                 </div>
               )}
             </div>
-            <div className="flex items-center space-x-2 text-xs text-gray-500">
+            <div className="flex items-center space-x-2 text-xs text-gray-500 flex-wrap">
               <span className="capitalize">
                 {('profile_type' in post.author ? post.author.profile_type : 'institution') === 'institution' ? 'Healthcare Institution' : 'Healthcare Professional'}
               </span>
@@ -240,7 +240,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
           </div>
           <button
             onClick={() => setShowOptions(!showOptions)}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
           >
             <EllipsisHorizontalIcon className="w-4 h-4" />
           </button>
@@ -248,7 +248,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
 
         {/* Post Content */}
         <div className="mb-3">
-          <p className="text-gray-900 text-sm leading-relaxed whitespace-pre-wrap">
+          <p className="text-gray-900 text-sm leading-relaxed whitespace-pre-wrap break-words">
             {post.content}
           </p>
         </div>
@@ -328,20 +328,20 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
               <div className="space-y-2">
                 {comments.map((comment) => (
                   <div key={comment.id} className="flex space-x-2">
-                    <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 font-bold text-xs">
+                    <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 font-bold text-xs flex-shrink-0">
                       {('full_name' in comment.author ? comment.author.full_name : comment.author.name)?.charAt(0) || 'U'}
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <div className="bg-gray-50 rounded-lg p-2">
                         <div className="flex items-center space-x-2 mb-1">
-                          <span className="font-medium text-xs text-gray-900">
+                          <span className="font-medium text-xs text-gray-900 truncate">
                             {('full_name' in comment.author ? comment.author.full_name : comment.author.name) || 'User'}
                           </span>
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-gray-500 flex-shrink-0">
                             {formatRelativeTime(comment.created_at)}
                           </span>
                         </div>
-                        <p className="text-xs text-gray-700">{comment.content}</p>
+                        <p className="text-xs text-gray-700 break-words">{comment.content}</p>
                       </div>
                     </div>
                   </div>
@@ -350,22 +350,22 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
 
               {/* Add Comment */}
               <div className="mt-3 flex space-x-2">
-                <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 font-bold text-xs">
+                <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 font-bold text-xs flex-shrink-0">
                   {userProfile?.full_name?.charAt(0) || 'U'}
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div className="flex space-x-2">
                     <input
                       type="text"
                       placeholder="Write a comment..."
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
-                      className="flex-1 elegant-input text-xs py-1.5"
+                      className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 text-xs"
                     />
                     <button
                       onClick={submitComment}
                       disabled={!newComment.trim() || isCommenting}
-                      className="elegant-button-primary text-xs px-2 py-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-2 py-1.5 rounded-lg transition-colors duration-200 text-xs disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
                     >
                       {isCommenting ? (
                         <>

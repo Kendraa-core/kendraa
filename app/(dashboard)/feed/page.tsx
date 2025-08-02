@@ -185,8 +185,8 @@ export default function FeedPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Left Sidebar */}
           <div className="lg:col-span-3 space-y-4">
             {/* Profile Card */}
@@ -265,37 +265,37 @@ export default function FeedPage() {
                   <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
                     {profile?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <textarea
                       placeholder="What's on your mind?"
-                      className="elegant-input resize-none mb-3"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 resize-none mb-3 text-sm"
                       rows={2}
                     />
-                    <div className="flex items-center justify-between">
-                      <div className="flex space-x-2">
-                        <button className="nav-item text-sm">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <div className="flex space-x-1">
+                        <button className="flex items-center space-x-1 px-2 py-1 rounded-lg text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-200 text-xs">
                           <PhotoIcon className="w-4 h-4" />
-                          <span className="text-xs">Photo</span>
+                          <span>Photo</span>
                         </button>
-                        <button className="nav-item text-sm">
+                        <button className="flex items-center space-x-1 px-2 py-1 rounded-lg text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-200 text-xs">
                           <VideoCameraIcon className="w-4 h-4" />
-                          <span className="text-xs">Video</span>
+                          <span>Video</span>
                         </button>
-                        <button className="nav-item text-sm">
+                        <button className="flex items-center space-x-1 px-2 py-1 rounded-lg text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-200 text-xs">
                           <DocumentIcon className="w-4 h-4" />
-                          <span className="text-xs">Document</span>
+                          <span>Document</span>
                         </button>
-                        <button className="nav-item text-sm">
+                        <button className="flex items-center space-x-1 px-2 py-1 rounded-lg text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-200 text-xs">
                           <FaceSmileIcon className="w-4 h-4" />
-                          <span className="text-xs">Feeling</span>
+                          <span>Feeling</span>
                         </button>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <button className="nav-item text-sm">
-                          <span className="text-xs">Anyone</span>
+                        <button className="flex items-center space-x-1 px-2 py-1 rounded-lg text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-200 text-xs">
+                          <span>Anyone</span>
                           <ChevronDownIcon className="w-3 h-3" />
                         </button>
-                        <Button className="elegant-button-primary text-sm px-3 py-1.5">
+                        <Button className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-1.5 rounded-lg transition-colors duration-200 text-sm">
                           Post
                         </Button>
                       </div>
@@ -364,11 +364,11 @@ export default function FeedPage() {
                     <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
                       K
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900">Kendraa</p>
                       <p className="text-xs text-gray-500">Healthcare Institution</p>
                     </div>
-                    <Button className="elegant-button-primary text-xs px-2 py-1">
+                    <Button className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-2 py-1 rounded-lg transition-colors duration-200 text-xs">
                       + Connect
                     </Button>
                   </div>
