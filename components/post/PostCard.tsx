@@ -211,10 +211,10 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
 
   return (
     <div className="professional-card">
-      <div className="card-spacing">
+      <div className="p-4">
         {/* Post Header */}
-        <div className="flex items-start space-x-3 mb-4">
-          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+        <div className="flex items-start space-x-3 mb-3">
+          <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
             {('full_name' in post.author ? post.author.full_name : post.author.name)?.charAt(0) || post.author?.email?.charAt(0) || 'U'}
           </div>
           <div className="flex-1 min-w-0">
@@ -223,8 +223,8 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
                 {('full_name' in post.author ? post.author.full_name : post.author.name) || post.author?.email?.split('@')[0] || 'User'}
               </h3>
               {('verified' in post.author && post.author.verified) && (
-                <div className="w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center">
-                  <CheckBadgeIcon className="w-3 h-3 text-white" />
+                <div className="w-3 h-3 bg-blue-600 rounded-full flex items-center justify-center">
+                  <CheckBadgeIcon className="w-2 h-2 text-white" />
                 </div>
               )}
             </div>
@@ -242,12 +242,12 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
             onClick={() => setShowOptions(!showOptions)}
             className="text-gray-400 hover:text-gray-600 transition-colors"
           >
-            <EllipsisHorizontalIcon className="w-5 h-5" />
+            <EllipsisHorizontalIcon className="w-4 h-4" />
           </button>
         </div>
 
         {/* Post Content */}
-        <div className="mb-4">
+        <div className="mb-3">
           <p className="text-gray-900 text-sm leading-relaxed whitespace-pre-wrap">
             {post.content}
           </p>
@@ -255,7 +255,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
 
         {/* Post Media */}
         {post.image_url && (
-          <div className="mb-4">
+          <div className="mb-3">
             <img
               src={post.image_url}
               alt="Post media"
@@ -265,8 +265,8 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
         )}
 
         {/* Post Stats */}
-        <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
-          <div className="flex items-center space-x-4">
+        <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
+          <div className="flex items-center space-x-3">
             <span>{post.likes_count || 0} likes</span>
             <span>{post.comments_count || 0} comments</span>
             <span>{post.shares_count || 0} shares</span>
@@ -274,45 +274,45 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
         </div>
 
         {/* Post Actions */}
-        <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+        <div className="flex items-center justify-between pt-3 border-t border-gray-200">
           <button
             onClick={handleLike}
-            className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors duration-200 ${
+            className={`flex items-center space-x-2 px-2 py-1.5 rounded-lg transition-colors duration-200 text-xs ${
               isLiked
                 ? 'text-blue-600 bg-blue-50'
                 : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
             }`}
           >
-            <HeartIcon className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
-            <span className="text-sm font-medium">Like</span>
+            <HeartIcon className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
+            <span className="font-medium">Like</span>
           </button>
 
           <button
             onClick={() => setShowComments(!showComments)}
-            className="flex items-center space-x-2 px-3 py-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+            className="flex items-center space-x-2 px-2 py-1.5 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors duration-200 text-xs"
           >
-            <ChatBubbleLeftIcon className="w-5 h-5" />
-            <span className="text-sm font-medium">Comment</span>
+            <ChatBubbleLeftIcon className="w-4 h-4" />
+            <span className="font-medium">Comment</span>
           </button>
 
           <button
             onClick={handleShare}
-            className="flex items-center space-x-2 px-3 py-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+            className="flex items-center space-x-2 px-2 py-1.5 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors duration-200 text-xs"
           >
-            <ArrowUpTrayIcon className="w-5 h-5" />
-            <span className="text-sm font-medium">Share</span>
+            <ArrowUpTrayIcon className="w-4 h-4" />
+            <span className="font-medium">Share</span>
           </button>
 
           <button
             onClick={handleBookmark}
-            className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors duration-200 ${
+            className={`flex items-center space-x-2 px-2 py-1.5 rounded-lg transition-colors duration-200 text-xs ${
               isBookmarked
                 ? 'text-blue-600 bg-blue-50'
                 : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
             }`}
           >
-            <BookmarkIcon className={`w-5 h-5 ${isBookmarked ? 'fill-current' : ''}`} />
-            <span className="text-sm font-medium">Save</span>
+            <BookmarkIcon className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
+            <span className="font-medium">Save</span>
           </button>
         </div>
 
@@ -323,25 +323,25 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="mt-4 pt-4 border-t border-gray-200"
+              className="mt-3 pt-3 border-t border-gray-200"
             >
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {comments.map((comment) => (
-                  <div key={comment.id} className="flex space-x-3">
-                    <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 font-bold text-sm">
+                  <div key={comment.id} className="flex space-x-2">
+                    <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 font-bold text-xs">
                       {('full_name' in comment.author ? comment.author.full_name : comment.author.name)?.charAt(0) || 'U'}
                     </div>
                     <div className="flex-1">
-                      <div className="bg-gray-50 rounded-lg p-3">
+                      <div className="bg-gray-50 rounded-lg p-2">
                         <div className="flex items-center space-x-2 mb-1">
-                          <span className="font-medium text-sm text-gray-900">
+                          <span className="font-medium text-xs text-gray-900">
                             {('full_name' in comment.author ? comment.author.full_name : comment.author.name) || 'User'}
                           </span>
                           <span className="text-xs text-gray-500">
                             {formatRelativeTime(comment.created_at)}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-700">{comment.content}</p>
+                        <p className="text-xs text-gray-700">{comment.content}</p>
                       </div>
                     </div>
                   </div>
@@ -349,8 +349,8 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
               </div>
 
               {/* Add Comment */}
-              <div className="mt-4 flex space-x-3">
-                <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 font-bold text-sm">
+              <div className="mt-3 flex space-x-2">
+                <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 font-bold text-xs">
                   {userProfile?.full_name?.charAt(0) || 'U'}
                 </div>
                 <div className="flex-1">
@@ -360,24 +360,20 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
                       placeholder="Write a comment..."
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
-                      className="flex-1 elegant-input text-sm"
+                      className="flex-1 elegant-input text-xs py-1.5"
                     />
                     <button
                       onClick={submitComment}
                       disabled={!newComment.trim() || isCommenting}
-                      className="elegant-button-primary text-sm px-3 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="elegant-button-primary text-xs px-2 py-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isCommenting ? (
-                        <div className="loading-dots">
-                          <span></span>
-                          <span></span>
-                          <span></span>
-                        </div>
-                      ) : (
                         <>
-                          <PaperAirplaneIcon className="w-4 h-4 mr-1" />
-                          Post
+                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
+                          Posting...
                         </>
+                      ) : (
+                        'Post'
                       )}
                     </button>
                   </div>

@@ -236,7 +236,7 @@ export default function DashboardLayout({
       </main>
       
       {/* Quick Navigation - Fixed positioning to avoid overlap */}
-      <div className="fixed bottom-6 right-6 z-40" style={{ marginBottom: '20px', marginRight: '20px' }}>
+      <div className="fixed bottom-6 right-6 z-40">
         <QuickNav />
       </div>
       
