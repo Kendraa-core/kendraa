@@ -14,12 +14,19 @@ import {
   PlusIcon,
   ArrowTrendingUpIcon,
   HashtagIcon,
+  PhotoIcon,
+  VideoCameraIcon,
+  DocumentIcon,
+  FaceSmileIcon,
+  ChevronDownIcon,
+  FireIcon,
 } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { getProfile, getPosts, getConnections, getSuggestedConnections } from '@/lib/queries';
 import type { PostWithAuthor, Profile } from '@/types/database.types';
 import toast from 'react-hot-toast';
+import PostCard from '@/components/post/PostCard';
 
 interface ProfileData extends Profile {
   connections_count?: number;
@@ -177,214 +184,219 @@ export default function FeedPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left Sidebar */}
           <div className="lg:col-span-3 space-y-6">
             {/* Profile Card */}
-            {profile && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <Card className="overflow-hidden bg-white shadow-lg">
-                  <div className="relative h-16 bg-gradient-to-r from-linkedin-primary to-linkedin-secondary">
-                    <div className="absolute -bottom-6 left-4">
-                      <Avatar
-                        src={profile.avatar_url}
-                        alt={profile.full_name || 'User'}
-                        size="lg"
-                        className="border-4 border-white"
-                      />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="professional-card"
+            >
+              <div className="card-spacing">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xl mx-auto mb-4">
+                    {profile?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
+                  </div>
+                  <h3 className="elegant-subheading mb-2">
+                    {profile?.full_name || user?.email?.split('@')[0] || 'User'}
+                  </h3>
+                  <p className="elegant-text text-sm mb-4">
+                    {profile?.headline || 'Add a headline'}
+                  </p>
+                  <div className="space-y-2 text-sm text-gray-600">
+                    <div className="flex justify-between">
+                      <span>Profile views</span>
+                      <span className="font-medium">{profile?.profile_views || 0}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Connections</span>
+                      <span className="font-medium">1</span>
                     </div>
                   </div>
-                  
-                  <CardContent className="pt-8 pb-4">
-                    <div className="space-y-3">
-                      <h3 className="font-semibold text-gray-900 text-lg">
-                        {profile.full_name || 'User'}
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        {profile.headline || 'Add a headline'}
-                      </p>
-                      <div className="space-y-2 pt-3 border-t border-gray-100">
-                        <div className="text-sm text-gray-600">
-                          Profile views <span className="font-semibold text-gray-900">0</span>
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          Connections <span className="font-semibold text-gray-900">{profile.connections_count || 0}</span>
-                        </div>
-                      </div>
-                      <div className="pt-2">
-                        <Link
-                          href="#"
-                          className="flex items-center text-sm text-red-600 hover:text-red-700 font-medium"
-                        >
-                          <span className="mr-1">Try Premium for free</span>
-                          <span className="text-xs">🔥</span>
-                        </Link>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <Link href="/profile/setup" className="text-red-600 text-sm font-medium hover:text-red-700 transition-colors">
+                      Try Premium for free
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
 
             {/* Navigation Links */}
-            <Card className="bg-white shadow-lg">
-              <CardContent className="p-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="professional-card"
+            >
+              <div className="card-spacing">
                 <div className="space-y-3">
-                  <Link
-                    href="/network"
-                    className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 hover:text-gray-900"
-                  >
-                    <UserGroupIcon className="h-5 w-5" />
-                    <span className="text-sm font-medium">My network</span>
+                  <Link href="/network" className="nav-item">
+                    <UserGroupIcon className="w-5 h-5" />
+                    <span>My network</span>
                   </Link>
-                  <Link
-                    href="/saved"
-                    className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 hover:text-gray-900"
-                  >
-                    <BookmarkSolidIcon className="h-5 w-5" />
-                    <span className="text-sm font-medium">Saved items</span>
+                  <Link href="/saved" className="nav-item">
+                    <BookmarkSolidIcon className="w-5 h-5" />
+                    <span>Saved items</span>
                   </Link>
-                  <Link
-                    href="/learning"
-                    className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 hover:text-gray-900"
-                  >
-                    <AcademicCapIcon className="h-5 w-5" />
-                    <span className="text-sm font-medium">Learning</span>
+                  <Link href="/learning" className="nav-item">
+                    <AcademicCapIcon className="w-5 h-5" />
+                    <span>Learning</span>
                   </Link>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </motion.div>
           </div>
 
-          {/* Main Content */}
+          {/* Main Feed */}
           <div className="lg:col-span-6 space-y-6">
-            <CreatePost onPostCreated={handlePostCreated} />
-            
-            {loading ? (
-              <div className="space-y-6">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <Card key={i} className="animate-pulse bg-white shadow-lg">
-                    <CardContent className="p-6">
-                      <div className="flex items-center space-x-4 mb-4">
-                        <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
-                        <div className="space-y-2 flex-1">
-                          <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-                          <div className="h-3 bg-gray-200 rounded w-1/3"></div>
-                        </div>
+            {/* Create Post */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="professional-card"
+            >
+              <div className="card-spacing">
+                <div className="flex space-x-3">
+                  <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                    {profile?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
+                  </div>
+                  <div className="flex-1">
+                    <textarea
+                      placeholder="What's on your mind?"
+                      className="elegant-input resize-none"
+                      rows={3}
+                    />
+                    <div className="flex items-center justify-between mt-4">
+                      <div className="flex space-x-2">
+                        <button className="nav-item">
+                          <PhotoIcon className="w-5 h-5" />
+                          <span className="text-sm">Photo</span>
+                        </button>
+                        <button className="nav-item">
+                          <VideoCameraIcon className="w-5 h-5" />
+                          <span className="text-sm">Video</span>
+                        </button>
+                        <button className="nav-item">
+                          <DocumentIcon className="w-5 h-5" />
+                          <span className="text-sm">Document</span>
+                        </button>
+                        <button className="nav-item">
+                          <FaceSmileIcon className="w-5 h-5" />
+                          <span className="text-sm">Feeling</span>
+                        </button>
                       </div>
-                      <div className="space-y-3">
-                        <div className="h-4 bg-gray-200 rounded"></div>
-                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                      <div className="flex items-center space-x-2">
+                        <button className="nav-item">
+                          <span className="text-sm">Anyone</span>
+                          <ChevronDownIcon className="w-4 h-4" />
+                        </button>
+                        <Button className="elegant-button-primary">
+                          Post
+                        </Button>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                    </div>
+                  </div>
+                </div>
               </div>
-            ) : (
-              <InfinitePostList
-                initialPosts={posts as unknown as (PostWithAuthor & { author: Profile })[] }
-                fetchMorePosts={fetchMorePosts as unknown as (page: number) => Promise<(PostWithAuthor & { author: Profile })[]>}
-              />
-            )}
+            </motion.div>
+
+            {/* Posts */}
+            {posts.map((post, index) => (
+              <motion.div
+                key={post.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 + index * 0.1 }}
+                className="professional-card"
+              >
+                <PostCard post={post} />
+              </motion.div>
+            ))}
           </div>
 
           {/* Right Sidebar */}
           <div className="lg:col-span-3 space-y-6">
             {/* LinkedIn News */}
-            <Card className="bg-white shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2 text-gray-900">
-                  <ArrowTrendingUpIcon className="h-5 w-5" />
-                  <span>LinkedIn News</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-gray-900">Remote work trends in 2024</h4>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="professional-card"
+            >
+              <div className="card-spacing">
+                <h3 className="elegant-subheading mb-4 flex items-center">
+                  <FireIcon className="w-5 h-5 text-orange-500 mr-2" />
+                  LinkedIn News
+                </h3>
+                <div className="space-y-3">
+                  <div className="border-b border-gray-100 pb-3">
+                    <p className="text-sm font-medium text-gray-900">Remote work trends in 2024</p>
                     <p className="text-xs text-gray-500">2 hours ago • 1,234 readers</p>
                   </div>
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-gray-900">AI transforming healthcare</h4>
+                  <div className="border-b border-gray-100 pb-3">
+                    <p className="text-sm font-medium text-gray-900">AI transforming healthcare</p>
                     <p className="text-xs text-gray-500">4 hours ago • 856 readers</p>
                   </div>
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-gray-900">Startup funding reaches new high</h4>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">Startup funding reaches new high</p>
                     <p className="text-xs text-gray-500">6 hours ago • 2,891 readers</p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </motion.div>
 
             {/* People You May Know */}
-            <Card className="bg-white shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-gray-900">People you may know</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {suggestedConnections.length > 0 ? (
-                    suggestedConnections.map((connection) => (
-                      <div key={connection.id} className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <Avatar
-                            src={connection.avatar_url || undefined}
-                            alt={connection.full_name || 'User'}
-                            size="sm"
-                            className="bg-blue-500 text-white"
-                          />
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">
-                              {connection.full_name || 'User'}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {connection.headline || connection.profile_type === 'institution' ? 'Healthcare Institution' : 'Healthcare Professional'}
-                            </p>
-                          </div>
-                        </div>
-                        <Button size="sm" variant="outline" className="text-xs">
-                          + Connect
-                        </Button>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-4">
-                      <p className="text-sm text-gray-500">No suggestions available</p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="professional-card"
+            >
+              <div className="card-spacing">
+                <h3 className="elegant-subheading mb-4">People you may know</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                      K
                     </div>
-                  )}
-                  {suggestedConnections.length > 0 && (
-                    <Link 
-                      href="/network" 
-                      className="text-sm text-blue-600 hover:text-blue-700 flex items-center justify-center mt-2"
-                    >
-                      See all
-                    </Link>
-                  )}
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-900">Kendraa</p>
+                      <p className="text-xs text-gray-500">Healthcare Institution</p>
+                    </div>
+                    <Button className="elegant-button-primary text-xs px-3 py-1">
+                      + Connect
+                    </Button>
+                  </div>
+                  <Link href="/network" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                    See all
+                  </Link>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </motion.div>
 
             {/* Level Up Your Skills */}
-            <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg">
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-3 mb-3">
-                  <AcademicCapIcon className="h-6 w-6" />
-                  <h3 className="font-semibold">Level up your skills</h3>
-                </div>
-                <p className="text-sm mb-4 opacity-90">
-                  Explore courses on LinkedIn Learning
-                </p>
-                <Button size="sm" className="bg-white text-blue-600 hover:bg-gray-100">
-                  Start learning
-                </Button>
-              </CardContent>
-            </Card>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="bg-blue-600 rounded-xl p-6 text-white"
+            >
+              <div className="flex items-center mb-3">
+                <AcademicCapIcon className="w-6 h-6 mr-2" />
+                <h3 className="text-lg font-semibold">Level up your skills</h3>
+              </div>
+              <p className="text-sm mb-4 opacity-90">
+                Explore courses on LinkedIn Learning.
+              </p>
+              <Button className="bg-white text-blue-600 hover:bg-gray-100 font-medium px-4 py-2 rounded-lg transition-colors duration-200">
+                Start learning
+              </Button>
+            </motion.div>
           </div>
         </div>
       </div>

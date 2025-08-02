@@ -22,36 +22,36 @@ export default function QuickNav() {
       icon: MagnifyingGlassIcon,
       label: 'Search',
       href: '/search',
-      color: 'bg-blue-500 hover:bg-blue-600',
+      color: 'bg-blue-600 hover:bg-blue-700',
     },
     {
       icon: UserPlusIcon,
       label: 'Network',
       href: '/network',
-      color: 'bg-green-500 hover:bg-green-600',
+      color: 'bg-green-600 hover:bg-green-700',
     },
     {
       icon: ChatBubbleLeftIcon,
       label: 'Messages',
       href: '/messaging',
-      color: 'bg-purple-500 hover:bg-purple-600',
+      color: 'bg-purple-600 hover:bg-purple-700',
     },
     {
       icon: BellIcon,
       label: 'Notifications',
       href: '/notifications',
-      color: 'bg-orange-500 hover:bg-orange-600',
+      color: 'bg-orange-600 hover:bg-orange-700',
     },
     {
       icon: UserCircleIcon,
       label: 'Profile',
       href: `/profile/${user?.id}`,
-      color: 'bg-indigo-500 hover:bg-indigo-600',
+      color: 'bg-indigo-600 hover:bg-indigo-700',
     },
   ];
 
   return (
-    <div className="fixed bottom-6 right-6 z-40">
+    <div className="relative">
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -71,7 +71,7 @@ export default function QuickNav() {
                 <Link
                   href={action.href}
                   onClick={() => setIsOpen(false)}
-                  className={`flex items-center space-x-3 px-4 py-3 rounded-full text-white shadow-lg transition-all duration-300 ${action.color}`}
+                  className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-white shadow-lg transition-all duration-300 ${action.color}`}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="font-medium">{action.label}</span>
@@ -88,7 +88,7 @@ export default function QuickNav() {
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(!isOpen)}
         className={`w-14 h-14 rounded-full shadow-lg transition-colors duration-300 ${
-          isOpen ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'
+          isOpen ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
         } text-white flex items-center justify-center`}
       >
         <motion.div

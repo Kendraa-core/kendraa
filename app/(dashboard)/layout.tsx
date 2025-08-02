@@ -135,7 +135,7 @@ export default function DashboardLayout({
             {/* Logo */}
             <div className="flex items-center">
               <Link href="/feed" className="flex-shrink-0">
-                <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-sm">
                   K
                 </div>
               </Link>
@@ -149,11 +149,10 @@ export default function DashboardLayout({
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="relative group flex flex-col items-center justify-center px-3 sm:px-4 py-2 text-gray-700 hover:text-indigo-600 transition-all duration-300 rounded-xl hover:bg-white/10"
+                    className="nav-item"
                   >
-                    <IconComponent className="h-6 w-6 sm:h-7 sm:w-7 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="hidden sm:block text-xs mt-1 font-medium">{item.label}</span>
-                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <IconComponent className="h-6 w-6" />
+                    <span className="text-sm font-medium">{item.label}</span>
                   </Link>
                 );
               })}
@@ -167,80 +166,58 @@ export default function DashboardLayout({
               {/* Search */}
               <button
                 onClick={() => setShowSearch(true)}
-                className="relative group flex flex-col items-center justify-center px-3 sm:px-4 py-2 text-gray-700 hover:text-blue-600 transition-all duration-300 rounded-xl hover:bg-white/10"
+                className="nav-item"
               >
-                <MagnifyingGlassIcon className="h-6 w-6 sm:h-7 sm:w-7 group-hover:scale-110 transition-transform duration-300" />
-                <span className="hidden sm:block text-xs mt-1 font-medium">Search</span>
+                <MagnifyingGlassIcon className="h-6 w-6" />
+                <span className="hidden sm:block text-sm font-medium">Search</span>
               </button>
 
               {/* Notifications */}
               <button
-                onClick={() => setShowNotifications(true)}
-                className="relative group flex flex-col items-center justify-center px-3 sm:px-4 py-2 text-gray-700 hover:text-indigo-600 transition-all duration-300 rounded-xl hover:bg-white/10"
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="nav-item relative"
               >
-                <BellIcon className="h-6 w-6 sm:h-7 sm:w-7 group-hover:scale-110 transition-transform duration-300" />
-                <span className="hidden sm:block text-xs mt-1 font-medium">Notifications</span>
+                <BellIcon className="h-6 w-6" />
+                <span className="hidden sm:block text-sm font-medium">Notifications</span>
                 {unreadCount > 0 && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold"
-                  >
-                    {unreadCount}
-                  </motion.div>
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
                 )}
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </button>
 
-              <div className="h-6 sm:h-8 border-l border-white/20 mx-2 sm:mx-3"></div>
+              {/* Profile Dropdown */}
               <div className="relative" ref={profileDropdownRef}>
-                <button 
-                  onClick={() => setShowProfileDropdown(prev => !prev)}
-                  className={`flex flex-col items-center justify-center px-3 sm:px-4 py-2 text-gray-700 hover:text-indigo-600 transition-all duration-300 rounded-xl hover:bg-white/10 ${
-                    showProfileDropdown ? 'bg-indigo-50 text-indigo-600' : ''
-                  }`}
+                <button
+                  onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                  className="nav-item"
                 >
-                  <UserCircleIcon className="h-6 w-6 sm:h-7 sm:w-7 hover:scale-110 transition-transform duration-300" />
-                  <span className="hidden sm:block text-xs mt-1 font-medium">
-                    Profile {showProfileDropdown ? '▴' : '▾'}
-                  </span>
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500/10 to-purple-500/10 opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+                  <UserCircleIcon className="h-6 w-6" />
+                  <span className="hidden sm:block text-sm font-medium">Profile</span>
                 </button>
+
                 <AnimatePresence>
                   {showProfileDropdown && (
                     <motion.div
-                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                      className="absolute right-0 w-56 sm:w-64 mt-2 py-3 bg-white rounded-2xl shadow-2xl border border-gray-200 z-50"
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50"
                     >
-                      <div className="px-4 py-3 border-b border-gray-100">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-12 h-12 premium-gradient rounded-xl flex items-center justify-center text-white font-bold text-lg">
-                            {user.email?.charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                            <div className="font-semibold text-gray-900 text-sm sm:text-base">
-                              {userProfile?.full_name || user.email?.split('@')[0]}
-                            </div>
-                            <div className="text-xs text-gray-500 capitalize">
-                              {userProfile?.profile_type || 'Individual'} Profile
-                            </div>
-                            <Link 
-                              href={`/profile/${user.id}`}
-                              className="text-xs sm:text-sm text-indigo-600 hover:text-indigo-700 font-medium transition-colors duration-300"
-                            >
-                              View Profile →
-                            </Link>
-                          </div>
+                      <Link href={`/profile/${user.id}`}>
+                        <div className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">
+                          View Profile
                         </div>
-                      </div>
+                      </Link>
+                      <Link href="/profile/setup">
+                        <div className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">
+                          Edit Profile
+                        </div>
+                      </Link>
+                      <div className="border-t border-gray-200 my-1"></div>
                       <button
-                        onClick={() => {
-                          signOut();
-                          setShowProfileDropdown(false);
-                        }}
-                        className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-300 rounded-b-2xl font-medium"
+                        onClick={signOut}
+                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50 cursor-pointer"
                       >
                         Sign Out
                       </button>
@@ -253,6 +230,16 @@ export default function DashboardLayout({
         </div>
       </header>
 
+      {/* Main Content */}
+      <main className="pt-16">
+        {children}
+      </main>
+      
+      {/* Quick Navigation - Fixed positioning to avoid overlap */}
+      <div className="fixed bottom-6 right-6 z-40">
+        <QuickNav />
+      </div>
+      
       {/* Search Modal */}
       <AnimatePresence>
         {showSearch && (
@@ -260,13 +247,14 @@ export default function DashboardLayout({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-center pt-20"
+            className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-20 px-4"
+            onClick={() => setShowSearch(false)}
           >
             <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="w-full max-w-2xl mx-4"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
             >
               <UserSearch onClose={() => setShowSearch(false)} />
             </motion.div>
@@ -281,15 +269,15 @@ export default function DashboardLayout({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-end pt-16"
+            className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-20 px-4"
             onClick={() => setShowNotifications(false)}
           >
             <motion.div
-              initial={{ x: 300 }}
-              animate={{ x: 0 }}
-              exit={{ x: 300 }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-md mx-4"
+              className="w-full max-w-md"
             >
               <NotificationList 
                 notifications={[]} 
@@ -299,16 +287,6 @@ export default function DashboardLayout({
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Main Content */}
-      <main className="pt-16">
-        {children}
-      </main>
-      
-      {/* Quick Navigation */}
-      <QuickNav />
-      
-      {/* No bottom navigation - removed as requested */}
     </div>
   );
 } 
