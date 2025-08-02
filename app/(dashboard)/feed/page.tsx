@@ -320,7 +320,7 @@ export default function FeedPage() {
           </div>
 
           {/* Right Sidebar */}
-          <div className="lg:col-span-3 space-y-6">
+          <div className="lg:col-span-3 space-y-6 pb-20">
             {/* LinkedIn News */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -384,7 +384,7 @@ export default function FeedPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
-              className="bg-blue-600 rounded-xl p-6 text-white"
+              className="bg-blue-600 rounded-xl p-6 text-white mb-8"
             >
               <div className="flex items-center mb-3">
                 <AcademicCapIcon className="w-6 h-6 mr-2" />

@@ -58,7 +58,7 @@ export default function QuickNav() {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            className="absolute bottom-16 right-0 space-y-3"
+            className="absolute bottom-16 right-0 space-y-3 mb-4"
           >
             {quickActions.map((action, index) => (
               <motion.div
@@ -90,6 +90,7 @@ export default function QuickNav() {
         className={`w-14 h-14 rounded-full shadow-lg transition-colors duration-300 ${
           isOpen ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
         } text-white flex items-center justify-center`}
+        style={{ marginBottom: '10px' }}
       >
         <motion.div
           animate={{ rotate: isOpen ? 45 : 0 }}
