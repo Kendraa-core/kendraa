@@ -56,9 +56,9 @@ export default function JobsPage() {
   const [selectedJob, setSelectedJob] = useState<JobWithCompany | null>(null);
 
   // Debug logging
-  const debugLog = (message: string, data?: unknown) => {
+  const debugLog = useCallback((message: string, data?: unknown) => {
     console.log(`[JobsPage] ${message}`, data);
-  };
+  }, []);
 
   const fetchProfile = useCallback(async () => {
     if (!user?.id) return;
@@ -69,7 +69,7 @@ export default function JobsPage() {
     } catch (error) {
       debugLog('Error fetching profile', error);
     }
-  }, [user?.id]);
+  }, [user?.id, debugLog]);
 
   const fetchJobs = useCallback(async () => {
     setLoading(true);
@@ -92,25 +92,11 @@ export default function JobsPage() {
     fetchJobs();
   }, [fetchProfile, fetchJobs]);
 
-  useEffect(() => {
-    filterJobs();
-  }, [jobs, searchQuery, selectedType, selectedLevel, selectedLocation]);
-
-  // Add a refresh mechanism for when returning from job creation
-  useEffect(() => {
-    const handleFocus = () => {
-      fetchJobs();
-    };
-
-    window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
-  }, [fetchJobs]);
-
-  const filterJobs = () => {
+  const filterJobs = useCallback(() => {
     let filtered = jobs;
 
     // Filter by search query
-    if (searchQuery.trim()) {
+    if (searchQuery) {
       filtered = filtered.filter(job =>
         job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         job.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -129,15 +115,18 @@ export default function JobsPage() {
     }
 
     // Filter by location
-    if (selectedLocation.trim()) {
+    if (selectedLocation) {
       filtered = filtered.filter(job =>
         job.location?.toLowerCase().includes(selectedLocation.toLowerCase())
       );
     }
 
     setFilteredJobs(filtered);
-    debugLog('Jobs filtered', { total: jobs.length, filtered: filtered.length });
-  };
+  }, [jobs, searchQuery, selectedType, selectedLevel, selectedLocation]);
+
+  useEffect(() => {
+    filterJobs();
+  }, [filterJobs]);
 
   const handleApply = async (job: JobWithCompany) => {
     if (!user?.id) {
