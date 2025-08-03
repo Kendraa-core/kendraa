@@ -19,10 +19,13 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import NewConversationModal from '@/components/messaging/NewConversationModal';
+import StartConversationModal from '@/components/messaging/StartConversationModal';
 import type { ConversationParticipant, Profile, Institution } from '@/types/database.types';
+import { useSearchParams } from 'next/navigation';
 
 export default function MessagingPage() {
   const { user, profile } = useAuth();
+  const searchParams = useSearchParams();
   const [conversations, setConversations] = useState<ConversationWithParticipants[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<ConversationWithParticipants | null>(null);
   const [messages, setMessages] = useState<MessageWithSender[]>([]);
@@ -31,6 +34,19 @@ export default function MessagingPage() {
   const [sending, setSending] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showNewConversationModal, setShowNewConversationModal] = useState(false);
+  const [showStartConversationModal, setShowStartConversationModal] = useState(false);
+
+  // Check for conversation parameter in URL
+  useEffect(() => {
+    const conversationId = searchParams.get('conversation');
+    if (conversationId && conversations.length > 0) {
+      const conversation = conversations.find(c => c.id === conversationId);
+      if (conversation) {
+        setSelectedConversation(conversation);
+        fetchMessages(conversationId);
+      }
+    }
+  }, [searchParams, conversations]);
 
   // Fetch conversations
   const fetchConversations = useCallback(async () => {
@@ -173,6 +189,18 @@ export default function MessagingPage() {
     await fetchConversations();
   };
 
+  const handleConversationStarted = async (conversationId: string) => {
+    // Find the conversation in the list or fetch it
+    const conversation = conversations.find(c => c.id === conversationId);
+    if (conversation) {
+      setSelectedConversation(conversation);
+      await fetchMessages(conversationId);
+    } else {
+      // Refresh conversations to get the new one
+      await fetchConversations();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto h-screen flex">
@@ -182,12 +210,22 @@ export default function MessagingPage() {
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <h1 className="text-xl font-semibold text-gray-900">Messages</h1>
-              <button 
-                onClick={() => setShowNewConversationModal(true)}
-                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                <PlusIcon className="w-5 h-5 text-gray-600" />
-              </button>
+              <div className="flex items-center space-x-2">
+                <button 
+                  onClick={() => setShowStartConversationModal(true)}
+                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  title="Start conversation with connections"
+                >
+                  <UserGroupIcon className="w-5 h-5 text-gray-600" />
+                </button>
+                <button 
+                  onClick={() => setShowNewConversationModal(true)}
+                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  title="Create new conversation"
+                >
+                  <PlusIcon className="w-5 h-5 text-gray-600" />
+                </button>
+              </div>
             </div>
             
             {/* Search */}
@@ -212,6 +250,20 @@ export default function MessagingPage() {
                 <ChatBubbleLeftRightIcon className="w-12 h-12 mx-auto text-gray-300 mb-2" />
                 <p>No conversations yet</p>
                 <p className="text-sm">Start a conversation to begin messaging</p>
+                <div className="mt-4 space-y-2">
+                  <button
+                    onClick={() => setShowStartConversationModal(true)}
+                    className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Message Connections
+                  </button>
+                  <button
+                    onClick={() => setShowNewConversationModal(true)}
+                    className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Create New Conversation
+                  </button>
+                </div>
               </div>
             ) : (
               <AnimatePresence>
@@ -369,7 +421,15 @@ export default function MessagingPage() {
               <div className="text-center">
                 <ChatBubbleLeftRightIcon className="w-16 h-16 mx-auto text-gray-300 mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">Select a conversation</h3>
-                <p className="text-gray-500">Choose a conversation from the sidebar to start messaging</p>
+                <p className="text-gray-500 mb-4">Choose a conversation from the sidebar to start messaging</p>
+                <div className="space-y-2">
+                  <button
+                    onClick={() => setShowStartConversationModal(true)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Message Connections
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -380,6 +440,12 @@ export default function MessagingPage() {
         isOpen={showNewConversationModal}
         onClose={() => setShowNewConversationModal(false)}
         onConversationCreated={handleConversationCreated}
+      />
+      
+      <StartConversationModal
+        isOpen={showStartConversationModal}
+        onClose={() => setShowStartConversationModal(false)}
+        onConversationStarted={handleConversationStarted}
       />
     </div>
   );

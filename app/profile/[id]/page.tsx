@@ -43,6 +43,7 @@ import {
   type Experience,
   type Education,
   type PostWithAuthor,
+  getOrCreateConversation,
 } from '@/lib/queries';
 
 // Memoized components for better performance
@@ -52,6 +53,34 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
   connectionStatus: string;
   onConnect: () => void;
 }) {
+  const { user } = useAuth();
+  const router = useRouter();
+
+  const handleMessage = async () => {
+    if (!user?.id) {
+      toast.error('Please log in to send messages');
+      return;
+    }
+
+    if (isOwnProfile) {
+      toast.error('You cannot message yourself');
+      return;
+    }
+
+    try {
+      const conversation = await getOrCreateConversation(user.id, profile.id);
+      if (conversation) {
+        toast.success('Conversation started!');
+        router.push(`/messaging?conversation=${conversation.id}`);
+      } else {
+        toast.error('Failed to start conversation');
+      }
+    } catch (error) {
+      console.error('Error starting conversation:', error);
+      toast.error('Failed to start conversation');
+    }
+  };
+
   return (
     <div className="relative">
       {/* Banner */}
@@ -97,6 +126,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
                 Share
               </Button>
               <Button
+                onClick={handleMessage}
                 variant="outline" 
                 size="sm"
                 className="bg-white/90 backdrop-blur-sm border-slate-200 hover:bg-white shadow-sm"

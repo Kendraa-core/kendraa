@@ -1824,7 +1824,135 @@ export async function ensurePostCommentsTable(): Promise<boolean> {
 
 // HIPAA-Compliant Messaging Functions
 
-// Get user's conversations
+// Simple messaging system that works with existing database
+export async function createDirectConversation(user1Id: string, user2Id: string): Promise<Conversation | null> {
+  try {
+    debugLog('Creating direct conversation', { user1Id, user2Id });
+    
+    const schemaExists = await checkSchemaExists();
+    if (!schemaExists) {
+      debugLog('Database schema not found, cannot create conversation');
+      return null;
+    }
+    
+    // Check if conversation already exists
+    const { data: existingConversations, error: checkError } = await supabase
+      .from('conversations')
+      .select('*')
+      .eq('conversation_type', 'direct');
+    
+    if (checkError) {
+      debugLog('Error checking existing conversations', checkError);
+      return null;
+    }
+    
+    // Check if a conversation between these users already exists
+    const existingConversation = existingConversations?.find(conv => {
+      // This is a simplified check - in a real implementation, you'd check participants
+      return conv.title === `${user1Id}-${user2Id}` || conv.title === `${user2Id}-${user1Id}`;
+    });
+    
+    if (existingConversation) {
+      debugLog('Conversation already exists', existingConversation);
+      return existingConversation;
+    }
+    
+    // Create new conversation
+    const { data: convData, error: convError } = await supabase
+      .from('conversations')
+      .insert({
+        title: `${user1Id}-${user2Id}`,
+        conversation_type: 'direct',
+        participants_count: 2,
+      })
+      .select()
+      .single();
+
+    if (convError) {
+      debugLog('Error creating conversation', convError);
+      return null;
+    }
+    
+    // Add participants
+    const participantData = [
+      {
+        conversation_id: convData.id,
+        user_id: user1Id,
+        user_type: 'individual',
+        role: 'participant',
+      },
+      {
+        conversation_id: convData.id,
+        user_id: user2Id,
+        user_type: 'individual',
+        role: 'participant',
+      },
+    ];
+    
+    const { error: partError } = await supabase
+      .from('conversation_participants')
+      .insert(participantData);
+
+    if (partError) {
+      debugLog('Error adding participants', partError);
+      // Delete the conversation if we can't add participants
+      await supabase.from('conversations').delete().eq('id', convData.id);
+      return null;
+    }
+    
+    debugLog('Direct conversation created successfully', convData);
+    return convData;
+  } catch (error) {
+    debugLog('Error creating direct conversation', error);
+    return null;
+  }
+}
+
+// Get or create conversation between two users
+export async function getOrCreateConversation(user1Id: string, user2Id: string): Promise<Conversation | null> {
+  try {
+    debugLog('Getting or creating conversation', { user1Id, user2Id });
+    
+    const schemaExists = await checkSchemaExists();
+    if (!schemaExists) {
+      debugLog('Database schema not found, cannot get/create conversation');
+      return null;
+    }
+    
+    // First try to find existing conversation
+    const { data: conversations, error: fetchError } = await supabase
+      .from('conversations')
+      .select(`
+        *,
+        participants:conversation_participants(user_id)
+      `)
+      .eq('conversation_type', 'direct');
+    
+    if (fetchError) {
+      debugLog('Error fetching conversations', fetchError);
+      return null;
+    }
+    
+    // Find conversation with both users
+    const existingConversation = conversations?.find(conv => {
+      const participantIds = conv.participants?.map((p: { user_id: string }) => p.user_id) || [];
+      return participantIds.includes(user1Id) && participantIds.includes(user2Id);
+    });
+    
+    if (existingConversation) {
+      debugLog('Found existing conversation', existingConversation);
+      return existingConversation;
+    }
+    
+    // Create new conversation
+    return await createDirectConversation(user1Id, user2Id);
+  } catch (error) {
+    debugLog('Error getting or creating conversation', error);
+    return null;
+  }
+}
+
+// Get user's conversations with proper error handling
 export async function getUserConversations(userId: string): Promise<ConversationWithParticipants[]> {
   try {
     debugLog('Getting user conversations', { userId });
@@ -1835,6 +1963,7 @@ export async function getUserConversations(userId: string): Promise<Conversation
       return [];
     }
     
+    // Get conversations where user is a participant
     const { data, error } = await supabase
       .from('conversations')
       .select(`
@@ -1850,15 +1979,24 @@ export async function getUserConversations(userId: string): Promise<Conversation
       `)
       .order('last_message_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      debugLog('Error fetching conversations', error);
+      return [];
+    }
     
     // Filter conversations where user is a participant
     const userConversations = data?.filter(conv => 
-      conv.participants?.some((p: ConversationParticipant & { user?: Profile | Institution }) => p.user_id === userId)
+      conv.participants?.some((p: { user_id: string }) => p.user_id === userId)
     ) || [];
     
-    debugLog('User conversations fetched successfully', userConversations);
-    return userConversations;
+    // Add unread count and other metadata
+    const conversationsWithMetadata = userConversations.map(conv => ({
+      ...conv,
+      unread_count: 0, // Simplified for now
+    }));
+    
+    debugLog('User conversations fetched successfully', conversationsWithMetadata);
+    return conversationsWithMetadata;
   } catch (error) {
     debugLog('Error fetching user conversations', error);
     return [];
