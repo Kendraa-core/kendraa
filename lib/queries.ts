@@ -92,10 +92,28 @@ const checkSchemaExists = async (): Promise<boolean> => {
   return schemaCheckPromise;
 };
 
+// Simple in-memory cache for profiles
+const profileCache = new Map<string, Profile>();
+
+// Function to clear profile cache
+export const clearProfileCache = (userId?: string) => {
+  if (userId) {
+    profileCache.delete(userId);
+  } else {
+    profileCache.clear();
+  }
+};
+
 // Profile queries
 export async function getProfile(userId: string): Promise<Profile | null> {
   try {
     debugLog('Getting profile', { userId });
+    
+    // Check cache first
+    if (profileCache.has(userId)) {
+      debugLog('Profile found in cache');
+      return profileCache.get(userId) || null;
+    }
     
     // Try to get profile directly first (most common case)
     const { data, error } = await supabase
@@ -112,7 +130,7 @@ export async function getProfile(userId: string): Promise<Profile | null> {
         const schemaExists = await checkSchemaExists();
         if (!schemaExists) {
           debugLog('Database schema not found, returning fallback profile');
-          return {
+          const fallbackProfile: Profile = {
             id: userId,
             email: 'user@example.com',
             full_name: 'User',
@@ -126,11 +144,14 @@ export async function getProfile(userId: string): Promise<Profile | null> {
             specialization: ['General Medicine'],
             is_premium: false,
             profile_views: 0,
-            user_type: 'individual',
-            profile_type: 'individual',
+            user_type: 'individual' as const,
+            profile_type: 'individual' as const,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           };
+          // Cache the fallback profile
+          profileCache.set(userId, fallbackProfile);
+          return fallbackProfile;
         }
       }
       
@@ -151,17 +172,23 @@ export async function getProfile(userId: string): Promise<Profile | null> {
           specialization: ['General Medicine'],
           is_premium: false,
           profile_views: 0,
-          user_type: 'individual',
-          profile_type: 'individual',
+          user_type: 'individual' as const,
+          profile_type: 'individual' as const,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         };
+        // Cache the basic profile
+        profileCache.set(userId, basicProfile);
         return basicProfile;
       }
       return null;
     }
     
     debugLog('Profile fetched successfully', data);
+    // Cache the fetched profile
+    if (data) {
+      profileCache.set(userId, data);
+    }
     return data;
   } catch (error) {
     debugLog('Error fetching profile', error);
@@ -189,6 +216,8 @@ export async function updateProfile(userId: string, updates: Partial<Profile>): 
     if (error) throw error;
     
     debugLog('Profile updated successfully', data);
+    // Clear cache for this user
+    clearProfileCache(userId);
     return data;
   } catch (error) {
     debugLog('Error updating profile', error);

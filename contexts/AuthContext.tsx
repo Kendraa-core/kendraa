@@ -27,11 +27,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     console.log('AuthContext: Starting authentication check');
     
-    // Reduce timeout to 3 seconds for faster loading
+    // Reduce timeout to 1.5 seconds for much faster loading
     const timeoutId = setTimeout(() => {
       console.log('AuthContext: Timeout reached, setting loading to false');
       setLoading(false);
-    }, 3000); // Reduced from 10 seconds to 3 seconds
+    }, 1500); // Reduced from 3 seconds to 1.5 seconds
     
     // Check active sessions and sets the user
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -39,7 +39,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       clearTimeout(timeoutId);
       setUser(session?.user ?? null);
       if (session?.user) {
-        console.log('AuthContext: Loading profile for session user');
+        console.log('AuthContext: Session found, setting loading to false immediately');
+        setLoading(false); // Set loading to false immediately when session is found
+        // Load profile in background without blocking
         loadUserProfile(session.user);
       } else {
         console.log('AuthContext: No session, setting loading to false');
@@ -57,8 +59,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       clearTimeout(timeoutId);
       setUser(session?.user ?? null);
       if (session?.user) {
-        console.log('AuthContext: Loading profile for auth state change');
-        await loadUserProfile(session.user);
+        console.log('AuthContext: Auth state change with session, setting loading to false immediately');
+        setLoading(false); // Set loading to false immediately
+        // Load profile in background
+        loadUserProfile(session.user);
       } else {
         console.log('AuthContext: No session in auth state change, clearing profile and setting loading to false');
         setProfile(null);
@@ -76,7 +80,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log('Loading user profile for:', user.id);
       
-      // Reduce timeout to 2 seconds for faster profile loading
+      // Create a basic profile immediately for faster UI response
+      const basicProfile: Profile = {
+        id: user.id,
+        email: user.email || 'user@example.com',
+        full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
+        headline: 'Healthcare Professional',
+        bio: '',
+        location: '',
+        avatar_url: '',
+        banner_url: '',
+        website: '',
+        phone: '',
+        specialization: ['General Medicine'],
+        is_premium: false,
+        profile_views: 0,
+        user_type: 'individual',
+        profile_type: 'individual',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      
+      // Set basic profile immediately
+      setProfile(basicProfile);
+      
+      // Then try to load the real profile in background
       const profilePromise = (async () => {
         // First try to get existing profile
         let userProfile = await getProfile(user.id);
@@ -98,46 +126,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return userProfile;
       })();
       
-      // Add timeout to the profile loading - reduced to 2 seconds
+      // Add timeout to the profile loading - reduced to 1 second
       const timeoutPromise = new Promise<Profile | null>((_, reject) => {
-        setTimeout(() => reject(new Error('Profile loading timeout')), 2000);
+        setTimeout(() => reject(new Error('Profile loading timeout')), 1000);
       });
       
       const userProfile = await Promise.race([profilePromise, timeoutPromise]);
-      setProfile(userProfile);
+      if (userProfile) {
+        setProfile(userProfile);
+      }
     } catch (error) {
       console.error('Error loading user profile:', error);
-      // Create a basic profile as fallback
-      const fallbackProfile: Profile = {
-        id: user.id,
-        email: user.email || 'user@example.com',
-        full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
-        headline: 'Healthcare Professional',
-        bio: '',
-        location: '',
-        avatar_url: '',
-        banner_url: '',
-        website: '',
-        phone: '',
-        specialization: ['General Medicine'],
-        is_premium: false,
-        profile_views: 0,
-        user_type: 'individual',
-        profile_type: 'individual',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-      setProfile(fallbackProfile);
-    } finally {
-      console.log('Setting loading to false');
-      setLoading(false);
+      // Keep the basic profile we set earlier
     }
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
-    setLoading(true);
+    // Don't set loading to true here to avoid blocking the UI
     const result = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
     return result;
   }, []);
 
