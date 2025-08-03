@@ -140,6 +140,12 @@ export default function CreateJobPage() {
       return;
     }
 
+    // Validate required fields
+    if (!formData.title.trim() || !formData.description.trim()) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -147,8 +153,11 @@ export default function CreateJobPage() {
         ...formData,
         salary_min: formData.salary_min ? parseInt(formData.salary_min) : null,
         salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
+        company_id: profile.id, // Use profile ID as company_id
         posted_by: user.id,
         applications_count: 0,
+        status: 'active' as const,
+        application_deadline: formData.application_deadline || null,
       };
 
       const result = await createJob(jobData);

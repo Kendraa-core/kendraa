@@ -1151,6 +1151,32 @@ export async function createJob(job: Omit<Job, 'id' | 'created_at' | 'updated_at
     const schemaExists = await checkSchemaExists();
     if (!schemaExists) {
       debugLog('Database schema not found, cannot create job');
+      toast.error('Job creation is not available yet. Please try again later.');
+      return null;
+    }
+    
+    // Check if jobs table exists by trying to query it
+    try {
+      const { error: tableCheckError } = await supabase
+        .from('jobs')
+        .select('id')
+        .limit(1);
+      
+      if (tableCheckError) {
+        debugLog('Jobs table does not exist, cannot create job');
+        toast.error('Job creation feature is not available yet. Please try again later.');
+        return null;
+      }
+    } catch (tableError) {
+      debugLog('Error checking jobs table existence', tableError);
+      toast.error('Job creation feature is not available yet. Please try again later.');
+      return null;
+    }
+    
+    // Validate required fields
+    if (!job.title || !job.description || !job.company_id || !job.posted_by) {
+      debugLog('Missing required fields for job creation');
+      toast.error('Please fill in all required fields.');
       return null;
     }
     
@@ -1160,16 +1186,32 @@ export async function createJob(job: Omit<Job, 'id' | 'created_at' | 'updated_at
         ...job,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+        applications_count: 0, // Set default value
       })
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      debugLog('Error creating job', error);
+      
+      // Handle specific error cases
+      if (error.code === '409') {
+        toast.error('A job with similar details already exists.');
+      } else if (error.code === '23503') {
+        toast.error('Invalid company or user reference. Please check your profile.');
+      } else {
+        toast.error('Failed to create job. Please try again.');
+      }
+      
+      return null;
+    }
     
     debugLog('Job created successfully', data);
+    toast.success('Job created successfully!');
     return data;
   } catch (error) {
     debugLog('Error creating job', error);
+    toast.error('Failed to create job. Please try again.');
     return null;
   }
 }
