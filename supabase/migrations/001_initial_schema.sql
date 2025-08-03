@@ -215,6 +215,120 @@ CREATE TABLE public.notifications (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- HIPAA-Compliant Messaging System Tables
+
+-- Conversations table
+CREATE TABLE public.conversations (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    title VARCHAR(255),
+    conversation_type VARCHAR(20) NOT NULL DEFAULT 'direct' CHECK (conversation_type IN ('direct', 'group', 'clinical')),
+    is_archived BOOLEAN DEFAULT FALSE,
+    is_pinned BOOLEAN DEFAULT FALSE,
+    last_message_at TIMESTAMPTZ,
+    participants_count INTEGER DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Conversation participants table
+CREATE TABLE public.conversation_participants (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    conversation_id UUID NOT NULL REFERENCES public.conversations(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    user_type VARCHAR(20) NOT NULL DEFAULT 'individual' CHECK (user_type IN ('individual', 'institution')),
+    role VARCHAR(20) NOT NULL DEFAULT 'participant' CHECK (role IN ('participant', 'admin', 'moderator')),
+    joined_at TIMESTAMPTZ DEFAULT NOW(),
+    left_at TIMESTAMPTZ,
+    is_muted BOOLEAN DEFAULT FALSE,
+    is_blocked BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(conversation_id, user_id)
+);
+
+-- Messages table (HIPAA-compliant)
+CREATE TABLE public.messages (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    conversation_id UUID NOT NULL REFERENCES public.conversations(id) ON DELETE CASCADE,
+    sender_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    sender_type VARCHAR(20) NOT NULL DEFAULT 'individual' CHECK (sender_type IN ('individual', 'institution')),
+    content TEXT NOT NULL,
+    message_type VARCHAR(20) NOT NULL DEFAULT 'text' CHECK (message_type IN ('text', 'image', 'file', 'system', 'clinical_note')),
+    is_edited BOOLEAN DEFAULT FALSE,
+    is_deleted BOOLEAN DEFAULT FALSE,
+    reply_to_id UUID REFERENCES public.messages(id) ON DELETE SET NULL,
+    forwarded_from_id UUID REFERENCES public.messages(id) ON DELETE SET NULL,
+    read_by UUID[] DEFAULT '{}', -- Array of user IDs who have read the message
+    delivered_to UUID[] DEFAULT '{}', -- Array of user IDs who have received the message
+    encryption_level VARCHAR(20) NOT NULL DEFAULT 'standard' CHECK (encryption_level IN ('standard', 'hipaa', 'encrypted')),
+    retention_policy VARCHAR(20) NOT NULL DEFAULT 'standard' CHECK (retention_policy IN ('standard', 'clinical', 'permanent')),
+    audit_trail JSONB NOT NULL DEFAULT '{}',
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Message attachments table
+CREATE TABLE public.message_attachments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    message_id UUID NOT NULL REFERENCES public.messages(id) ON DELETE CASCADE,
+    file_name VARCHAR(255) NOT NULL,
+    file_type VARCHAR(100) NOT NULL,
+    file_size BIGINT NOT NULL,
+    file_url TEXT NOT NULL,
+    encryption_key TEXT,
+    is_encrypted BOOLEAN DEFAULT FALSE,
+    mime_type VARCHAR(100) NOT NULL,
+    thumbnail_url TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Message reactions table
+CREATE TABLE public.message_reactions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    message_id UUID NOT NULL REFERENCES public.messages(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    reaction_type VARCHAR(20) NOT NULL CHECK (reaction_type IN ('like', 'love', 'laugh', 'wow', 'sad', 'angry', 'clinical_important')),
+    emoji VARCHAR(10) NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(message_id, user_id, reaction_type)
+);
+
+-- Clinical notes table (HIPAA-compliant)
+CREATE TABLE public.clinical_notes (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    message_id UUID NOT NULL REFERENCES public.messages(id) ON DELETE CASCADE,
+    patient_id TEXT, -- Encrypted patient identifier
+    clinical_context TEXT NOT NULL,
+    diagnosis_codes TEXT[] DEFAULT '{}',
+    treatment_notes TEXT,
+    medication_notes TEXT,
+    follow_up_required BOOLEAN DEFAULT FALSE,
+    follow_up_date TIMESTAMPTZ,
+    urgency_level VARCHAR(20) NOT NULL DEFAULT 'routine' CHECK (urgency_level IN ('routine', 'urgent', 'emergency')),
+    confidentiality_level VARCHAR(30) NOT NULL DEFAULT 'standard' CHECK (confidentiality_level IN ('standard', 'restricted', 'highly_confidential')),
+    audit_trail JSONB NOT NULL DEFAULT '{}',
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Messaging settings table
+CREATE TABLE public.messaging_settings (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    notifications_enabled BOOLEAN DEFAULT TRUE,
+    sound_enabled BOOLEAN DEFAULT TRUE,
+    read_receipts_enabled BOOLEAN DEFAULT TRUE,
+    typing_indicators_enabled BOOLEAN DEFAULT TRUE,
+    auto_archive_days INTEGER DEFAULT 30,
+    message_retention_days INTEGER DEFAULT 365,
+    encryption_preference VARCHAR(20) NOT NULL DEFAULT 'standard' CHECK (encryption_preference IN ('standard', 'hipaa', 'encrypted')),
+    clinical_messaging_enabled BOOLEAN DEFAULT FALSE,
+    audit_logging_enabled BOOLEAN DEFAULT TRUE,
+    hipaa_compliance_enabled BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(user_id)
+);
+
 -- Profile Views table
 CREATE TABLE public.profile_views (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -254,6 +368,27 @@ ALTER TABLE public.job_applications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.event_attendees ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.profile_views ENABLE ROW LEVEL SECURITY;
+
+-- Enable RLS for messaging tables
+ALTER TABLE public.conversations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.conversation_participants ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.message_attachments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.message_reactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.clinical_notes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.messaging_settings ENABLE ROW LEVEL SECURITY;
+
+-- Create indexes for messaging tables
+CREATE INDEX idx_conversations_created_at ON public.conversations(created_at DESC);
+CREATE INDEX idx_conversation_participants_conversation_id ON public.conversation_participants(conversation_id);
+CREATE INDEX idx_conversation_participants_user_id ON public.conversation_participants(user_id);
+CREATE INDEX idx_messages_conversation_id ON public.messages(conversation_id);
+CREATE INDEX idx_messages_sender_id ON public.messages(sender_id);
+CREATE INDEX idx_messages_created_at ON public.messages(created_at DESC);
+CREATE INDEX idx_message_attachments_message_id ON public.message_attachments(message_id);
+CREATE INDEX idx_message_reactions_message_id ON public.message_reactions(message_id);
+CREATE INDEX idx_clinical_notes_message_id ON public.clinical_notes(message_id);
+CREATE INDEX idx_messaging_settings_user_id ON public.messaging_settings(user_id);
 
 -- RLS Policies
 
@@ -334,6 +469,91 @@ CREATE POLICY "Users can update their own notifications" ON public.notifications
 -- Profile Views policies
 CREATE POLICY "Users can view their own profile views" ON public.profile_views FOR SELECT USING (auth.uid()::uuid = profile_id);
 CREATE POLICY "Authenticated users can record profile views" ON public.profile_views FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
+-- Messaging RLS Policies
+
+-- Conversations policies
+CREATE POLICY "Users can view conversations they participate in" ON public.conversations FOR SELECT USING (
+    EXISTS (
+        SELECT 1 FROM public.conversation_participants 
+        WHERE conversation_id = id AND user_id = auth.uid()::uuid
+    )
+);
+CREATE POLICY "Authenticated users can create conversations" ON public.conversations FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+CREATE POLICY "Conversation participants can update conversations" ON public.conversations FOR UPDATE USING (
+    EXISTS (
+        SELECT 1 FROM public.conversation_participants 
+        WHERE conversation_id = id AND user_id = auth.uid()::uuid AND role IN ('admin', 'moderator')
+    )
+);
+
+-- Conversation participants policies
+CREATE POLICY "Users can view participants in their conversations" ON public.conversation_participants FOR SELECT USING (
+    EXISTS (
+        SELECT 1 FROM public.conversation_participants cp2
+        WHERE cp2.conversation_id = conversation_id AND cp2.user_id = auth.uid()::uuid
+    )
+);
+CREATE POLICY "Authenticated users can join conversations" ON public.conversation_participants FOR INSERT WITH CHECK (auth.uid()::uuid = user_id);
+CREATE POLICY "Users can update their own participation" ON public.conversation_participants FOR UPDATE USING (auth.uid()::uuid = user_id);
+
+-- Messages policies (HIPAA-compliant)
+CREATE POLICY "Users can view messages in their conversations" ON public.messages FOR SELECT USING (
+    EXISTS (
+        SELECT 1 FROM public.conversation_participants 
+        WHERE conversation_id = messages.conversation_id AND user_id = auth.uid()::uuid
+    )
+);
+CREATE POLICY "Authenticated users can send messages" ON public.messages FOR INSERT WITH CHECK (auth.uid()::uuid = sender_id);
+CREATE POLICY "Users can edit their own messages" ON public.messages FOR UPDATE USING (auth.uid()::uuid = sender_id);
+CREATE POLICY "Users can delete their own messages" ON public.messages FOR DELETE USING (auth.uid()::uuid = sender_id);
+
+-- Message attachments policies
+CREATE POLICY "Users can view attachments in their conversations" ON public.message_attachments FOR SELECT USING (
+    EXISTS (
+        SELECT 1 FROM public.messages m
+        JOIN public.conversation_participants cp ON m.conversation_id = cp.conversation_id
+        WHERE m.id = message_id AND cp.user_id = auth.uid()::uuid
+    )
+);
+CREATE POLICY "Authenticated users can upload attachments" ON public.message_attachments FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
+-- Message reactions policies
+CREATE POLICY "Users can view reactions in their conversations" ON public.message_reactions FOR SELECT USING (
+    EXISTS (
+        SELECT 1 FROM public.messages m
+        JOIN public.conversation_participants cp ON m.conversation_id = cp.conversation_id
+        WHERE m.id = message_id AND cp.user_id = auth.uid()::uuid
+    )
+);
+CREATE POLICY "Authenticated users can react to messages" ON public.message_reactions FOR INSERT WITH CHECK (auth.uid()::uuid = user_id);
+CREATE POLICY "Users can remove their own reactions" ON public.message_reactions FOR DELETE USING (auth.uid()::uuid = user_id);
+
+-- Clinical notes policies (HIPAA-compliant)
+CREATE POLICY "Authorized users can view clinical notes" ON public.clinical_notes FOR SELECT USING (
+    EXISTS (
+        SELECT 1 FROM public.messages m
+        JOIN public.conversation_participants cp ON m.conversation_id = cp.conversation_id
+        WHERE m.id = message_id AND cp.user_id = auth.uid()::uuid
+    )
+);
+CREATE POLICY "Authorized users can create clinical notes" ON public.clinical_notes FOR INSERT WITH CHECK (
+    EXISTS (
+        SELECT 1 FROM public.messages m
+        WHERE m.id = message_id AND m.sender_id = auth.uid()::uuid
+    )
+);
+CREATE POLICY "Users can update their own clinical notes" ON public.clinical_notes FOR UPDATE USING (
+    EXISTS (
+        SELECT 1 FROM public.messages m
+        WHERE m.id = message_id AND m.sender_id = auth.uid()::uuid
+    )
+);
+
+-- Messaging settings policies
+CREATE POLICY "Users can view their own messaging settings" ON public.messaging_settings FOR SELECT USING (auth.uid()::uuid = user_id);
+CREATE POLICY "Users can create their own messaging settings" ON public.messaging_settings FOR INSERT WITH CHECK (auth.uid()::uuid = user_id);
+CREATE POLICY "Users can update their own messaging settings" ON public.messaging_settings FOR UPDATE USING (auth.uid()::uuid = user_id);
 
 -- Database Functions
 

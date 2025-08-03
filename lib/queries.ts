@@ -19,7 +19,15 @@ import type {
   Notification,
   ConnectionWithProfile,
   Follow,
-  FollowWithProfile
+  FollowWithProfile,
+  Conversation,
+  ConversationWithParticipants,
+  Message,
+  MessageWithSender,
+  MessageReaction,
+  ClinicalNote,
+  MessagingSettings,
+  ConversationParticipant
 } from '@/types/database.types';
 
 // Re-export types for convenience
@@ -33,7 +41,14 @@ export type {
   PostWithAuthor,
   ConnectionWithProfile,
   Follow,
-  FollowWithProfile
+  FollowWithProfile,
+  Conversation,
+  ConversationWithParticipants,
+  Message,
+  MessageWithSender,
+  MessageReaction,
+  ClinicalNote,
+  MessagingSettings
 };
 
 const debugLog = (message: string, data?: unknown) => {
@@ -1782,25 +1797,435 @@ export async function ensurePostCommentsTable(): Promise<boolean> {
   try {
     debugLog('Ensuring post_comments table exists');
     
-    // Check if table exists by trying to select from it
-    const { data, error } = await supabase
+    const schemaExists = await checkSchemaExists();
+    if (!schemaExists) {
+      debugLog('Database schema not found, cannot ensure post_comments table');
+      return false;
+    }
+    
+    // Check if post_comments table exists
+    const { error: tableCheckError } = await supabase
       .from('post_comments')
       .select('id')
       .limit(1);
     
-    if (error && error.code === '42P01') {
-      // Table doesn't exist, create it
-      debugLog('Post_comments table does not exist, creating it');
-      
-      // Since we can't run DDL through the client, we'll just return false
-      // and handle this in the application logic
+    if (tableCheckError) {
+      debugLog('Post_comments table does not exist');
       return false;
     }
     
     debugLog('Post_comments table exists');
     return true;
   } catch (error) {
-    debugLog('Error checking post_comments table', error);
+    debugLog('Error checking post_comments table existence', error);
     return false;
+  }
+}
+
+// HIPAA-Compliant Messaging Functions
+
+// Get user's conversations
+export async function getUserConversations(userId: string): Promise<ConversationWithParticipants[]> {
+  try {
+    debugLog('Getting user conversations', { userId });
+    
+    const schemaExists = await checkSchemaExists();
+    if (!schemaExists) {
+      debugLog('Database schema not found, returning empty conversations');
+      return [];
+    }
+    
+    const { data, error } = await supabase
+      .from('conversations')
+      .select(`
+        *,
+        participants:conversation_participants(
+          *,
+          user:profiles(*)
+        ),
+        last_message:messages(
+          *,
+          sender:profiles(*)
+        )
+      `)
+      .order('last_message_at', { ascending: false });
+
+    if (error) throw error;
+    
+    // Filter conversations where user is a participant
+    const userConversations = data?.filter(conv => 
+      conv.participants?.some((p: ConversationParticipant & { user?: Profile | Institution }) => p.user_id === userId)
+    ) || [];
+    
+    debugLog('User conversations fetched successfully', userConversations);
+    return userConversations;
+  } catch (error) {
+    debugLog('Error fetching user conversations', error);
+    return [];
+  }
+}
+
+// Create a new conversation
+export async function createConversation(conversation: {
+  title?: string;
+  conversation_type: 'direct' | 'group' | 'clinical';
+  participants: string[]; // Array of user IDs
+}): Promise<Conversation | null> {
+  try {
+    debugLog('Creating conversation', conversation);
+    
+    const schemaExists = await checkSchemaExists();
+    if (!schemaExists) {
+      debugLog('Database schema not found, cannot create conversation');
+      return null;
+    }
+    
+    // Create conversation
+    const { data: convData, error: convError } = await supabase
+      .from('conversations')
+      .insert({
+        title: conversation.title,
+        conversation_type: conversation.conversation_type,
+        participants_count: conversation.participants.length,
+      })
+      .select()
+      .single();
+
+    if (convError) throw convError;
+    
+    // Add participants
+    const participantData = conversation.participants.map(userId => ({
+      conversation_id: convData.id,
+      user_id: userId,
+      user_type: 'individual', // Default, can be enhanced
+      role: 'participant',
+    }));
+    
+    const { error: partError } = await supabase
+      .from('conversation_participants')
+      .insert(participantData);
+
+    if (partError) throw partError;
+    
+    debugLog('Conversation created successfully', convData);
+    return convData;
+  } catch (error) {
+    debugLog('Error creating conversation', error);
+    return null;
+  }
+}
+
+// Send a message
+export async function sendMessage(message: {
+  conversation_id: string;
+  sender_id: string;
+  sender_type: 'individual' | 'institution';
+  content: string;
+  message_type?: 'text' | 'image' | 'file' | 'system' | 'clinical_note';
+  encryption_level?: 'standard' | 'hipaa' | 'encrypted';
+  retention_policy?: 'standard' | 'clinical' | 'permanent';
+}): Promise<Message | null> {
+  try {
+    debugLog('Sending message', message);
+    
+    const schemaExists = await checkSchemaExists();
+    if (!schemaExists) {
+      debugLog('Database schema not found, cannot send message');
+      return null;
+    }
+    
+    const { data, error } = await supabase
+      .from('messages')
+      .insert({
+        conversation_id: message.conversation_id,
+        sender_id: message.sender_id,
+        sender_type: message.sender_type,
+        content: message.content,
+        message_type: message.message_type || 'text',
+        encryption_level: message.encryption_level || 'standard',
+        retention_policy: message.retention_policy || 'standard',
+        audit_trail: {
+          created_by: message.sender_id,
+          created_at: new Date().toISOString(),
+        },
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    
+    // Update conversation's last_message_at
+    await supabase
+      .from('conversations')
+      .update({ last_message_at: new Date().toISOString() })
+      .eq('id', message.conversation_id);
+    
+    debugLog('Message sent successfully', data);
+    return data;
+  } catch (error) {
+    debugLog('Error sending message', error);
+    return null;
+  }
+}
+
+// Get messages for a conversation
+export async function getConversationMessages(conversationId: string, limit = 50, offset = 0): Promise<MessageWithSender[]> {
+  try {
+    debugLog('Getting conversation messages', { conversationId, limit, offset });
+    
+    const schemaExists = await checkSchemaExists();
+    if (!schemaExists) {
+      debugLog('Database schema not found, returning empty messages');
+      return [];
+    }
+    
+    const { data, error } = await supabase
+      .from('messages')
+      .select(`
+        *,
+        sender:profiles(*),
+        attachments:message_attachments(*),
+        reactions:message_reactions(*),
+        clinical_note:clinical_notes(*)
+      `)
+      .eq('conversation_id', conversationId)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) throw error;
+    
+    debugLog('Conversation messages fetched successfully', data);
+    return data || [];
+  } catch (error) {
+    debugLog('Error fetching conversation messages', error);
+    return [];
+  }
+}
+
+// Mark message as read
+export async function markMessageAsRead(messageId: string, userId: string): Promise<boolean> {
+  try {
+    debugLog('Marking message as read', { messageId, userId });
+    
+    const schemaExists = await checkSchemaExists();
+    if (!schemaExists) {
+      debugLog('Database schema not found, cannot mark message as read');
+      return false;
+    }
+    
+    // Get current message
+    const { data: message, error: fetchError } = await supabase
+      .from('messages')
+      .select('read_by')
+      .eq('id', messageId)
+      .single();
+
+    if (fetchError) throw fetchError;
+    
+    // Add user to read_by array if not already present
+    const readBy = message.read_by || [];
+    if (!readBy.includes(userId)) {
+      readBy.push(userId);
+      
+      const { error: updateError } = await supabase
+        .from('messages')
+        .update({ read_by: readBy })
+        .eq('id', messageId);
+
+      if (updateError) throw updateError;
+    }
+    
+    debugLog('Message marked as read successfully');
+    return true;
+  } catch (error) {
+    debugLog('Error marking message as read', error);
+    return false;
+  }
+}
+
+// Add reaction to message
+export async function addMessageReaction(reaction: {
+  message_id: string;
+  user_id: string;
+  reaction_type: 'like' | 'love' | 'laugh' | 'wow' | 'sad' | 'angry' | 'clinical_important';
+  emoji: string;
+}): Promise<MessageReaction | null> {
+  try {
+    debugLog('Adding message reaction', reaction);
+    
+    const schemaExists = await checkSchemaExists();
+    if (!schemaExists) {
+      debugLog('Database schema not found, cannot add reaction');
+      return null;
+    }
+    
+    const { data, error } = await supabase
+      .from('message_reactions')
+      .insert({
+        message_id: reaction.message_id,
+        user_id: reaction.user_id,
+        reaction_type: reaction.reaction_type,
+        emoji: reaction.emoji,
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    
+    debugLog('Message reaction added successfully', data);
+    return data;
+  } catch (error) {
+    debugLog('Error adding message reaction', error);
+    return null;
+  }
+}
+
+// Create clinical note
+export async function createClinicalNote(note: {
+  message_id: string;
+  patient_id?: string;
+  clinical_context: string;
+  diagnosis_codes?: string[];
+  treatment_notes?: string;
+  medication_notes?: string;
+  follow_up_required?: boolean;
+  follow_up_date?: string;
+  urgency_level?: 'routine' | 'urgent' | 'emergency';
+  confidentiality_level?: 'standard' | 'restricted' | 'highly_confidential';
+}): Promise<ClinicalNote | null> {
+  try {
+    debugLog('Creating clinical note', note);
+    
+    const schemaExists = await checkSchemaExists();
+    if (!schemaExists) {
+      debugLog('Database schema not found, cannot create clinical note');
+      return null;
+    }
+    
+    const { data, error } = await supabase
+      .from('clinical_notes')
+      .insert({
+        message_id: note.message_id,
+        patient_id: note.patient_id,
+        clinical_context: note.clinical_context,
+        diagnosis_codes: note.diagnosis_codes || [],
+        treatment_notes: note.treatment_notes,
+        medication_notes: note.medication_notes,
+        follow_up_required: note.follow_up_required || false,
+        follow_up_date: note.follow_up_date,
+        urgency_level: note.urgency_level || 'routine',
+        confidentiality_level: note.confidentiality_level || 'standard',
+        audit_trail: {
+          created_by: 'system', // Should be actual user ID
+          created_at: new Date().toISOString(),
+        },
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    
+    debugLog('Clinical note created successfully', data);
+    return data;
+  } catch (error) {
+    debugLog('Error creating clinical note', error);
+    return null;
+  }
+}
+
+// Get messaging settings
+export async function getMessagingSettings(userId: string): Promise<MessagingSettings | null> {
+  try {
+    debugLog('Getting messaging settings', { userId });
+    
+    const schemaExists = await checkSchemaExists();
+    if (!schemaExists) {
+      debugLog('Database schema not found, returning default settings');
+      return {
+        id: 'default',
+        user_id: userId,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        notifications_enabled: true,
+        sound_enabled: true,
+        read_receipts_enabled: true,
+        typing_indicators_enabled: true,
+        auto_archive_days: 30,
+        message_retention_days: 365,
+        encryption_preference: 'standard',
+        clinical_messaging_enabled: false,
+        audit_logging_enabled: true,
+        hipaa_compliance_enabled: true,
+      };
+    }
+    
+    const { data, error } = await supabase
+      .from('messaging_settings')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    if (error) {
+      // Create default settings if none exist
+      const defaultSettings = {
+        user_id: userId,
+        notifications_enabled: true,
+        sound_enabled: true,
+        read_receipts_enabled: true,
+        typing_indicators_enabled: true,
+        auto_archive_days: 30,
+        message_retention_days: 365,
+        encryption_preference: 'standard' as const,
+        clinical_messaging_enabled: false,
+        audit_logging_enabled: true,
+        hipaa_compliance_enabled: true,
+      };
+      
+      const { data: newSettings, error: createError } = await supabase
+        .from('messaging_settings')
+        .insert(defaultSettings)
+        .select()
+        .single();
+
+      if (createError) throw createError;
+      return newSettings;
+    }
+    
+    debugLog('Messaging settings fetched successfully', data);
+    return data;
+  } catch (error) {
+    debugLog('Error fetching messaging settings', error);
+    return null;
+  }
+}
+
+// Update messaging settings
+export async function updateMessagingSettings(userId: string, settings: Partial<MessagingSettings>): Promise<MessagingSettings | null> {
+  try {
+    debugLog('Updating messaging settings', { userId, settings });
+    
+    const schemaExists = await checkSchemaExists();
+    if (!schemaExists) {
+      debugLog('Database schema not found, cannot update settings');
+      return null;
+    }
+    
+    const { data, error } = await supabase
+      .from('messaging_settings')
+      .update({
+        ...settings,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('user_id', userId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    
+    debugLog('Messaging settings updated successfully', data);
+    return data;
+  } catch (error) {
+    debugLog('Error updating messaging settings', error);
+    return null;
   }
 } 

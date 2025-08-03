@@ -319,4 +319,135 @@ export interface JobWithCompany extends Job {
 
 export interface EventWithOrganizer extends Event {
   organizer: Profile | Institution;
+}
+
+// Messaging interfaces for HIPAA-compliant communication
+export interface Conversation {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  title: string | null;
+  conversation_type: 'direct' | 'group' | 'clinical';
+  is_archived: boolean;
+  is_pinned: boolean;
+  last_message_at: string | null;
+  participants_count: number;
+}
+
+export interface ConversationParticipant {
+  id: string;
+  created_at: string;
+  conversation_id: string;
+  user_id: string;
+  user_type: 'individual' | 'institution';
+  role: 'participant' | 'admin' | 'moderator';
+  joined_at: string;
+  left_at: string | null;
+  is_muted: boolean;
+  is_blocked: boolean;
+  user?: Profile | Institution; // Added for join queries
+}
+
+export interface Message {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  conversation_id: string;
+  sender_id: string;
+  sender_type: 'individual' | 'institution';
+  content: string;
+  message_type: 'text' | 'image' | 'file' | 'system' | 'clinical_note';
+  is_edited: boolean;
+  is_deleted: boolean;
+  reply_to_id: string | null;
+  forwarded_from_id: string | null;
+  read_by: string[]; // Array of user IDs who have read the message
+  delivered_to: string[]; // Array of user IDs who have received the message
+  encryption_level: 'standard' | 'hipaa' | 'encrypted';
+  retention_policy: 'standard' | 'clinical' | 'permanent';
+  audit_trail: {
+    created_by: string;
+    created_at: string;
+    modified_by?: string;
+    modified_at?: string;
+    deleted_by?: string;
+    deleted_at?: string;
+  };
+}
+
+export interface MessageAttachment {
+  id: string;
+  created_at: string;
+  message_id: string;
+  file_name: string;
+  file_type: string;
+  file_size: number;
+  file_url: string;
+  encryption_key: string | null;
+  is_encrypted: boolean;
+  mime_type: string;
+  thumbnail_url: string | null;
+}
+
+export interface MessageReaction {
+  id: string;
+  created_at: string;
+  message_id: string;
+  user_id: string;
+  reaction_type: 'like' | 'love' | 'laugh' | 'wow' | 'sad' | 'angry' | 'clinical_important';
+  emoji: string;
+}
+
+export interface ClinicalNote {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  message_id: string;
+  patient_id: string | null; // HIPAA: Patient identifier (encrypted)
+  clinical_context: string;
+  diagnosis_codes: string[];
+  treatment_notes: string;
+  medication_notes: string;
+  follow_up_required: boolean;
+  follow_up_date: string | null;
+  urgency_level: 'routine' | 'urgent' | 'emergency';
+  confidentiality_level: 'standard' | 'restricted' | 'highly_confidential';
+  audit_trail: {
+    created_by: string;
+    created_at: string;
+    modified_by?: string;
+    modified_at?: string;
+    accessed_by: string[];
+    accessed_at: string[];
+  };
+}
+
+export interface MessageWithSender extends Message {
+  sender: Profile | Institution;
+  attachments: MessageAttachment[];
+  reactions: MessageReaction[];
+  clinical_note?: ClinicalNote;
+}
+
+export interface ConversationWithParticipants extends Conversation {
+  participants: ConversationParticipant[];
+  last_message?: MessageWithSender;
+  unread_count: number;
+}
+
+export interface MessagingSettings {
+  id: string;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
+  notifications_enabled: boolean;
+  sound_enabled: boolean;
+  read_receipts_enabled: boolean;
+  typing_indicators_enabled: boolean;
+  auto_archive_days: number;
+  message_retention_days: number;
+  encryption_preference: 'standard' | 'hipaa' | 'encrypted';
+  clinical_messaging_enabled: boolean;
+  audit_logging_enabled: boolean;
+  hipaa_compliance_enabled: boolean;
 } 
