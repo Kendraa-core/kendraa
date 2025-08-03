@@ -200,7 +200,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
 
           {/* Post Content */}
           <div className="flex-1">
-            <div
+            <motion.div
               layout
               className="space-y-4"
             >
@@ -390,7 +390,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                   </div>
                 )}
               </>
-            </div>
+            </motion.div>
           </div>
         </div>
       </CardContent>

@@ -93,7 +93,7 @@ export default function ConnectionButton({ profileId, onStatusChange }: Connecti
   if (user?.id === profileId) return null;
 
   return (
-    <div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
       {status === 'none' && (
         <button
           onClick={handleConnect}
@@ -123,6 +123,6 @@ export default function ConnectionButton({ profileId, onStatusChange }: Connecti
           {loading ? 'Removing...' : 'Connected'}
         </button>
       )}
-    </div>
+    </motion.div>
   );
 } 

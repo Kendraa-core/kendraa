@@ -110,7 +110,7 @@ export default function LeftSidebar() {
         {/* User Profile Section */}
         <div className="p-6 border-b border-slate-200 bg-gradient-to-br from-primary-50 to-accent-50">
           <Link href={`/profile/${user.id}`} className="group block">
-            <div
+            <motion.div
               whileHover={{ scale: 1.02 }}
               className="flex items-center space-x-3"
             >
@@ -128,7 +128,7 @@ export default function LeftSidebar() {
                   {user.user_metadata?.headline || 'Add your professional headline'}
                 </p>
               </div>
-            </div>
+            </motion.div>
           </Link>
           
           {/* Profile Stats */}
@@ -157,7 +157,7 @@ export default function LeftSidebar() {
 
               return (
                 <Link key={item.name} href={item.href}>
-                  <div
+                  <motion.div
                     whileHover={{ x: 2 }}
                     className={cn(
                       'group flex items-center px-3 py-2 text-sm font-medium rounded-xl transition-all duration-200',
@@ -178,7 +178,7 @@ export default function LeftSidebar() {
                         New
                       </span>
                     )}
-                  </div>
+                  </motion.div>
                 </Link>
               );
             })}
@@ -214,7 +214,7 @@ export default function LeftSidebar() {
 
                   return (
                     <Link key={item.name} href={item.href}>
-                      <div
+                      <motion.div
                         whileHover={{ x: 2 }}
                         className={cn(
                           'group flex items-center px-3 py-2 text-sm font-medium rounded-xl transition-all duration-200',
@@ -230,7 +230,7 @@ export default function LeftSidebar() {
                           )} 
                         />
                         <span className="truncate">{item.name}</span>
-                      </div>
+                      </motion.div>
                     </Link>
                   );
                 })}
@@ -241,13 +241,13 @@ export default function LeftSidebar() {
           {/* Settings */}
           <div className="mt-auto p-3 border-t border-slate-200">
             <Link href="/settings">
-              <div
+              <motion.div
                 whileHover={{ x: 2 }}
                 className="group flex items-center px-3 py-2 text-sm font-medium text-slate-600 rounded-xl hover:bg-slate-50 hover:text-slate-900 transition-all duration-200"
               >
                 <Cog6ToothIcon className="mr-3 h-5 w-5 flex-shrink-0 text-slate-400 group-hover:text-slate-500" />
                 <span>Settings</span>
-              </div>
+              </motion.div>
             </Link>
           </div>
         </nav>
