@@ -1,26 +1,35 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
+import { getJobs, applyToJob } from '@/lib/queries';
+import type { JobWithCompany } from '@/types/database.types';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  BriefcaseIcon,
+  MapPinIcon,
+  CalendarIcon,
+  CurrencyDollarIcon,
+  UserGroupIcon,
+  CheckIcon,
+  XMarkIcon,
+  EyeIcon,
+  ClockIcon,
+  PlusIcon,
+  MagnifyingGlassIcon
+} from '@heroicons/react/24/outline';
+import toast from 'react-hot-toast';
+import Avatar from '@/components/common/Avatar';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { formatRelativeTime } from '@/lib/utils';
 import {
-  BriefcaseIcon,
-  MagnifyingGlassIcon,
-  MapPinIcon,
-  CurrencyDollarIcon,
-  ClockIcon,
-  BuildingOfficeIcon,
-  PlusIcon,
+  CheckBadgeIcon as CheckBadgeSolidIcon,
   StarIcon,
-} from '@heroicons/react/24/outline';
-import { CheckBadgeIcon as CheckBadgeSolidIcon } from '@heroicons/react/24/solid';
+} from '@heroicons/react/24/solid';
 import Link from 'next/link';
-import toast from 'react-hot-toast';
-import { getJobs, applyToJob, getProfile, type JobWithCompany } from '@/lib/queries';
+import { getProfile } from '@/lib/queries';
 import type { Profile } from '@/types/database.types';
 
 const JOB_TYPES = [
