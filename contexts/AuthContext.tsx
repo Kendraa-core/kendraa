@@ -25,50 +25,111 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
+    console.log('AuthContext: Starting authentication check');
+    
+    // Add a timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      console.log('AuthContext: Timeout reached, setting loading to false');
+      setLoading(false);
+    }, 10000); // 10 second timeout
+    
     // Check active sessions and sets the user
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('AuthContext: Session check result:', session ? 'Session found' : 'No session');
+      clearTimeout(timeoutId);
       setUser(session?.user ?? null);
       if (session?.user) {
+        console.log('AuthContext: Loading profile for session user');
         loadUserProfile(session.user);
       } else {
+        console.log('AuthContext: No session, setting loading to false');
         setLoading(false);
       }
+    }).catch((error) => {
+      console.error('AuthContext: Error getting session:', error);
+      clearTimeout(timeoutId);
+      setLoading(false);
     });
 
     // Listen for changes on auth state
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('AuthContext: Auth state change:', event, session ? 'Session present' : 'No session');
+      clearTimeout(timeoutId);
       setUser(session?.user ?? null);
       if (session?.user) {
+        console.log('AuthContext: Loading profile for auth state change');
         await loadUserProfile(session.user);
       } else {
+        console.log('AuthContext: No session in auth state change, clearing profile and setting loading to false');
         setProfile(null);
         setLoading(false);
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      clearTimeout(timeoutId);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const loadUserProfile = async (user: User) => {
     try {
-      // First try to get existing profile
-      let userProfile = await getProfile(user.id);
+      console.log('Loading user profile for:', user.id);
       
-      // If no profile exists, create one
-      if (!userProfile) {
-        const profileType = user.user_metadata?.profile_type || 'individual';
-        userProfile = await ensureProfileExists(
-          user.id,
-          user.email || '',
-          user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
-          profileType
-        );
-      }
+      // Add a timeout to prevent the function from getting stuck
+      const profilePromise = (async () => {
+        // First try to get existing profile
+        let userProfile = await getProfile(user.id);
+        console.log('Existing profile found:', userProfile);
+        
+        // If no profile exists, create one
+        if (!userProfile) {
+          console.log('No profile found, creating new profile');
+          const profileType = user.user_metadata?.profile_type || 'individual';
+          userProfile = await ensureProfileExists(
+            user.id,
+            user.email || '',
+            user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
+            profileType
+          );
+          console.log('New profile created:', userProfile);
+        }
+        
+        return userProfile;
+      })();
       
+      // Add timeout to the profile loading
+      const timeoutPromise = new Promise<Profile | null>((_, reject) => {
+        setTimeout(() => reject(new Error('Profile loading timeout')), 5000);
+      });
+      
+      const userProfile = await Promise.race([profilePromise, timeoutPromise]);
       setProfile(userProfile);
     } catch (error) {
       console.error('Error loading user profile:', error);
+      // Create a basic profile as fallback
+      const fallbackProfile: Profile = {
+        id: user.id,
+        email: user.email || 'user@example.com',
+        full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
+        headline: 'Healthcare Professional',
+        bio: '',
+        location: '',
+        avatar_url: '',
+        banner_url: '',
+        website: '',
+        phone: '',
+        specialization: ['General Medicine'],
+        is_premium: false,
+        profile_views: 0,
+        user_type: 'individual',
+        profile_type: 'individual',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      setProfile(fallbackProfile);
     } finally {
+      console.log('Setting loading to false');
       setLoading(false);
     }
   };
