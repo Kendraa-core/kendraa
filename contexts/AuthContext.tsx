@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
@@ -27,11 +27,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     console.log('AuthContext: Starting authentication check');
     
-    // Add a timeout to prevent infinite loading
+    // Reduce timeout to 3 seconds for faster loading
     const timeoutId = setTimeout(() => {
       console.log('AuthContext: Timeout reached, setting loading to false');
       setLoading(false);
-    }, 10000); // 10 second timeout
+    }, 3000); // Reduced from 10 seconds to 3 seconds
     
     // Check active sessions and sets the user
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -72,11 +72,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const loadUserProfile = async (user: User) => {
+  const loadUserProfile = useCallback(async (user: User) => {
     try {
       console.log('Loading user profile for:', user.id);
       
-      // Add a timeout to prevent the function from getting stuck
+      // Reduce timeout to 2 seconds for faster profile loading
       const profilePromise = (async () => {
         // First try to get existing profile
         let userProfile = await getProfile(user.id);
@@ -98,9 +98,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return userProfile;
       })();
       
-      // Add timeout to the profile loading
+      // Add timeout to the profile loading - reduced to 2 seconds
       const timeoutPromise = new Promise<Profile | null>((_, reject) => {
-        setTimeout(() => reject(new Error('Profile loading timeout')), 5000);
+        setTimeout(() => reject(new Error('Profile loading timeout')), 2000);
       });
       
       const userProfile = await Promise.race([profilePromise, timeoutPromise]);
@@ -132,16 +132,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('Setting loading to false');
       setLoading(false);
     }
-  };
+  }, []);
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = useCallback(async (email: string, password: string) => {
     setLoading(true);
     const result = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     return result;
-  };
+  }, []);
 
-  const signUp = async (email: string, password: string, fullName: string, profileType: 'individual' | 'institution' = 'individual') => {
+  const signUp = useCallback(async (email: string, password: string, fullName: string, profileType: 'individual' | 'institution' = 'individual') => {
     setLoading(true);
     const result = await supabase.auth.signUp({
       email,
@@ -156,28 +156,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
     setLoading(false);
     return result;
-  };
+  }, []);
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     setLoading(true);
     await supabase.auth.signOut();
     setUser(null);
     setProfile(null);
     setLoading(false);
     router.push('/');
-  };
+  }, [router]);
+
+  const contextValue = useMemo(() => ({
+    user,
+    profile,
+    loading,
+    signIn,
+    signUp,
+    signOut,
+  }), [user, profile, loading, signIn, signUp, signOut]);
 
   return (
-    <AuthContext.Provider 
-      value={{ 
-        user, 
-        profile, 
-        loading, 
-        signIn, 
-        signUp, 
-        signOut 
-      }}
-    >
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );

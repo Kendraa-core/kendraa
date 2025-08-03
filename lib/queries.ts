@@ -55,19 +55,41 @@ const debugLog = (message: string, data?: unknown) => {
   console.log(`[Queries] ${message}`, data || '');
 };
 
-// Check if database schema exists
+// Check if database schema exists - cache the result
+let schemaExistsCache: boolean | null = null;
+let schemaCheckPromise: Promise<boolean> | null = null;
+
 const checkSchemaExists = async (): Promise<boolean> => {
-  try {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('count')
-      .limit(1);
-    
-    // If we can query profiles, schema exists
-    return !error;
-  } catch {
-    return false;
+  // Return cached result if available
+  if (schemaExistsCache !== null) {
+    return schemaExistsCache;
   }
+
+  // If a check is already in progress, return that promise
+  if (schemaCheckPromise) {
+    return schemaCheckPromise;
+  }
+
+  // Start a new schema check
+  schemaCheckPromise = (async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('count')
+        .limit(1);
+      
+      const exists = !error;
+      schemaExistsCache = exists;
+      return exists;
+    } catch {
+      schemaExistsCache = false;
+      return false;
+    } finally {
+      schemaCheckPromise = null;
+    }
+  })();
+
+  return schemaCheckPromise;
 };
 
 // Profile queries
@@ -75,40 +97,43 @@ export async function getProfile(userId: string): Promise<Profile | null> {
   try {
     debugLog('Getting profile', { userId });
     
-    const schemaExists = await checkSchemaExists();
-    if (!schemaExists) {
-      debugLog('Database schema not found, creating profile in auth.users');
-      // Fallback to auth.users if schema doesn't exist
-      return {
-        id: userId,
-        email: 'user@example.com',
-        full_name: 'User',
-        headline: 'Healthcare Professional',
-        bio: '',
-        location: '',
-        avatar_url: '',
-        banner_url: '',
-        website: '',
-        phone: '',
-        specialization: ['General Medicine'],
-        is_premium: false,
-        profile_views: 0,
-        user_type: 'individual',
-        profile_type: 'individual',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-    }
-    
-    // Try to get profile with proper error handling
+    // Try to get profile directly first (most common case)
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', userId)
-      .maybeSingle(); // Use maybeSingle instead of single to avoid 406 error
+      .maybeSingle();
 
     if (error) {
       debugLog('Error fetching profile', error);
+      
+      // If it's a schema error, check if schema exists
+      if (error.code === '42P01' || error.message?.includes('relation')) {
+        const schemaExists = await checkSchemaExists();
+        if (!schemaExists) {
+          debugLog('Database schema not found, returning fallback profile');
+          return {
+            id: userId,
+            email: 'user@example.com',
+            full_name: 'User',
+            headline: 'Healthcare Professional',
+            bio: '',
+            location: '',
+            avatar_url: '',
+            banner_url: '',
+            website: '',
+            phone: '',
+            specialization: ['General Medicine'],
+            is_premium: false,
+            profile_views: 0,
+            user_type: 'individual',
+            profile_type: 'individual',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          };
+        }
+      }
+      
       // If profile doesn't exist, create a basic one
       if (error.code === 'PGRST116') {
         debugLog('Profile not found, creating basic profile');

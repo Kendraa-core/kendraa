@@ -34,7 +34,7 @@ export default function DashboardLayout({
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [userProfile, setUserProfile] = useState<Profile | null>(null);
-  const [profileLoading, setProfileLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(false); // Start as false since we don't need it immediately
   const profileDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -43,10 +43,11 @@ export default function DashboardLayout({
     }
   }, [user, loading, router]);
 
-  // Load user profile to determine navigation options
+  // Load user profile to determine navigation options - but don't block the UI
   useEffect(() => {
     const loadUserProfile = async () => {
-      if (user?.id) {
+      if (user?.id && !userProfile) {
+        setProfileLoading(true);
         try {
           const profile = await getProfile(user.id);
           setUserProfile(profile);
@@ -55,13 +56,12 @@ export default function DashboardLayout({
         } finally {
           setProfileLoading(false);
         }
-      } else {
-        setProfileLoading(false);
       }
     };
 
+    // Load profile in background without blocking UI
     loadUserProfile();
-  }, [user?.id]);
+  }, [user?.id, userProfile]);
 
   // Click outside handler for profile dropdown
   useEffect(() => {
@@ -80,7 +80,7 @@ export default function DashboardLayout({
     };
   }, [showProfileDropdown]);
 
-  if (loading || profileLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -93,7 +93,7 @@ export default function DashboardLayout({
 
   if (!user) return null;
 
-  // Determine navigation items based on user type
+  // Determine navigation items based on user type - use cached profile or default to individual
   const getNavigationItems = () => {
     const isInstitution = userProfile?.profile_type === 'institution';
     
@@ -111,7 +111,7 @@ export default function DashboardLayout({
         { href: '/followers', icon: UsersIcon, label: 'Followers' },
       ];
     } else {
-      // Individual/Student navigation
+      // Individual/Student navigation (default)
       return [
         ...baseItems,
         { href: '/network', icon: UserGroupIcon, label: 'Network' },
