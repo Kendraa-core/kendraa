@@ -170,17 +170,17 @@ const PostList = React.memo(function PostList({ refreshTrigger = 0 }: PostListPr
   // Memoized post components to prevent unnecessary re-renders
   const postComponents = useMemo(() => 
     posts.map((post) => (
-      <motion.div
+      <div
         key={post.id}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
+        
+        
+        
       >
         <PostCard 
           post={post} 
           onInteraction={handlePostInteraction}
         />
-      </motion.div>
+      </div>
     )), 
     [posts, handlePostInteraction]
   );

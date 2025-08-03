@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   PlusIcon,
@@ -52,21 +51,21 @@ export default function QuickNav() {
 
   return (
     <div className="relative">
-      <AnimatePresence>
+      <>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
+          <div
+            
+            
+            
             className="absolute bottom-16 right-0 space-y-3"
           >
             {quickActions.map((action, index) => (
-              <motion.div
+              <div
                 key={action.label}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-                transition={{ delay: index * 0.1 }}
+                
+                
+                
+                
               >
                 <Link
                   href={action.href}
@@ -76,28 +75,28 @@ export default function QuickNav() {
                   <action.icon className="w-5 h-5" />
                   <span className="font-medium">{action.label}</span>
                 </Link>
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
+      </>
 
       {/* Main FAB */}
-      <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+      <button
+        
+        
         onClick={() => setIsOpen(!isOpen)}
         className={`w-14 h-14 rounded-full shadow-lg transition-colors duration-300 ${
           isOpen ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
         } text-white flex items-center justify-center`}
       >
-        <motion.div
-          animate={{ rotate: isOpen ? 45 : 0 }}
-          transition={{ duration: 0.2 }}
+        <div
+          
+          
         >
           <PlusIcon className="w-6 h-6" />
-        </motion.div>
-      </motion.button>
+        </div>
+      </button>
     </div>
   );
 } 

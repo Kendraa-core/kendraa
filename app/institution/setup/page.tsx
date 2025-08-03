@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import {
   BuildingOffice2Icon,
@@ -147,9 +146,9 @@ export default function InstitutionSetup() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+        <div
+          
+          
           className="text-center mb-8"
         >
           <div className="flex justify-center mb-4">
@@ -163,12 +162,12 @@ export default function InstitutionSetup() {
           <p className="text-lg text-gray-600">
             Help healthcare professionals discover and connect with your institution
           </p>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+        <div
+          
+          
+          
           className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden"
         >
           <form onSubmit={handleSubmit} className="p-8 space-y-8">
@@ -456,7 +455,7 @@ export default function InstitutionSetup() {
               </div>
             </div>
           </form>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

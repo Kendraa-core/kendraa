@@ -1,7 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
-
 export default function Loading() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -33,12 +31,7 @@ export default function Loading() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Left Sidebar Skeleton */}
           <div className="lg:col-span-1">
-            <motion.div 
-              className="bg-white rounded-xl shadow-sm border border-slate-200 p-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-            >
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 animate-fade-in">
               <div className="flex flex-col items-center space-y-4">
                 <div className="w-20 h-20 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full animate-pulse" />
                 <div className="w-32 h-5 bg-slate-200 rounded animate-pulse" />
@@ -53,32 +46,25 @@ export default function Loading() {
                   </div>
                 ))}
               </div>
-            </motion.div>
+            </div>
           </div>
 
           {/* Main Content Skeleton */}
           <div className="lg:col-span-2 space-y-6">
             {/* Create Post Skeleton */}
-            <motion.div 
-              className="bg-white rounded-xl shadow-sm border border-slate-200 p-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.1 }}
-            >
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 animate-fade-in">
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 bg-slate-200 rounded-full animate-pulse" />
                 <div className="flex-1 h-12 bg-slate-100 rounded-full animate-pulse" />
               </div>
-            </motion.div>
+            </div>
 
             {/* Posts Skeleton */}
             {[1, 2, 3].map((i) => (
-              <motion.div 
+              <div 
                 key={i}
-                className="bg-white rounded-xl shadow-sm border border-slate-200 p-6"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.1 * (i + 1) }}
+                className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 animate-fade-in"
+                style={{ animationDelay: `${i * 0.1}s` }}
               >
                 {/* Post Header */}
                 <div className="flex items-center space-x-3 mb-4">
@@ -111,19 +97,14 @@ export default function Loading() {
                     ))}
                   </div>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
 
           {/* Right Sidebar Skeleton */}
           <div className="lg:col-span-1 space-y-6">
             {/* Trending Skeleton */}
-            <motion.div 
-              className="bg-white rounded-xl shadow-sm border border-slate-200 p-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.2 }}
-            >
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 animate-fade-in">
               <div className="w-24 h-5 bg-slate-200 rounded animate-pulse mb-4" />
               <div className="space-y-3">
                 {[1, 2, 3, 4].map((i) => (
@@ -133,15 +114,10 @@ export default function Loading() {
                   </div>
                 ))}
               </div>
-            </motion.div>
+            </div>
 
             {/* Suggestions Skeleton */}
-            <motion.div 
-              className="bg-white rounded-xl shadow-sm border border-slate-200 p-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.3 }}
-            >
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 animate-fade-in">
               <div className="w-32 h-5 bg-slate-200 rounded animate-pulse mb-4" />
               <div className="space-y-4">
                 {[1, 2, 3].map((i) => (
@@ -154,19 +130,13 @@ export default function Loading() {
                   </div>
                 ))}
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Loading Progress Bar */}
-      <motion.div 
-        className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-purple-600 z-50"
-        initial={{ scaleX: 0 }}
-        animate={{ scaleX: 1 }}
-        transition={{ duration: 2, ease: "easeInOut" }}
-        style={{ transformOrigin: "left" }}
-      />
+      <div className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-purple-600 z-50 animate-progress" />
     </div>
   );
 } 

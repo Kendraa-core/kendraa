@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -317,12 +316,12 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
         </div>
 
         {/* Comments Section */}
-        <AnimatePresence>
+        <>
           {showComments && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
+            <div
+              
+              
+              
               className="mt-3 pt-3 border-t border-gray-200"
             >
               <div className="space-y-2">
@@ -379,9 +378,9 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
           )}
-        </AnimatePresence>
+        </>
       </div>
     </div>
   );

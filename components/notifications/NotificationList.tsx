@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { formatDistanceToNow } from 'date-fns';
 import {
   UserPlusIcon,
@@ -87,11 +86,11 @@ export default function NotificationList({ notifications, onMarkAsRead }: Notifi
         const config = getNotificationConfig(notification);
         
         return (
-          <motion.div
+          <div
             key={notification.id}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.1 }}
+            
+            
+            
             className={`p-4 rounded-lg border cursor-pointer hover:shadow-sm transition-all duration-200 ${
               notification.read 
                 ? 'bg-white border-gray-200' 
@@ -133,7 +132,7 @@ export default function NotificationList({ notifications, onMarkAsRead }: Notifi
                 </p>
               </div>
             </div>
-          </motion.div>
+          </div>
         );
       })}
     </div>

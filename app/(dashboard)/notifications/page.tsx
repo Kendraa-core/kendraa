@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { getNotifications, getConnectionRequests, acceptConnectionRequest, rejectConnectionRequest, getProfile } from '@/lib/queries';
@@ -193,9 +192,9 @@ export default function NotificationsPage() {
           /* All Notifications */
           <div className="space-y-4">
             {notifications.length === 0 ? (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+              <div
+                
+                
                 className="bg-white rounded-xl shadow-sm p-8 text-center"
               >
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -203,17 +202,17 @@ export default function NotificationsPage() {
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No notifications yet</h3>
                 <p className="text-gray-500">When you get notifications, they&apos;ll show up here.</p>
-              </motion.div>
+              </div>
             ) : (
               notifications.map((notification, index) => {
                 const config = getNotificationConfig(notification);
                 
                 return (
-                  <motion.div
+                  <div
                     key={notification.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
+                    
+                    
+                    
                     className={`bg-white rounded-xl shadow-sm p-6 border-l-4 ${
                       notification.read 
                         ? 'border-gray-200' 
@@ -250,7 +249,7 @@ export default function NotificationsPage() {
                         </p>
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
                 );
               })
             )}
@@ -259,9 +258,9 @@ export default function NotificationsPage() {
           /* Connection Requests */
           <div className="space-y-4">
             {connectionRequests.length === 0 ? (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+              <div
+                
+                
                 className="bg-white rounded-xl shadow-sm p-8 text-center"
               >
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -269,14 +268,14 @@ export default function NotificationsPage() {
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No pending requests</h3>
                 <p className="text-gray-500">You don&apos;t have any pending connection requests.</p>
-              </motion.div>
+              </div>
             ) : (
               connectionRequests.map((request, index) => (
-                <motion.div
+                <div
                   key={request.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
+                  
+                  
+                  
                   className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-orange-500"
                 >
                   <div className="flex items-start space-x-4">
@@ -322,7 +321,7 @@ export default function NotificationsPage() {
                       </p>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               ))
             )}
           </div>

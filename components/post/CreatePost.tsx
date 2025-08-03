@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion,  } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
@@ -200,7 +200,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
 
           {/* Post Content */}
           <div className="flex-1">
-            <motion.div
+            <div
               layout
               className="space-y-4"
             >
@@ -233,20 +233,20 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
               </div>
 
               {/* Image Previews */}
-              <AnimatePresence>
+              <>
                 {imagePreviewUrls.length > 0 && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
+                  <div
+                    
+                    
+                    
                     className="grid grid-cols-2 md:grid-cols-3 gap-3"
                   >
                     {imagePreviewUrls.map((url, index) => (
-                      <motion.div
+                      <div
                         key={index}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
+                        
+                        
+                        
                         className="relative group aspect-square rounded-xl overflow-hidden bg-slate-100"
                       >
                         <Image
@@ -261,19 +261,19 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                         >
                           <XMarkIcon className="w-4 h-4" />
                         </button>
-                      </motion.div>
+                      </div>
                     ))}
-                  </motion.div>
+                  </div>
                 )}
-              </AnimatePresence>
+              </>
 
               {/* Action Buttons */}
-              <AnimatePresence>
+              <>
                 {isExpanded && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
+                  <div
+                    
+                    
+                    
                     className="flex items-center justify-between pt-4 border-t border-gray-200"
                   >
                     {/* Media Buttons */}
@@ -344,12 +344,12 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                           <span>{selectedVisibility?.label}</span>
                         </Button>
 
-                        <AnimatePresence>
+                        <>
                           {showVisibilityDropdown && (
-                            <motion.div
-                              initial={{ opacity: 0, y: -10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -10 }}
+                            <div
+                              
+                              
+                              
                               className="absolute bottom-full mb-2 right-0 w-64 bg-white rounded-xl shadow-xl border border-gray-200 p-2 z-50"
                             >
                               {VISIBILITY_OPTIONS.map((option) => (
@@ -373,9 +373,9 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                                   </div>
                                 </button>
                               ))}
-                            </motion.div>
+                            </div>
                           )}
-                        </AnimatePresence>
+                        </>
                       </div>
 
                       {/* Post Button */}
@@ -387,10 +387,10 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                         {isPosting ? 'Posting...' : 'Post'}
                       </Button>
                     </div>
-                  </motion.div>
+                  </div>
                 )}
-              </AnimatePresence>
-            </motion.div>
+              </>
+            </div>
           </div>
         </div>
       </CardContent>

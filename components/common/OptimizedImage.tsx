@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
 
 interface OptimizedImageProps {
   src: string;
@@ -66,17 +65,17 @@ export default function OptimizedImage({
 
   return (
     <div className={`relative ${className}`} style={{ width, height }}>
-      <AnimatePresence>
+      <>
         {isLoading && (
-          <motion.div
-            initial={{ opacity: 0.5 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+          <div
+            
+            
+            
+            
             className="absolute inset-0 bg-gray-100 animate-pulse"
           />
         )}
-      </AnimatePresence>
+      </>
       <Image
         src={src}
         alt={alt}

@@ -3,7 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "description": "Royal Network for Healthcare Professionals",
-  "keywords": ["healthcare", "networking", "professionals", "medical"],
+  "keywords": [
+    "healthcare",
+    "networking",
+    "professionals",
+    "medical"
+  ],
   "author": "Kendraa Team",
   "license": "MIT",
   "scripts": {
@@ -23,11 +28,15 @@
   "dependencies": {
     "@heroicons/react": "^2.0.18",
     "@supabase/supabase-js": "^2.38.4",
-    "framer-motion": "^10.16.4",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "next": "15.4.3",
     "react": "^18",
     "react-dom": "^18",
-    "react-hot-toast": "^2.4.1"
+    "react-hot-toast": "^2.4.1",
+    "react-intersection-observer": "^9.16.0",
+    "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^15.4.3",

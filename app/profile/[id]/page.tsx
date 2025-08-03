@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -377,9 +376,9 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumb Navigation */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
+        <div
+          
+          
           className="mb-6"
         >
           <Breadcrumb 
@@ -388,26 +387,26 @@ export default function ProfilePage() {
               { label: profile?.full_name || 'Profile' }
             ]} 
           />
-        </motion.div>
+        </div>
 
         {/* Back Button */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
+        <div
+          
+          
           className="mb-6"
         >
           <BackButton className="text-gray-600 hover:text-gray-900 hover:bg-white/50">
             Back to Home
           </BackButton>
-        </motion.div>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Main Profile Column */}
           <div className="lg:col-span-8 space-y-6">
             {/* Profile Header */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+            <div
+              
+              
               className="bg-white shadow-lg rounded-xl overflow-hidden"
             >
               <ProfileHeader
@@ -416,14 +415,14 @@ export default function ProfilePage() {
                 connectionStatus={connectionStatus}
                 onConnect={handleConnect}
               />
-            </motion.div>
+            </div>
 
             {/* Specializations */}
             {profile.specialization && profile.specialization.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
+              <div
+                
+                
+                
               >
                 <Card className="bg-white shadow-lg border-0">
                   <CardHeader>
@@ -442,14 +441,14 @@ export default function ProfilePage() {
                     </div>
                   </CardContent>
                 </Card>
-              </motion.div>
+              </div>
             )}
 
             {/* Section Navigation */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
+            <div
+              
+              
+              
             >
               <Card className="bg-white shadow-lg border-0">
                 <CardContent className="p-0">
@@ -472,14 +471,14 @@ export default function ProfilePage() {
                   </div>
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
 
             {/* Section Content */}
-            <motion.div
+            <div
               key={activeSection}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
+              
+              
+              
             >
               {activeSection === 'about' && (
                 <Card className="bg-white shadow-lg border-0">
@@ -619,25 +618,25 @@ export default function ProfilePage() {
                   )}
                 </div>
               )}
-            </motion.div>
+            </div>
           </div>
 
           {/* Sidebar */}
           <div className="lg:col-span-4 space-y-6">
             {/* Contact Information */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
+            <div
+              
+              
+              
             >
               <ContactInfo profile={profile} />
-            </motion.div>
+            </div>
 
             {/* Quick Stats */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
+            <div
+              
+              
+              
             >
               <Card className="bg-white shadow-lg border-0">
                 <CardHeader>
@@ -658,13 +657,13 @@ export default function ProfilePage() {
                   </div>
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
 
             {/* Navigation Links */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
+            <div
+              
+              
+              
             >
               <Card className="bg-white shadow-lg border-0">
                 <CardContent className="p-4">
@@ -686,7 +685,7 @@ export default function ProfilePage() {
                   </div>
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
           </div>
         </div>
       </div>

@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 import { 
@@ -37,29 +36,29 @@ export default function ComingSoon({
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
+      <div
+        
+        
+        
         className="w-full max-w-2xl"
       >
         <Card>
           <CardContent className="p-12 text-center">
             {/* Icon */}
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+            <div
+              
+              
+              
               className="w-20 h-20 bg-linkedin-light rounded-full flex items-center justify-center mx-auto mb-8"
             >
               <Icon className="w-10 h-10 text-linkedin-primary" />
-            </motion.div>
+            </div>
 
             {/* Content */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
+            <div
+              
+              
+              
               className="space-y-6"
             >
               <div className="space-y-3">
@@ -80,16 +79,16 @@ export default function ComingSoon({
                   <h3 className="font-semibold text-gray-900 mb-4 text-center">What to expect:</h3>
                   <ul className="space-y-2">
                     {features.map((feature, index) => (
-                      <motion.li
+                      <li
                         key={index}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.4 + index * 0.1 }}
+                        
+                        
+                        
                         className="flex items-center text-sm text-gray-700"
                       >
                         <div className="w-2 h-2 bg-linkedin-primary rounded-full mr-3 flex-shrink-0" />
                         {feature}
-                      </motion.li>
+                      </li>
                     ))}
                   </ul>
                 </div>
@@ -121,23 +120,23 @@ export default function ComingSoon({
                   <span>75%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: '75%' }}
-                    transition={{ delay: 0.6, duration: 1, ease: "easeOut" }}
+                  <div
+                    
+                    
+                    
                     className="bg-linkedin-primary h-2 rounded-full"
                   />
                 </div>
               </div>
-            </motion.div>
+            </div>
           </CardContent>
         </Card>
 
         {/* Quick Navigation */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
+        <div
+          
+          
+          
           className="mt-8 text-center"
         >
           <p className="text-sm text-gray-500 mb-4">Meanwhile, explore these features:</p>
@@ -152,8 +151,8 @@ export default function ComingSoon({
               <Button variant="ghost" size="sm">Profile</Button>
             </Link>
           </div>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     </div>
   );
 }

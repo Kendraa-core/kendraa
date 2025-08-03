@@ -17,7 +17,6 @@ import {
   UsersIcon,
   CalendarDaysIcon,
 } from '@heroicons/react/24/outline';
-import { motion, AnimatePresence } from 'framer-motion';
 import UserSearch from '@/components/search/UserSearch';
 import NotificationList from '@/components/notifications/NotificationList';
 import MobileNavigation from '@/components/layout/MobileNavigation';
@@ -197,12 +196,12 @@ export default function ProfileLayout({
                   <span className="hidden sm:block text-xs mt-1 font-medium">Profile</span>
                 </button>
 
-                <AnimatePresence>
+                <>
                   {showProfileDropdown && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
+                    <div
+                      
+                      
+                      
                       className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50"
                     >
                       <Link href={`/profile/${user.id}`}>
@@ -222,9 +221,9 @@ export default function ProfileLayout({
                       >
                         Sign Out
                       </button>
-                    </motion.div>
+                    </div>
                   )}
-                </AnimatePresence>
+                </>
               </div>
             </nav>
           </div>
@@ -240,41 +239,41 @@ export default function ProfileLayout({
       <QuickNav />
 
       {/* Search Modal */}
-      <AnimatePresence>
+      <>
         {showSearch && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+          <div
+            
+            
+            
             className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-20 px-4"
             onClick={() => setShowSearch(false)}
           >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
+            <div
+              
+              
+              
               onClick={(e) => e.stopPropagation()}
             >
               <UserSearch onClose={() => setShowSearch(false)} />
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         )}
-      </AnimatePresence>
+      </>
 
       {/* Notifications Modal */}
-      <AnimatePresence>
+      <>
         {showNotifications && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+          <div
+            
+            
+            
             className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-20 px-4"
             onClick={() => setShowNotifications(false)}
           >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
+            <div
+              
+              
+              
               onClick={(e) => e.stopPropagation()}
               className="w-full max-w-md"
             >
@@ -282,10 +281,10 @@ export default function ProfileLayout({
                 notifications={[]} 
                 onMarkAsRead={() => {}} 
               />
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         )}
-      </AnimatePresence>
+      </>
     </div>
   );
 } 

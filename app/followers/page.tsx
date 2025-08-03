@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import {
   UsersIcon,
@@ -130,9 +129,9 @@ export default function FollowersPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+        <div
+          
+          
           className="text-center mb-8"
         >
           <div className="flex justify-center mb-4">
@@ -146,13 +145,13 @@ export default function FollowersPage() {
           <p className="text-lg text-gray-600">
             Healthcare professionals following your institution
           </p>
-        </motion.div>
+        </div>
 
         {/* Stats Cards */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+        <div
+          
+          
+          
           className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"
         >
           <Card className="bg-white border border-gray-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
@@ -184,13 +183,13 @@ export default function FollowersPage() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
 
         {/* Tabs */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+        <div
+          
+          
+          
           className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden"
         >
           <div className="border-b border-gray-200">
@@ -232,10 +231,10 @@ export default function FollowersPage() {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {followers.map((follow) => (
-                      <motion.div
+                      <div
                         key={follow.id}
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
+                        
+                        
                         className="bg-gray-50 rounded-xl p-4 hover:bg-gray-100 transition-colors duration-200"
                       >
                         <div className="flex items-center space-x-3 mb-3">
@@ -282,7 +281,7 @@ export default function FollowersPage() {
                             View
                           </Button>
                         </div>
-                      </motion.div>
+                      </div>
                     ))}
                   </div>
                 )}
@@ -303,10 +302,10 @@ export default function FollowersPage() {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {following.map((follow) => (
-                      <motion.div
+                      <div
                         key={follow.id}
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
+                        
+                        
                         className="bg-gray-50 rounded-xl p-4 hover:bg-gray-100 transition-colors duration-200"
                       >
                         <div className="flex items-center space-x-3 mb-3">
@@ -353,14 +352,14 @@ export default function FollowersPage() {
                             View
                           </Button>
                         </div>
-                      </motion.div>
+                      </div>
                     ))}
                   </div>
                 )}
               </div>
             )}
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

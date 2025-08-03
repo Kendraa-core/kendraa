@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getJobs, applyToJob } from '@/lib/queries';
 import type { JobWithCompany } from '@/types/database.types';
-import { motion, AnimatePresence } from 'framer-motion';
 import { 
   BriefcaseIcon,
   MapPinIcon,
@@ -219,35 +218,27 @@ export default function JobsPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
+        <div className="mb-8 animate-fade-in">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Healthcare Jobs</h1>
-              <p className="text-gray-600">
-                {isInstitution ? 'Post and manage job opportunities' : 'Find your next opportunity in healthcare'}
-              </p>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Jobs</h1>
+              <p className="text-gray-600">Discover healthcare opportunities</p>
             </div>
             
-            {user && isInstitution && (
-              <Link href="/jobs/create">
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                  <PlusIcon className="w-4 h-4 mr-2" />
-                  Post Job
-                </Button>
-              </Link>
+            {user && (
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                <PlusIcon className="w-4 h-4 mr-2" />
+                Post Job
+              </Button>
             )}
           </div>
-        </motion.div>
+        </div>
 
         {/* Search and Filters */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+        <div
+          
+          
+          
           className="mb-8"
         >
           <Card className="bg-white shadow-sm border border-gray-200">
@@ -315,34 +306,34 @@ export default function JobsPage() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
 
         {/* Results Count */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+        <div
+          
+          
+          
           className="mb-6"
         >
           <p className="text-gray-600">
             Showing {filteredJobs.length} of {jobs.length} jobs
           </p>
-        </motion.div>
+        </div>
 
         {/* Jobs List */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
+        <div
+          
+          
+          
         >
           {filteredJobs.length > 0 ? (
             <div className="space-y-4">
               {filteredJobs.map((job) => (
-                <motion.div
+                <div
                   key={job.id}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.2 }}
+                  
+                  
+                  
                   className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200"
                 >
                   <CardContent className="p-6">
@@ -443,7 +434,7 @@ export default function JobsPage() {
                       </div>
                     </div>
                   </CardContent>
-                </motion.div>
+                </div>
               ))}
             </div>
           ) : (
@@ -459,7 +450,7 @@ export default function JobsPage() {
               </CardContent>
             </Card>
           )}
-        </motion.div>
+        </div>
       </div>
 
       {/* Application Modal */}
@@ -500,10 +491,10 @@ function ApplicationModal({ job, onClose, onSubmit }: ApplicationModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
+      <div
+        
+        
+        
         className="bg-white rounded-xl shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto"
       >
         <div className="p-6">
@@ -562,7 +553,7 @@ function ApplicationModal({ job, onClose, onSubmit }: ApplicationModalProps) {
             </div>
           </form>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 } 

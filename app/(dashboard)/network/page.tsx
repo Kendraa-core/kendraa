@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -200,20 +199,20 @@ export default function NetworkPage() {
     <div className="min-h-screen modern-gradient-surface">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
+        <div
+          
+          
           className="mb-8"
         >
           <h1 className="text-3xl font-bold text-slate-900 mb-2">My Network</h1>
           <p className="text-slate-600">Manage your professional connections</p>
-        </motion.div>
+        </div>
 
         {/* Search */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+        <div
+          
+          
+          
           className="mb-8"
         >
           <Card className="modern-card">
@@ -230,13 +229,13 @@ export default function NetworkPage() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
 
         {/* Tabs */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+        <div
+          
+          
+          
           className="mb-8"
         >
           <Card className="modern-card">
@@ -271,13 +270,13 @@ export default function NetworkPage() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
 
         {/* Content */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
+        <div
+          
+          
+          
         >
           {activeTab === 'suggestions' && (
             <div>
@@ -285,11 +284,11 @@ export default function NetworkPage() {
               {filteredSuggestions.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredSuggestions.map((suggestion) => (
-                    <motion.div
+                    <div
                       key={suggestion.id}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.2 }}
+                      
+                      
+                      
                       className="modern-card hover:shadow-modern-lg transition-shadow duration-200"
                     >
                       <CardContent className="p-6">
@@ -366,7 +365,7 @@ export default function NetworkPage() {
                           </div>
                         </div>
                       </CardContent>
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
               ) : (
@@ -387,10 +386,10 @@ export default function NetworkPage() {
               {connectionRequests.length > 0 ? (
                 <div className="space-y-4">
                   {connectionRequests.map((request) => (
-                    <motion.div
+                    <div
                       key={request.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
+                      
+                      
                       className="modern-card"
                     >
                       <CardContent className="p-6">
@@ -435,7 +434,7 @@ export default function NetworkPage() {
                           </div>
                         </div>
                       </CardContent>
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
               ) : (
@@ -456,10 +455,10 @@ export default function NetworkPage() {
               {connections.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {connections.map((connection) => (
-                    <motion.div
+                    <div
                       key={connection.id}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
+                      
+                      
                       className="modern-card hover:shadow-modern-lg transition-shadow duration-200"
                     >
                       <CardContent className="p-6">
@@ -499,7 +498,7 @@ export default function NetworkPage() {
                           </div>
                         </div>
                       </CardContent>
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
               ) : (
@@ -513,7 +512,7 @@ export default function NetworkPage() {
               )}
             </div>
           )}
-        </motion.div>
+        </div>
       </div>
     </div>
   );

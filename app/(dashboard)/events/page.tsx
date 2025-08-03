@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -214,33 +213,13 @@ export default function EventsPage() {
     <div className="min-h-screen modern-gradient-surface">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-2">Events & Conferences</h1>
-              <p className="text-slate-600">Discover medical conferences, workshops, and networking events</p>
-            </div>
-            
-            {user && (
-              <Button className="modern-button-primary">
-                <PlusIcon className="w-4 h-4 mr-2" />
-                Create Event
-              </Button>
-            )}
-          </div>
-        </motion.div>
+        <div className="mb-8 animate-fade-in">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Events</h1>
+          <p className="text-gray-600">Discover and join professional healthcare events</p>
+        </div>
 
         {/* Search and Filters */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="mb-8"
-        >
+        <div className="mb-8 animate-fade-in">
           <Card className="modern-card">
             <CardContent className="p-6">
               {/* Search and Type Filter */}
@@ -315,37 +294,25 @@ export default function EventsPage() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
 
         {/* Results Count */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="mb-6"
-        >
+        <div className="mb-6 animate-fade-in">
           <p className="text-slate-600">
             Showing {filteredEvents.length} of {events.length} events
           </p>
-        </motion.div>
+        </div>
 
         {/* Events List */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
+        <div className="animate-fade-in">
           {filteredEvents.length > 0 ? (
             <div className="space-y-6">
               {filteredEvents.map((event) => {
                 const EventIcon = getEventTypeIcon(event.event_type);
                 
                 return (
-                  <motion.div
+                  <Card
                     key={event.id}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.2 }}
                     className="modern-card hover:shadow-modern-lg transition-shadow duration-200"
                   >
                     <CardContent className="p-6">
@@ -487,7 +454,7 @@ export default function EventsPage() {
                         </div>
                       </div>
                     </CardContent>
-                  </motion.div>
+                  </Card>
                 );
               })}
             </div>
@@ -510,7 +477,7 @@ export default function EventsPage() {
               </CardContent>
             </Card>
           )}
-        </motion.div>
+        </div>
       </div>
     </div>
   );

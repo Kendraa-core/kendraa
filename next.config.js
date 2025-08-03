@@ -14,7 +14,7 @@ const nextConfig = {
   
   // Experimental features for better performance
   experimental: {
-    optimizePackageImports: ['@heroicons/react', 'framer-motion'],
+    optimizePackageImports: ['@heroicons/react'],
     optimizeCss: true,
     scrollRestoration: true,
   },

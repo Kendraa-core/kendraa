@@ -3,7 +3,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
-import { motion } from 'framer-motion';
 import {
   ExclamationTriangleIcon,
   ArrowPathIcon,
@@ -75,27 +74,27 @@ function DefaultErrorFallback({ error, retry }: ErrorFallbackProps) {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.3 }}
+      <div
+        
+        
+        
         className="w-full max-w-md"
       >
         <Card>
           <CardContent className="p-8 text-center">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+            <div
+              
+              
+              
               className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6"
             >
               <ExclamationTriangleIcon className="w-8 h-8 text-red-600" />
-            </motion.div>
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
+            <div
+              
+              
+              
               className="space-y-4"
             >
               <h2 className="text-xl font-semibold text-gray-900">
@@ -131,10 +130,10 @@ function DefaultErrorFallback({ error, retry }: ErrorFallbackProps) {
                   Go Home
                 </Button>
               </div>
-            </motion.div>
+            </div>
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
     </div>
   );
 }

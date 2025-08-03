@@ -2,76 +2,149 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  * {
-    @apply border-gray-200;
+/* Custom animations to replace framer-motion */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
   }
-  body {
-    @apply bg-gray-50 text-gray-900;
+  to {
+    opacity: 1;
   }
 }
 
-@layer components {
-  /* Professional Card Styles */
-  .professional-card {
-    @apply bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200;
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
   }
-
-  /* Elegant Button Styles */
-  .elegant-button-primary {
-    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+  to {
+    transform: scale(1);
   }
+}
 
-  .elegant-button-secondary {
-    @apply bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-4 py-2 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
-
-  .elegant-button-outline {
-    @apply border border-gray-300 hover:border-gray-400 text-gray-700 font-medium px-4 py-2 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
+}
 
-  /* Professional Input Styles */
-  .elegant-input {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200;
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
   }
-
-  /* Professional Navigation */
-  .nav-item {
-    @apply flex items-center space-x-2 px-3 py-2 rounded-lg text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-200;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
+}
 
-  .nav-item-active {
-    @apply text-blue-600 bg-blue-50;
+@keyframes progress {
+  from {
+    transform: scaleX(0);
   }
-
-  /* Elegant Typography */
-  .elegant-heading {
-    @apply text-2xl font-bold text-gray-900;
+  to {
+    transform: scaleX(1);
   }
+}
 
-  .elegant-subheading {
-    @apply text-lg font-semibold text-gray-800;
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.3s ease-out;
+}
+
+.animate-progress {
+  animation: progress 2s ease-in-out;
+  transform-origin: left;
+}
+
+/* Professional card styles */
+.professional-card {
+  @apply bg-white rounded-xl shadow-sm border border-gray-200;
+}
+
+/* Elegant button styles */
+.elegant-button {
+  @apply px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium;
+}
+
+.elegant-button-outline {
+  @apply px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium;
+}
+
+/* Elegant input styles */
+.elegant-input {
+  @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200;
+}
+
+/* Elegant navigation styles */
+.elegant-nav-item {
+  @apply flex items-center space-x-3 px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-lg transition-colors duration-200;
+}
+
+.elegant-nav-item-active {
+  @apply flex items-center space-x-3 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg font-medium;
+}
+
+/* LinkedIn-inspired colors */
+:root {
+  --linkedin-primary: #0a66c2;
+  --linkedin-secondary: #0073b1;
+  --linkedin-accent: #006097;
+  --linkedin-light: #e8f3ff;
+  --linkedin-dark: #004182;
+}
+
+/* Professional typography */
+.elegant-heading {
+  @apply text-2xl font-bold text-gray-900;
+}
+
+.elegant-subheading {
+  @apply text-lg font-semibold text-gray-800;
+}
+
+.elegant-text {
+  @apply text-gray-600 leading-relaxed;
+}
+
+/* Loading states */
+.loading-skeleton {
+  @apply animate-pulse bg-gray-200 rounded;
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+  .mobile-hidden {
+    @apply hidden;
   }
-
-  .elegant-text {
-    @apply text-gray-700 leading-relaxed;
+  
+  .mobile-visible {
+    @apply block;
   }
+}
 
-  /* Professional Spacing */
-  .section-spacing {
-    @apply py-8 px-4 sm:px-6 lg:px-8;
+@media (min-width: 769px) {
+  .desktop-hidden {
+    @apply hidden;
   }
-
-  .card-spacing {
-    @apply p-6;
-  }
-
-  /* Professional shadows */
-  .elegant-shadow {
-    @apply shadow-sm hover:shadow-md transition-shadow duration-200;
-  }
-
-  .elegant-shadow-lg {
-    @apply shadow-lg hover:shadow-xl transition-shadow duration-200;
+  
+  .desktop-visible {
+    @apply block;
   }
 }

@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import {
   ChevronRightIcon,
   StarIcon,
@@ -194,10 +193,10 @@ export default function LandingPage() {
       {/* Hero Section */}
       <section className="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+          <div
+            
+            
+            
           >
             <div className="mb-8">
               <div className="w-24 h-24 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
@@ -217,13 +216,13 @@ export default function LandingPage() {
               Get Started for Free
               <ChevronRightIcon className="w-5 h-5 ml-2" />
             </Link>
-          </motion.div>
+          </div>
 
           {/* Network Visualization */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, delay: 0.3 }}
+          <div
+            
+            
+            
             className="mt-16 relative"
           >
             <div className="flex justify-center items-center space-x-8">
@@ -238,7 +237,7 @@ export default function LandingPage() {
                 </div>
               ))}
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -259,11 +258,11 @@ export default function LandingPage() {
       {/* Features Section */}
       <section id="features" className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
+          <div
+            
+            
+            
+            
             className="text-center mb-16"
           >
             <h2 className="text-4xl font-bold mb-4 text-gray-900">
@@ -272,16 +271,16 @@ export default function LandingPage() {
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Kendraa makes connecting with the right healthcare professionals simple and effective.
             </p>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
-              <motion.div
+              <div
                 key={feature.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: index * 0.1 }}
-                viewport={{ once: true }}
+                
+                
+                
+                
                 className="text-center bg-white rounded-xl p-6 border border-gray-200 hover:border-blue-300 transition-colors shadow-sm"
               >
                 <div className="w-16 h-16 bg-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4">
@@ -289,7 +288,7 @@ export default function LandingPage() {
                 </div>
                 <h3 className="text-xl font-semibold mb-2 text-gray-900">{feature.title}</h3>
                 <p className="text-gray-600">{feature.description}</p>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
@@ -298,30 +297,30 @@ export default function LandingPage() {
       {/* Stats Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
         <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
+          <div
+            
+            
+            
+            
             className="text-center mb-16"
           >
             <h2 className="text-4xl font-bold mb-4 text-gray-900">Kendraa by the Numbers</h2>
             <p className="text-xl text-gray-600">How Kendraa is transforming healthcare networking.</p>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
-              <motion.div
+              <div
                 key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: index * 0.1 }}
-                viewport={{ once: true }}
+                
+                
+                
+                
                 className="text-center bg-white rounded-xl p-6 border border-gray-200 shadow-sm"
               >
                 <div className="text-4xl font-bold text-blue-600 mb-2">{stat.number}</div>
                 <div className="text-gray-600">{stat.label}</div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
@@ -330,25 +329,25 @@ export default function LandingPage() {
       {/* Testimonials Section */}
       <section id="testimonials" className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
+          <div
+            
+            
+            
+            
             className="text-center mb-16"
           >
             <h2 className="text-4xl font-bold mb-4 text-gray-900">What Healthcare Professionals Say</h2>
             <p className="text-xl text-gray-600">Real professionals, real connections.</p>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
-              <motion.div
+              <div
                 key={testimonial.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: index * 0.1 }}
-                viewport={{ once: true }}
+                
+                
+                
+                
                 className="bg-white rounded-xl p-6 border border-gray-200 hover:border-blue-300 transition-colors shadow-sm"
               >
                 <div className="flex items-center mb-4">
@@ -361,7 +360,7 @@ export default function LandingPage() {
                   </div>
                 </div>
                 <p className="text-gray-600">&quot;{testimonial.quote}&quot;</p>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
@@ -370,27 +369,27 @@ export default function LandingPage() {
       {/* Pricing Section */}
       <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
         <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
+          <div
+            
+            
+            
+            
             className="text-center mb-16"
           >
             <h2 className="text-4xl font-bold mb-4 text-gray-900">
               Plans for Every Professional
             </h2>
             <p className="text-xl text-gray-600">Choose the plan that fits your networking needs.</p>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {pricingPlans.map((plan, index) => (
-              <motion.div
+              <div
                 key={plan.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: index * 0.1 }}
-                viewport={{ once: true }}
+                
+                
+                
+                
                 className={`bg-white rounded-xl p-8 border ${
                   plan.popular ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-gray-200'
                 } shadow-sm`}
@@ -419,7 +418,7 @@ export default function LandingPage() {
                 >
                   {plan.buttonText}
                 </Link>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
@@ -428,24 +427,24 @@ export default function LandingPage() {
       {/* FAQ Section */}
       <section id="faq" className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
+          <div
+            
+            
+            
+            
             className="text-center mb-16"
           >
             <h2 className="text-4xl font-bold mb-4 text-gray-900">Frequently Asked Questions</h2>
-          </motion.div>
+          </div>
 
           <div className="space-y-4">
             {faqs.map((faq, index) => (
-              <motion.div
+              <div
                 key={faq.question}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: index * 0.1 }}
-                viewport={{ once: true }}
+                
+                
+                
+                
                 className="bg-white rounded-lg border border-gray-200 shadow-sm"
               >
                 <button
@@ -464,7 +463,7 @@ export default function LandingPage() {
                     {faq.answer}
                   </div>
                 )}
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
@@ -473,11 +472,11 @@ export default function LandingPage() {
       {/* Bottom CTA Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
         <div className="max-w-4xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
+          <div
+            
+            
+            
+            
           >
             <h2 className="text-4xl font-bold mb-4 text-gray-900">Join Healthcare Professionals</h2>
             <p className="text-xl text-gray-600 mb-8">
@@ -490,7 +489,7 @@ export default function LandingPage() {
               Get Started For Free
               <ChevronRightIcon className="w-5 h-5 ml-2" />
             </Link>
-          </motion.div>
+          </div>
         </div>
       </section>
 

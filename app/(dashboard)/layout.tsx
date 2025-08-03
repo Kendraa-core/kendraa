@@ -9,15 +9,12 @@ import {
   UserGroupIcon,
   BriefcaseIcon,
   BellIcon,
-  ChatBubbleLeftRightIcon,
   UserCircleIcon,
   MagnifyingGlassIcon,
-  BuildingOffice2Icon,
   PlusIcon,
   UsersIcon,
   CalendarDaysIcon,
 } from '@heroicons/react/24/outline';
-import { motion, AnimatePresence } from 'framer-motion';
 import UserSearch from '@/components/search/UserSearch';
 import NotificationList from '@/components/notifications/NotificationList';
 import MobileNavigation from '@/components/layout/MobileNavigation';
@@ -196,34 +193,27 @@ export default function DashboardLayout({
                   <span className="hidden sm:block text-sm font-medium">Profile</span>
                 </button>
 
-                <AnimatePresence>
-                  {showProfileDropdown && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50"
+                {showProfileDropdown && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
+                    <Link href={`/profile/${user.id}`}>
+                      <div className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">
+                        View Profile
+                      </div>
+                    </Link>
+                    <Link href="/profile/setup">
+                      <div className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">
+                        Edit Profile
+                      </div>
+                    </Link>
+                    <div className="border-t border-gray-200 my-1"></div>
+                    <button
+                      onClick={signOut}
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50 cursor-pointer"
                     >
-                      <Link href={`/profile/${user.id}`}>
-                        <div className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">
-                          View Profile
-                        </div>
-                      </Link>
-                      <Link href="/profile/setup">
-                        <div className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">
-                          Edit Profile
-                        </div>
-                      </Link>
-                      <div className="border-t border-gray-200 my-1"></div>
-                      <button
-                        onClick={signOut}
-                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50 cursor-pointer"
-                      >
-                        Sign Out
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                      Sign Out
+                    </button>
+                  </div>
+                )}
               </div>
             </nav>
           </div>
@@ -241,52 +231,25 @@ export default function DashboardLayout({
       </div>
       
       {/* Search Modal */}
-      <AnimatePresence>
-        {showSearch && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-20 px-4"
-            onClick={() => setShowSearch(false)}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <UserSearch onClose={() => setShowSearch(false)} />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {showSearch && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-20 px-4">
+          <div className="w-full max-w-md">
+            <UserSearch onClose={() => setShowSearch(false)} />
+          </div>
+        </div>
+      )}
 
       {/* Notifications Modal */}
-      <AnimatePresence>
-        {showNotifications && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-20 px-4"
-            onClick={() => setShowNotifications(false)}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-md"
-            >
-              <NotificationList 
-                notifications={notifications} 
-                onMarkAsRead={markAsRead} 
-              />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {showNotifications && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-20 px-4">
+          <div className="w-full max-w-md">
+            <NotificationList 
+              notifications={notifications} 
+              onMarkAsRead={markAsRead} 
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

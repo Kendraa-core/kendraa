@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getPosts, createPost, likePost, unlikePost, isPostLiked } from '@/lib/queries';
 import type { PostWithAuthor } from '@/types/database.types';
-import { motion, AnimatePresence } from 'framer-motion';
 import { 
   HeartIcon,
   ChatBubbleOvalLeftIcon,
@@ -241,19 +240,16 @@ export default function FeedPage() {
                 <p className="text-gray-500">Be the first to share something!</p>
               </div>
             ) : (
-              <AnimatePresence>
+              <div className="space-y-6">
                 {posts.map((post) => (
-                  <motion.div
+                  <div
                     key={post.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
+                    className="animate-fade-in"
                   >
                     <PostCard post={post} />
-                  </motion.div>
+                  </div>
                 ))}
-              </AnimatePresence>
+              </div>
             )}
           </div>
 

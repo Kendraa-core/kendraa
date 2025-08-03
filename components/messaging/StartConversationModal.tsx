@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { XMarkIcon, UserGroupIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { getConnections, getOrCreateConversation } from '@/lib/queries';
 import { useAuth } from '@/contexts/AuthContext';
@@ -72,19 +71,19 @@ export default function StartConversationModal({ isOpen, onClose, onConversation
   });
 
   return (
-    <AnimatePresence>
+    <>
       {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+        <div
+          
+          
+          
           className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
           onClick={onClose}
         >
-          <motion.div
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.95, opacity: 0 }}
+          <div
+            
+            
+            
             className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
@@ -154,9 +153,9 @@ export default function StartConversationModal({ isOpen, onClose, onConversation
                 )}
               </div>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       )}
-    </AnimatePresence>
+    </>
   );
 } 

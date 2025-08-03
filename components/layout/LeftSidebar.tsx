@@ -110,7 +110,7 @@ export default function LeftSidebar() {
         {/* User Profile Section */}
         <div className="p-6 border-b border-slate-200 bg-gradient-to-br from-primary-50 to-accent-50">
           <Link href={`/profile/${user.id}`} className="group block">
-            <motion.div
+            <div
               whileHover={{ scale: 1.02 }}
               className="flex items-center space-x-3"
             >
@@ -128,7 +128,7 @@ export default function LeftSidebar() {
                   {user.user_metadata?.headline || 'Add your professional headline'}
                 </p>
               </div>
-            </motion.div>
+            </div>
           </Link>
           
           {/* Profile Stats */}
@@ -157,7 +157,7 @@ export default function LeftSidebar() {
 
               return (
                 <Link key={item.name} href={item.href}>
-                  <motion.div
+                  <div
                     whileHover={{ x: 2 }}
                     className={cn(
                       'group flex items-center px-3 py-2 text-sm font-medium rounded-xl transition-all duration-200',
@@ -178,7 +178,7 @@ export default function LeftSidebar() {
                         New
                       </span>
                     )}
-                  </motion.div>
+                  </div>
                 </Link>
               );
             })}
@@ -191,20 +191,20 @@ export default function LeftSidebar() {
               className="flex items-center justify-between w-full px-3 py-2 text-xs font-medium text-slate-500 hover:text-slate-700 transition-colors"
             >
               <span>Quick Access</span>
-              <motion.div
-                animate={{ rotate: showQuickAccess ? 180 : 0 }}
-                transition={{ duration: 0.2 }}
+              <div
+                
+                
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
-              </motion.div>
+              </div>
             </button>
 
-            <motion.div
-              initial={false}
-              animate={{ height: showQuickAccess ? 'auto' : 0, opacity: showQuickAccess ? 1 : 0 }}
-              transition={{ duration: 0.2 }}
+            <div
+              
+              
+              
               className="overflow-hidden"
             >
               <div className="mt-2 space-y-1">
@@ -214,7 +214,7 @@ export default function LeftSidebar() {
 
                   return (
                     <Link key={item.name} href={item.href}>
-                      <motion.div
+                      <div
                         whileHover={{ x: 2 }}
                         className={cn(
                           'group flex items-center px-3 py-2 text-sm font-medium rounded-xl transition-all duration-200',
@@ -230,24 +230,24 @@ export default function LeftSidebar() {
                           )} 
                         />
                         <span className="truncate">{item.name}</span>
-                      </motion.div>
+                      </div>
                     </Link>
                   );
                 })}
               </div>
-            </motion.div>
+            </div>
           </div>
 
           {/* Settings */}
           <div className="mt-auto p-3 border-t border-slate-200">
             <Link href="/settings">
-              <motion.div
+              <div
                 whileHover={{ x: 2 }}
                 className="group flex items-center px-3 py-2 text-sm font-medium text-slate-600 rounded-xl hover:bg-slate-50 hover:text-slate-900 transition-all duration-200"
               >
                 <Cog6ToothIcon className="mr-3 h-5 w-5 flex-shrink-0 text-slate-400 group-hover:text-slate-500" />
                 <span>Settings</span>
-              </motion.div>
+              </div>
             </Link>
           </div>
         </nav>

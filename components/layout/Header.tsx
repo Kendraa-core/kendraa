@@ -3,7 +3,6 @@
 import { useState, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import Avatar from '@/components/common/Avatar';
 import { Button } from '@/components/ui/Button';
@@ -58,13 +57,13 @@ export default function Header() {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link href="/feed" className="flex items-center space-x-2 group">
-              <motion.div 
+              <div 
                 className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center"
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                whileTap={{ scale: 0.95 }}
+                
+                
               >
                 <span className="text-white font-bold text-sm">K</span>
-              </motion.div>
+              </div>
               <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent group-hover:scale-105 transition-transform">
                 Kendra
               </span>
@@ -76,27 +75,27 @@ export default function Header() {
                 const isActive = pathname === item.href;
                 return (
                   <Link key={item.name} href={item.href}>
-                    <motion.div
+                    <div
                       className={`flex flex-col items-center px-3 py-2 rounded-lg transition-all duration-200 ${
                         isActive 
                           ? 'text-blue-600 bg-blue-50' 
                           : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                       }`}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      
+                      
                     >
                       <item.icon className="w-5 h-5 mb-1" />
                       <span className="text-xs font-medium">{item.name}</span>
                       {isActive && (
-                        <motion.div
+                        <div
                           className="absolute bottom-0 left-1/2 w-1 h-1 bg-blue-600 rounded-full"
-                          layoutId="activeTab"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
+                          
+                          
+                          
                           style={{ transform: 'translateX(-50%) translateY(8px)' }}
                         />
                       )}
-                    </motion.div>
+                    </div>
                   </Link>
                 );
               })}
@@ -118,23 +117,23 @@ export default function Header() {
             <div className="flex items-center space-x-3">
               {/* Notifications */}
               <Link href="/notifications">
-                <motion.button
+                <button
                   className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
+                  
+                  
                 >
                   <BellIcon className="w-5 h-5" />
                   <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white" />
-                </motion.button>
+                </button>
               </Link>
 
               {/* Profile Dropdown */}
               <div className="relative">
-                <motion.button
+                <button
                   onClick={toggleProfileMenu}
                   className="flex items-center space-x-2 p-1 rounded-lg hover:bg-gray-50 transition-colors"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  
+                  
                 >
                   <Avatar
                     src={profile?.avatar_url}
@@ -145,15 +144,15 @@ export default function Header() {
                     {profile?.full_name}
                   </span>
                   <ChevronDownIcon className={`w-4 h-4 text-gray-500 transition-transform ${isProfileMenuOpen ? 'rotate-180' : ''}`} />
-                </motion.button>
+                </button>
 
-                <AnimatePresence>
+                <>
                   {isProfileMenuOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                      transition={{ duration: 0.2 }}
+                    <div
+                      
+                      
+                      
+                      
                       className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 py-2"
                     >
                       <div className="px-4 py-3 border-b border-gray-100">
@@ -193,36 +192,36 @@ export default function Header() {
                           Sign Out
                         </button>
                       </div>
-                    </motion.div>
+                    </div>
                   )}
-                </AnimatePresence>
+                </>
               </div>
 
               {/* Mobile Menu Button */}
-              <motion.button
+              <button
                 onClick={toggleMobileMenu}
                 className="lg:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
+                
+                
               >
                 {isMobileMenuOpen ? (
                   <XMarkIcon className="w-5 h-5" />
                 ) : (
                   <Bars3Icon className="w-5 h-5" />
                 )}
-              </motion.button>
+              </button>
             </div>
           </div>
         </div>
 
         {/* Mobile Menu */}
-        <AnimatePresence>
+        <>
           {isMobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
+            <div
+              
+              
+              
+              
               className="lg:hidden bg-white border-t border-gray-200 overflow-hidden"
             >
               <div className="px-4 py-4 space-y-2">
@@ -241,52 +240,52 @@ export default function Header() {
                   const isActive = pathname === item.href;
                   return (
                     <Link key={item.name} href={item.href} onClick={() => setIsMobileMenuOpen(false)}>
-                      <motion.div
+                      <div
                         className={`flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors ${
                           isActive 
                             ? 'text-blue-600 bg-blue-50' 
                             : 'text-gray-700 hover:bg-gray-50'
                         }`}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
+                        
+                        
                       >
                         <item.icon className="w-5 h-5" />
                         <span className="font-medium">{item.name}</span>
-                      </motion.div>
+                      </div>
                     </Link>
                   );
                 })}
               </div>
-            </motion.div>
+            </div>
           )}
-        </AnimatePresence>
+        </>
       </header>
 
       {/* Backdrop for mobile menu */}
-      <AnimatePresence>
+      <>
         {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+          <div
+            
+            
+            
             className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
             onClick={() => setIsMobileMenuOpen(false)}
           />
         )}
-      </AnimatePresence>
+      </>
 
       {/* Backdrop for profile menu */}
-      <AnimatePresence>
+      <>
         {isProfileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+          <div
+            
+            
+            
             className="fixed inset-0 z-40"
             onClick={() => setIsProfileMenuOpen(false)}
           />
         )}
-      </AnimatePresence>
+      </>
     </>
   );
 } 

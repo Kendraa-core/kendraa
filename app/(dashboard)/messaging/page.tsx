@@ -16,7 +16,6 @@ import {
   UserGroupIcon,
   BuildingOfficeIcon
 } from '@heroicons/react/24/outline';
-import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import NewConversationModal from '@/components/messaging/NewConversationModal';
 import StartConversationModal from '@/components/messaging/StartConversationModal';
@@ -266,13 +265,10 @@ export default function MessagingPage() {
                 </div>
               </div>
             ) : (
-              <AnimatePresence>
+              <div className="space-y-2">
                 {filteredConversations.map((conversation) => (
-                  <motion.div
+                  <div
                     key={conversation.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
                     className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
                       selectedConversation?.id === conversation.id ? 'bg-blue-50 border-blue-200' : ''
                     }`}
@@ -310,9 +306,9 @@ export default function MessagingPage() {
                         </div>
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
-              </AnimatePresence>
+              </div>
             )}
           </div>
         </div>
@@ -353,12 +349,10 @@ export default function MessagingPage() {
                     <p className="text-sm">Start the conversation!</p>
                   </div>
                 ) : (
-                  <AnimatePresence>
+                  <div className="space-y-4">
                     {messages.map((message) => (
-                      <motion.div
+                      <div
                         key={message.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
                         className={`flex ${message.sender_id === user?.id ? 'justify-end' : 'justify-start'}`}
                       >
                         <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
@@ -384,9 +378,9 @@ export default function MessagingPage() {
                             </div>
                           )}
                         </div>
-                      </motion.div>
+                      </div>
                     ))}
-                  </AnimatePresence>
+                  </div>
                 )}
               </div>
 

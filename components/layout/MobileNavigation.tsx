@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   HomeIcon,
@@ -82,19 +81,19 @@ export default function MobileNavigation() {
       </button>
 
       {/* Mobile Menu Overlay */}
-      <AnimatePresence>
+      <>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+          <div
+            
+            
+            
             className="fixed inset-0 bg-black/50 z-50 md:hidden"
             onClick={() => setIsOpen(false)}
           >
-            <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
+            <div
+              
+              
+              
               className="absolute right-0 top-0 h-full w-80 bg-white shadow-xl"
               onClick={(e) => e.stopPropagation()}
             >
@@ -169,10 +168,10 @@ export default function MobileNavigation() {
                   </Link>
                 </div>
               </div>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         )}
-      </AnimatePresence>
+      </>
     </>
   );
 } 
