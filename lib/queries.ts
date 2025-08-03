@@ -1143,6 +1143,93 @@ export async function getInstitutions(): Promise<Institution[]> {
   }
 }
 
+// Get institution by admin user ID
+export async function getInstitutionByAdminId(adminUserId: string): Promise<Institution | null> {
+  try {
+    debugLog('Getting institution by admin user ID', { adminUserId });
+    
+    const schemaExists = await checkSchemaExists();
+    if (!schemaExists) {
+      debugLog('Database schema not found, cannot get institution');
+      return null;
+    }
+    
+    const { data, error } = await supabase
+      .from('institutions')
+      .select('*')
+      .eq('admin_user_id', adminUserId)
+      .single();
+
+    if (error) {
+      debugLog('Error fetching institution by admin user ID', error);
+      return null;
+    }
+    
+    debugLog('Institution fetched successfully', data);
+    return data;
+  } catch (error) {
+    debugLog('Error fetching institution by admin user ID', error);
+    return null;
+  }
+}
+
+// Create institution for a user if it doesn't exist
+export async function ensureInstitutionExists(userId: string, profile: Profile): Promise<Institution | null> {
+  try {
+    debugLog('Ensuring institution exists for user', { userId });
+    
+    // First check if institution already exists
+    const existingInstitution = await getInstitutionByAdminId(userId);
+    if (existingInstitution) {
+      debugLog('Institution already exists', existingInstitution);
+      return existingInstitution;
+    }
+    
+    // Map profile institution_type to institution type
+    const mapInstitutionType = (profileType: string | undefined): Institution['type'] => {
+      switch (profileType) {
+        case 'hospital':
+        case 'clinic':
+        case 'research_center':
+        case 'pharmaceutical':
+        case 'other':
+          return profileType as Institution['type'];
+        case 'medical_college':
+          return 'university';
+        default:
+          return 'hospital';
+      }
+    };
+    
+    // Create new institution
+    const institutionData = {
+      name: profile.full_name || 'Healthcare Institution',
+      type: mapInstitutionType(profile.institution_type),
+      description: profile.bio || 'Healthcare institution',
+      location: profile.location || null,
+      website: profile.website || null,
+      phone: profile.phone || null,
+      email: profile.email,
+      logo_url: profile.avatar_url || null,
+      banner_url: profile.banner_url || null,
+      specialties: profile.specialization || null,
+      license_number: null,
+      accreditation: profile.accreditations || null,
+      established_year: null,
+      size: 'medium' as const,
+      verified: false,
+      admin_user_id: userId,
+    };
+    
+    const result = await createInstitution(institutionData);
+    debugLog('Institution created successfully', result);
+    return result;
+  } catch (error) {
+    debugLog('Error ensuring institution exists', error);
+    return null;
+  }
+}
+
 // Job functions
 export async function createJob(job: Omit<Job, 'id' | 'created_at' | 'updated_at'>): Promise<Job | null> {
   try {

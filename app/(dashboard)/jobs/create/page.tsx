@@ -19,8 +19,8 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
-import { createJob, getProfile, type Profile } from '@/lib/queries';
-import type { Job } from '@/types/database.types';
+import { getProfile, ensureInstitutionExists, createJob } from '@/lib/queries';
+import type { Job, Profile } from '@/types/database.types';
 
 const JOB_TYPES = [
   { value: 'full_time', label: 'Full Time' },
@@ -149,11 +149,18 @@ export default function CreateJobPage() {
     setLoading(true);
 
     try {
+      // Ensure institution exists for this user
+      const institution = await ensureInstitutionExists(user.id, profile);
+      if (!institution) {
+        toast.error('Failed to create institution profile. Please try again.');
+        return;
+      }
+
       const jobData = {
         ...formData,
         salary_min: formData.salary_min ? parseInt(formData.salary_min) : null,
         salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
-        company_id: profile.id, // Use profile ID as company_id
+        company_id: institution.id, // Use the institution ID
         posted_by: user.id,
         applications_count: 0,
         status: 'active' as const,
