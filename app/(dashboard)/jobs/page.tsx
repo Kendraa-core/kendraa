@@ -6,7 +6,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import Avatar from '@/components/common/Avatar';
 import { formatRelativeTime } from '@/lib/utils';
 import {
   BriefcaseIcon,
@@ -17,7 +16,6 @@ import {
   BuildingOfficeIcon,
   PlusIcon,
   StarIcon,
-  UserGroupIcon,
 } from '@heroicons/react/24/outline';
 import { CheckBadgeIcon as CheckBadgeSolidIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
@@ -42,6 +40,26 @@ const EXPERIENCE_LEVELS = [
   { value: 'executive', label: 'Executive' },
 ];
 
+const formatSalary = (min: number | null, max: number | null, currency = 'USD') => {
+  if (!min && !max) return 'Salary not specified';
+  
+  const format = (amount: number) => {
+    if (amount >= 1000000) return `$${(amount / 1000000).toFixed(1)}M`;
+    if (amount >= 1000) return `$${(amount / 1000).toFixed(0)}K`;
+    return `$${amount.toLocaleString()}`;
+  };
+
+  if (min && max) {
+    return `${format(min)} - ${format(max)}`;
+  } else if (min) {
+    return `${format(min)}+`;
+  } else if (max) {
+    return `Up to ${format(max)}`;
+  }
+  
+  return 'Salary not specified';
+};
+
 export default function JobsPage() {
   const { user } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -55,11 +73,6 @@ export default function JobsPage() {
   const [showApplicationModal, setShowApplicationModal] = useState(false);
   const [selectedJob, setSelectedJob] = useState<JobWithCompany | null>(null);
 
-  // Debug logging
-  const debugLog = useCallback((message: string, data?: unknown) => {
-    console.log(`[JobsPage] ${message}`, data);
-  }, []);
-
   const fetchProfile = useCallback(async () => {
     if (!user?.id) return;
     
@@ -67,25 +80,23 @@ export default function JobsPage() {
       const profileData = await getProfile(user.id);
       setProfile(profileData);
     } catch (error) {
-      debugLog('Error fetching profile', error);
+      console.error('Error fetching profile:', error);
     }
-  }, [user?.id, debugLog]);
+  }, [user?.id]);
 
   const fetchJobs = useCallback(async () => {
     setLoading(true);
-    debugLog('Fetching jobs');
     
     try {
       const data = await getJobs();
       setJobs(data);
-      debugLog('Jobs fetched successfully', { count: data.length });
     } catch (error) {
-      debugLog('Error fetching jobs', error);
+      console.error('Error fetching jobs:', error);
       toast.error('Failed to load jobs');
     } finally {
       setLoading(false);
     }
-  }, [debugLog]);
+  }, []);
 
   useEffect(() => {
     fetchProfile();
@@ -141,72 +152,50 @@ export default function JobsPage() {
   const submitApplication = async (coverLetter: string) => {
     if (!user?.id || !selectedJob) return;
 
-    debugLog('Submitting job application', { jobId: selectedJob.id, userId: user.id });
-
     try {
-      const application = await applyToJob({
+      const result = await applyToJob({
         job_id: selectedJob.id,
         applicant_id: user.id,
         cover_letter: coverLetter,
-        status: 'pending',
         resume_url: null,
+        status: 'pending',
         reviewed_by: null,
         reviewed_at: null,
         notes: null,
       });
 
-      if (application) {
+      if (result) {
         toast.success('Application submitted successfully!');
         setShowApplicationModal(false);
         setSelectedJob(null);
-        debugLog('Application submitted successfully', { applicationId: application.id });
       } else {
         toast.error('Failed to submit application');
-        debugLog('Failed to submit application');
       }
     } catch (error) {
-      debugLog('Error submitting application', error);
+      console.error('Error submitting application:', error);
       toast.error('Failed to submit application');
     }
   };
 
-  const formatSalary = (min: number | null, max: number | null, currency = 'USD') => {
-    if (!min && !max) return 'Salary not disclosed';
-    
-    const formatter = new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency,
-      maximumFractionDigits: 0,
-    });
-
-    if (min && max) {
-      return `${formatter.format(min)} - ${formatter.format(max)}`;
-    } else if (min) {
-      return `From ${formatter.format(min)}`;
-    } else if (max) {
-      return `Up to ${formatter.format(max)}`;
-    }
-    
-    return 'Salary not disclosed';
-  };
-
   const getJobTypeLabel = (type: string) => {
-    return JOB_TYPES.find(t => t.value === type)?.label || type;
+    const jobType = JOB_TYPES.find(t => t.value === type);
+    return jobType?.label || type;
   };
 
   const getExperienceLabel = (level: string) => {
-    return EXPERIENCE_LEVELS.find(l => l.value === level)?.label || level;
+    const expLevel = EXPERIENCE_LEVELS.find(l => l.value === level);
+    return expLevel?.label || level;
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen modern-gradient-surface">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4 py-8">
           <div className="animate-pulse">
-            <div className="h-8 bg-slate-200 rounded w-1/4 mb-6"></div>
+            <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
             <div className="space-y-4">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="h-32 bg-slate-200 rounded-xl"></div>
+                <div key={i} className="h-32 bg-gray-200 rounded-xl"></div>
               ))}
             </div>
           </div>
@@ -215,12 +204,11 @@ export default function JobsPage() {
     );
   }
 
-  // Check if user is an institution
   const isInstitution = profile?.profile_type === 'institution';
 
   return (
-    <div className="min-h-screen modern-gradient-surface">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -229,15 +217,15 @@ export default function JobsPage() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-2">Medical Jobs</h1>
-              <p className="text-slate-600">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Healthcare Jobs</h1>
+              <p className="text-gray-600">
                 {isInstitution ? 'Post and manage job opportunities' : 'Find your next opportunity in healthcare'}
               </p>
             </div>
             
             {user && isInstitution && (
               <Link href="/jobs/create">
-                <Button className="modern-button-primary">
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white">
                   <PlusIcon className="w-4 h-4 mr-2" />
                   Post Job
                 </Button>
@@ -253,19 +241,19 @@ export default function JobsPage() {
           transition={{ delay: 0.1 }}
           className="mb-8"
         >
-          <Card className="modern-card">
+          <Card className="bg-white shadow-sm border border-gray-200">
             <CardContent className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* Search */}
                 <div className="lg:col-span-2">
                   <div className="relative">
-                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <Input
                       type="text"
                       placeholder="Search jobs, companies, or keywords..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="modern-input pl-10"
+                      className="pl-10"
                     />
                   </div>
                 </div>
@@ -273,13 +261,13 @@ export default function JobsPage() {
                 {/* Location */}
                 <div>
                   <div className="relative">
-                    <MapPinIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <MapPinIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <Input
                       type="text"
                       placeholder="Location"
                       value={selectedLocation}
                       onChange={(e) => setSelectedLocation(e.target.value)}
-                      className="modern-input pl-10"
+                      className="pl-10"
                     />
                   </div>
                 </div>
@@ -289,7 +277,7 @@ export default function JobsPage() {
                   <select
                     value={selectedType}
                     onChange={(e) => setSelectedType(e.target.value)}
-                    className="modern-input"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     {JOB_TYPES.map((type) => (
                       <option key={type.value} value={type.value}>
@@ -306,7 +294,7 @@ export default function JobsPage() {
                   <select
                     value={selectedLevel}
                     onChange={(e) => setSelectedLevel(e.target.value)}
-                    className="modern-input"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     {EXPERIENCE_LEVELS.map((level) => (
                       <option key={level.value} value={level.value}>
@@ -327,7 +315,7 @@ export default function JobsPage() {
           transition={{ delay: 0.2 }}
           className="mb-6"
         >
-          <p className="text-slate-600">
+          <p className="text-gray-600">
             Showing {filteredJobs.length} of {jobs.length} jobs
           </p>
         </motion.div>
@@ -338,44 +326,24 @@ export default function JobsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          {/* Show message for individual users */}
-          {!isInstitution && profile && (
-            <Card className="modern-card mb-6">
-              <CardContent className="p-6">
-                <div className="text-center">
-                  <BuildingOfficeIcon className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-slate-900 mb-2">Jobs for Healthcare Professionals</h3>
-                  <p className="text-slate-600 mb-4">
-                    Browse and apply for job opportunities posted by healthcare institutions.
-                  </p>
-                  <p className="text-sm text-slate-500">
-                    Only healthcare institutions can post jobs. If you&apos;re an institution, please contact support to upgrade your account.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
           {filteredJobs.length > 0 ? (
-            <div className="space-y-6">
+            <div className="space-y-4">
               {filteredJobs.map((job) => (
                 <motion.div
                   key={job.id}
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.2 }}
-                  className="modern-card hover:shadow-modern-lg transition-shadow duration-200"
+                  className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200"
                 >
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start space-x-4 flex-1">
                         {/* Company Logo */}
                         <div className="relative flex-shrink-0">
-                          <Avatar
-                            src={job.company.logo_url}
-                            alt={job.company.name}
-                            size="lg"
-                          />
+                          <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">
+                            {job.company.name.charAt(0)}
+                          </div>
                           {job.company.verified && (
                             <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
                               <CheckBadgeSolidIcon className="w-3 h-3 text-white" />
@@ -387,13 +355,13 @@ export default function JobsPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between mb-2">
                             <div>
-                              <h3 className="text-lg font-semibold text-slate-900 mb-1">
+                              <h3 className="text-lg font-semibold text-gray-900 mb-1">
                                 {job.title}
                               </h3>
-                              <div className="flex items-center space-x-2 text-sm text-slate-600">
+                              <div className="flex items-center space-x-2 text-sm text-gray-600">
                                 <Link
                                   href={`/profile/${job.company.admin_user_id}`}
-                                  className="font-medium hover:text-primary-600 transition-colors"
+                                  className="font-medium hover:text-blue-600 transition-colors"
                                 >
                                   {job.company.name}
                                 </Link>
@@ -404,7 +372,7 @@ export default function JobsPage() {
                           </div>
 
                           {/* Job Meta */}
-                          <div className="flex flex-wrap items-center gap-4 mb-3 text-sm text-slate-500">
+                          <div className="flex flex-wrap items-center gap-4 mb-3 text-sm text-gray-500">
                             {job.location && (
                               <div className="flex items-center">
                                 <MapPinIcon className="w-4 h-4 mr-1" />
@@ -426,44 +394,29 @@ export default function JobsPage() {
                               <CurrencyDollarIcon className="w-4 h-4 mr-1" />
                               {formatSalary(job.salary_min, job.salary_max, job.currency || 'USD')}
                             </div>
-
-                            {job.applications_count > 0 && (
-                              <div className="flex items-center">
-                                <UserGroupIcon className="w-4 h-4 mr-1" />
-                                {job.applications_count} applicants
-                              </div>
-                            )}
                           </div>
 
                           {/* Description */}
-                          <p className="text-slate-700 text-sm mb-4 line-clamp-2">
+                          <p className="text-gray-700 text-sm mb-4 line-clamp-2">
                             {job.description}
                           </p>
 
                           {/* Specializations */}
                           {job.specializations && job.specializations.length > 0 && (
                             <div className="flex flex-wrap gap-2 mb-4">
-                              {job.specializations.slice(0, 4).map((spec, index) => (
+                              {job.specializations.slice(0, 3).map((spec, index) => (
                                 <span
                                   key={index}
-                                  className="px-2 py-1 bg-primary-100 text-primary-700 rounded-full text-xs font-medium"
+                                  className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium"
                                 >
                                   {spec}
                                 </span>
                               ))}
-                              {job.specializations.length > 4 && (
-                                <span className="px-2 py-1 bg-slate-100 text-slate-600 rounded-full text-xs">
-                                  +{job.specializations.length - 4}
+                              {job.specializations.length > 3 && (
+                                <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs">
+                                  +{job.specializations.length - 3}
                                 </span>
                               )}
-                            </div>
-                          )}
-
-                          {/* Application Deadline */}
-                          {job.application_deadline && (
-                            <div className="text-xs text-amber-600 mb-4">
-                              <ClockIcon className="w-3 h-3 inline mr-1" />
-                              Apply by {new Date(job.application_deadline).toLocaleDateString()}
                             </div>
                           )}
                         </div>
@@ -473,21 +426,11 @@ export default function JobsPage() {
                       <div className="flex flex-col space-y-2 ml-4">
                         <Button
                           onClick={() => handleApply(job)}
-                          className="modern-button-primary min-w-[100px]"
+                          className="bg-blue-600 hover:bg-blue-700 text-white min-w-[100px]"
                           size="sm"
                         >
                           Apply Now
                         </Button>
-                        
-                        <Link href={`/jobs/${job.id}`}>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="min-w-[100px]"
-                          >
-                            View Details
-                          </Button>
-                        </Link>
                       </div>
                     </div>
                   </CardContent>
@@ -495,21 +438,15 @@ export default function JobsPage() {
               ))}
             </div>
           ) : (
-            <Card className="modern-card">
+            <Card className="bg-white shadow-sm border border-gray-200">
               <CardContent className="p-12 text-center">
-                <BriefcaseIcon className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-slate-900 mb-2">No jobs found</h3>
-                <p className="text-slate-500 mb-6">
-                  {searchQuery || selectedType !== 'all' || selectedLevel !== 'all'
-                    ? 'Try adjusting your search criteria or filters.'
-                    : 'Be the first to post a job opportunity.'}
+                <BriefcaseIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No jobs found</h3>
+                <p className="text-gray-500">
+                  {searchQuery || selectedLocation || selectedType !== 'all' || selectedLevel !== 'all'
+                    ? 'Try adjusting your search criteria'
+                    : 'No jobs are currently available. Check back later!'}
                 </p>
-                {user && (
-                  <Button className="modern-button-primary">
-                    <PlusIcon className="w-4 h-4 mr-2" />
-                    Post Job
-                  </Button>
-                )}
               </CardContent>
             </Card>
           )}
@@ -531,7 +468,6 @@ export default function JobsPage() {
   );
 }
 
-// Application Modal Component
 interface ApplicationModalProps {
   job: JobWithCompany;
   onClose: () => void;
@@ -540,71 +476,83 @@ interface ApplicationModalProps {
 
 function ApplicationModal({ job, onClose, onSubmit }: ApplicationModalProps) {
   const [coverLetter, setCoverLetter] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!coverLetter.trim()) return;
-
-    setIsSubmitting(true);
-    await onSubmit(coverLetter);
-    setIsSubmitting(false);
+    setLoading(true);
+    
+    try {
+      await onSubmit(coverLetter);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        exit={{ opacity: 0, scale: 0.95 }}
+        className="bg-white rounded-xl shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto"
       >
-        <div className="p-6 border-b border-slate-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-semibold text-slate-900">Apply for Position</h2>
-              <p className="text-slate-600">{job.title} at {job.company.name}</p>
-            </div>
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              ×
-            </Button>
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Apply for {job.title}</h3>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
-        </div>
 
-        <form onSubmit={handleSubmit} className="p-6">
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-slate-900 mb-2">
-              Cover Letter <span className="text-red-500">*</span>
-            </label>
-            <textarea
-              value={coverLetter}
-              onChange={(e) => setCoverLetter(e.target.value)}
-              placeholder="Write a compelling cover letter explaining why you&apos;re the perfect fit for this role..."
-              className="modern-input min-h-[200px] resize-y"
-              required
-            />
-            <p className="text-xs text-slate-500 mt-1">
-              {coverLetter.length}/1000 characters
+          <div className="mb-4">
+            <p className="text-sm text-gray-600 mb-2">
+              <strong>{job.company.name}</strong> • {job.location}
+            </p>
+            <p className="text-sm text-gray-500">
+              {formatSalary(job.salary_min, job.salary_max, job.currency || 'USD')}
             </p>
           </div>
 
-          <div className="flex space-x-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              className="flex-1"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={!coverLetter.trim() || isSubmitting}
-              className="modern-button-primary flex-1"
-            >
-              {isSubmitting ? 'Submitting...' : 'Submit Application'}
-            </Button>
-          </div>
-        </form>
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Cover Letter
+              </label>
+              <textarea
+                value={coverLetter}
+                onChange={(e) => setCoverLetter(e.target.value)}
+                rows={4}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Introduce yourself and explain why you're interested in this position..."
+                required
+              />
+            </div>
+
+            <div className="flex space-x-3">
+              <Button
+                type="submit"
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                disabled={loading}
+              >
+                {loading ? 'Submitting...' : 'Submit Application'}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                disabled={loading}
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </div>
       </motion.div>
     </div>
   );
