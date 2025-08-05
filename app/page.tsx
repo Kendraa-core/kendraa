@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import {
   UserGroupIcon,
@@ -22,10 +23,14 @@ export default function LandingPage() {
           <div className="flex justify-between items-center py-6">
             {/* Logo */}
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-                <SparklesIcon className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-2xl font-bold text-gray-900">Kendraa</span>
+              <Image
+                src="/logo.svg"
+                alt="Kendraa"
+                width={120}
+                height={40}
+                className="h-8 w-auto"
+                priority
+              />
             </div>
 
             {/* Navigation */}

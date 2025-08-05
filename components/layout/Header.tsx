@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import Avatar from '@/components/common/Avatar';
 import UserSearch from '@/components/search/UserSearch';
@@ -65,10 +66,14 @@ export default function Header() {
             {/* Logo */}
             <div className="flex items-center space-x-8">
               <Link href="/" className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">K</span>
-                </div>
-                <span className="text-xl font-bold text-gray-900">Kendraa</span>
+                <Image
+                  src="/logo.svg"
+                  alt="Kendraa"
+                  width={120}
+                  height={40}
+                  className="h-8 w-auto"
+                  priority
+                />
               </Link>
 
               {/* Desktop Navigation */}
