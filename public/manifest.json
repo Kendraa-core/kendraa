@@ -12,21 +12,15 @@
   "categories": ["business", "medical", "social"],
   "icons": [
     {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
       "src": "/favicon.ico",
       "sizes": "16x16",
       "type": "image/x-icon"
-    },
-    {
-      "src": "/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
     }
   ],
   "shortcuts": [
@@ -37,8 +31,9 @@
       "url": "/feed",
       "icons": [
         {
-          "src": "/favicon.ico",
-          "sizes": "96x96"
+          "src": "/logo.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
         }
       ]
     },
@@ -49,8 +44,9 @@
       "url": "/profile",
       "icons": [
         {
-          "src": "/favicon.ico",
-          "sizes": "96x96"
+          "src": "/logo.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
         }
       ]
     },
@@ -61,8 +57,9 @@
       "url": "/messaging",
       "icons": [
         {
-          "src": "/favicon.ico",
-          "sizes": "96x96"
+          "src": "/logo.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
         }
       ]
     }
