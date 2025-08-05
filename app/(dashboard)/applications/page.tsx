@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { getUserApplications } from '@/lib/queries';
@@ -35,16 +35,7 @@ export default function MyApplicationsPage() {
   const [loading, setLoading] = useState(true);
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
 
-  useEffect(() => {
-    if (!user) {
-      router.push('/signin');
-      return;
-    }
-
-    fetchApplications();
-  }, [user]);
-
-  const fetchApplications = async () => {
+  const fetchApplications = useCallback(async () => {
     if (!user?.id) return;
 
     try {
@@ -57,7 +48,13 @@ export default function MyApplicationsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchApplications();
+    }
+  }, [user?.id, fetchApplications]);
 
   const getStatusIcon = (status: JobApplication['status']) => {
     switch (status) {
@@ -102,11 +99,11 @@ export default function MyApplicationsPage() {
       case 'interview':
         return 'You have been selected for an interview!';
       case 'accepted':
-        return 'Congratulations! Your application has been accepted!';
+        return 'Congratulations! Your application has been accepted';
       case 'rejected':
         return 'Your application was not selected for this position';
       default:
-        return 'Application status updated';
+        return 'Application status unknown';
     }
   };
 
@@ -114,28 +111,18 @@ export default function MyApplicationsPage() {
     selectedStatus === 'all' || app.status === selectedStatus
   );
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-6xl mx-auto px-4 py-8">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
-            <div className="space-y-4">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="h-32 bg-gray-200 rounded-xl"></div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+  if (!user) {
+    router.push('/signin');
+    return null;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Applications</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            My Applications
+          </h1>
           <p className="text-gray-600">
             Track the status of your job applications
           </p>
@@ -143,134 +130,108 @@ export default function MyApplicationsPage() {
 
         {/* Status Filter */}
         <div className="mb-6">
-          <div className="flex space-x-2">
-            <button
-              onClick={() => setSelectedStatus('all')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                selectedStatus === 'all'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              All ({applications.length})
-            </button>
-            <button
-              onClick={() => setSelectedStatus('pending')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                selectedStatus === 'pending'
-                  ? 'bg-yellow-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              Pending ({applications.filter(app => app.status === 'pending').length})
-            </button>
-            <button
-              onClick={() => setSelectedStatus('reviewed')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                selectedStatus === 'reviewed'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              Reviewed ({applications.filter(app => app.status === 'reviewed').length})
-            </button>
-            <button
-              onClick={() => setSelectedStatus('interview')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                selectedStatus === 'interview'
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              Interview ({applications.filter(app => app.status === 'interview').length})
-            </button>
-            <button
-              onClick={() => setSelectedStatus('accepted')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                selectedStatus === 'accepted'
-                  ? 'bg-green-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              Accepted ({applications.filter(app => app.status === 'accepted').length})
-            </button>
-            <button
-              onClick={() => setSelectedStatus('rejected')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                selectedStatus === 'rejected'
-                  ? 'bg-red-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              Rejected ({applications.filter(app => app.status === 'rejected').length})
-            </button>
+          <div className="flex flex-wrap gap-2">
+            {['all', 'pending', 'reviewed', 'interview', 'accepted', 'rejected'].map((status) => (
+              <button
+                key={status}
+                onClick={() => setSelectedStatus(status)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  selectedStatus === status
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                {status === 'all' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1)}
+              </button>
+            ))}
           </div>
         </div>
 
-        {filteredApplications.length === 0 ? (
+        {/* Applications List */}
+        {loading ? (
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="bg-white rounded-lg shadow p-6 animate-pulse">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/6"></div>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filteredApplications.length === 0 ? (
           <div className="text-center py-12">
-            <BriefcaseIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <BriefcaseIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              {selectedStatus === 'all' ? 'No applications yet' : `No ${selectedStatus} applications`}
+              No applications found
             </h3>
-            <p className="text-gray-600">
+            <p className="text-gray-600 mb-6">
               {selectedStatus === 'all' 
-                ? 'Start applying to jobs to see your applications here.'
-                : `You don't have any ${selectedStatus} applications.`
+                ? "You haven't submitted any job applications yet."
+                : `No ${selectedStatus} applications found.`
               }
             </p>
-            {selectedStatus === 'all' && (
-              <button
-                onClick={() => router.push('/jobs')}
-                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Browse Jobs
-              </button>
-            )}
+            <button
+              onClick={() => router.push('/jobs')}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Browse Jobs
+            </button>
           </div>
         ) : (
           <div className="space-y-4">
             {filteredApplications.map((application) => (
-              <div
-                key={application.id}
-                className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                      <BuildingOfficeIcon className="w-6 h-6 text-blue-600" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          {application.job?.title || 'Unknown Position'}
-                        </h3>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(application.status)}`}>
-                          {application.status}
-                        </span>
-                      </div>
-                      <p className="text-gray-600 mb-2">
-                        {application.job?.company?.name || 'Unknown Company'}
-                      </p>
-                      <p className="text-gray-600 mb-2">
-                        Applied {formatRelativeTime(application.created_at)}
-                      </p>
-                      <p className="text-gray-700 text-sm">
-                        {getStatusMessage(application.status)}
-                      </p>
-                      {application.notes && (
-                        <div className="mt-2 p-3 bg-gray-50 rounded-lg">
-                          <p className="text-sm text-gray-600">
-                            <strong>Notes:</strong> {application.notes}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
+              <div key={application.id} className="bg-white rounded-lg shadow p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-3">
                     {getStatusIcon(application.status)}
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        {application.job.title}
+                      </h3>
+                      <p className="text-gray-600">
+                        {application.job.company.name}
+                      </p>
+                    </div>
                   </div>
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(application.status)}`}>
+                    {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+                  </span>
                 </div>
+
+                <div className="space-y-2 mb-4">
+                  <p className="text-gray-700">
+                    {getStatusMessage(application.status)}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Applied {formatRelativeTime(application.created_at)}
+                  </p>
+                </div>
+
+                {application.cover_letter && (
+                  <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                    <h4 className="font-medium text-gray-900 mb-2">Cover Letter</h4>
+                    <p className="text-gray-700 text-sm">
+                      {application.cover_letter.length > 200
+                        ? `${application.cover_letter.substring(0, 200)}...`
+                        : application.cover_letter
+                      }
+                    </p>
+                  </div>
+                )}
+
+                {application.status === 'interview' && (
+                  <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                    <h4 className="font-medium text-blue-900 mb-2">Interview Details</h4>
+                    <p className="text-blue-700 text-sm">
+                      You will receive interview details via email or through the platform.
+                    </p>
+                  </div>
+                )}
               </div>
             ))}
           </div>

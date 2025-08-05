@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { getPosts } from '@/lib/queries';
+import { getPosts, createPost } from '@/lib/queries';
 import type { Post } from '@/types/database.types';
 import { 
   HeartIcon,
@@ -81,13 +81,25 @@ export default function FeedPage() {
     await fetchPosts();
   }, [fetchPosts]);
 
-  useEffect(() => {
-    fetchProfile();
-  }, [fetchProfile]);
+  const handleCreatePost = useCallback(async (content: string, imageUrl?: string) => {
+    if (!user?.id) return;
+
+    try {
+      const post = await createPost(user.id, content, imageUrl);
+      if (post) {
+        setPosts(prev => [post, ...prev]);
+        toast.success('Post created successfully!');
+      }
+    } catch (error) {
+      console.error('Error creating post:', error);
+      toast.error('Failed to create post');
+    }
+  }, [user?.id]);
 
   useEffect(() => {
+    fetchProfile();
     fetchPosts();
-  }, [fetchPosts]);
+  }, [fetchProfile, fetchPosts]);
 
   if (!user) {
     return (

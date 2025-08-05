@@ -130,8 +130,10 @@ export default function MessagingPage() {
   });
 
   useEffect(() => {
-    fetchConversations();
-  }, [fetchConversations]);
+    if (user?.id) {
+      fetchConversations();
+    }
+  }, [user?.id, fetchConversations]);
 
   useEffect(() => {
     if (selectedConversation) {
@@ -142,7 +144,7 @@ export default function MessagingPage() {
         }
       });
     }
-  }, [selectedConversation, messages, user?.id]);
+  }, [selectedConversation, messages, user?.id, handleMarkAsRead]);
 
   const getConversationTitle = (conversation: ConversationWithParticipants) => {
     if (conversation.title) return conversation.title;

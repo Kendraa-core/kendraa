@@ -1,24 +1,14 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 
 export default function PerformanceOptimizer() {
   const pathname = usePathname();
   const performanceRef = useRef<PerformanceObserver | null>(null);
 
-  useEffect(() => {
-    // Only run on client side
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    // Monitor performance metrics only
-    setupPerformanceMonitoring();
-  }, [pathname]);
-
   // Setup performance monitoring
-  const setupPerformanceMonitoring = () => {
+  const setupPerformanceMonitoring = useCallback(() => {
     if (typeof window === 'undefined' || !('PerformanceObserver' in window)) {
       return;
     }
@@ -42,7 +32,7 @@ export default function PerformanceOptimizer() {
     } catch (error) {
       console.log('[Performance] Performance monitoring not supported');
     }
-  };
+  }, []);
 
   const logPerformanceMetrics = (navEntry: PerformanceNavigationTiming) => {
     const metrics = {
@@ -97,6 +87,16 @@ export default function PerformanceOptimizer() {
       console.warn('[Performance] Slow first contentful paint:', metrics.firstContentfulPaint + 'ms');
     }
   };
+
+  useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    // Monitor performance metrics only
+    setupPerformanceMonitoring();
+  }, [pathname, setupPerformanceMonitoring]);
 
   // Cleanup on unmount
   useEffect(() => {

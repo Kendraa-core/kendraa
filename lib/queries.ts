@@ -109,11 +109,11 @@ export async function ensureProfileExists(
         specialization: [],
         is_premium: false,
         profile_views: 0,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
 
     if (error) {
       console.error('[Queries] Error ensuring profile exists:', error);
@@ -144,12 +144,12 @@ export async function getPosts(limit = 10, offset = 0): Promise<Post[]> {
       console.error('[Queries] Error fetching posts:', error);
       return [];
     }
-
+    
     if (!posts || posts.length === 0) {
       console.log('[Queries] No posts found');
       return [];
     }
-
+    
     // Get author IDs for the posts
     const authorIds = [...new Set(posts.map(post => post.author_id))];
     
@@ -158,14 +158,14 @@ export async function getPosts(limit = 10, offset = 0): Promise<Post[]> {
       .from('profiles')
       .select('id, full_name, avatar_url, headline, user_type')
       .in('id', authorIds);
-
+    
     if (authorsError) {
       console.error('[Queries] Error fetching authors:', authorsError);
     }
-
+    
     // Create author lookup map
     const authorMap = new Map(authors?.map(author => [author.id, author]) || []);
-
+    
     // Combine posts with author data
     const postsWithAuthors = posts.map(post => ({
       ...post,
@@ -273,7 +273,7 @@ export async function createPost(
       console.error('[Queries] Error creating post:', error);
       throw error;
     }
-
+    
     console.log('[Queries] Post created successfully');
     return data as Post;
   } catch (error) {
@@ -847,7 +847,7 @@ export async function recordProfileView(viewerId: string, profileId: string): Pr
         profile_id: profileId,
         viewed_at: new Date().toISOString(),
       });
-
+    
     if (viewError) {
       console.error('[Queries] Error recording profile view:', viewError);
       throw viewError;
@@ -1028,7 +1028,7 @@ export async function likePost(postId: string, userId: string): Promise<boolean>
       console.log('[Queries] Post already liked');
       return false;
     }
-
+    
     // Add like record
     const { error: likeError } = await supabase
       .from('post_likes')
@@ -1126,7 +1126,7 @@ export async function isPostLiked(userId: string, postId: string): Promise<boole
       console.error('[Queries] Error checking like status:', error);
       return false;
     }
-
+    
     const isLiked = !!data;
     console.log('[Queries] Post like status checked:', isLiked);
     return isLiked;
@@ -2789,4 +2789,4 @@ export async function getSuggestedConnectionsWithMutualCounts(userId: string, li
     console.error('[Queries] Error getting suggested connections with mutual counts:', error);
     return [];
   }
-}
+} 
