@@ -1,8 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Disable static optimization for dynamic content
-  staticPageGenerationTimeout: 120,
-  
   // Optimize images
   images: {
     domains: ['localhost', '127.0.0.1'],
@@ -15,13 +12,11 @@ const nextConfig = {
   experimental: {
     optimizeCss: true,
     scrollRestoration: true,
-    // Disable optimizePackageImports to prevent cache issues
-    // optimizePackageImports: ['@heroicons/react'],
   },
 
   // Webpack configuration
   webpack: (config, { dev, isServer }) => {
-    // Optimize bundle size
+    // Optimize bundle size for production
     if (!dev && !isServer) {
       config.optimization.splitChunks = {
         chunks: 'all',
@@ -34,15 +29,6 @@ const nextConfig = {
         },
       };
     }
-
-    // Add cache busting
-    config.output.filename = dev 
-      ? 'static/js/[name].js'
-      : 'static/js/[name].[contenthash].js';
-    
-    config.output.chunkFilename = dev
-      ? 'static/js/[name].chunk.js'
-      : 'static/js/[name].[contenthash].chunk.js';
 
     return config;
   },
@@ -80,9 +66,6 @@ const nextConfig = {
     ];
   },
 
-  // Disable automatic static optimization for dynamic pages
-  trailingSlash: false,
-  
   // Enable React strict mode for better development
   reactStrictMode: true,
 };
