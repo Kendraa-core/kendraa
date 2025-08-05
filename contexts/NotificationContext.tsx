@@ -41,7 +41,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   }, [user?.id, isClient]);
 
   const markAsRead = useCallback(async (notificationId: string) => {
-    if (!isClient) return;
+    if (typeof window === 'undefined') return;
     
     try {
       const success = await markNotificationAsRead(notificationId);
@@ -56,10 +56,10 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     } catch (error) {
       console.error('Error marking notification as read:', error);
     }
-  }, [isClient]);
+  }, []);
 
   const refreshNotifications = useCallback(async () => {
-    if (!user?.id || !isClient) return;
+    if (!user?.id || typeof window === 'undefined') return;
     
     try {
       const data = await getNotifications(user.id);
@@ -68,7 +68,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     } catch (error) {
       console.error('Error refreshing notifications:', error);
     }
-  }, [user?.id, isClient]);
+  }, [user?.id]);
 
   // Initial fetch
   useEffect(() => {
