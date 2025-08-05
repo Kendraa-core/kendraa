@@ -27,10 +27,25 @@ export default class ErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
     this.setState({ error, errorInfo });
+    
+    // Handle webpack module loading errors
+    if (error.message.includes('Cannot read properties of undefined') || 
+        error.message.includes('webpack') ||
+        error.message.includes('call')) {
+      console.log('Webpack module error detected, attempting recovery...');
+      // Force a page reload for webpack errors
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    }
   }
 
   handleRetry = () => {
     this.setState({ hasError: false, error: undefined, errorInfo: undefined });
+  };
+
+  handleReload = () => {
+    window.location.reload();
   };
 
   render() {
@@ -45,11 +60,11 @@ export default class ErrorBoundary extends Component<Props, State> {
             <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
               <ExclamationTriangleIcon className="h-6 w-6 text-red-600" />
             </div>
-            
+
             <h2 className="text-lg font-semibold text-gray-900 mb-2">
               Something went wrong
             </h2>
-            
+
             <p className="text-gray-600 mb-6">
               We encountered an unexpected error. Please try refreshing the page or contact support if the problem persists.
             </p>
@@ -62,9 +77,9 @@ export default class ErrorBoundary extends Component<Props, State> {
                 <ArrowPathIcon className="h-4 w-4" />
                 <span>Try Again</span>
               </button>
-              
+
               <button
-                onClick={() => window.location.reload()}
+                onClick={this.handleReload}
                 className="w-full border border-gray-300 hover:border-gray-400 text-gray-700 hover:text-gray-900 px-4 py-2 rounded-lg transition-colors"
               >
                 Refresh Page

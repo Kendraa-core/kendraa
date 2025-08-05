@@ -97,11 +97,20 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              // Unregister any existing service workers
+              // Completely disable service workers
               if ('serviceWorker' in navigator) {
+                // Override the register method to prevent new registrations
+                const originalRegister = navigator.serviceWorker.register;
+                navigator.serviceWorker.register = function() {
+                  console.log('Service worker registration blocked');
+                  return Promise.reject(new Error('Service workers are disabled'));
+                };
+                
+                // Unregister all existing service workers
                 navigator.serviceWorker.getRegistrations().then(function(registrations) {
                   for(let registration of registrations) {
                     registration.unregister();
+                    console.log('Service worker unregistered');
                   }
                 });
                 
@@ -110,9 +119,29 @@ export default function RootLayout({
                   caches.keys().then(function(names) {
                     for (let name of names) {
                       caches.delete(name);
+                      console.log('Cache deleted:', name);
                     }
                   });
                 }
+                
+                // Prevent new service workers from registering
+                navigator.serviceWorker.addEventListener('message', function(event) {
+                  if (event.data && event.data.type === 'SKIP_WAITING') {
+                    event.preventDefault();
+                  }
+                });
+              }
+              
+              // Clear any existing service worker
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.ready.then(function(registration) {
+                  registration.unregister();
+                });
+              }
+              
+              // Disable any existing service worker
+              if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({type: 'TERMINATE'});
               }
             `,
           }}
