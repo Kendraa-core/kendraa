@@ -66,14 +66,14 @@ export default function Header() {
             {/* Logo */}
             <div className="flex items-center space-x-8">
               <Link href="/" className="flex items-center space-x-2">
-                <Image
-                  src="/logo.svg"
-                  alt="Kendraa"
-                  width={120}
-                  height={40}
-                  className="h-8 w-auto"
-                  priority
-                />
+                                            <Image
+                              src="/Kendraa Logo.png"
+                              alt="Kendraa"
+                              width={120}
+                              height={40}
+                              className="h-8 w-auto"
+                              priority
+                            />
               </Link>
 
               {/* Desktop Navigation */}

@@ -12,9 +12,9 @@
   "categories": ["business", "medical", "social"],
   "icons": [
     {
-      "src": "/logo.svg",
+      "src": "/Kendraa Logo.png",
       "sizes": "any",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     },
     {
@@ -31,9 +31,9 @@
       "url": "/feed",
       "icons": [
         {
-          "src": "/logo.svg",
+          "src": "/Kendraa Logo.png",
           "sizes": "any",
-          "type": "image/svg+xml"
+          "type": "image/png"
         }
       ]
     },
@@ -44,9 +44,9 @@
       "url": "/profile",
       "icons": [
         {
-          "src": "/logo.svg",
+          "src": "/Kendraa Logo.png",
           "sizes": "any",
-          "type": "image/svg+xml"
+          "type": "image/png"
         }
       ]
     },
@@ -57,9 +57,9 @@
       "url": "/messaging",
       "icons": [
         {
-          "src": "/logo.svg",
+          "src": "/Kendraa Logo.png",
           "sizes": "any",
-          "type": "image/svg+xml"
+          "type": "image/png"
         }
       ]
     }

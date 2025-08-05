@@ -23,14 +23,14 @@ export default function LandingPage() {
           <div className="flex justify-between items-center py-6">
             {/* Logo */}
             <div className="flex items-center space-x-2">
-              <Image
-                src="/logo.svg"
-                alt="Kendraa"
-                width={120}
-                height={40}
-                className="h-8 w-auto"
-                priority
-              />
+                                      <Image
+                          src="/Kendraa Logo.png"
+                          alt="Kendraa"
+                          width={120}
+                          height={40}
+                          className="h-8 w-auto"
+                          priority
+                        />
             </div>
 
             {/* Navigation */}

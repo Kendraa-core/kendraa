@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
+import ErrorBoundary from '@/components/common/ErrorBoundary';
 import './globals.css';
 import ServiceWorkerRegistration from '@/components/common/ServiceWorkerRegistration';
 import PerformanceOptimizer from '@/components/common/PerformanceOptimizer';
@@ -44,7 +45,7 @@ export const metadata: Metadata = {
     description: 'Connect with healthcare professionals worldwide and advance your medical career with the premier healthcare networking platform.',
     images: [
       {
-        url: '/og-image.jpg',
+        url: '/Kendraa Logo.png',
         width: 1200,
         height: 630,
         alt: 'Kendraa - Royal Network for Healthcare Professionals',
@@ -55,7 +56,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Kendraa - Royal Network for Healthcare Professionals',
     description: 'Connect with healthcare professionals worldwide and advance your medical career with the premier healthcare networking platform.',
-    images: ['/twitter-image.jpg'],
+    images: ['/Kendraa Logo.png'],
     creator: '@kendraa_health',
   },
   verification: {
@@ -67,7 +68,7 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: '/favicon.ico' },
-      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/Kendraa Logo.png', type: 'image/png' },
     ],
     apple: '/apple-touch-icon.png',
   },
@@ -92,46 +93,40 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.className} suppressHydrationWarning>
-      <head>
-        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
-        <link rel="apple-touch-icon" href="/icon.svg" />
-        <meta name="theme-color" content="#6366f1" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-      </head>
       <body className="min-h-screen bg-gray-50 antialiased" suppressHydrationWarning>
-        <AuthProvider>
-          <NotificationProvider>
-            <Toaster
-              position="top-right"
-              toastOptions={{
-                duration: 4000,
-                style: {
-                  background: '#363636',
-                  color: '#fff',
-                  borderRadius: '12px',
-                  padding: '16px',
-                  fontSize: '14px',
-                },
-                success: {
+        <ErrorBoundary>
+          <AuthProvider>
+            <NotificationProvider>
+              <Toaster
+                position="top-right"
+                toastOptions={{
+                  duration: 4000,
                   style: {
-                    background: '#10b981',
+                    background: '#363636',
+                    color: '#fff',
+                    borderRadius: '12px',
+                    padding: '16px',
+                    fontSize: '14px',
                   },
-                },
-                error: {
-                  style: {
-                    background: '#ef4444',
+                  success: {
+                    style: {
+                      background: '#10b981',
+                    },
                   },
-                },
-              }}
-            />
-            <ServiceWorkerRegistration>
-              <PerformanceOptimizer />
-              {children}
-            </ServiceWorkerRegistration>
-          </NotificationProvider>
-        </AuthProvider>
+                  error: {
+                    style: {
+                      background: '#ef4444',
+                    },
+                  },
+                }}
+              />
+              <ServiceWorkerRegistration>
+                <PerformanceOptimizer />
+                {children}
+              </ServiceWorkerRegistration>
+            </NotificationProvider>
+          </AuthProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );
