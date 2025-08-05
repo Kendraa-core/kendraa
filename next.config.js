@@ -8,13 +8,6 @@ const nextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
 
-  // Experimental features
-  experimental: {
-    // Disable optimizeCss to avoid critters dependency
-    // optimizeCss: true,
-    scrollRestoration: true,
-  },
-
   // Webpack configuration
   webpack: (config, { dev, isServer }) => {
     // Optimize bundle size for production
