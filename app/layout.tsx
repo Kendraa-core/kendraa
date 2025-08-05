@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
+import ClientOnly from '@/components/common/ClientOnly';
 import './globals.css';
 import PerformanceOptimizer from '@/components/common/PerformanceOptimizer';
 
@@ -174,7 +175,9 @@ export default function RootLayout({
                   },
                 }}
               />
-              <PerformanceOptimizer />
+              <ClientOnly>
+                <PerformanceOptimizer />
+              </ClientOnly>
               {children}
             </NotificationProvider>
           </AuthProvider>
