@@ -44,7 +44,6 @@ export default function PerformanceOptimizer() {
     }
   };
 
-  // Log performance metrics
   const logPerformanceMetrics = (navEntry: PerformanceNavigationTiming) => {
     const metrics = {
       // Navigation timing
@@ -54,7 +53,7 @@ export default function PerformanceOptimizer() {
       domContentLoaded: navEntry.domContentLoadedEventEnd - navEntry.domContentLoadedEventStart,
       loadComplete: navEntry.loadEventEnd - navEntry.loadEventStart,
       totalTime: navEntry.loadEventEnd - navEntry.fetchStart,
-      
+
       // Resource timing
       firstPaint: 0,
       firstContentfulPaint: 0,
@@ -66,7 +65,7 @@ export default function PerformanceOptimizer() {
       const paintEntries = performance.getEntriesByType('paint');
       const firstPaint = paintEntries.find(entry => entry.name === 'first-paint');
       const firstContentfulPaint = paintEntries.find(entry => entry.name === 'first-contentful-paint');
-      
+
       if (firstPaint) {
         metrics.firstPaint = firstPaint.startTime;
       }
@@ -108,5 +107,5 @@ export default function PerformanceOptimizer() {
     };
   }, []);
 
-  return null; // This component doesn't render anything
+  return null;
 } 

@@ -59,8 +59,16 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   }, [isClient]);
 
   const refreshNotifications = useCallback(async () => {
-    await fetchNotifications();
-  }, [fetchNotifications]);
+    if (!user?.id || !isClient) return;
+    
+    try {
+      const data = await getNotifications(user.id);
+      setNotifications(data);
+      setUnreadCount(data.filter(n => !n.read).length);
+    } catch (error) {
+      console.error('Error refreshing notifications:', error);
+    }
+  }, [user?.id, isClient]);
 
   // Initial fetch
   useEffect(() => {

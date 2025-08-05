@@ -5,7 +5,6 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import './globals.css';
-import ServiceWorkerRegistration from '@/components/common/ServiceWorkerRegistration';
 import PerformanceOptimizer from '@/components/common/PerformanceOptimizer';
 
 const inter = Inter({ 
@@ -122,10 +121,8 @@ export default function RootLayout({
                   },
                 }}
               />
-              <ServiceWorkerRegistration>
-                <PerformanceOptimizer />
-                {children}
-              </ServiceWorkerRegistration>
+              <PerformanceOptimizer />
+              {children}
             </NotificationProvider>
           </AuthProvider>
         </ErrorBoundary>
