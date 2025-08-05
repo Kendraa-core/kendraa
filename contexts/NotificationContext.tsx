@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { useAuth } from './AuthContext';
 import { getNotifications, markNotificationAsRead } from '@/lib/queries';
+import { useIsClient } from '@/hooks/useIsClient';
 import type { Notification } from '@/types/database.types';
 
 interface NotificationContextType {
@@ -18,9 +19,10 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const isClient = useIsClient();
 
   const fetchNotifications = useCallback(async () => {
-    if (!user?.id) {
+    if (!user?.id || !isClient) {
       setNotifications([]);
       setUnreadCount(0);
       return;
@@ -36,9 +38,11 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       setNotifications([]);
       setUnreadCount(0);
     }
-  }, [user?.id]);
+  }, [user?.id, isClient]);
 
   const markAsRead = useCallback(async (notificationId: string) => {
+    if (!isClient) return;
+    
     try {
       const success = await markNotificationAsRead(notificationId);
       if (success) {
@@ -52,7 +56,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     } catch (error) {
       console.error('Error marking notification as read:', error);
     }
-  }, []);
+  }, [isClient]);
 
   const refreshNotifications = useCallback(async () => {
     await fetchNotifications();
@@ -60,8 +64,10 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
   // Initial fetch
   useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications]);
+    if (isClient) {
+      fetchNotifications();
+    }
+  }, [fetchNotifications, isClient]);
 
   const value = useMemo(() => ({
     notifications,

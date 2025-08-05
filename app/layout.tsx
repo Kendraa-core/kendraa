@@ -12,6 +12,8 @@ const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
   preload: true,
+  variable: '--font-inter',
+  fallback: ['system-ui', 'arial'],
 });
 
 export const metadata: Metadata = {
@@ -92,8 +94,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.className} suppressHydrationWarning>
-      <body className="min-h-screen bg-gray-50 antialiased" suppressHydrationWarning>
+    <html lang="en" className={`${inter.className} ${inter.variable}`} suppressHydrationWarning>
+      <body className="min-h-screen bg-gray-50 antialiased font-sans" suppressHydrationWarning>
         <ErrorBoundary>
           <AuthProvider>
             <NotificationProvider>

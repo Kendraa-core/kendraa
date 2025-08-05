@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState, useCallback, useMemo } 
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { getProfile, ensureProfileExists, type Profile } from '@/lib/queries';
+import { useIsClient } from '@/hooks/useIsClient';
 import toast from 'react-hot-toast';
 
 interface AuthContextType {
@@ -22,9 +23,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const isClient = useIsClient();
 
   // Load user profile efficiently
   const loadProfile = useCallback(async (userId: string) => {
+    if (!isClient) return;
+    
     try {
       const profileData = await getProfile(userId);
       setProfile(profileData);
@@ -51,10 +55,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         updated_at: new Date().toISOString(),
       });
     }
-  }, [user?.email]);
+  }, [user?.email, isClient]);
 
   // Initialize auth state
   useEffect(() => {
+    if (!isClient) return;
+
     let mounted = true;
 
     const initializeAuth = async () => {
@@ -114,9 +120,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       mounted = false;
     };
-  }, [loadProfile]);
+  }, [loadProfile, isClient]);
 
   const signIn = useCallback(async (email: string, password: string) => {
+    if (!isClient) return;
+    
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -133,9 +141,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       toast.error(error.message || 'Failed to sign in');
       throw error;
     }
-  }, []);
+  }, [isClient]);
 
   const signUp = useCallback(async (email: string, password: string, fullName: string, profileType: 'individual' | 'institution') => {
+    if (!isClient) return;
+    
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -168,9 +178,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       toast.error(error.message || 'Failed to create account');
       throw error;
     }
-  }, []);
+  }, [isClient]);
 
   const signOut = useCallback(async () => {
+    if (!isClient) return;
+    
     try {
       const { error } = await supabase.auth.signOut();
       if (error) {
@@ -182,10 +194,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       toast.error('Failed to sign out');
       throw error;
     }
-  }, []);
+  }, [isClient]);
 
   const updateProfile = useCallback(async (updates: Partial<Profile>) => {
-    if (!user) return;
+    if (!user || !isClient) return;
 
     try {
       const { error } = await supabase
@@ -208,7 +220,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       toast.error('Failed to update profile');
       throw error;
     }
-  }, [user]);
+  }, [user, isClient]);
 
   const value = useMemo(() => ({
     user,
