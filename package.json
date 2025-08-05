@@ -16,14 +16,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "lint:fix": "next lint --fix",
     "type-check": "tsc --noEmit",
-    "clean": "rm -rf .next out",
-    "analyze": "ANALYZE=true npm run build",
-    "export": "next build && next export",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "build:production": "NODE_ENV=production next build",
+    "start:production": "NODE_ENV=production next start -p 3000",
+    "deploy:prepare": "npm run type-check && npm run lint && npm run build:production",
+    "deploy:vercel": "vercel --prod",
+    "deploy:netlify": "netlify deploy --prod --dir=.next"
   },
   "dependencies": {
     "@heroicons/react": "^2.0.18",

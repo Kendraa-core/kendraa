@@ -23,16 +23,12 @@ export default function SignIn() {
       // Show immediate feedback
       toast.loading('Signing in...', { id: 'signin' });
       
-      const { error } = await signIn(email, password);
-      if (error) {
-        toast.error(error.message, { id: 'signin' });
-      } else {
-        toast.success('Signed in successfully!', { id: 'signin' });
-        // Navigate immediately without waiting
-        router.push('/feed');
-      }
-    } catch (error) {
-      toast.error('An error occurred during sign in', { id: 'signin' });
+      await signIn(email, password);
+      toast.success('Signed in successfully!', { id: 'signin' });
+      // Navigate immediately without waiting
+      router.push('/feed');
+    } catch (error: any) {
+      toast.error(error.message || 'An error occurred during sign in', { id: 'signin' });
     } finally {
       setLoading(false);
     }

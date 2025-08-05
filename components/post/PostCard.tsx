@@ -2,20 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
 import Avatar from '@/components/common/Avatar';
-import { cn } from '@/lib/utils';
 import {
   HeartIcon,
   ChatBubbleOvalLeftIcon,
   ShareIcon,
   BookmarkIcon,
   EllipsisHorizontalIcon,
-  PaperAirplaneIcon,
   CheckBadgeIcon,
-  ChatBubbleLeftIcon,
-  ArrowUpTrayIcon,
 } from '@heroicons/react/24/outline';
 import {
   HeartIcon as HeartSolidIcon,
@@ -30,10 +24,15 @@ import {
   getPostComments,
   createComment,
 } from '@/lib/queries';
-import type { PostWithAuthor, CommentWithAuthor, Profile } from '@/types/database.types';
+import type { Post, CommentWithAuthor, Profile } from '@/types/database.types';
+import { supabase } from '@/lib/supabase';
 
 interface PostCardProps {
-  post: PostWithAuthor;
+  post: Post & {
+    profiles?: Profile;
+    post_likes?: Array<{ id: string; user_id: string }>;
+    post_comments?: Array<{ id: string; content: string; author_id: string; created_at: string }>;
+  };
   onInteraction?: () => void;
 }
 
@@ -55,44 +54,41 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
     console.log(`[PostCard] ${message}`, data);
   };
 
-  // Type guard to check if author is a Profile
-  const isProfile = (author: typeof post.author): author is Profile => {
-    return author && 'full_name' in author;
-  };
-
-  // Helper function to get author display name
-  const getAuthorName = () => {
-    if (!post.author) return 'Unknown User';
-    return isProfile(post.author) ? (post.author.full_name || 'Unknown User') : (post.author.name || 'Unknown Institution');
-  };
-
-  // Helper function to get author avatar
-  const getAuthorAvatar = () => {
-    if (!post.author) return '';
-    return isProfile(post.author) ? (post.author.avatar_url || '') : (post.author.logo_url || '');
-  };
-
-  // Helper function to get author headline
-  const getAuthorHeadline = () => {
-    if (!post.author) return 'Healthcare Professional';
-    return isProfile(post.author) ? (post.author.headline || 'Healthcare Professional') : (post.author.type || 'Institution');
-  };
-
-  useEffect(() => {
-    checkIfLiked();
-  }, [post.id, user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const checkIfLiked = async () => {
-    if (!user?.id) return;
-    
+  // Function to refresh post data from database
+  const refreshPostData = async () => {
     try {
-      const liked = await isPostLiked(post.id, user.id);
-      setIsLiked(liked);
-      debugLog('Like status checked', { postId: post.id, liked });
+      const { data: postData, error } = await supabase
+        .from('posts')
+        .select('likes_count, comments_count')
+        .eq('id', post.id)
+        .single();
+      
+      if (!error && postData) {
+        setLikesCount(postData.likes_count || 0);
+        setCommentsCount(postData.comments_count || 0);
+        debugLog('Post data refreshed', postData);
+      }
     } catch (error) {
-      debugLog('Error checking like status', error);
+      debugLog('Error refreshing post data', error);
     }
   };
+
+  // Check if current user has liked the post
+  useEffect(() => {
+    if (!user?.id) return;
+    
+    const checkIfLiked = async () => {
+      try {
+        const liked = await isPostLiked(user.id, post.id);
+        setIsLiked(liked);
+        debugLog('Like status checked', { postId: post.id, liked });
+      } catch (error) {
+        debugLog('Error checking like status', error);
+      }
+    };
+
+    checkIfLiked();
+  }, [post.id, user?.id]);
 
   const handleLike = async () => {
     if (!user?.id) {
@@ -107,7 +103,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
         const success = await unlikePost(post.id, user.id);
         if (success) {
           setIsLiked(false);
-                     setLikesCount((prev: number) => Math.max(0, prev - 1));
+          setLikesCount((prev: number) => Math.max(0, prev - 1));
           debugLog('Post unliked successfully');
         } else {
           debugLog('Failed to unlike post');
@@ -116,7 +112,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
         const success = await likePost(post.id, user.id);
         if (success) {
           setIsLiked(true);
-                     setLikesCount((prev: number) => prev + 1);
+          setLikesCount((prev: number) => prev + 1);
           debugLog('Post liked successfully');
         } else {
           debugLog('Failed to like post');
@@ -124,6 +120,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
       }
       
       onInteraction?.();
+      await refreshPostData(); // Refresh post data after like/unlike
     } catch (error) {
       debugLog('Error toggling like', error);
       toast.error('Failed to update like');
@@ -177,28 +174,19 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
         toast.success('Comment added successfully!');
         onInteraction?.();
       } else {
-        debugLog('Failed to create comment');
-        toast.error('Failed to add comment. Please try again.');
+        toast.error('Failed to add comment');
       }
     } catch (error) {
-      debugLog('Error creating comment', error);
-      toast.error('Failed to add comment. Please try again.');
+      debugLog('Error submitting comment', error);
+      toast.error('Failed to add comment');
     } finally {
       setIsCommenting(false);
     }
   };
 
   const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-                 title: `Post by ${getAuthorName()}`,
-        text: post.content,
-        url: window.location.href,
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      toast.success('Link copied to clipboard!');
-    }
+    // Implement share functionality
+    toast('Share functionality coming soon!');
   };
 
   const handleBookmark = () => {
@@ -206,182 +194,190 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
     toast.success(isBookmarked ? 'Removed from bookmarks' : 'Added to bookmarks');
   };
 
-  const userProfile = user?.user_metadata;
+  const getAuthorName = () => {
+    return post.profiles?.full_name || 'Unknown User';
+  };
+
+  const getAuthorAvatar = () => {
+    return post.profiles?.avatar_url || '';
+  };
+
+  const getAuthorHeadline = () => {
+    return post.profiles?.headline || 'Healthcare Professional';
+  };
 
   return (
-    <div className="professional-card">
-      <div className="p-4">
-        {/* Post Header */}
-        <div className="flex items-start space-x-3 mb-3">
-          <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-            {('full_name' in post.author ? post.author.full_name : post.author.name)?.charAt(0) || post.author?.email?.charAt(0) || 'U'}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center space-x-2 mb-1">
-              <h3 className="font-semibold text-gray-900 text-sm truncate">
-                {('full_name' in post.author ? post.author.full_name : post.author.name) || post.author?.email?.split('@')[0] || 'User'}
-              </h3>
-              {('verified' in post.author && post.author.verified) && (
-                <div className="w-3 h-3 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                  <CheckBadgeIcon className="w-2 h-2 text-white" />
-                </div>
+    <div className="bg-white rounded-xl shadow-sm p-6">
+      {/* Post Header */}
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center space-x-3">
+          <Avatar
+            src={getAuthorAvatar()}
+            alt={getAuthorName()}
+            size="md"
+          />
+          <div className="flex-1">
+            <div className="flex items-center space-x-2">
+              <h3 className="font-semibold text-gray-900">{getAuthorName()}</h3>
+              {post.profiles?.user_type === 'institution' && (
+                <CheckBadgeIcon className="w-4 h-4 text-blue-600" />
               )}
             </div>
-            <div className="flex items-center space-x-2 text-xs text-gray-500 flex-wrap">
-              <span className="capitalize">
-                {('profile_type' in post.author ? post.author.profile_type : 'institution') === 'institution' ? 'Healthcare Institution' : 'Healthcare Professional'}
-              </span>
-              <span>•</span>
-              <span>{formatRelativeTime(post.created_at)}</span>
-              <span>•</span>
-              <span className="capitalize">{post.visibility}</span>
-            </div>
+            <p className="text-sm text-gray-500">{getAuthorHeadline()}</p>
+            <p className="text-xs text-gray-400">
+              {formatRelativeTime(post.created_at)} • Public
+            </p>
           </div>
-          <button
-            onClick={() => setShowOptions(!showOptions)}
-            className="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
-          >
-            <EllipsisHorizontalIcon className="w-4 h-4" />
-          </button>
         </div>
+        <button
+          onClick={() => setShowOptions(!showOptions)}
+          className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <EllipsisHorizontalIcon className="w-5 h-5" />
+        </button>
+      </div>
 
-        {/* Post Content */}
-        <div className="mb-3">
-          <p className="text-gray-900 text-sm leading-relaxed whitespace-pre-wrap break-words">
-            {post.content}
-          </p>
-        </div>
-
-        {/* Post Media */}
+      {/* Post Content */}
+      <div className="mb-4">
+        <p className="text-gray-900 whitespace-pre-wrap">{post.content}</p>
         {post.image_url && (
-          <div className="mb-3">
+          <div className="mt-3">
             <img
               src={post.image_url}
               alt="Post media"
-              className="w-full h-auto rounded-lg object-cover"
+              className="w-full rounded-lg"
             />
           </div>
         )}
+      </div>
 
-        {/* Post Stats */}
-        <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
-          <div className="flex items-center space-x-3">
-            <span>{post.likes_count || 0} likes</span>
-            <span>{post.comments_count || 0} comments</span>
-            <span>{post.shares_count || 0} shares</span>
-          </div>
+      {/* Post Stats */}
+      <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+        <div className="flex items-center space-x-4">
+          <span>{likesCount} likes</span>
+          <span>{commentsCount} comments</span>
+          <span>0 shares</span>
         </div>
+      </div>
 
-        {/* Post Actions */}
-        <div className="flex items-center justify-between pt-3 border-t border-gray-200">
-          <button
-            onClick={handleLike}
-            className={`flex items-center space-x-2 px-2 py-1.5 rounded-lg transition-colors duration-200 text-xs ${
-              isLiked
-                ? 'text-blue-600 bg-blue-50'
-                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            <HeartIcon className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
-            <span className="font-medium">Like</span>
-          </button>
+      {/* Post Actions */}
+      <div className="flex items-center justify-between border-t border-gray-100 pt-4">
+        <button
+          onClick={handleLike}
+          className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
+            isLiked
+              ? 'text-red-600 hover:bg-red-50'
+              : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+          }`}
+        >
+          {isLiked ? (
+            <HeartSolidIcon className="w-5 h-5" />
+          ) : (
+            <HeartIcon className="w-5 h-5" />
+          )}
+          <span className="text-sm">Like</span>
+        </button>
 
-          <button
-            onClick={() => setShowComments(!showComments)}
-            className="flex items-center space-x-2 px-2 py-1.5 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors duration-200 text-xs"
-          >
-            <ChatBubbleLeftIcon className="w-4 h-4" />
-            <span className="font-medium">Comment</span>
-          </button>
+        <button
+          onClick={toggleComments}
+          className="flex items-center space-x-2 px-3 py-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors"
+        >
+          <ChatBubbleOvalLeftIcon className="w-5 h-5" />
+          <span className="text-sm">Comment</span>
+        </button>
 
-          <button
-            onClick={handleShare}
-            className="flex items-center space-x-2 px-2 py-1.5 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors duration-200 text-xs"
-          >
-            <ArrowUpTrayIcon className="w-4 h-4" />
-            <span className="font-medium">Share</span>
-          </button>
+        <button
+          onClick={handleShare}
+          className="flex items-center space-x-2 px-3 py-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors"
+        >
+          <ShareIcon className="w-5 h-5" />
+          <span className="text-sm">Share</span>
+        </button>
 
-          <button
-            onClick={handleBookmark}
-            className={`flex items-center space-x-2 px-2 py-1.5 rounded-lg transition-colors duration-200 text-xs ${
-              isBookmarked
-                ? 'text-blue-600 bg-blue-50'
-                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            <BookmarkIcon className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
-            <span className="font-medium">Save</span>
-          </button>
-        </div>
+        <button
+          onClick={handleBookmark}
+          className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
+            isBookmarked
+              ? 'text-blue-600 hover:bg-blue-50'
+              : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+          }`}
+        >
+          {isBookmarked ? (
+            <BookmarkSolidIcon className="w-5 h-5" />
+          ) : (
+            <BookmarkIcon className="w-5 h-5" />
+          )}
+          <span className="text-sm">Save</span>
+        </button>
+      </div>
 
-        {/* Comments Section */}
-        <>
-          {showComments && (
-            <div
-              
-              
-              
-              className="mt-3 pt-3 border-t border-gray-200"
-            >
-              <div className="space-y-2">
-                {comments.map((comment) => (
-                  <div key={comment.id} className="flex space-x-2">
-                    <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 font-bold text-xs flex-shrink-0">
-                      {('full_name' in comment.author ? comment.author.full_name : comment.author.name)?.charAt(0) || 'U'}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="bg-gray-50 rounded-lg p-2">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <span className="font-medium text-xs text-gray-900 truncate">
-                            {('full_name' in comment.author ? comment.author.full_name : comment.author.name) || 'User'}
-                          </span>
-                          <span className="text-xs text-gray-500 flex-shrink-0">
-                            {formatRelativeTime(comment.created_at)}
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-700 break-words">{comment.content}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Add Comment */}
-              <div className="mt-3 flex space-x-2">
-                <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 font-bold text-xs flex-shrink-0">
-                  {userProfile?.full_name?.charAt(0) || 'U'}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex space-x-2">
-                    <input
-                      type="text"
-                      placeholder="Write a comment..."
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 text-xs"
-                    />
-                    <button
-                      onClick={submitComment}
-                      disabled={!newComment.trim() || isCommenting}
-                      className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-2 py-1.5 rounded-lg transition-colors duration-200 text-xs disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
-                    >
-                      {isCommenting ? (
-                        <>
-                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
-                          Posting...
-                        </>
-                      ) : (
-                        'Post'
-                      )}
-                    </button>
-                  </div>
-                </div>
+      {/* Comments Section */}
+      {showComments && (
+        <div className="border-t border-gray-100 pt-4 mt-4">
+          {/* Add Comment */}
+          <div className="flex items-start space-x-3 mb-4">
+            <Avatar
+              src={user?.user_metadata?.avatar_url}
+              alt={user?.email || 'User'}
+              size="sm"
+            />
+            <div className="flex-1">
+              <textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Write a comment..."
+                className="w-full p-3 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows={2}
+              />
+              <div className="flex justify-end mt-2">
+                <button
+                  onClick={submitComment}
+                  disabled={isCommenting || !newComment.trim()}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {isCommenting ? 'Posting...' : 'Post'}
+                </button>
               </div>
             </div>
-          )}
-        </>
-      </div>
+          </div>
+
+          {/* Comments List */}
+          <div className="space-y-4">
+            {isLoadingComments ? (
+              <div className="text-center py-4">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
+              </div>
+            ) : comments.length > 0 ? (
+              comments.map((comment) => (
+                <div key={comment.id} className="flex items-start space-x-3">
+                  <Avatar
+                    src={'avatar_url' in comment.author ? comment.author.avatar_url || '' : comment.author.logo_url || ''}
+                    alt={'full_name' in comment.author ? comment.author.full_name || 'User' : comment.author.name || 'User'}
+                    size="sm"
+                  />
+                  <div className="flex-1">
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <span className="font-medium text-sm text-gray-900">
+                          {'full_name' in comment.author ? comment.author.full_name || 'Unknown User' : comment.author.name || 'Unknown User'}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {formatRelativeTime(comment.created_at)}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-700">{comment.content}</p>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-center text-gray-500 text-sm py-4">
+                No comments yet. Be the first to comment!
+              </p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

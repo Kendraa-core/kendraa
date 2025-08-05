@@ -32,25 +32,27 @@ import toast from 'react-hot-toast';
 import Link from 'next/link';
 import {
   getProfile,
-  recordProfileView,
-  getConnectionStatus,
-  sendConnectionRequest,
   getExperiences,
   getEducation,
   getPostsByAuthor,
+  recordProfileView,
+  getConnectionStatus,
+  sendConnectionRequest,
+  getProfileViewsCount,
+  getOrCreateConversation,
   type Profile,
   type Experience,
   type Education,
   type PostWithAuthor,
-  getOrCreateConversation,
 } from '@/lib/queries';
 
 // Memoized components for better performance
-const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile, connectionStatus, onConnect }: {
+const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile, connectionStatus, onConnect, realTimeViewsCount }: {
   profile: Profile;
   isOwnProfile: boolean;
   connectionStatus: string;
   onConnect: () => void;
+  realTimeViewsCount: number;
 }) {
   const { user } = useAuth();
   const router = useRouter();
@@ -180,7 +182,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
             )}
             <div className="flex items-center">
               <EyeIcon className="w-4 h-4 mr-1" />
-              {profile.profile_views || 0} profile views
+              {realTimeViewsCount} profile views
             </div>
           </div>
 
@@ -241,9 +243,10 @@ export default function ProfilePage() {
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [education, setEducation] = useState<Education[]>([]);
   const [posts, setPosts] = useState<PostWithAuthor[]>([]);
+  const [connectionStatus, setConnectionStatus] = useState<'none' | 'pending' | 'connected'>('none');
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState('about');
-  const [connectionStatus, setConnectionStatus] = useState<'none' | 'pending' | 'connected'>('none');
+  const [realTimeViewsCount, setRealTimeViewsCount] = useState<number>(0);
 
   const profileId = params.id as string;
   const isOwnProfile = user?.id === profileId;
@@ -280,9 +283,16 @@ export default function ProfilePage() {
       setEducation(educationData);
       setPosts(postsData);
 
+      // Get real-time profile views count
+      const viewsCount = await getProfileViewsCount(profileId);
+      setRealTimeViewsCount(viewsCount);
+
       // Record profile view if not own profile
       if (!isOwnProfile && user?.id) {
         await recordProfileView(profileId, user.id);
+        // Update the views count after recording the view
+        const updatedViewsCount = await getProfileViewsCount(profileId);
+        setRealTimeViewsCount(updatedViewsCount);
       }
 
       // Get connection status if not own profile
@@ -414,6 +424,7 @@ export default function ProfilePage() {
                 isOwnProfile={isOwnProfile}
                 connectionStatus={connectionStatus}
                 onConnect={handleConnect}
+                realTimeViewsCount={realTimeViewsCount}
               />
             </div>
 
@@ -643,9 +654,9 @@ export default function ProfilePage() {
                   <CardTitle className="text-lg text-gray-900">Profile Stats</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div className="flex justify-between items-center text-sm">
+                  <div className="flex items-center space-x-4 text-sm">
                     <span className="text-gray-600">Profile views</span>
-                    <span className="font-semibold text-gray-900">{profile.profile_views || 0}</span>
+                    <span className="font-semibold text-gray-900">{realTimeViewsCount}</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-gray-600">Posts</span>

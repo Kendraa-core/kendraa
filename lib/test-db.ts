@@ -75,4 +75,78 @@ export async function testDatabaseConnection() {
   } catch (error) {
     console.error('💥 Database test failed:', error);
   }
+}
+
+export async function createSamplePostsWithHashtags() {
+  console.log('📝 Creating sample posts with hashtags...');
+  
+  try {
+    // Get a sample user ID (you'll need to replace this with a real user ID)
+    const { data: profiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select('id')
+      .limit(1);
+    
+    if (profilesError || !profiles || profiles.length === 0) {
+      console.log('❌ No profiles found for creating sample posts');
+      return;
+    }
+    
+    const authorId = profiles[0].id;
+    
+    const samplePosts = [
+      {
+        author_id: authorId,
+        content: "Just finished an amazing #healthcare conference! The insights on #telemedicine were incredible. #medicalinnovation #healthcaretech",
+        visibility: 'public'
+      },
+      {
+        author_id: authorId,
+        content: "Excited to share our latest research findings on #medicalresearch. The data shows promising results for #patientcare. #healthcare #research",
+        visibility: 'public'
+      },
+      {
+        author_id: authorId,
+        content: "The future of #telemedicine is here! Remote consultations are becoming the new normal. #healthcare #digitalhealth #innovation",
+        visibility: 'public'
+      },
+      {
+        author_id: authorId,
+        content: "Great discussion today about #medicalresearch and its impact on #patientcare. The healthcare industry is evolving rapidly! #healthcare #innovation",
+        visibility: 'public'
+      },
+      {
+        author_id: authorId,
+        content: "Attending the #healthcare summit next week. Looking forward to networking with other professionals in #telemedicine and #medicalinnovation.",
+        visibility: 'public'
+      },
+      {
+        author_id: authorId,
+        content: "Just published our findings on #medicalresearch. The results are promising for improving #patientcare outcomes. #healthcare #research",
+        visibility: 'public'
+      },
+      {
+        author_id: authorId,
+        content: "The integration of AI in #healthcare is revolutionizing #patientcare. #medicalinnovation is key to the future of medicine. #healthcaretech",
+        visibility: 'public'
+      }
+    ];
+    
+    for (const post of samplePosts) {
+      const { error } = await supabase
+        .from('posts')
+        .insert(post);
+      
+      if (error) {
+        console.log('❌ Error creating sample post:', error);
+      } else {
+        console.log('✅ Sample post created successfully');
+      }
+    }
+    
+    console.log('🎯 Sample posts with hashtags created!');
+    
+  } catch (error) {
+    console.error('💥 Error creating sample posts:', error);
+  }
 } 

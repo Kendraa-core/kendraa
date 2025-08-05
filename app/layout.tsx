@@ -4,6 +4,8 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import './globals.css';
+import ServiceWorkerRegistration from '@/components/common/ServiceWorkerRegistration';
+import PerformanceOptimizer from '@/components/common/PerformanceOptimizer';
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -101,7 +103,6 @@ export default function RootLayout({
       <body className="min-h-screen bg-gray-50 antialiased" suppressHydrationWarning>
         <AuthProvider>
           <NotificationProvider>
-            {children}
             <Toaster
               position="top-right"
               toastOptions={{
@@ -125,6 +126,10 @@ export default function RootLayout({
                 },
               }}
             />
+            <ServiceWorkerRegistration>
+              <PerformanceOptimizer />
+              {children}
+            </ServiceWorkerRegistration>
           </NotificationProvider>
         </AuthProvider>
       </body>

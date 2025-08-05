@@ -135,7 +135,11 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
 
       debugLog('Creating post with data', postData);
 
-      const post = await createPost(postData);
+      const post = await createPost(
+        user.id,
+        content,
+        imageUrls[0] || undefined
+      );
 
       debugLog('Post creation result', { post });
 

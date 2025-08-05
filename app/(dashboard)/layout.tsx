@@ -81,7 +81,7 @@ export default function DashboardLayout({
       {showSearch && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-20 px-4">
           <div className="w-full max-w-md">
-            <UserSearch onClose={() => setShowSearch(false)} />
+            <UserSearch />
           </div>
         </div>
       )}

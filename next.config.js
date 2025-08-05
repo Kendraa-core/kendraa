@@ -1,39 +1,27 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Production optimizations
-  compress: true,
-  poweredByHeader: false,
-  generateEtags: false,
+  // Disable static optimization for dynamic content
+  staticPageGenerationTimeout: 120,
   
-  // Image optimization
+  // Optimize images
   images: {
-    domains: ['localhost'],
+    domains: ['localhost', '127.0.0.1'],
     formats: ['image/webp', 'image/avif'],
-    minimumCacheTTL: 60,
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
-  
-  // Experimental features for better performance
+
+  // Experimental features
   experimental: {
-    optimizePackageImports: ['@heroicons/react', 'framer-motion', 'react-hot-toast'],
     optimizeCss: true,
     scrollRestoration: true,
+    // Disable optimizePackageImports to prevent cache issues
+    // optimizePackageImports: ['@heroicons/react'],
   },
-  
-  // Turbopack configuration (moved from experimental.turbo)
-  turbopack: {
-    rules: {
-      '*.svg': {
-        loaders: ['@svgr/webpack'],
-        as: '*.js',
-      },
-    },
-  },
-  
-  // Webpack optimizations
+
+  // Webpack configuration
   webpack: (config, { dev, isServer }) => {
-    // Production optimizations
+    // Optimize bundle size
     if (!dev && !isServer) {
       config.optimization.splitChunks = {
         chunks: 'all',
@@ -42,47 +30,29 @@ const nextConfig = {
             test: /[\\/]node_modules[\\/]/,
             name: 'vendors',
             chunks: 'all',
-            priority: 10,
-          },
-          common: {
-            name: 'common',
-            minChunks: 2,
-            chunks: 'all',
-            priority: 5,
           },
         },
       };
-      
-      // Enable tree shaking
-      config.optimization.usedExports = true;
-      config.optimization.sideEffects = false;
     }
+
+    // Add cache busting
+    config.output.filename = dev 
+      ? 'static/js/[name].js'
+      : 'static/js/[name].[contenthash].js';
     
+    config.output.chunkFilename = dev
+      ? 'static/js/[name].chunk.js'
+      : 'static/js/[name].[contenthash].chunk.js';
+
     return config;
   },
-  
-  // Headers for security and performance
+
+  // Headers for better caching
   async headers() {
     return [
       {
-        source: '/(.*)',
+        source: '/static/:path*',
         headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin',
-          },
-          {
-            key: 'X-DNS-Prefetch-Control',
-            value: 'on',
-          },
           {
             key: 'Cache-Control',
             value: 'public, max-age=31536000, immutable',
@@ -90,7 +60,16 @@ const nextConfig = {
         ],
       },
       {
-        source: '/api/(.*)',
+        source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/api/:path*',
         headers: [
           {
             key: 'Cache-Control',
@@ -100,37 +79,12 @@ const nextConfig = {
       },
     ];
   },
+
+  // Disable automatic static optimization for dynamic pages
+  trailingSlash: false,
   
-  // Redirects for better UX
-  async redirects() {
-    return [
-      {
-        source: '/home',
-        destination: '/feed',
-        permanent: true,
-      },
-    ];
-  },
-  
-  // Environment variables
-  env: {
-    CUSTOM_KEY: process.env.CUSTOM_KEY,
-  },
-  
-  // TypeScript configuration
-  typescript: {
-    ignoreBuildErrors: false,
-  },
-  
-  // ESLint configuration
-  eslint: {
-    ignoreDuringBuilds: false,
-  },
-  
-  // Performance optimizations
-  compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
-  },
+  // Enable React strict mode for better development
+  reactStrictMode: true,
 };
 
 module.exports = nextConfig; 

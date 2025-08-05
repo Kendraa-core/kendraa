@@ -1,34 +1,11 @@
 import { supabase } from './supabase';
 import toast from 'react-hot-toast';
-import type { 
-  Profile, 
-  Post, 
-  PostComment,
-  PostWithAuthor, 
-  CommentWithAuthor, 
-  Connection, 
-  Institution, 
-  Job, 
-  JobApplication, 
-  JobWithCompany,
-  Event, 
-  EventAttendee,
-  EventWithOrganizer,
-  Experience, 
-  Education, 
-  Notification,
-  ConnectionWithProfile,
-  Follow,
-  FollowWithProfile,
-  Conversation,
-  ConversationWithParticipants,
-  Message,
-  MessageWithSender,
-  MessageReaction,
-  ClinicalNote,
-  MessagingSettings,
-  ConversationParticipant
-} from '@/types/database.types';
+import type { Profile, Post, PostComment,
+  PostWithAuthor, CommentWithAuthor, Connection, Institution, Job, JobApplication, JobWithCompany,
+  Event, EventAttendee, EventWithOrganizer, Experience, Education, Notification,
+  ConnectionWithProfile, Follow, FollowWithProfile, Conversation, ConversationWithParticipants,
+  Message, MessageWithSender, MessageReaction, ClinicalNote, MessagingSettings,
+  ConversationParticipant } from '@/types/database.types';
 
 // Re-export types for convenience
 export type { 
@@ -51,160 +28,39 @@ export type {
   MessagingSettings
 };
 
-const debugLog = (message: string, data?: unknown) => {
-  console.log(`[Queries] ${message}`, data || '');
-};
+// No caching - direct database calls only
 
-// Check if database schema exists - cache the result
-let schemaExistsCache: boolean | null = null;
-let schemaCheckPromise: Promise<boolean> | null = null;
-
-const checkSchemaExists = async (): Promise<boolean> => {
-  // Return cached result if available
-  if (schemaExistsCache !== null) {
-    return schemaExistsCache;
-  }
-
-  // If a check is already in progress, return that promise
-  if (schemaCheckPromise) {
-    return schemaCheckPromise;
-  }
-
-  // Start a new schema check
-  schemaCheckPromise = (async () => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('count')
-        .limit(1);
-      
-      const exists = !error;
-      schemaExistsCache = exists;
-      return exists;
-    } catch {
-      schemaExistsCache = false;
-      return false;
-    } finally {
-      schemaCheckPromise = null;
-    }
-  })();
-
-  return schemaCheckPromise;
-};
-
-// Simple in-memory cache for profiles
-const profileCache = new Map<string, Profile>();
-
-// Function to clear profile cache
-export const clearProfileCache = (userId?: string) => {
-  if (userId) {
-    profileCache.delete(userId);
-  } else {
-    profileCache.clear();
-  }
-};
-
-// Profile queries
-export async function getProfile(userId: string): Promise<Profile | null> {
+// Profile queries - No caching
+export async function getProfile(userId: string): Promise<Profile> {
   try {
-    debugLog('Getting profile', { userId });
+    console.log('[Queries] Getting profile for user:', userId);
     
-    // Check cache first
-    if (profileCache.has(userId)) {
-      debugLog('Profile found in cache');
-      return profileCache.get(userId) || null;
-    }
-    
-    // Try to get profile directly first (most common case)
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', userId)
-      .maybeSingle();
+      .single();
 
     if (error) {
-      debugLog('Error fetching profile', error);
-      
-      // If it's a schema error, check if schema exists
-      if (error.code === '42P01' || error.message?.includes('relation')) {
-        const schemaExists = await checkSchemaExists();
-        if (!schemaExists) {
-          debugLog('Database schema not found, returning fallback profile');
-          const fallbackProfile: Profile = {
-            id: userId,
-            email: 'user@example.com',
-            full_name: 'User',
-            headline: 'Healthcare Professional',
-            bio: '',
-            location: '',
-            avatar_url: '',
-            banner_url: '',
-            website: '',
-            phone: '',
-            specialization: ['General Medicine'],
-            is_premium: false,
-            profile_views: 0,
-            user_type: 'individual' as const,
-            profile_type: 'individual' as const,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          };
-          // Cache the fallback profile
-          profileCache.set(userId, fallbackProfile);
-          return fallbackProfile;
-        }
-      }
-      
-      // If profile doesn't exist, create a basic one
-      if (error.code === 'PGRST116') {
-        debugLog('Profile not found, creating basic profile');
-        const basicProfile: Profile = {
-          id: userId,
-          email: 'user@example.com',
-          full_name: 'Healthcare Professional',
-          headline: 'Medical Professional',
-          bio: '',
-          location: '',
-          avatar_url: '',
-          banner_url: '',
-          website: '',
-          phone: '',
-          specialization: ['General Medicine'],
-          is_premium: false,
-          profile_views: 0,
-          user_type: 'individual' as const,
-          profile_type: 'individual' as const,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
-        // Cache the basic profile
-        profileCache.set(userId, basicProfile);
-        return basicProfile;
-      }
-      return null;
+      console.error('[Queries] Error fetching profile:', error);
+      throw error;
     }
-    
-    debugLog('Profile fetched successfully', data);
-    // Cache the fetched profile
-    if (data) {
-      profileCache.set(userId, data);
+
+    if (!data) {
+      throw new Error('Profile not found');
     }
-    return data;
+
+    console.log('[Queries] Profile fetched successfully');
+    return data as Profile;
   } catch (error) {
-    debugLog('Error fetching profile', error);
-    return null;
+    console.error('[Queries] Error in getProfile:', error);
+    throw error;
   }
 }
 
 export async function updateProfile(userId: string, updates: Partial<Profile>): Promise<Profile | null> {
   try {
-    debugLog('Updating profile', { userId, updates });
-    
-    const schemaExists = await checkSchemaExists();
-    if (!schemaExists) {
-      debugLog('Database schema not found, cannot update profile');
-      return null;
-    }
+    console.log('[Queries] Updating profile', { userId, updates });
     
     const { data, error } = await supabase
       .from('profiles')
@@ -213,183 +69,124 @@ export async function updateProfile(userId: string, updates: Partial<Profile>): 
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('[Queries] Error updating profile', error);
+      throw error;
+    }
     
-    debugLog('Profile updated successfully', data);
-    // Clear cache for this user
-    clearProfileCache(userId);
+    console.log('[Queries] Profile updated successfully', data);
     return data;
   } catch (error) {
-    debugLog('Error updating profile', error);
+    console.error('[Queries] Error updating profile', error);
     return null;
   }
 }
 
-export async function ensureProfileExists(userId: string, email: string, fullName: string, profileType: 'individual' | 'institution' = 'individual'): Promise<Profile | null> {
+export async function ensureProfileExists(
+  userId: string,
+  email: string,
+  fullName: string,
+  profileType: 'individual' | 'institution'
+): Promise<Profile> {
   try {
-    debugLog('Ensuring profile exists', { userId, email, fullName, profileType });
+    console.log('[Queries] Ensuring profile exists for user:', userId);
     
-    const schemaExists = await checkSchemaExists();
-    if (!schemaExists) {
-      debugLog('Database schema not found, returning mock profile');
-      return {
+    const { data, error } = await supabase
+      .from('profiles')
+      .upsert({
         id: userId,
         email,
         full_name: fullName,
-        headline: profileType === 'institution' ? 'Healthcare Institution' : 'Healthcare Professional',
+        user_type: profileType,
+        profile_type: profileType,
+        headline: '',
         bio: '',
         location: '',
         avatar_url: '',
         banner_url: '',
         website: '',
         phone: '',
-        specialization: ['General Medicine'],
+        specialization: [],
         is_premium: false,
         profile_views: 0,
-        user_type: profileType,
-        profile_type: profileType,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-      };
-    }
-    
-    // First try to get existing profile
-    const { data: profile, error: fetchError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
+      })
+      .select()
       .single();
 
-    if (fetchError && fetchError.code !== 'PGRST116') {
-      throw fetchError;
+    if (error) {
+      console.error('[Queries] Error ensuring profile exists:', error);
+      throw error;
     }
 
-    // If profile doesn't exist, create it
-    if (!profile) {
-      const { data: newProfile, error: createError } = await supabase
-        .from('profiles')
-        .insert({
-          id: userId,
-          email,
-          full_name: fullName,
-          user_type: profileType,
-          profile_type: profileType,
-          headline: profileType === 'institution' ? 'Healthcare Institution' : 'Healthcare Professional',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .select()
-        .single();
-
-      if (createError) throw createError;
-      
-      debugLog('Profile created successfully', newProfile);
-      return newProfile;
-    }
-    
-    debugLog('Profile already exists', profile);
-    return profile;
+    console.log('[Queries] Profile ensured successfully');
+    return data as Profile;
   } catch (error) {
-    debugLog('Error ensuring profile exists', error);
-    return null;
+    console.error('[Queries] Error in ensureProfileExists:', error);
+    throw error;
   }
 }
 
 // Post queries
-export async function getPosts(page = 0, limit = 10): Promise<PostWithAuthor[]> {
+export async function getPosts(limit = 10, offset = 0): Promise<Post[]> {
   try {
-    debugLog('Getting posts', { page, limit });
+    console.log('[Queries] Getting posts');
     
-    const schemaExists = await checkSchemaExists();
-    if (!schemaExists) {
-      debugLog('Database schema not found, returning empty posts');
-      return [];
-    }
-    
-    // First check if we have any posts at all
-    const { count } = await supabase
-      .from('posts')
-      .select('*', { count: 'exact', head: true });
-    
-    if (count === 0) {
-      debugLog('No posts found, returning empty array');
-      return [];
-    }
-    
-    // Calculate proper offset
-    const offset = Math.min(page * limit, count || 0);
-    
-    // Get posts without join first
-    const { data: posts, error: postsError } = await supabase
+    // First get posts without joins to avoid complex query issues
+    const { data: posts, error } = await supabase
       .from('posts')
       .select('*')
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
-    if (postsError) {
-      debugLog('Error fetching posts', postsError);
+    if (error) {
+      console.error('[Queries] Error fetching posts:', error);
       return [];
     }
-    
+
     if (!posts || posts.length === 0) {
-      debugLog('No posts returned');
+      console.log('[Queries] No posts found');
       return [];
     }
-    
-    // Get author IDs
+
+    // Get author IDs for the posts
     const authorIds = [...new Set(posts.map(post => post.author_id))];
     
     // Fetch authors separately
     const { data: authors, error: authorsError } = await supabase
       .from('profiles')
-      .select('id, full_name, avatar_url, headline, email')
+      .select('id, full_name, avatar_url, headline, user_type')
       .in('id', authorIds);
-    
+
     if (authorsError) {
-      debugLog('Error fetching authors', authorsError);
-      // Return posts without author info
-      return posts.map(post => ({
-        ...post,
-        author: {
-          id: post.author_id,
-          full_name: 'Unknown User',
-          avatar_url: '',
-          headline: '',
-          email: ''
-        }
-      }));
+      console.error('[Queries] Error fetching authors:', authorsError);
     }
-    
+
     // Create author lookup map
     const authorMap = new Map(authors?.map(author => [author.id, author]) || []);
-    
-    // Combine posts with authors
+
+    // Combine posts with author data
     const postsWithAuthors = posts.map(post => ({
       ...post,
-      author: authorMap.get(post.author_id) || {
-        id: post.author_id,
-        full_name: 'Unknown User',
-        avatar_url: '',
-        headline: '',
-        email: ''
-      }
+      profiles: authorMap.get(post.author_id) || null
     }));
-    
-    debugLog('Posts fetched successfully', postsWithAuthors);
+
+    console.log('[Queries] Posts fetched successfully:', postsWithAuthors.length);
     return postsWithAuthors;
   } catch (error) {
-    debugLog('Error fetching posts', error);
+    console.error('[Queries] Error in getPosts:', error);
     return [];
   }
 }
 
 export async function getPostsByAuthor(authorId: string): Promise<PostWithAuthor[]> {
   try {
-    debugLog('Getting posts by author', { authorId });
+    console.log('Getting posts by author', { authorId });
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, returning empty posts');
+      console.log('Database schema not found, returning empty posts');
       return [];
     }
     
@@ -401,12 +198,12 @@ export async function getPostsByAuthor(authorId: string): Promise<PostWithAuthor
       .order('created_at', { ascending: false });
 
     if (postsError) {
-      debugLog('Error fetching posts by author', postsError);
+      console.log('Error fetching posts by author', postsError);
       return [];
     }
     
     if (!posts || posts.length === 0) {
-      debugLog('No posts found for author');
+      console.log('No posts found for author');
       return [];
     }
     
@@ -418,7 +215,7 @@ export async function getPostsByAuthor(authorId: string): Promise<PostWithAuthor
       .single();
     
     if (authorError) {
-      debugLog('Error fetching author', authorError);
+      console.log('Error fetching author', authorError);
       // Return posts without author info
       return posts.map(post => ({
         ...post,
@@ -444,64 +241,55 @@ export async function getPostsByAuthor(authorId: string): Promise<PostWithAuthor
       }
     }));
     
-    debugLog('Posts by author fetched successfully', postsWithAuthor);
+    console.log('Posts by author fetched successfully', postsWithAuthor);
     return postsWithAuthor;
   } catch (error) {
-    debugLog('Error fetching posts by author', error);
+    console.log('Error fetching posts by author', error);
     return [];
   }
 }
 
-export async function createPost(post: {
-  content: string;
-  author_id: string;
-  visibility: 'public' | 'connections' | 'private';
-  image_url?: string;
-  images?: string[];
-}): Promise<Post | null> {
+export async function createPost(
+  authorId: string,
+  content: string,
+  mediaUrl?: string
+): Promise<Post | null> {
   try {
-    debugLog('Creating post', post);
-    
-    const schemaExists = await checkSchemaExists();
-    if (!schemaExists) {
-      debugLog('Database schema not found, cannot create post');
-      return null;
-    }
-    
-    const postData = {
-      ...post,
-      author_type: 'individual' as const,
-      likes_count: 0,
-      comments_count: 0,
-      shares_count: 0,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
+    console.log('[Queries] Creating post for user:', authorId);
     
     const { data, error } = await supabase
       .from('posts')
-      .insert(postData)
+      .insert({
+        author_id: authorId,
+        content,
+        media_url: mediaUrl,
+        likes_count: 0,
+        comments_count: 0,
+      })
       .select()
       .single();
 
-    if (error) throw error;
-    
-    debugLog('Post created successfully', data);
-    return data;
+    if (error) {
+      console.error('[Queries] Error creating post:', error);
+      throw error;
+    }
+
+    console.log('[Queries] Post created successfully');
+    return data as Post;
   } catch (error) {
-    debugLog('Error creating post', error);
-    return null;
+    console.error('[Queries] Error in createPost:', error);
+    throw error;
   }
 }
 
 // Connection queries
 export async function getConnections(userId: string): Promise<Profile[]> {
   try {
-    debugLog('Getting connections', { userId });
+    console.log('Getting connections', { userId });
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, returning empty connections');
+      console.log('Database schema not found, returning empty connections');
       return [];
     }
     
@@ -517,7 +305,7 @@ export async function getConnections(userId: string): Promise<Profile[]> {
       .eq('status', 'accepted');
 
     if (error) {
-      debugLog('Error fetching connections', error);
+      console.log('Error fetching connections', error);
       return [];
     }
 
@@ -533,21 +321,21 @@ export async function getConnections(userId: string): Promise<Profile[]> {
       }
     }
     
-    debugLog('Connections fetched successfully', connections);
+    console.log('Connections fetched successfully', connections);
     return connections;
   } catch (error) {
-    debugLog('Error fetching connections', error);
+    console.log('Error fetching connections', error);
     return [];
   }
 }
 
 export async function getConnectionStatus(userId: string, targetUserId: string): Promise<string | null> {
   try {
-    debugLog('Getting connection status', { userId, targetUserId });
+    console.log('Getting connection status', { userId, targetUserId });
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, returning null connection status');
+      console.log('Database schema not found, returning null connection status');
       return null;
     }
     
@@ -562,21 +350,21 @@ export async function getConnectionStatus(userId: string, targetUserId: string):
     }
     
     const status = data?.status || null;
-    debugLog('Connection status fetched', status);
+    console.log('Connection status fetched', status);
     return status;
   } catch (error) {
-    debugLog('Error fetching connection status', error);
+    console.log('Error fetching connection status', error);
     return null;
   }
 }
 
 export async function sendConnectionRequest(requesterId: string, recipientId: string): Promise<Connection | null> {
   try {
-    debugLog('Sending connection request', { requesterId, recipientId });
+    console.log('Sending connection request', { requesterId, recipientId });
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, cannot send connection request');
+      console.log('Database schema not found, cannot send connection request');
       return null;
     }
     
@@ -609,10 +397,10 @@ export async function sendConnectionRequest(requesterId: string, recipientId: st
       });
     }
     
-    debugLog('Connection request sent successfully', data);
+    console.log('Connection request sent successfully', data);
     return data;
   } catch (error) {
-    debugLog('Error sending connection request', error);
+    console.log('Error sending connection request', error);
     return null;
   }
 }
@@ -620,11 +408,11 @@ export async function sendConnectionRequest(requesterId: string, recipientId: st
 // Missing connection functions
 export async function getSuggestedConnections(userId: string, limit = 10): Promise<Profile[]> {
   try {
-    debugLog('Getting suggested connections', { userId, limit });
+    console.log('Getting suggested connections', { userId, limit });
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, returning empty suggested connections');
+      console.log('Database schema not found, returning empty suggested connections');
       return [];
     }
     
@@ -660,25 +448,25 @@ export async function getSuggestedConnections(userId: string, limit = 10): Promi
       .limit(limit);
 
     if (error) {
-      debugLog('Error fetching suggested connections', error);
+      console.log('Error fetching suggested connections', error);
       return [];
     }
     
-    debugLog('Suggested connections fetched successfully', data);
+    console.log('Suggested connections fetched successfully', data);
     return data || [];
   } catch (error) {
-    debugLog('Error fetching suggested connections', error);
+    console.log('Error fetching suggested connections', error);
     return [];
   }
 }
 
 export async function getConnectionRequests(userId: string): Promise<ConnectionWithProfile[]> {
   try {
-    debugLog('Getting connection requests', { userId });
+    console.log('Getting connection requests', { userId });
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, returning empty connection requests');
+      console.log('Database schema not found, returning empty connection requests');
       return [];
     }
     
@@ -695,21 +483,21 @@ export async function getConnectionRequests(userId: string): Promise<ConnectionW
 
     if (error) throw error;
     
-    debugLog('Connection requests fetched successfully', data);
+    console.log('Connection requests fetched successfully', data);
     return data || [];
   } catch (error) {
-    debugLog('Error fetching connection requests', error);
+    console.log('Error fetching connection requests', error);
     return [];
   }
 }
 
 export async function acceptConnectionRequest(connectionId: string): Promise<boolean> {
   try {
-    debugLog('Accepting connection request', { connectionId });
+    console.log('Accepting connection request', { connectionId });
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, cannot accept connection request');
+      console.log('Database schema not found, cannot accept connection request');
       return false;
     }
     
@@ -749,21 +537,21 @@ export async function acceptConnectionRequest(connectionId: string): Promise<boo
       }
     }
     
-    debugLog('Connection request accepted successfully');
+    console.log('Connection request accepted successfully');
     return true;
   } catch (error) {
-    debugLog('Error accepting connection request', error);
+    console.log('Error accepting connection request', error);
     return false;
   }
 }
 
 export async function rejectConnectionRequest(connectionId: string): Promise<boolean> {
   try {
-    debugLog('Rejecting connection request', { connectionId });
+    console.log('Rejecting connection request', { connectionId });
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, cannot reject connection request');
+      console.log('Database schema not found, cannot reject connection request');
       return false;
     }
     
@@ -777,10 +565,10 @@ export async function rejectConnectionRequest(connectionId: string): Promise<boo
 
     if (error) throw error;
     
-    debugLog('Connection request rejected successfully');
+    console.log('Connection request rejected successfully');
     return true;
   } catch (error) {
-    debugLog('Error rejecting connection request', error);
+    console.log('Error rejecting connection request', error);
     return false;
   }
 }
@@ -788,11 +576,11 @@ export async function rejectConnectionRequest(connectionId: string): Promise<boo
 // Experience queries
 export async function getExperiences(profileId: string): Promise<Experience[]> {
   try {
-    debugLog('Getting experiences', { profileId });
+    console.log('Getting experiences', { profileId });
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, returning empty experiences');
+      console.log('Database schema not found, returning empty experiences');
       return [];
     }
     
@@ -804,10 +592,10 @@ export async function getExperiences(profileId: string): Promise<Experience[]> {
 
     if (error) throw error;
     
-    debugLog('Experiences fetched successfully', data);
+    console.log('Experiences fetched successfully', data);
     return data || [];
   } catch (error) {
-    debugLog('Error fetching experiences', error);
+    console.log('Error fetching experiences', error);
     return [];
   }
 }
@@ -815,11 +603,11 @@ export async function getExperiences(profileId: string): Promise<Experience[]> {
 // Education queries
 export async function getEducation(profileId: string): Promise<Education[]> {
   try {
-    debugLog('Getting education', { profileId });
+    console.log('Getting education', { profileId });
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, returning empty education');
+      console.log('Database schema not found, returning empty education');
       return [];
     }
     
@@ -831,10 +619,10 @@ export async function getEducation(profileId: string): Promise<Education[]> {
 
     if (error) throw error;
     
-    debugLog('Education fetched successfully', data);
+    console.log('Education fetched successfully', data);
     return data || [];
   } catch (error) {
-    debugLog('Error fetching education', error);
+    console.log('Error fetching education', error);
     return [];
   }
 }
@@ -842,12 +630,11 @@ export async function getEducation(profileId: string): Promise<Education[]> {
 // Notifications - returning mock data for now
 export async function getNotifications(userId: string): Promise<Notification[]> {
   try {
-    debugLog('Getting notifications', { userId });
+    console.log('Getting notifications', { userId });
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, returning mock notifications');
-      // Return mock notifications for testing
+      console.log('Database schema not found, returning mock notifications');
       return [
         {
           id: '1',
@@ -889,11 +676,11 @@ export async function getNotifications(userId: string): Promise<Notification[]> 
     const { data, error } = await supabase
       .from('notifications')
       .select('*')
-      .eq('user_id', userId)
+      .eq('recipient_id', userId) // Use recipient_id instead of user_id
       .order('created_at', { ascending: false });
 
     if (error) {
-      debugLog('Error fetching notifications from database, returning mock data', error);
+      console.log('Error fetching notifications from database, returning mock data', error);
       // If table doesn't exist or other error, return mock data
       return [
         {
@@ -932,10 +719,21 @@ export async function getNotifications(userId: string): Promise<Notification[]> 
       ];
     }
     
-    debugLog('Notifications fetched successfully', data);
-    return data || [];
+    console.log('Notifications fetched successfully', data);
+    // Transform the data to match our interface
+    return (data || []).map(notification => ({
+      id: notification.id,
+      created_at: notification.created_at,
+      user_id: notification.recipient_id, // Map recipient_id back to user_id
+      type: notification.type,
+      title: notification.title,
+      message: notification.message,
+      read: notification.read,
+      data: notification.data,
+      action_url: null, // Add this field as it's not in the database
+    }));
   } catch (error) {
-    debugLog('Error fetching notifications', error);
+    console.log('Error fetching notifications', error);
     // Return mock data on any error
     return [
       {
@@ -978,18 +776,23 @@ export async function getNotifications(userId: string): Promise<Notification[]> 
 // Create notification function
 export async function createNotification(notification: Omit<Notification, 'id' | 'created_at'>): Promise<Notification | null> {
   try {
-    debugLog('Creating notification', notification);
+    console.log('Creating notification', notification);
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, cannot create notification');
+      console.log('Database schema not found, cannot create notification');
       return null;
     }
     
     const { data, error } = await supabase
       .from('notifications')
       .insert({
-        ...notification,
+        recipient_id: notification.user_id, // Map user_id to recipient_id for database
+        type: notification.type,
+        title: notification.title,
+        message: notification.message,
+        read: notification.read,
+        data: notification.data,
         created_at: new Date().toISOString(),
       })
       .select()
@@ -997,10 +800,10 @@ export async function createNotification(notification: Omit<Notification, 'id' |
 
     if (error) throw error;
     
-    debugLog('Notification created successfully', data);
+    console.log('Notification created successfully', data);
     return data;
   } catch (error) {
-    debugLog('Error creating notification', error);
+    console.log('Error creating notification', error);
     return null;
   }
 }
@@ -1008,11 +811,11 @@ export async function createNotification(notification: Omit<Notification, 'id' |
 // Mark notification as read
 export async function markNotificationAsRead(notificationId: string): Promise<boolean> {
   try {
-    debugLog('Marking notification as read', { notificationId });
+    console.log('Marking notification as read', { notificationId });
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, cannot mark notification as read');
+      console.log('Database schema not found, cannot mark notification as read');
       return false;
     }
     
@@ -1023,38 +826,56 @@ export async function markNotificationAsRead(notificationId: string): Promise<bo
 
     if (error) throw error;
     
-    debugLog('Notification marked as read successfully');
+    console.log('Notification marked as read successfully');
     return true;
   } catch (error) {
-    debugLog('Error marking notification as read', error);
+    console.log('Error marking notification as read', error);
     return false;
   }
 }
 
 // Additional helper functions
-export async function recordProfileView(viewerId: string, profileId: string): Promise<void> {
+export async function recordProfileView(viewerId: string, profileId: string): Promise<boolean> {
   try {
-    debugLog('Recording profile view', { viewerId, profileId });
+    console.log('[Queries] Recording profile view:', profileId, 'by user:', viewerId);
     
-    if (viewerId === profileId) return; // Don't record self-views
-    
-    const schemaExists = await checkSchemaExists();
-    if (!schemaExists) {
-      debugLog('Database schema not found, cannot record profile view');
-      return;
-    }
-    
-    await supabase
+    // Add view record
+    const { error: viewError } = await supabase
       .from('profile_views')
       .upsert({
         viewer_id: viewerId,
         profile_id: profileId,
         viewed_at: new Date().toISOString(),
       });
-    
-    debugLog('Profile view recorded successfully');
+
+    if (viewError) {
+      console.error('[Queries] Error recording profile view:', viewError);
+      throw viewError;
+    }
+
+    // Update profile views count
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('profile_views')
+      .eq('id', profileId)
+      .single();
+
+    if (profile) {
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ profile_views: (profile.profile_views || 0) + 1 })
+        .eq('id', profileId);
+
+      if (updateError) {
+        console.error('[Queries] Error updating profile views:', updateError);
+      }
+    }
+
+    console.log('[Queries] Profile view recorded successfully');
+    return true;
   } catch (error) {
-    debugLog('Error recording profile view', error);
+    console.error('[Queries] Error in recordProfileView:', error);
+    return false;
   }
 }
 
@@ -1065,19 +886,12 @@ export async function createComment(comment: {
   author_id: string;
 }): Promise<PostComment | null> {
   try {
-    debugLog('Creating comment', comment);
+    console.log('[Queries] Creating comment:', comment);
     
-    const schemaExists = await checkSchemaExists();
-    if (!schemaExists) {
-      debugLog('Database schema not found, cannot create comment');
-      return null;
-    }
-    
-    // Check if post_comments table exists
+    // First check if the table exists
     const tableExists = await ensurePostCommentsTable();
     if (!tableExists) {
-      debugLog('Post_comments table does not exist, cannot create comment');
-      toast.error('Comments feature is not available yet. Please try again later.');
+      console.log('[Queries] Post comments table does not exist, cannot create comment');
       return null;
     }
     
@@ -1090,36 +904,49 @@ export async function createComment(comment: {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('[Queries] Error creating comment:', error);
+      throw error;
+    }
     
-    // Increment comments count
-    await supabase.rpc('increment_comments_count', { post_id: comment.post_id });
+    // Update post comments count
+    const { data: post } = await supabase
+      .from('posts')
+      .select('comments_count')
+      .eq('id', comment.post_id)
+      .single();
+
+    if (post) {
+      const { error: updateError } = await supabase
+        .from('posts')
+        .update({ comments_count: (post.comments_count || 0) + 1 })
+        .eq('id', comment.post_id);
+
+      if (updateError) {
+        console.error('[Queries] Error updating comments count:', updateError);
+      }
+    }
     
-    debugLog('Comment created successfully', data);
+    console.log('[Queries] Comment created successfully:', data);
     return data;
   } catch (error) {
-    debugLog('Error creating comment', error);
+    console.error('[Queries] Error in createComment:', error);
     return null;
   }
 }
 
 export async function getPostComments(postId: string): Promise<CommentWithAuthor[]> {
   try {
-    debugLog('Getting post comments', { postId });
+    console.log('[Queries] Getting comments for post:', postId);
     
-    const schemaExists = await checkSchemaExists();
-    if (!schemaExists) {
-      debugLog('Database schema not found, returning empty comments');
-      return [];
-    }
-    
-    // Check if post_comments table exists
+    // First check if the table exists
     const tableExists = await ensurePostCommentsTable();
     if (!tableExists) {
-      debugLog('Post_comments table does not exist, returning empty comments');
+      console.log('[Queries] Post comments table does not exist, returning empty array');
       return [];
     }
     
+    // Try to fetch comments with author data
     const { data, error } = await supabase
       .from('post_comments')
       .select(`
@@ -1129,12 +956,57 @@ export async function getPostComments(postId: string): Promise<CommentWithAuthor
       .eq('post_id', postId)
       .order('created_at', { ascending: true });
 
-    if (error) throw error;
+    if (error) {
+      console.error('[Queries] Error fetching comments with author data:', error);
+      
+      // If the join fails, try fetching comments without author data
+      console.log('[Queries] Trying to fetch comments without author data');
+      const { data: commentsOnly, error: commentsError } = await supabase
+        .from('post_comments')
+        .select('*')
+        .eq('post_id', postId)
+        .order('created_at', { ascending: true });
+      
+      if (commentsError) {
+        console.error('[Queries] Error fetching comments without author data:', commentsError);
+        return [];
+      }
+      
+      // If we got comments without author data, fetch authors separately
+      if (commentsOnly && commentsOnly.length > 0) {
+        const authorIds = [...new Set(commentsOnly.map(comment => comment.author_id))];
+        console.log('[Queries] Fetching authors for comment IDs:', authorIds);
+        
+        const { data: authors, error: authorsError } = await supabase
+          .from('profiles')
+          .select('id, full_name, avatar_url, headline, user_type')
+          .in('id', authorIds);
+        
+        if (authorsError) {
+          console.error('[Queries] Error fetching authors:', authorsError);
+        }
+        
+        // Create author lookup map
+        const authorMap = new Map(authors?.map(author => [author.id, author]) || []);
+        
+        // Combine comments with author data
+        const commentsWithAuthors = commentsOnly.map(comment => ({
+          ...comment,
+          author: authorMap.get(comment.author_id) || null
+        }));
+        
+        console.log('[Queries] Comments fetched successfully with separate author lookup:', commentsWithAuthors.length);
+        return commentsWithAuthors;
+      }
+      
+      console.log('[Queries] No comments found for post:', postId);
+      return [];
+    }
     
-    debugLog('Post comments fetched successfully', data);
+    console.log('[Queries] Comments fetched successfully:', data?.length || 0);
     return data || [];
   } catch (error) {
-    debugLog('Error fetching post comments', error);
+    console.error('[Queries] Error in getPostComments:', error);
     return [];
   }
 }
@@ -1142,90 +1014,124 @@ export async function getPostComments(postId: string): Promise<CommentWithAuthor
 // Like functions
 export async function likePost(postId: string, userId: string): Promise<boolean> {
   try {
-    debugLog('Liking post', { postId, userId });
+    console.log('[Queries] Liking post:', postId, 'by user:', userId);
     
-    const schemaExists = await checkSchemaExists();
-    if (!schemaExists) {
-      debugLog('Database schema not found, cannot like post');
+    // Check if already liked
+    const { data: existingLike } = await supabase
+      .from('post_likes')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('post_id', postId)
+      .single();
+
+    if (existingLike) {
+      console.log('[Queries] Post already liked');
       return false;
     }
-    
-    const { error } = await supabase
+
+    // Add like record
+    const { error: likeError } = await supabase
       .from('post_likes')
       .insert({
-        post_id: postId,
         user_id: userId,
-        created_at: new Date().toISOString(),
+        post_id: postId,
       });
 
-    if (error) throw error;
-    
-    // Increment likes count
-    await supabase.rpc('increment_likes_count', { post_id: postId });
-    
-    debugLog('Post liked successfully');
+    if (likeError) {
+      console.error('[Queries] Error adding like:', likeError);
+      throw likeError;
+    }
+
+    // Update post likes count
+    const { data: post } = await supabase
+      .from('posts')
+      .select('likes_count')
+      .eq('id', postId)
+      .single();
+
+    if (post) {
+      const { error: updateError } = await supabase
+        .from('posts')
+        .update({ likes_count: (post.likes_count || 0) + 1 })
+        .eq('id', postId);
+
+      if (updateError) {
+        console.error('[Queries] Error updating likes count:', updateError);
+      }
+    }
+
+    console.log('[Queries] Post liked successfully');
     return true;
   } catch (error) {
-    debugLog('Error liking post', error);
+    console.error('[Queries] Error in likePost:', error);
     return false;
   }
 }
 
 export async function unlikePost(postId: string, userId: string): Promise<boolean> {
   try {
-    debugLog('Unliking post', { postId, userId });
+    console.log('[Queries] Unliking post:', postId, 'by user:', userId);
     
-    const schemaExists = await checkSchemaExists();
-    if (!schemaExists) {
-      debugLog('Database schema not found, cannot unlike post');
-      return false;
-    }
-    
-    const { error } = await supabase
+    // Remove like record
+    const { error: unlikeError } = await supabase
       .from('post_likes')
       .delete()
-      .eq('post_id', postId)
-      .eq('user_id', userId);
+      .eq('user_id', userId)
+      .eq('post_id', postId);
 
-    if (error) throw error;
-    
-    // Decrement likes count
-    await supabase.rpc('decrement_likes_count', { post_id: postId });
-    
-    debugLog('Post unliked successfully');
+    if (unlikeError) {
+      console.error('[Queries] Error removing like:', unlikeError);
+      throw unlikeError;
+    }
+
+    // Update post likes count
+    const { data: post } = await supabase
+      .from('posts')
+      .select('likes_count')
+      .eq('id', postId)
+      .single();
+
+    if (post) {
+      const newCount = Math.max(0, (post.likes_count || 0) - 1);
+      const { error: updateError } = await supabase
+        .from('posts')
+        .update({ likes_count: newCount })
+        .eq('id', postId);
+
+      if (updateError) {
+        console.error('[Queries] Error updating likes count:', updateError);
+      }
+    }
+
+    console.log('[Queries] Post unliked successfully');
     return true;
   } catch (error) {
-    debugLog('Error unliking post', error);
+    console.error('[Queries] Error in unlikePost:', error);
     return false;
   }
 }
 
-export async function isPostLiked(postId: string, userId: string): Promise<boolean> {
+export async function isPostLiked(userId: string, postId: string): Promise<boolean> {
   try {
-    debugLog('Checking if post is liked', { postId, userId });
-    
-    const schemaExists = await checkSchemaExists();
-    if (!schemaExists) {
-      debugLog('Database schema not found, returning false for like status');
-      return false;
-    }
+    console.log('[Queries] Checking if post is liked by user:', userId, 'post:', postId);
     
     const { data, error } = await supabase
       .from('post_likes')
       .select('id')
-      .eq('post_id', postId)
       .eq('user_id', userId)
-      .single();
+      .eq('post_id', postId)
+      .maybeSingle();
 
-    if (error && error.code !== 'PGRST116') {
-      throw error;
+    if (error) {
+      console.error('[Queries] Error checking like status:', error);
+      return false;
     }
-    
+
     const isLiked = !!data;
-    debugLog('Post like status checked', isLiked);
+    console.log('[Queries] Post like status checked:', isLiked);
     return isLiked;
   } catch (error) {
-    debugLog('Error checking post like status', error);
+    console.error('[Queries] Error in isPostLiked:', error);
     return false;
   }
 }
@@ -1233,11 +1139,11 @@ export async function isPostLiked(postId: string, userId: string): Promise<boole
 // Institution functions
 export async function createInstitution(institution: Omit<Institution, 'id' | 'created_at' | 'updated_at'>): Promise<Institution | null> {
   try {
-    debugLog('Creating institution', institution);
+    console.log('Creating institution', institution);
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, cannot create institution');
+      console.log('Database schema not found, cannot create institution');
       return null;
     }
     
@@ -1253,21 +1159,21 @@ export async function createInstitution(institution: Omit<Institution, 'id' | 'c
 
     if (error) throw error;
     
-    debugLog('Institution created successfully', data);
+    console.log('Institution created successfully', data);
     return data;
   } catch (error) {
-    debugLog('Error creating institution', error);
+    console.log('Error creating institution', error);
     return null;
   }
 }
 
 export async function getInstitutions(): Promise<Institution[]> {
   try {
-    debugLog('Getting institutions');
+    console.log('Getting institutions');
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, returning empty institutions');
+      console.log('Database schema not found, returning empty institutions');
       return [];
     }
     
@@ -1278,10 +1184,10 @@ export async function getInstitutions(): Promise<Institution[]> {
 
     if (error) throw error;
     
-    debugLog('Institutions fetched successfully', data);
+    console.log('Institutions fetched successfully', data);
     return data || [];
   } catch (error) {
-    debugLog('Error fetching institutions', error);
+    console.log('Error fetching institutions', error);
     return [];
   }
 }
@@ -1289,11 +1195,11 @@ export async function getInstitutions(): Promise<Institution[]> {
 // Get institution by admin user ID
 export async function getInstitutionByAdminId(adminUserId: string): Promise<Institution | null> {
   try {
-    debugLog('Getting institution by admin user ID', { adminUserId });
+    console.log('Getting institution by admin user ID', { adminUserId });
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, cannot get institution');
+      console.log('Database schema not found, cannot get institution');
       return null;
     }
     
@@ -1304,14 +1210,14 @@ export async function getInstitutionByAdminId(adminUserId: string): Promise<Inst
       .single();
 
     if (error) {
-      debugLog('Error fetching institution by admin user ID', error);
+      console.log('Error fetching institution by admin user ID', error);
       return null;
     }
     
-    debugLog('Institution fetched successfully', data);
+    console.log('Institution fetched successfully', data);
     return data;
   } catch (error) {
-    debugLog('Error fetching institution by admin user ID', error);
+    console.log('Error fetching institution by admin user ID', error);
     return null;
   }
 }
@@ -1319,12 +1225,12 @@ export async function getInstitutionByAdminId(adminUserId: string): Promise<Inst
 // Create institution for a user if it doesn't exist
 export async function ensureInstitutionExists(userId: string, profile: Profile): Promise<Institution | null> {
   try {
-    debugLog('Ensuring institution exists for user', { userId });
+    console.log('Ensuring institution exists for user', { userId });
     
     // First check if institution already exists
     const existingInstitution = await getInstitutionByAdminId(userId);
     if (existingInstitution) {
-      debugLog('Institution already exists', existingInstitution);
+      console.log('Institution already exists', existingInstitution);
       return existingInstitution;
     }
     
@@ -1365,10 +1271,10 @@ export async function ensureInstitutionExists(userId: string, profile: Profile):
     };
     
     const result = await createInstitution(institutionData);
-    debugLog('Institution created successfully', result);
+    console.log('Institution created successfully', result);
     return result;
   } catch (error) {
-    debugLog('Error ensuring institution exists', error);
+    console.log('Error ensuring institution exists', error);
     return null;
   }
 }
@@ -1376,11 +1282,11 @@ export async function ensureInstitutionExists(userId: string, profile: Profile):
 // Job functions
 export async function createJob(job: Omit<Job, 'id' | 'created_at' | 'updated_at'>): Promise<Job | null> {
   try {
-    debugLog('Creating job', job);
+    console.log('Creating job', job);
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, cannot create job');
+      console.log('Database schema not found, cannot create job');
       toast.error('Job creation is not available yet. Please try again later.');
       return null;
     }
@@ -1393,19 +1299,19 @@ export async function createJob(job: Omit<Job, 'id' | 'created_at' | 'updated_at
         .limit(1);
       
       if (tableCheckError) {
-        debugLog('Jobs table does not exist, cannot create job');
+        console.log('Jobs table does not exist, cannot create job');
         toast.error('Job creation feature is not available yet. Please try again later.');
         return null;
       }
     } catch (tableError) {
-      debugLog('Error checking jobs table existence', tableError);
+      console.log('Error checking jobs table existence', tableError);
       toast.error('Job creation feature is not available yet. Please try again later.');
       return null;
     }
     
     // Validate required fields
     if (!job.title || !job.description || !job.company_id || !job.posted_by) {
-      debugLog('Missing required fields for job creation');
+      console.log('Missing required fields for job creation');
       toast.error('Please fill in all required fields.');
       return null;
     }
@@ -1422,7 +1328,7 @@ export async function createJob(job: Omit<Job, 'id' | 'created_at' | 'updated_at
       .single();
 
     if (error) {
-      debugLog('Error creating job', error);
+      console.log('Error creating job', error);
       
       // Handle specific error cases
       if (error.code === '409') {
@@ -1436,11 +1342,11 @@ export async function createJob(job: Omit<Job, 'id' | 'created_at' | 'updated_at
       return null;
     }
     
-    debugLog('Job created successfully', data);
+    console.log('Job created successfully', data);
     toast.success('Job created successfully!');
     return data;
   } catch (error) {
-    debugLog('Error creating job', error);
+    console.log('Error creating job', error);
     toast.error('Failed to create job. Please try again.');
     return null;
   }
@@ -1448,11 +1354,11 @@ export async function createJob(job: Omit<Job, 'id' | 'created_at' | 'updated_at
 
 export async function getJobs(): Promise<JobWithCompany[]> {
   try {
-    debugLog('Getting jobs');
+    console.log('Getting jobs');
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, returning mock jobs');
+      console.log('Database schema not found, returning mock jobs');
       // Return mock data for testing
       return [
         {
@@ -1607,21 +1513,21 @@ export async function getJobs(): Promise<JobWithCompany[]> {
 
     if (error) throw error;
     
-    debugLog('Jobs fetched successfully', data);
+    console.log('Jobs fetched successfully', data);
     return data || [];
   } catch (error) {
-    debugLog('Error fetching jobs', error);
+    console.log('Error fetching jobs', error);
     return [];
   }
 }
 
 export async function applyToJob(application: Omit<JobApplication, 'id' | 'created_at' | 'updated_at'>): Promise<JobApplication | null> {
   try {
-    debugLog('Applying to job', application);
+    console.log('Applying to job', application);
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, cannot apply to job');
+      console.log('Database schema not found, cannot apply to job');
       return null;
     }
     
@@ -1636,9 +1542,16 @@ export async function applyToJob(application: Omit<JobApplication, 'id' | 'creat
       .select()
       .single();
 
-    if (applicationError) throw applicationError;
+    if (applicationError) {
+      // Handle duplicate application error
+      if (applicationError.code === '23505' && applicationError.message?.includes('job_applications_job_id_applicant_id_key')) {
+        console.log('User has already applied to this job');
+        throw new Error('You have already applied to this job');
+      }
+      throw applicationError;
+    }
     
-    debugLog('Job application submitted successfully', jobApplication);
+    console.log('Job application submitted successfully', jobApplication);
 
     // Get job details to create notifications
     const { data: job, error: jobError } = await supabase
@@ -1648,7 +1561,7 @@ export async function applyToJob(application: Omit<JobApplication, 'id' | 'creat
       .single();
 
     if (jobError) {
-      debugLog('Error fetching job details for notification', jobError);
+      console.log('Error fetching job details for notification', jobError);
     } else {
       // Create notification for the job poster (institution)
       if (job.posted_by) {
@@ -1688,19 +1601,19 @@ export async function applyToJob(application: Omit<JobApplication, 'id' | 'creat
 
     return jobApplication;
   } catch (error) {
-    debugLog('Error applying to job', error);
-    return null;
+    console.log('Error applying to job', error);
+    throw error; // Re-throw to handle in the UI
   }
 }
 
 // Event functions
 export async function createEvent(event: Omit<Event, 'id' | 'created_at' | 'updated_at'>): Promise<Event | null> {
   try {
-    debugLog('Creating event', event);
+    console.log('Creating event', event);
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, cannot create event');
+      console.log('Database schema not found, cannot create event');
       return null;
     }
     
@@ -1716,21 +1629,21 @@ export async function createEvent(event: Omit<Event, 'id' | 'created_at' | 'upda
 
     if (error) throw error;
     
-    debugLog('Event created successfully', data);
+    console.log('Event created successfully', data);
     return data;
   } catch (error) {
-    debugLog('Error creating event', error);
+    console.log('Error creating event', error);
     return null;
   }
 }
 
 export async function getEvents(): Promise<EventWithOrganizer[]> {
   try {
-    debugLog('Getting events');
+    console.log('Getting events');
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, returning empty events');
+      console.log('Database schema not found, returning empty events');
       return [];
     }
     
@@ -1744,21 +1657,21 @@ export async function getEvents(): Promise<EventWithOrganizer[]> {
 
     if (error) throw error;
     
-    debugLog('Events fetched successfully', data);
+    console.log('Events fetched successfully', data);
     return data || [];
   } catch (error) {
-    debugLog('Error fetching events', error);
+    console.log('Error fetching events', error);
     return [];
   }
 }
 
 export async function registerForEvent(registration: Omit<EventAttendee, 'id' | 'created_at'>): Promise<EventAttendee | null> {
   try {
-    debugLog('Registering for event', registration);
+    console.log('Registering for event', registration);
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, cannot register for event');
+      console.log('Database schema not found, cannot register for event');
       return null;
     }
     
@@ -1773,10 +1686,10 @@ export async function registerForEvent(registration: Omit<EventAttendee, 'id' | 
 
     if (error) throw error;
     
-    debugLog('Event registration successful', data);
+    console.log('Event registration successful', data);
     return data;
   } catch (error) {
-    debugLog('Error registering for event', error);
+    console.log('Error registering for event', error);
     return null;
   }
 } 
@@ -1784,11 +1697,11 @@ export async function registerForEvent(registration: Omit<EventAttendee, 'id' | 
 // Follow system functions
 export async function followUser(followerId: string, followingId: string, followerType: 'individual' | 'institution', followingType: 'individual' | 'institution'): Promise<Follow | null> {
   try {
-    debugLog('Following user', { followerId, followingId, followerType, followingType });
+    console.log('Following user', { followerId, followingId, followerType, followingType });
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, cannot follow user');
+      console.log('Database schema not found, cannot follow user');
       return null;
     }
     
@@ -1806,21 +1719,21 @@ export async function followUser(followerId: string, followingId: string, follow
 
     if (error) throw error;
     
-    debugLog('User followed successfully', data);
+    console.log('User followed successfully', data);
     return data;
   } catch (error) {
-    debugLog('Error following user', error);
+    console.log('Error following user', error);
     return null;
   }
 }
 
 export async function unfollowUser(followerId: string, followingId: string): Promise<boolean> {
   try {
-    debugLog('Unfollowing user', { followerId, followingId });
+    console.log('Unfollowing user', { followerId, followingId });
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, cannot unfollow user');
+      console.log('Database schema not found, cannot unfollow user');
       return false;
     }
     
@@ -1832,21 +1745,21 @@ export async function unfollowUser(followerId: string, followingId: string): Pro
 
     if (error) throw error;
     
-    debugLog('User unfollowed successfully');
+    console.log('User unfollowed successfully');
     return true;
   } catch (error) {
-    debugLog('Error unfollowing user', error);
+    console.log('Error unfollowing user', error);
     return false;
   }
 }
 
 export async function isFollowing(followerId: string, followingId: string): Promise<boolean> {
   try {
-    debugLog('Checking if following', { followerId, followingId });
+    console.log('Checking if following', { followerId, followingId });
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, returning false for follow status');
+      console.log('Database schema not found, returning false for follow status');
       return false;
     }
     
@@ -1862,21 +1775,21 @@ export async function isFollowing(followerId: string, followingId: string): Prom
     }
     
     const following = !!data;
-    debugLog('Follow status checked', following);
+    console.log('Follow status checked', following);
     return following;
   } catch (error) {
-    debugLog('Error checking follow status', error);
+    console.log('Error checking follow status', error);
     return false;
   }
 }
 
 export async function getFollowers(userId: string): Promise<FollowWithProfile[]> {
   try {
-    debugLog('Getting followers', { userId });
+    console.log('Getting followers', { userId });
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, returning empty followers');
+      console.log('Database schema not found, returning empty followers');
       return [];
     }
     
@@ -1891,21 +1804,21 @@ export async function getFollowers(userId: string): Promise<FollowWithProfile[]>
 
     if (error) throw error;
     
-    debugLog('Followers fetched successfully', data);
+    console.log('Followers fetched successfully', data);
     return data || [];
   } catch (error) {
-    debugLog('Error fetching followers', error);
+    console.log('Error fetching followers', error);
     return [];
   }
 }
 
 export async function getFollowing(userId: string): Promise<FollowWithProfile[]> {
   try {
-    debugLog('Getting following', { userId });
+    console.log('Getting following', { userId });
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, returning empty following');
+      console.log('Database schema not found, returning empty following');
       return [];
     }
     
@@ -1920,21 +1833,21 @@ export async function getFollowing(userId: string): Promise<FollowWithProfile[]>
 
     if (error) throw error;
     
-    debugLog('Following fetched successfully', data);
+    console.log('Following fetched successfully', data);
     return data || [];
   } catch (error) {
-    debugLog('Error fetching following', error);
+    console.log('Error fetching following', error);
     return [];
   }
 }
 
 export async function getSuggestedInstitutions(userId: string, limit: number = 10): Promise<Profile[]> {
   try {
-    debugLog('Getting suggested institutions', { userId, limit });
+    console.log('Getting suggested institutions', { userId, limit });
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, returning empty suggestions');
+      console.log('Database schema not found, returning empty suggestions');
       return [];
     }
     
@@ -1960,10 +1873,10 @@ export async function getSuggestedInstitutions(userId: string, limit: number = 1
 
     if (error) throw error;
     
-    debugLog('Suggested institutions fetched successfully', data);
+    console.log('Suggested institutions fetched successfully', data);
     return data || [];
   } catch (error) {
-    debugLog('Error fetching suggested institutions', error);
+    console.log('Error fetching suggested institutions', error);
     return [];
   }
 }
@@ -1971,29 +1884,23 @@ export async function getSuggestedInstitutions(userId: string, limit: number = 1
 // Function to ensure post_comments table exists
 export async function ensurePostCommentsTable(): Promise<boolean> {
   try {
-    debugLog('Ensuring post_comments table exists');
+    console.log('[Queries] Checking if post_comments table exists');
     
-    const schemaExists = await checkSchemaExists();
-    if (!schemaExists) {
-      debugLog('Database schema not found, cannot ensure post_comments table');
-      return false;
-    }
-    
-    // Check if post_comments table exists
+    // Check if post_comments table exists by trying to select from it
     const { error: tableCheckError } = await supabase
       .from('post_comments')
       .select('id')
       .limit(1);
     
     if (tableCheckError) {
-      debugLog('Post_comments table does not exist');
+      console.log('[Queries] Post_comments table does not exist:', tableCheckError);
       return false;
     }
     
-    debugLog('Post_comments table exists');
+    console.log('[Queries] Post_comments table exists');
     return true;
   } catch (error) {
-    debugLog('Error checking post_comments table existence', error);
+    console.error('[Queries] Error checking post_comments table existence:', error);
     return false;
   }
 }
@@ -2003,11 +1910,11 @@ export async function ensurePostCommentsTable(): Promise<boolean> {
 // Simple messaging system that works with existing database
 export async function createDirectConversation(user1Id: string, user2Id: string): Promise<Conversation | null> {
   try {
-    debugLog('Creating direct conversation', { user1Id, user2Id });
+    console.log('Creating direct conversation', { user1Id, user2Id });
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, cannot create conversation');
+      console.log('Database schema not found, cannot create conversation');
       return null;
     }
     
@@ -2018,7 +1925,7 @@ export async function createDirectConversation(user1Id: string, user2Id: string)
       .eq('conversation_type', 'direct');
     
     if (checkError) {
-      debugLog('Error checking existing conversations', checkError);
+      console.log('Error checking existing conversations', checkError);
       return null;
     }
     
@@ -2029,7 +1936,7 @@ export async function createDirectConversation(user1Id: string, user2Id: string)
     });
     
     if (existingConversation) {
-      debugLog('Conversation already exists', existingConversation);
+      console.log('Conversation already exists', existingConversation);
       return existingConversation;
     }
     
@@ -2045,7 +1952,7 @@ export async function createDirectConversation(user1Id: string, user2Id: string)
       .single();
 
     if (convError) {
-      debugLog('Error creating conversation', convError);
+      console.log('Error creating conversation', convError);
       return null;
     }
     
@@ -2070,16 +1977,16 @@ export async function createDirectConversation(user1Id: string, user2Id: string)
       .insert(participantData);
 
     if (partError) {
-      debugLog('Error adding participants', partError);
+      console.log('Error adding participants', partError);
       // Delete the conversation if we can't add participants
       await supabase.from('conversations').delete().eq('id', convData.id);
       return null;
     }
     
-    debugLog('Direct conversation created successfully', convData);
+    console.log('Direct conversation created successfully', convData);
     return convData;
   } catch (error) {
-    debugLog('Error creating direct conversation', error);
+    console.log('Error creating direct conversation', error);
     return null;
   }
 }
@@ -2087,11 +1994,11 @@ export async function createDirectConversation(user1Id: string, user2Id: string)
 // Get or create conversation between two users
 export async function getOrCreateConversation(user1Id: string, user2Id: string): Promise<Conversation | null> {
   try {
-    debugLog('Getting or creating conversation', { user1Id, user2Id });
+    console.log('Getting or creating conversation', { user1Id, user2Id });
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, cannot get/create conversation');
+      console.log('Database schema not found, cannot get/create conversation');
       return null;
     }
     
@@ -2105,7 +2012,7 @@ export async function getOrCreateConversation(user1Id: string, user2Id: string):
       .eq('conversation_type', 'direct');
     
     if (fetchError) {
-      debugLog('Error fetching conversations', fetchError);
+      console.log('Error fetching conversations', fetchError);
       return null;
     }
     
@@ -2116,14 +2023,14 @@ export async function getOrCreateConversation(user1Id: string, user2Id: string):
     });
     
     if (existingConversation) {
-      debugLog('Found existing conversation', existingConversation);
+      console.log('Found existing conversation', existingConversation);
       return existingConversation;
     }
     
     // Create new conversation
     return await createDirectConversation(user1Id, user2Id);
   } catch (error) {
-    debugLog('Error getting or creating conversation', error);
+    console.log('Error getting or creating conversation', error);
     return null;
   }
 }
@@ -2131,11 +2038,11 @@ export async function getOrCreateConversation(user1Id: string, user2Id: string):
 // Get user's conversations with proper error handling
 export async function getUserConversations(userId: string): Promise<ConversationWithParticipants[]> {
   try {
-    debugLog('Getting user conversations', { userId });
+    console.log('Getting user conversations', { userId });
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, returning empty conversations');
+      console.log('Database schema not found, returning empty conversations');
       return [];
     }
     
@@ -2156,7 +2063,7 @@ export async function getUserConversations(userId: string): Promise<Conversation
       .order('last_message_at', { ascending: false });
 
     if (error) {
-      debugLog('Error fetching conversations', error);
+      console.log('Error fetching conversations', error);
       return [];
     }
     
@@ -2171,10 +2078,10 @@ export async function getUserConversations(userId: string): Promise<Conversation
       unread_count: 0, // Simplified for now
     }));
     
-    debugLog('User conversations fetched successfully', conversationsWithMetadata);
+    console.log('User conversations fetched successfully', conversationsWithMetadata);
     return conversationsWithMetadata;
   } catch (error) {
-    debugLog('Error fetching user conversations', error);
+    console.log('Error fetching user conversations', error);
     return [];
   }
 }
@@ -2186,11 +2093,11 @@ export async function createConversation(conversation: {
   participants: string[]; // Array of user IDs
 }): Promise<Conversation | null> {
   try {
-    debugLog('Creating conversation', conversation);
+    console.log('Creating conversation', conversation);
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, cannot create conversation');
+      console.log('Database schema not found, cannot create conversation');
       return null;
     }
     
@@ -2221,10 +2128,10 @@ export async function createConversation(conversation: {
 
     if (partError) throw partError;
     
-    debugLog('Conversation created successfully', convData);
+    console.log('Conversation created successfully', convData);
     return convData;
   } catch (error) {
-    debugLog('Error creating conversation', error);
+    console.log('Error creating conversation', error);
     return null;
   }
 }
@@ -2240,11 +2147,11 @@ export async function sendMessage(message: {
   retention_policy?: 'standard' | 'clinical' | 'permanent';
 }): Promise<Message | null> {
   try {
-    debugLog('Sending message', message);
+    console.log('Sending message', message);
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, cannot send message');
+      console.log('Database schema not found, cannot send message');
       return null;
     }
     
@@ -2274,10 +2181,10 @@ export async function sendMessage(message: {
       .update({ last_message_at: new Date().toISOString() })
       .eq('id', message.conversation_id);
     
-    debugLog('Message sent successfully', data);
+    console.log('Message sent successfully', data);
     return data;
   } catch (error) {
-    debugLog('Error sending message', error);
+    console.log('Error sending message', error);
     return null;
   }
 }
@@ -2285,11 +2192,11 @@ export async function sendMessage(message: {
 // Get messages for a conversation
 export async function getConversationMessages(conversationId: string, limit = 50, offset = 0): Promise<MessageWithSender[]> {
   try {
-    debugLog('Getting conversation messages', { conversationId, limit, offset });
+    console.log('Getting conversation messages', { conversationId, limit, offset });
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, returning empty messages');
+      console.log('Database schema not found, returning empty messages');
       return [];
     }
     
@@ -2308,10 +2215,10 @@ export async function getConversationMessages(conversationId: string, limit = 50
 
     if (error) throw error;
     
-    debugLog('Conversation messages fetched successfully', data);
+    console.log('Conversation messages fetched successfully', data);
     return data || [];
   } catch (error) {
-    debugLog('Error fetching conversation messages', error);
+    console.log('Error fetching conversation messages', error);
     return [];
   }
 }
@@ -2319,11 +2226,11 @@ export async function getConversationMessages(conversationId: string, limit = 50
 // Mark message as read
 export async function markMessageAsRead(messageId: string, userId: string): Promise<boolean> {
   try {
-    debugLog('Marking message as read', { messageId, userId });
+    console.log('Marking message as read', { messageId, userId });
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, cannot mark message as read');
+      console.log('Database schema not found, cannot mark message as read');
       return false;
     }
     
@@ -2349,10 +2256,10 @@ export async function markMessageAsRead(messageId: string, userId: string): Prom
       if (updateError) throw updateError;
     }
     
-    debugLog('Message marked as read successfully');
+    console.log('Message marked as read successfully');
     return true;
   } catch (error) {
-    debugLog('Error marking message as read', error);
+    console.log('Error marking message as read', error);
     return false;
   }
 }
@@ -2365,11 +2272,11 @@ export async function addMessageReaction(reaction: {
   emoji: string;
 }): Promise<MessageReaction | null> {
   try {
-    debugLog('Adding message reaction', reaction);
+    console.log('Adding message reaction', reaction);
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, cannot add reaction');
+      console.log('Database schema not found, cannot add reaction');
       return null;
     }
     
@@ -2386,10 +2293,10 @@ export async function addMessageReaction(reaction: {
 
     if (error) throw error;
     
-    debugLog('Message reaction added successfully', data);
+    console.log('Message reaction added successfully', data);
     return data;
   } catch (error) {
-    debugLog('Error adding message reaction', error);
+    console.log('Error adding message reaction', error);
     return null;
   }
 }
@@ -2408,11 +2315,11 @@ export async function createClinicalNote(note: {
   confidentiality_level?: 'standard' | 'restricted' | 'highly_confidential';
 }): Promise<ClinicalNote | null> {
   try {
-    debugLog('Creating clinical note', note);
+    console.log('Creating clinical note', note);
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, cannot create clinical note');
+      console.log('Database schema not found, cannot create clinical note');
       return null;
     }
     
@@ -2439,10 +2346,10 @@ export async function createClinicalNote(note: {
 
     if (error) throw error;
     
-    debugLog('Clinical note created successfully', data);
+    console.log('Clinical note created successfully', data);
     return data;
   } catch (error) {
-    debugLog('Error creating clinical note', error);
+    console.log('Error creating clinical note', error);
     return null;
   }
 }
@@ -2450,11 +2357,11 @@ export async function createClinicalNote(note: {
 // Get messaging settings
 export async function getMessagingSettings(userId: string): Promise<MessagingSettings | null> {
   try {
-    debugLog('Getting messaging settings', { userId });
+    console.log('Getting messaging settings', { userId });
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, returning default settings');
+      console.log('Database schema not found, returning default settings');
       return {
         id: 'default',
         user_id: userId,
@@ -2505,10 +2412,10 @@ export async function getMessagingSettings(userId: string): Promise<MessagingSet
       return newSettings;
     }
     
-    debugLog('Messaging settings fetched successfully', data);
+    console.log('Messaging settings fetched successfully', data);
     return data;
   } catch (error) {
-    debugLog('Error fetching messaging settings', error);
+    console.log('Error fetching messaging settings', error);
     return null;
   }
 }
@@ -2516,11 +2423,11 @@ export async function getMessagingSettings(userId: string): Promise<MessagingSet
 // Update messaging settings
 export async function updateMessagingSettings(userId: string, settings: Partial<MessagingSettings>): Promise<MessagingSettings | null> {
   try {
-    debugLog('Updating messaging settings', { userId, settings });
+    console.log('Updating messaging settings', { userId, settings });
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, cannot update settings');
+      console.log('Database schema not found, cannot update settings');
       return null;
     }
     
@@ -2536,10 +2443,10 @@ export async function updateMessagingSettings(userId: string, settings: Partial<
 
     if (error) throw error;
     
-    debugLog('Messaging settings updated successfully', data);
+    console.log('Messaging settings updated successfully', data);
     return data;
   } catch (error) {
-    debugLog('Error updating messaging settings', error);
+    console.log('Error updating messaging settings', error);
     return null;
   }
 } 
@@ -2552,11 +2459,11 @@ export async function updateJobApplicationStatus(
   notes?: string
 ): Promise<boolean> {
   try {
-    debugLog('Updating job application status', { applicationId, status, reviewedBy });
+    console.log('Updating job application status', { applicationId, status, reviewedBy });
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, cannot update job application');
+      console.log('Database schema not found, cannot update job application');
       return false;
     }
     
@@ -2576,7 +2483,7 @@ export async function updateJobApplicationStatus(
 
     if (updateError) throw updateError;
     
-    debugLog('Job application status updated successfully', application);
+    console.log('Job application status updated successfully', application);
 
     // Create notification for the applicant
     if (application) {
@@ -2609,7 +2516,7 @@ export async function updateJobApplicationStatus(
 
     return true;
   } catch (error) {
-    debugLog('Error updating job application status', error);
+    console.log('Error updating job application status', error);
     return false;
   }
 }
@@ -2617,11 +2524,11 @@ export async function updateJobApplicationStatus(
 // Get job applications for a specific job (for institutions)
 export async function getJobApplications(jobId: string): Promise<JobApplication[]> {
   try {
-    debugLog('Getting job applications', { jobId });
+    console.log('Getting job applications', { jobId });
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, returning empty applications');
+      console.log('Database schema not found, returning empty applications');
       return [];
     }
     
@@ -2633,10 +2540,10 @@ export async function getJobApplications(jobId: string): Promise<JobApplication[
 
     if (error) throw error;
     
-    debugLog('Job applications fetched successfully', data);
+    console.log('Job applications fetched successfully', data);
     return data || [];
   } catch (error) {
-    debugLog('Error fetching job applications', error);
+    console.log('Error fetching job applications', error);
     return [];
   }
 }
@@ -2644,11 +2551,11 @@ export async function getJobApplications(jobId: string): Promise<JobApplication[
 // Get applications submitted by a user
 export async function getUserApplications(userId: string): Promise<JobApplication[]> {
   try {
-    debugLog('Getting user applications', { userId });
+    console.log('Getting user applications', { userId });
     
-    const schemaExists = await checkSchemaExists();
+    const schemaExists = await true;
     if (!schemaExists) {
-      debugLog('Database schema not found, returning empty applications');
+      console.log('Database schema not found, returning empty applications');
       return [];
     }
     
@@ -2660,10 +2567,226 @@ export async function getUserApplications(userId: string): Promise<JobApplicatio
 
     if (error) throw error;
     
-    debugLog('User applications fetched successfully', data);
+    console.log('User applications fetched successfully', data);
     return data || [];
   } catch (error) {
-    debugLog('Error fetching user applications', error);
+    console.log('Error fetching user applications', error);
+    return [];
+  }
+}
+
+// Check if user has applied to a specific job
+export async function hasAppliedToJob(userId: string, jobId: string): Promise<boolean> {
+  try {
+    console.log('Checking if user has applied to job', { userId, jobId });
+    
+    const schemaExists = await true;
+    if (!schemaExists) {
+      console.log('Database schema not found, returning false for application status');
+      return false;
+    }
+    
+    const { data, error } = await supabase
+      .from('job_applications')
+      .select('id')
+      .eq('applicant_id', userId)
+      .eq('job_id', jobId)
+      .maybeSingle();
+
+    if (error) {
+      console.log('Error checking application status', error);
+      return false;
+    }
+    
+    console.log('Application status checked', data);
+    return !!data; // Return true if application exists, false otherwise
+  } catch (error) {
+    console.log('Error checking application status', error);
+    return false;
+  }
+}
+
+// Extract hashtags from text content
+function extractHashtags(text: string): string[] {
+  const hashtagRegex = /#[\w\u0590-\u05ff]+/g;
+  const matches = text.match(hashtagRegex);
+  return matches ? matches.map(tag => tag.toLowerCase()) : [];
+}
+
+// Get trending topics based on hashtags in posts
+export async function getTrendingTopics(limit: number = 5): Promise<Array<{ hashtag: string; count: number }>> {
+  try {
+    console.log('Getting trending topics');
+    
+    const schemaExists = await true;
+    if (!schemaExists) {
+      console.log('Database schema not found, returning empty trending topics');
+      return [];
+    }
+    
+    // Get all posts with content
+    const { data: posts, error } = await supabase
+      .from('posts')
+      .select('content')
+      .not('content', 'is', null);
+    
+    if (error) {
+      console.log('Error fetching posts for trending topics', error);
+      return [];
+    }
+    
+    if (!posts || posts.length === 0) {
+      console.log('No posts found for trending topics');
+      return [];
+    }
+    
+    // Extract hashtags from all posts
+    const hashtagCounts: Record<string, number> = {};
+    
+    posts.forEach(post => {
+      if (post.content) {
+        const hashtags = extractHashtags(post.content);
+        hashtags.forEach(hashtag => {
+          hashtagCounts[hashtag] = (hashtagCounts[hashtag] || 0) + 1;
+        });
+      }
+    });
+    
+    // Convert to array and sort by count
+    const trendingTopics = Object.entries(hashtagCounts)
+      .map(([hashtag, count]) => ({ hashtag, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, limit);
+    
+    console.log('Trending topics calculated', { count: trendingTopics.length, topics: trendingTopics });
+    return trendingTopics;
+    
+  } catch (error) {
+    console.log('Error getting trending topics', error);
+    return [];
+  }
+}
+
+
+
+export async function searchUsers(query: string): Promise<Array<{
+  id: string;
+  full_name: string;
+  headline?: string;
+  avatar_url?: string;
+  user_type: 'individual' | 'institution';
+}>> {
+  try {
+    console.log('[Queries] Searching users with query:', query);
+    
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, full_name, headline, avatar_url, user_type')
+      .or(`full_name.ilike.%${query}%,headline.ilike.%${query}%`)
+      .not('full_name', 'is', null)
+      .limit(10);
+
+    if (error) {
+      console.error('[Queries] Error searching users:', error);
+      return [];
+    }
+
+    console.log('[Queries] Search results:', data?.length || 0, 'users found');
+    return data || [];
+  } catch (error) {
+    console.error('[Queries] Error in searchUsers:', error);
+    return [];
+  }
+}
+
+// Calculate mutual connections between two users
+export async function getMutualConnections(userId1: string, userId2: string): Promise<number> {
+  try {
+    console.log('[Queries] Getting mutual connections between:', userId1, userId2);
+    
+    // Get connections for both users
+    const [user1Connections, user2Connections] = await Promise.all([
+      getConnections(userId1),
+      getConnections(userId2)
+    ]);
+    
+    // Get IDs of connected users for both users
+    const user1ConnectedIds = new Set(user1Connections.map(conn => conn.id));
+    const user2ConnectedIds = new Set(user2Connections.map(conn => conn.id));
+    
+    // Find intersection (mutual connections)
+    const mutualConnections = [...user1ConnectedIds].filter(id => user2ConnectedIds.has(id));
+    
+    console.log('[Queries] Mutual connections found:', mutualConnections.length);
+    return mutualConnections.length;
+  } catch (error) {
+    console.error('[Queries] Error calculating mutual connections:', error);
+    return 0;
+  }
+}
+
+// Get connection count for a user
+export async function getConnectionCount(userId: string): Promise<number> {
+  try {
+    console.log('[Queries] Getting connection count for user:', userId);
+    
+    const connections = await getConnections(userId);
+    const count = connections.length;
+    
+    console.log('[Queries] Connection count:', count);
+    return count;
+  } catch (error) {
+    console.error('[Queries] Error getting connection count:', error);
+    return 0;
+  }
+}
+
+// Get profile views count for a user
+export async function getProfileViewsCount(userId: string): Promise<number> {
+  try {
+    console.log('[Queries] Getting profile views count for user:', userId);
+    
+    const { data, error } = await supabase
+      .from('profile_views')
+      .select('id')
+      .eq('profile_id', userId);
+    
+    if (error) {
+      console.error('[Queries] Error getting profile views count:', error);
+      return 0;
+    }
+    
+    const count = data?.length || 0;
+    console.log('[Queries] Profile views count:', count);
+    return count;
+  } catch (error) {
+    console.error('[Queries] Error getting profile views count:', error);
+    return 0;
+  }
+}
+
+// Get suggested connections with mutual connection counts
+export async function getSuggestedConnectionsWithMutualCounts(userId: string, limit = 10): Promise<Array<Profile & { mutual_connections: number }>> {
+  try {
+    console.log('[Queries] Getting suggested connections with mutual counts for user:', userId);
+    
+    const suggestions = await getSuggestedConnections(userId, limit);
+    
+    // Calculate mutual connections for each suggestion
+    const suggestionsWithMutualCounts = await Promise.all(
+      suggestions.map(async (profile) => {
+        const mutualCount = await getMutualConnections(userId, profile.id);
+        return {
+          ...profile,
+          mutual_connections: mutualCount
+        };
+      })
+    );
+    
+    console.log('[Queries] Suggested connections with mutual counts fetched:', suggestionsWithMutualCounts.length);
+    return suggestionsWithMutualCounts;
+  } catch (error) {
+    console.error('[Queries] Error getting suggested connections with mutual counts:', error);
     return [];
   }
 }

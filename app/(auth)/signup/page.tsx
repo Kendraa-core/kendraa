@@ -49,22 +49,18 @@ export default function SignUp() {
     }
 
     try {
-      const { error } = await signUp(
+      await signUp(
         formData.email,
         formData.password,
         formData.fullName,
         profileType
       );
       
-      if (error) {
-        toast.error(error.message);
-      } else {
-        toast.success('Account created successfully!');
-        router.push('/profile/setup');
-      }
-    } catch (error) {
+      toast.success('Account created successfully!');
+      router.push('/profile/setup');
+    } catch (error: any) {
       console.error('Error signing up:', error);
-      toast.error('An error occurred during sign up');
+      toast.error(error.message || 'An error occurred during sign up');
     } finally {
       setLoading(false);
     }

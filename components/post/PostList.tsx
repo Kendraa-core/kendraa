@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import PostCard from './PostCard';
 import { getPosts, type PostWithAuthor } from '@/lib/queries';
+import { type Post } from '@/types/database.types';
 import { Card, CardContent } from '@/components/ui/Card';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/Button';
@@ -79,12 +80,12 @@ interface PostListProps {
 }
 
 const PostList = React.memo(function PostList({ refreshTrigger = 0 }: PostListProps) {
-  const [posts, setPosts] = useState<PostWithAuthor[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [page, setPage] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [error, setError] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(0);
 
   const POSTS_PER_PAGE = 10;
 
@@ -112,7 +113,7 @@ const PostList = React.memo(function PostList({ refreshTrigger = 0 }: PostListPr
       }
 
       if (append) {
-        setPosts((prev: PostWithAuthor[]) => {
+        setPosts((prev: Post[]) => {
           const existingIds = new Set(prev.map(p => p.id));
           const uniqueNewPosts = newPosts.filter(p => !existingIds.has(p.id));
           return [...prev, ...uniqueNewPosts];

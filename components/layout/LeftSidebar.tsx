@@ -1,13 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { useAuth } from '@/contexts/AuthContext';
-import Avatar from '@/components/common/Avatar';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/Button';
+import { useAuth } from '@/contexts/AuthContext';
+import { getConnectionCount, getProfileViewsCount } from '@/lib/queries';
 import {
   HomeIcon,
   UserGroupIcon,
@@ -98,9 +97,36 @@ const quickAccessItems = [
 ];
 
 export default function LeftSidebar() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const pathname = usePathname();
   const [showQuickAccess, setShowQuickAccess] = useState(false);
+  const [connectionCount, setConnectionCount] = useState(0);
+  const [profileViewsCount, setProfileViewsCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch real stats
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (!user?.id) return;
+      
+      setLoading(true);
+      try {
+        const [connections, views] = await Promise.all([
+          getConnectionCount(user.id),
+          getProfileViewsCount(user.id)
+        ]);
+        
+        setConnectionCount(connections);
+        setProfileViewsCount(views);
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, [user?.id]);
 
   if (!user) return null;
 
@@ -114,18 +140,18 @@ export default function LeftSidebar() {
               whileHover={{ scale: 1.02 }}
               className="flex items-center space-x-3"
             >
-              <Avatar
-                src={user.user_metadata?.avatar_url}
-                alt={user.user_metadata?.full_name || user.email || 'User'}
-                size="lg"
-                className="ring-2 ring-white shadow-modern"
-              />
+              <div className="relative">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-lg">
+                  {profile?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
+                </div>
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+              </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-slate-900 truncate group-hover:text-primary-600 transition-colors">
-                  {user.user_metadata?.full_name || user.email?.split('@')[0] || 'User'}
+                  {profile?.full_name || 'User'}
                 </p>
                 <p className="text-xs text-slate-600 truncate">
-                  {user.user_metadata?.headline || 'Add your professional headline'}
+                  {profile?.headline || 'Add your professional headline'}
                 </p>
               </div>
             </motion.div>
@@ -136,13 +162,13 @@ export default function LeftSidebar() {
             <div className="bg-white/50 rounded-lg p-2">
               <p className="text-xs text-slate-600">Profile views</p>
               <p className="text-sm font-semibold text-slate-900">
-                {Math.floor(Math.random() * 1000) + 100}
+                {loading ? '...' : profileViewsCount}
               </p>
             </div>
             <div className="bg-white/50 rounded-lg p-2">
               <p className="text-xs text-slate-600">Connections</p>
               <p className="text-sm font-semibold text-slate-900">
-                {Math.floor(Math.random() * 500) + 50}
+                {loading ? '...' : connectionCount}
               </p>
             </div>
           </div>
@@ -192,8 +218,10 @@ export default function LeftSidebar() {
             >
               <span>Quick Access</span>
               <div
-                
-                
+                className={cn(
+                  'transition-transform duration-200',
+                  showQuickAccess ? 'rotate-180' : ''
+                )}
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -202,10 +230,11 @@ export default function LeftSidebar() {
             </button>
 
             <div
-              
-              
-              
-              className="overflow-hidden"
+              className={cn(
+                'transition-all duration-200 ease-in-out',
+                showQuickAccess ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+              )}
+              style={{ overflow: 'hidden' }}
             >
               <div className="mt-2 space-y-1">
                 {quickAccessItems.map((item) => {
@@ -262,12 +291,9 @@ export default function LeftSidebar() {
             <p className="text-xs text-amber-700 mb-3">
               Get advanced features and insights
             </p>
-            <Button
-              size="sm"
-              className="w-full bg-amber-500 hover:bg-amber-600 text-white border-0"
-            >
+            <button className="w-full px-3 py-2 text-sm font-medium bg-amber-500 hover:bg-amber-600 text-white border-0 rounded-lg transition-colors">
               Upgrade Now
-            </Button>
+            </button>
           </div>
         </div>
       </div>
