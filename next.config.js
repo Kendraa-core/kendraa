@@ -10,7 +10,8 @@ const nextConfig = {
 
   // Experimental features
   experimental: {
-    optimizeCss: true,
+    // Disable optimizeCss to avoid critters dependency
+    // optimizeCss: true,
     scrollRestoration: true,
   },
 
