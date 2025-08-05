@@ -6,5 +6,6 @@
     "react/no-unescaped-entities": "error",
     "@next/next/no-img-element": "warn",
     "react-hooks/exhaustive-deps": "warn"
-  }
+  },
+  "ignorePatterns": ["node_modules/", ".next/", "out/", "public/"]
 } 

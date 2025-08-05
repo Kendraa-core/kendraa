@@ -28,7 +28,6 @@
     "@supabase/supabase-js": "^2.38.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "critters": "^0.0.25",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.23.12",
     "next": "15.4.3",
@@ -48,22 +47,22 @@
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "autoprefixer": "^10.0.1",
-    "eslint": "^8",
+    "eslint": "^9.0.0",
     "eslint-config-next": "15.4.3",
     "postcss": "^8",
     "tailwindcss": "^3.3.0",
     "typescript": "^5"
   },
   "engines": {
-    "node": ">=18.0.0",
+    "node": "18.x",
     "npm": ">=8.0.0"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/psmithul/thinkify-2.git"
+    "url": "https://github.com/psmithul/kendra.git"
   },
   "bugs": {
-    "url": "https://github.com/psmithul/thinkify-2/issues"
+    "url": "https://github.com/psmithul/kendra/issues"
   },
   "homepage": "https://kendraa.com"
 }
