@@ -73,7 +73,6 @@ export const metadata: Metadata = {
     ],
     apple: '/apple-touch-icon.png',
   },
-  manifest: '/manifest.json',
 };
 
 export const viewport: Viewport = {
@@ -94,6 +93,31 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.className} ${inter.variable}`} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Unregister any existing service workers
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                  for(let registration of registrations) {
+                    registration.unregister();
+                  }
+                });
+                
+                // Clear all caches
+                if ('caches' in window) {
+                  caches.keys().then(function(names) {
+                    for (let name of names) {
+                      caches.delete(name);
+                    }
+                  });
+                }
+              }
+            `,
+          }}
+        />
+      </head>
       <body className="min-h-screen bg-gray-50 antialiased font-sans" suppressHydrationWarning>
         <ErrorBoundary>
           <AuthProvider>
