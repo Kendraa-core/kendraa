@@ -2,39 +2,48 @@ const CACHE_NAME = 'kendraa-v1';
 const STATIC_CACHE = 'kendraa-static-v1';
 const DYNAMIC_CACHE = 'kendraa-dynamic-v1';
 
-// Files to cache immediately
-const STATIC_FILES = [
-  '/',
-  '/signin',
-  '/signup',
-  '/feed',
-  '/favicon.ico',
+// Skip these URLs from caching
+const SKIP_CACHE_URLS = [
+  'chrome-extension://',
+  'moz-extension://',
+  'safari-extension://',
+  'ms-browser-extension://',
+  'edge-extension://',
+  'chrome://',
+  'moz://',
+  'safari://',
+  'ms://',
+  'edge://',
+  'about:',
+  'data:',
+  'blob:',
+  'file:',
 ];
 
-// API endpoints to cache
-const API_CACHE = [
-  '/api/profiles',
-  '/api/posts',
-  '/api/notifications',
-];
+// Check if URL should be skipped
+function shouldSkipCache(url) {
+  return SKIP_CACHE_URLS.some(skipUrl => url.startsWith(skipUrl));
+}
 
-// Install event - cache static files
+// Install event - cache static resources
 self.addEventListener('install', (event) => {
   console.log('[SW] Installing service worker...');
   
   event.waitUntil(
-    caches.open(STATIC_CACHE)
-      .then((cache) => {
-        console.log('[SW] Caching static files');
-        return cache.addAll(STATIC_FILES);
-      })
-      .then(() => {
-        console.log('[SW] Static files cached successfully');
-        return self.skipWaiting();
-      })
-      .catch((error) => {
-        console.error('[SW] Error caching static files:', error);
-      })
+    caches.open(STATIC_CACHE).then((cache) => {
+      return cache.addAll([
+        '/',
+        '/offline',
+        '/Kendraa Logo.png',
+        '/favicon.ico',
+        '/manifest.json',
+      ]);
+    }).then(() => {
+      console.log('[SW] Static resources cached');
+      return self.skipWaiting();
+    }).catch((error) => {
+      console.error('[SW] Cache installation failed:', error);
+    })
   );
 });
 
@@ -43,202 +52,157 @@ self.addEventListener('activate', (event) => {
   console.log('[SW] Activating service worker...');
   
   event.waitUntil(
-    caches.keys()
-      .then((cacheNames) => {
-        return Promise.all(
-          cacheNames.map((cacheName) => {
-            if (cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE) {
-              console.log('[SW] Deleting old cache:', cacheName);
-              return caches.delete(cacheName);
-            }
-          })
-        );
-      })
-      .then(() => {
-        console.log('[SW] Service worker activated');
-        return self.clients.claim();
-      })
-      .catch((error) => {
-        console.error('[SW] Error during activation:', error);
-      })
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE) {
+            console.log('[SW] Deleting old cache:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    }).then(() => {
+      console.log('[SW] Service worker activated');
+      return self.clients.claim();
+    })
   );
 });
 
-// Fetch event - serve from cache or network
+// Fetch event - handle requests
 self.addEventListener('fetch', (event) => {
   const { request } = event;
-  
-  // Skip non-GET requests
-  if (request.method !== 'GET') {
+  const url = new URL(request.url);
+
+  // Skip chrome extensions and other problematic URLs
+  if (shouldSkipCache(request.url)) {
+    console.log('[SW] Skipping cache for:', request.url);
     return;
   }
 
-  try {
-    const url = new URL(request.url);
+  // Skip Next.js internal requests
+  if (url.pathname.startsWith('/_next/') || 
+      url.pathname.startsWith('/__nextjs_') ||
+      url.pathname.includes('webpack') ||
+      url.pathname.includes('hot-update')) {
+    return;
+  }
 
-    // Skip service worker updates and Next.js internal requests
-    if (url.pathname.startsWith('/_next/') || 
-        url.pathname.startsWith('/__nextjs_') ||
-        url.pathname.includes('webpack') ||
-        url.pathname.includes('hot-update')) {
-      return;
-    }
-
-    // Handle API requests
-    if (url.pathname.startsWith('/api/')) {
-      event.respondWith(handleApiRequest(request));
-      return;
-    }
-
-    // Handle static files
-    if (url.pathname.startsWith('/static/') || url.pathname.startsWith('/_next/')) {
-      event.respondWith(handleStaticRequest(request));
-      return;
-    }
-
-    // Handle page requests
+  // Handle different types of requests
+  if (request.method === 'GET') {
     if (request.destination === 'document') {
-      event.respondWith(handlePageRequest(request));
-      return;
+      event.respondWith(handleDocumentRequest(request));
+    } else if (request.destination === 'image') {
+      event.respondWith(handleImageRequest(request));
+    } else if (request.destination === 'script' || request.destination === 'style') {
+      event.respondWith(handleStaticRequest(request));
+    } else {
+      event.respondWith(handleOtherRequest(request));
     }
-
-    // Handle other requests
-    event.respondWith(handleOtherRequest(request));
-  } catch (error) {
-    console.error('[SW] Error in fetch event:', error);
-    // Let the request go through normally
   }
 });
 
-// Handle API requests with network-first strategy
-async function handleApiRequest(request) {
+// Handle document requests (pages)
+async function handleDocumentRequest(request) {
   try {
-    // Always try network first for API requests
-    const networkResponse = await fetch(request);
-    
-    if (networkResponse.ok) {
-      // Cache the response for offline use
+    // Try network first
+    const response = await fetch(request);
+    if (response.ok) {
+      // Cache successful responses
       const cache = await caches.open(DYNAMIC_CACHE);
-      cache.put(request, networkResponse.clone());
-      
-      return networkResponse;
+      cache.put(request, response.clone());
+      return response;
     }
-    
-    // If network fails, try cache
-    const cachedResponse = await caches.match(request);
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-    
-    return networkResponse;
   } catch (error) {
-    console.log('[SW] Network failed, trying cache for:', request.url);
-    
-    // Try cache as fallback
-    const cachedResponse = await caches.match(request);
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-    
-    // Return offline response
-    return new Response(
-      JSON.stringify({ error: 'Offline - Please check your connection' }),
-      {
-        status: 503,
-        statusText: 'Service Unavailable',
-        headers: { 'Content-Type': 'application/json' }
-      }
-    );
+    console.log('[SW] Network failed for document, trying cache:', request.url);
   }
+
+  // Fallback to cache
+  const cachedResponse = await caches.match(request);
+  if (cachedResponse) {
+    return cachedResponse;
+  }
+
+  // Fallback to offline page
+  return caches.match('/offline');
 }
 
-// Handle static files with cache-first strategy
+// Handle image requests
+async function handleImageRequest(request) {
+  try {
+    // Try cache first for images
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+
+    // Try network
+    const response = await fetch(request);
+    if (response.ok) {
+      const cache = await caches.open(DYNAMIC_CACHE);
+      cache.put(request, response.clone());
+      return response;
+    }
+  } catch (error) {
+    console.log('[SW] Image fetch failed:', request.url);
+  }
+
+  // Return a placeholder or null
+  return new Response(null, { status: 404 });
+}
+
+// Handle static requests (CSS, JS)
 async function handleStaticRequest(request) {
   try {
+    // Try cache first
     const cachedResponse = await caches.match(request);
-    
     if (cachedResponse) {
       return cachedResponse;
     }
-    
-    const networkResponse = await fetch(request);
-    
-    if (networkResponse.ok) {
-      const cache = await caches.open(STATIC_CACHE);
-      cache.put(request, networkResponse.clone());
-    }
-    
-    return networkResponse;
-  } catch (error) {
-    console.log('[SW] Static file not found:', request.url);
-    return new Response('Not found', { status: 404 });
-  }
-}
 
-// Handle page requests with network-first strategy
-async function handlePageRequest(request) {
-  try {
-    // Always try network first for pages
-    const networkResponse = await fetch(request);
-    
-    if (networkResponse.ok) {
-      // Cache the response
+    // Try network
+    const response = await fetch(request);
+    if (response.ok) {
       const cache = await caches.open(DYNAMIC_CACHE);
-      cache.put(request, networkResponse.clone());
-      
-      return networkResponse;
+      cache.put(request, response.clone());
+      return response;
     }
-    
-    // If network fails, try cache
-    const cachedResponse = await caches.match(request);
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-    
-    return networkResponse;
   } catch (error) {
-    console.log('[SW] Network failed, trying cache for page:', request.url);
-    
-    // Try cache as fallback
-    const cachedResponse = await caches.match(request);
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-    
-    // Return offline page
-    return caches.match('/offline');
+    console.log('[SW] Static resource fetch failed:', request.url);
   }
+
+  return new Response(null, { status: 404 });
 }
 
-// Handle other requests with cache-first strategy
+// Handle other requests (API calls, etc.)
 async function handleOtherRequest(request) {
   try {
-    const cachedResponse = await caches.match(request);
-    
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-    
-    const networkResponse = await fetch(request);
-    
-    if (networkResponse.ok) {
+    // Try network first for API calls
+    const response = await fetch(request);
+    if (response.ok) {
+      // Cache successful API responses for a short time
       const cache = await caches.open(DYNAMIC_CACHE);
-      cache.put(request, networkResponse.clone());
+      cache.put(request, response.clone());
+      return response;
     }
-    
-    return networkResponse;
   } catch (error) {
-    console.log('[SW] Request failed:', request.url);
-    return new Response('Not found', { status: 404 });
+    console.log('[SW] API request failed:', request.url);
   }
+
+  // Try cache as fallback
+  const cachedResponse = await caches.match(request);
+  if (cachedResponse) {
+    return cachedResponse;
+  }
+
+  return new Response(null, { status: 404 });
 }
 
-// Background sync for offline actions
+// Handle background sync
 self.addEventListener('sync', (event) => {
   console.log('[SW] Background sync triggered:', event.tag);
   
   if (event.tag === 'background-sync') {
-    event.waitUntil(doBackgroundSync());
+    event.waitUntil(performBackgroundSync());
   }
 });
 
@@ -248,8 +212,8 @@ self.addEventListener('push', (event) => {
   
   const options = {
     body: event.data ? event.data.text() : 'New notification from Kendraa',
-    icon: '/favicon.ico',
-    badge: '/favicon.ico',
+    icon: '/Kendraa Logo.png',
+    badge: '/Kendraa Logo.png',
     vibrate: [100, 50, 100],
     data: {
       dateOfArrival: Date.now(),
@@ -259,16 +223,16 @@ self.addEventListener('push', (event) => {
       {
         action: 'explore',
         title: 'View',
-        icon: '/favicon.ico'
+        icon: '/Kendraa Logo.png'
       },
       {
         action: 'close',
         title: 'Close',
-        icon: '/favicon.ico'
+        icon: '/Kendraa Logo.png'
       }
     ]
   };
-  
+
   event.waitUntil(
     self.registration.showNotification('Kendraa', options)
   );
@@ -279,7 +243,7 @@ self.addEventListener('notificationclick', (event) => {
   console.log('[SW] Notification clicked:', event.action);
   
   event.notification.close();
-  
+
   if (event.action === 'explore') {
     event.waitUntil(
       clients.openWindow('/feed')
@@ -288,80 +252,44 @@ self.addEventListener('notificationclick', (event) => {
 });
 
 // Background sync function
-async function doBackgroundSync() {
+async function performBackgroundSync() {
   try {
     console.log('[SW] Performing background sync...');
     
     // Sync any pending data
-    const pendingData = await getPendingData();
+    const cache = await caches.open(DYNAMIC_CACHE);
+    const requests = await cache.keys();
     
-    for (const data of pendingData) {
-      try {
-        await syncData(data);
-      } catch (error) {
-        console.error('[SW] Error syncing data:', error);
+    for (const request of requests) {
+      if (request.url.includes('/api/')) {
+        try {
+          await fetch(request);
+        } catch (error) {
+          console.log('[SW] Background sync failed for:', request.url);
+        }
       }
     }
     
     console.log('[SW] Background sync completed');
   } catch (error) {
-    console.error('[SW] Background sync failed:', error);
+    console.error('[SW] Background sync error:', error);
   }
 }
 
-// Get pending data from IndexedDB
-async function getPendingData() {
-  // This would typically read from IndexedDB
-  // For now, return empty array
-  return [];
-}
-
-// Sync data to server
-async function syncData(data) {
-  const response = await fetch('/api/sync', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
-  
-  if (!response.ok) {
-    throw new Error('Sync failed');
-  }
-  
-  return response.json();
-}
-
-// Message handling for communication with main thread
+// Handle cache clear message
 self.addEventListener('message', (event) => {
-  console.log('[SW] Message received:', event.data);
-  
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
-  
-  if (event.data && event.data.type === 'GET_VERSION') {
-    if (event.ports && event.ports[0]) {
-      event.ports[0].postMessage({ version: CACHE_NAME });
-    }
-  }
-  
-  // Handle cache clear request
   if (event.data && event.data.type === 'CLEAR_CACHE') {
-    event.waitUntil(clearAllCaches());
-  }
-});
-
-// Clear all caches
-async function clearAllCaches() {
-  try {
-    const cacheNames = await caches.keys();
-    await Promise.all(
-      cacheNames.map(cacheName => caches.delete(cacheName))
+    event.waitUntil(
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            return caches.delete(cacheName);
+          })
+        );
+      }).then(() => {
+        console.log('[SW] All caches cleared');
+        event.ports[0].postMessage({ success: true });
+      })
     );
-    console.log('[SW] All caches cleared');
-  } catch (error) {
-    console.error('[SW] Error clearing caches:', error);
   }
-} 
+}); 

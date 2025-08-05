@@ -13,74 +13,9 @@ export default function PerformanceOptimizer() {
       return;
     }
 
-    // Preload critical resources based on current route
-    preloadCriticalResources();
-    
-    // Monitor performance metrics
+    // Monitor performance metrics only
     setupPerformanceMonitoring();
-    
-    // Prefetch next likely pages
-    prefetchNextPages();
   }, [pathname]);
-
-  // Preload critical resources
-  const preloadCriticalResources = () => {
-    if (typeof document === 'undefined') return;
-
-    const criticalResources = [
-      // CSS and JS bundles
-      '/static/css/app/layout.css',
-      '/static/chunks/main-app.js',
-      
-      // Critical images
-      '/favicon.ico',
-      
-      // API endpoints that are likely to be called
-      '/api/profiles',
-      '/api/posts',
-    ];
-
-    criticalResources.forEach((resource) => {
-      const link = document.createElement('link');
-      link.rel = 'preload';
-      link.href = resource;
-      
-      if (resource.endsWith('.css')) {
-        link.as = 'style';
-      } else if (resource.endsWith('.js')) {
-        link.as = 'script';
-      } else if (resource.endsWith('.ico') || resource.endsWith('.png') || resource.endsWith('.jpg')) {
-        link.as = 'image';
-      } else {
-        link.as = 'fetch';
-      }
-      
-      document.head.appendChild(link);
-    });
-  };
-
-  // Prefetch next likely pages
-  const prefetchNextPages = () => {
-    if (typeof document === 'undefined') return;
-
-    const prefetchRoutes = {
-      '/': ['/feed', '/signin'],
-      '/signin': ['/feed', '/signup'],
-      '/signup': ['/feed', '/signin'],
-      '/feed': ['/profile', '/messaging', '/jobs'],
-      '/profile': ['/feed', '/messaging'],
-      '/messaging': ['/feed', '/profile'],
-    };
-
-    const routesToPrefetch = prefetchRoutes[pathname as keyof typeof prefetchRoutes] || [];
-    
-    routesToPrefetch.forEach((route) => {
-      const link = document.createElement('link');
-      link.rel = 'prefetch';
-      link.href = route;
-      document.head.appendChild(link);
-    });
-  };
 
   // Setup performance monitoring
   const setupPerformanceMonitoring = () => {
@@ -104,125 +39,71 @@ export default function PerformanceOptimizer() {
       });
 
       performanceRef.current.observe({ entryTypes: ['navigation'] });
-
-      // Monitor resource loading
-      const resourceObserver = new PerformanceObserver((list) => {
-        for (const entry of list.getEntries()) {
-          if (entry.entryType === 'resource') {
-            const resourceEntry = entry as PerformanceResourceTiming;
-            if (resourceEntry.initiatorType === 'fetch' && resourceEntry.duration > 1000) {
-              console.warn('[Performance] Slow API call:', resourceEntry.name, resourceEntry.duration + 'ms');
-            }
-          }
-        }
-      });
-
-      resourceObserver.observe({ entryTypes: ['resource'] });
     } catch (error) {
-      console.error('[Performance] Error setting up performance monitoring:', error);
+      console.log('[Performance] Performance monitoring not supported');
     }
   };
 
   // Log performance metrics
   const logPerformanceMetrics = (navEntry: PerformanceNavigationTiming) => {
     const metrics = {
-      page: pathname,
-      loadTime: navEntry.loadEventEnd - navEntry.loadEventStart,
+      // Navigation timing
+      dnsLookup: navEntry.domainLookupEnd - navEntry.domainLookupStart,
+      tcpConnection: navEntry.connectEnd - navEntry.connectStart,
+      serverResponse: navEntry.responseEnd - navEntry.responseStart,
       domContentLoaded: navEntry.domContentLoadedEventEnd - navEntry.domContentLoadedEventStart,
+      loadComplete: navEntry.loadEventEnd - navEntry.loadEventStart,
+      totalTime: navEntry.loadEventEnd - navEntry.fetchStart,
+      
+      // Resource timing
       firstPaint: 0,
       firstContentfulPaint: 0,
       largestContentfulPaint: 0,
     };
 
-    // Get paint timing if available
-    if (typeof performance !== 'undefined' && 'getEntriesByType' in performance) {
-      try {
-        const paintEntries = performance.getEntriesByType('paint');
-        paintEntries.forEach((entry) => {
-          if (entry.name === 'first-paint') {
-            metrics.firstPaint = entry.startTime;
-          }
-          if (entry.name === 'first-contentful-paint') {
-            metrics.firstContentfulPaint = entry.startTime;
-          }
-        });
-      } catch (error) {
-        console.error('[Performance] Error getting paint entries:', error);
+    // Try to get paint timing
+    try {
+      const paintEntries = performance.getEntriesByType('paint');
+      const firstPaint = paintEntries.find(entry => entry.name === 'first-paint');
+      const firstContentfulPaint = paintEntries.find(entry => entry.name === 'first-contentful-paint');
+      
+      if (firstPaint) {
+        metrics.firstPaint = firstPaint.startTime;
       }
+      if (firstContentfulPaint) {
+        metrics.firstContentfulPaint = firstContentfulPaint.startTime;
+      }
+    } catch (error) {
+      // Paint timing not supported
     }
 
-    // Log to console and potentially send to analytics
+    // Try to get LCP
+    try {
+      const lcpEntries = performance.getEntriesByType('largest-contentful-paint');
+      if (lcpEntries.length > 0) {
+        const lcp = lcpEntries[lcpEntries.length - 1];
+        metrics.largestContentfulPaint = lcp.startTime;
+      }
+    } catch (error) {
+      // LCP not supported
+    }
+
     console.log('[Performance] Page load metrics:', metrics);
-    
-    // Send to analytics if needed
-    if (process.env.NODE_ENV === 'production') {
-      // sendToAnalytics(metrics);
+
+    // Log slow performance warnings
+    if (metrics.totalTime > 3000) {
+      console.warn('[Performance] Slow page load detected:', metrics.totalTime + 'ms');
+    }
+    if (metrics.firstContentfulPaint > 1500) {
+      console.warn('[Performance] Slow first contentful paint:', metrics.firstContentfulPaint + 'ms');
     }
   };
-
-  // Optimize images
-  useEffect(() => {
-    if (typeof document === 'undefined') return;
-
-    const optimizeImages = () => {
-      try {
-        const images = document.querySelectorAll('img');
-        images.forEach((img) => {
-          // Add loading="lazy" to images below the fold
-          if (!img.hasAttribute('loading')) {
-            img.loading = 'lazy';
-          }
-          
-          // Add decoding="async" for better performance
-          if (!img.hasAttribute('decoding')) {
-            img.decoding = 'async';
-          }
-        });
-      } catch (error) {
-        console.error('[Performance] Error optimizing images:', error);
-      }
-    };
-
-    // Run after DOM is ready
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', optimizeImages);
-    } else {
-      optimizeImages();
-    }
-  }, [pathname]);
-
-  // Optimize fonts
-  useEffect(() => {
-    if (typeof document === 'undefined') return;
-
-    try {
-      // Preload critical fonts
-      const fontLinks = [
-        { href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap', as: 'style' },
-      ];
-
-      fontLinks.forEach((font) => {
-        const link = document.createElement('link');
-        link.rel = 'preload';
-        link.href = font.href;
-        link.as = font.as;
-        link.crossOrigin = 'anonymous';
-        document.head.appendChild(link);
-      });
-    } catch (error) {
-      console.error('[Performance] Error preloading fonts:', error);
-    }
-  }, []);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (performanceRef.current) {
-        try {
-          performanceRef.current.disconnect();
-        } catch (error) {
-          console.error('[Performance] Error disconnecting observer:', error);
-        }
+        performanceRef.current.disconnect();
       }
     };
   }, []);

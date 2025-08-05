@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { useAuth } from './AuthContext';
 import { getNotifications, markNotificationAsRead } from '@/lib/queries';
 import type { Notification } from '@/types/database.types';
@@ -63,13 +63,15 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     fetchNotifications();
   }, [fetchNotifications]);
 
+  const value = useMemo(() => ({
+    notifications,
+    unreadCount,
+    markAsRead,
+    refreshNotifications
+  }), [notifications, unreadCount, markAsRead, refreshNotifications]);
+
   return (
-    <NotificationContext.Provider value={{
-      notifications,
-      unreadCount,
-      markAsRead,
-      refreshNotifications
-    }}>
+    <NotificationContext.Provider value={value}>
       {children}
     </NotificationContext.Provider>
   );
