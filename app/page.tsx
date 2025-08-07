@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
+import Logo from '@/components/common/Logo';
 import {
   UserGroupIcon,
   BriefcaseIcon,
@@ -23,14 +23,7 @@ export default function LandingPage() {
           <div className="flex justify-between items-center py-6">
             {/* Logo */}
             <div className="flex items-center space-x-2">
-                                      <Image
-                          src="/Kendraa Logo.png"
-                          alt="Kendraa"
-                          width={120}
-                          height={40}
-                          className="h-8 w-auto"
-                          priority
-                        />
+              <Logo />
             </div>
 
             {/* Navigation */}
