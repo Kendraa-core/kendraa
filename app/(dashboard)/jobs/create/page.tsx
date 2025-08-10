@@ -128,7 +128,7 @@ export default function CreateJobPage() {
         requirements: formData.requirements,
         specializations: formData.specializations,
         company_id: companyId,
-        posted_by: user.id,
+        posted_by: profile?.id || user.id,
         status: 'active' as const,
         application_deadline: formData.application_deadline || null,
         currency: 'USD',

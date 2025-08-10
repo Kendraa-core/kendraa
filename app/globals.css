@@ -225,30 +225,36 @@ a {
   }
 }
 
+/* Input field styling */
+input, textarea, select {
+  background-color: white !important;
+  color: #111827 !important; /* gray-900 - black text */
+}
+
 /* Comprehensive placeholder styling */
 ::placeholder {
-  color: #6b7280 !important; /* gray-500 */
+  color: #d1d5db !important; /* gray-300 - very light color */
   opacity: 1 !important;
 }
 
 input::placeholder {
-  color: #6b7280 !important; /* gray-500 */
+  color: #d1d5db !important; /* gray-300 - very light color */
   opacity: 1 !important;
 }
 
 textarea::placeholder {
-  color: #6b7280 !important; /* gray-500 */
+  color: #d1d5db !important; /* gray-300 - very light color */
   opacity: 1 !important;
 }
 
 /* Focus state placeholders */
 input:focus::placeholder {
-  color: #9ca3af !important; /* gray-400 */
+  color: #d1d5db !important; /* gray-300 - even lighter on focus */
   opacity: 1 !important;
 }
 
 textarea:focus::placeholder {
-  color: #9ca3af !important; /* gray-400 */
+  color: #d1d5db !important; /* gray-300 - even lighter on focus */
   opacity: 1 !important;
 }
 
@@ -260,7 +266,7 @@ input[type="search"]::placeholder,
 input[type="tel"]::placeholder,
 input[type="url"]::placeholder,
 input[type="number"]::placeholder {
-  color: #6b7280 !important; /* gray-500 */
+  color: #d1d5db !important; /* gray-300 - very light color */
   opacity: 1 !important;
 }
 
@@ -272,6 +278,6 @@ input[type="search"]:focus::placeholder,
 input[type="tel"]:focus::placeholder,
 input[type="url"]:focus::placeholder,
 input[type="number"]:focus::placeholder {
-  color: #9ca3af !important; /* gray-400 */
+  color: #d1d5db !important; /* gray-300 - even lighter on focus */
   opacity: 1 !important;
 }

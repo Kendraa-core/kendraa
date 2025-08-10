@@ -132,13 +132,18 @@ export default function JobsPage() {
     if (!user?.id || !profile) return;
     
     try {
+      console.log('Fetching job applications for profile:', profile.id);
       const applications: Record<string, JobApplication[]> = {};
       for (const job of jobs) {
-        if (job.posted_by === user.id) {
+        console.log('Checking job:', { jobId: job.id, postedBy: job.posted_by, profileId: profile.id });
+        if (job.posted_by === profile.id) {
+          console.log('Fetching applications for job:', job.id);
           const jobApps = await getJobApplications(job.id);
+          console.log('Applications fetched:', { jobId: job.id, count: jobApps.length });
           applications[job.id] = jobApps;
         }
       }
+      console.log('All applications:', applications);
       setJobApplications(applications);
     } catch (error) {
       console.error('Error fetching job applications:', error);
@@ -259,7 +264,7 @@ export default function JobsPage() {
   };
 
   const isJobPoster = (job: JobWithCompany) => {
-    return user?.id === job.posted_by;
+    return profile?.id === job.posted_by;
   };
 
   const getApplicationCount = (jobId: string) => {

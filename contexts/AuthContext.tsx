@@ -65,8 +65,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const initializeAuth = async () => {
       try {
+        // Check if Supabase is properly configured
+        if (!supabase) {
+          console.warn('Supabase is not configured. Please check your environment variables.');
+          if (mounted) {
+            setLoading(false);
+          }
+          return;
+        }
+
         // Get initial session
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const { data: { session }, error } = await supabase!.auth.getSession();
         
         if (error) {
           console.error('Error getting session:', error);
@@ -87,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         // Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        const { data: { subscription } } = supabase!.auth.onAuthStateChange(
           async (event, session) => {
             if (!mounted) return;
 
@@ -125,6 +134,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = useCallback(async (email: string, password: string) => {
     if (!isClient) return;
     
+    if (!supabase) {
+      toast.error('Supabase is not configured. Please check your environment variables.');
+      return;
+    }
+    
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -145,6 +159,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = useCallback(async (email: string, password: string, fullName: string, profileType: 'individual' | 'institution') => {
     if (!isClient) return;
+    
+    if (!supabase) {
+      toast.error('Supabase is not configured. Please check your environment variables.');
+      return;
+    }
     
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -183,6 +202,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = useCallback(async () => {
     if (!isClient) return;
     
+    if (!supabase) {
+      toast.error('Supabase is not configured. Please check your environment variables.');
+      return;
+    }
+    
     try {
       const { error } = await supabase.auth.signOut();
       if (error) {
@@ -198,6 +222,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const updateProfile = useCallback(async (updates: Partial<Profile>) => {
     if (!user || !isClient) return;
+
+    if (!supabase) {
+      toast.error('Supabase is not configured. Please check your environment variables.');
+      return;
+    }
 
     try {
       const { error } = await supabase

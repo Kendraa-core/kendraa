@@ -6,18 +6,23 @@ import { toast } from 'react-hot-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
   getSuggestedConnectionsWithMutualCounts,
+  getSuggestedInstitutions,
   getConnectionRequests, 
   getConnections,
   getConnectionStatus,
   sendConnectionRequest,
   acceptConnectionRequest,
-  rejectConnectionRequest
+  rejectConnectionRequest,
+  followUser,
+  unfollowUser,
+  isFollowing
 } from '@/lib/queries';
 import { Profile, ConnectionWithProfile } from '@/types/database.types';
 
 interface ProfilePreview extends Profile {
   mutual_connections?: number;
   connection_status?: 'none' | 'pending' | 'connected';
+  follow_status?: 'following' | 'not_following';
 }
 
 export default function NetworkPage() {
@@ -41,26 +46,55 @@ export default function NetworkPage() {
     debugLog('Fetching network data', { userId: user.id });
     
     try {
-      const [suggestionsData, requestsData, connectionsData] = await Promise.all([
-        getSuggestedConnectionsWithMutualCounts(user.id, 12),
+      const [individualsData, institutionsData, requestsData, connectionsData] = await Promise.all([
+        getSuggestedConnectionsWithMutualCounts(user.id, 8),
+        getSuggestedInstitutions(user.id, 4),
         getConnectionRequests(user.id),
         getConnections(user.id)
       ]);
 
+      // Combine individuals and institutions
+      const suggestionsData = [...individualsData, ...institutionsData];
+
       debugLog('Network data fetched', { 
+        individuals: individualsData.length,
+        institutions: institutionsData.length,
         suggestions: suggestionsData.length,
         requests: requestsData.length,
         connections: connectionsData.length 
       });
 
-      // Add connection status to suggestions
+      // Debug: Log the profile types
+      suggestionsData.forEach((profile, index) => {
+        debugLog(`Profile ${index}:`, { 
+          id: profile.id, 
+          name: profile.full_name, 
+          type: profile.profile_type,
+          mutual_connections: (profile as any).mutual_connections 
+        });
+      });
+
+      // Add connection status and follow status to suggestions
       const enrichedSuggestions = await Promise.all(
         suggestionsData.map(async (profile) => {
-          const status = await getConnectionStatus(user.id, profile.id);
+          let connectionStatus: 'none' | 'pending' | 'connected' = 'none';
+          let followStatus: 'following' | 'not_following' = 'not_following';
+          
+          if (profile.profile_type === 'institution') {
+            // For institutions, check follow status
+            const isFollowingUser = await isFollowing(user.id, profile.id);
+            followStatus = isFollowingUser ? 'following' : 'not_following';
+          } else {
+            // For individuals, check connection status
+            const status = await getConnectionStatus(user.id, profile.id);
+            connectionStatus = (status as 'none' | 'pending' | 'connected') || 'none';
+          }
+          
           return {
             ...profile,
-            connection_status: (status as 'none' | 'pending' | 'connected') || 'none',
-            mutual_connections: profile.mutual_connections || 0,
+            connection_status: connectionStatus,
+            follow_status: followStatus,
+            mutual_connections: (profile as any).mutual_connections || 0,
           };
         })
       );
@@ -80,28 +114,71 @@ export default function NetworkPage() {
     fetchNetworkData();
   }, [fetchNetworkData]);
 
-  const handleConnect = async (profileId: string) => {
+  const handleConnect = async (profileId: string, profileType: 'individual' | 'institution') => {
     if (!user?.id) return;
     
-    debugLog('Sending connection request', { fromUserId: user.id, toUserId: profileId });
+    debugLog('Handling connect/follow action', { fromUserId: user.id, toUserId: profileId, profileType });
     
     try {
-      const success = await sendConnectionRequest(user.id, profileId);
+      if (profileType === 'institution') {
+        // For institutions, use follow system
+        const success = await followUser(user.id, profileId, 'individual', 'institution');
+        
+        if (success) {
+          // Update local state
+          setSuggestions(prev => prev.map(p => 
+            p.id === profileId ? { ...p, follow_status: 'following' } : p
+          ));
+          toast.success('Now following this institution!');
+          debugLog('Follow action successful', { profileId });
+        } else {
+          toast.error('Failed to follow institution');
+          debugLog('Failed to follow institution', { profileId });
+        }
+      } else {
+        // For individuals, use connection system
+        const success = await sendConnectionRequest(user.id, profileId);
+        
+        if (success) {
+          // Update local state
+          setSuggestions(prev => prev.map(p => 
+            p.id === profileId ? { ...p, connection_status: 'pending' } : p
+          ));
+          toast.success('Connection request sent!');
+          debugLog('Connection request sent successfully', { profileId });
+        } else {
+          toast.error('Failed to send connection request');
+          debugLog('Failed to send connection request', { profileId });
+        }
+      }
+    } catch (error) {
+      debugLog('Error in connect/follow action', error);
+      toast.error('Failed to complete action');
+    }
+  };
+
+  const handleUnfollow = async (profileId: string) => {
+    if (!user?.id) return;
+    
+    debugLog('Unfollowing institution', { fromUserId: user.id, toUserId: profileId });
+    
+    try {
+      const success = await unfollowUser(user.id, profileId);
       
       if (success) {
         // Update local state
         setSuggestions(prev => prev.map(p => 
-          p.id === profileId ? { ...p, connection_status: 'pending' } : p
+          p.id === profileId ? { ...p, follow_status: 'not_following' } : p
         ));
-        toast.success('Connection request sent!');
-        debugLog('Connection request sent successfully', { profileId });
+        toast.success('Unfollowed institution');
+        debugLog('Unfollow action successful', { profileId });
       } else {
-        toast.error('Failed to send connection request');
-        debugLog('Failed to send connection request', { profileId });
+        toast.error('Failed to unfollow institution');
+        debugLog('Failed to unfollow institution', { profileId });
       }
     } catch (error) {
-      debugLog('Error sending connection request', error);
-      toast.error('Failed to send connection request');
+      debugLog('Error unfollowing institution', error);
+      toast.error('Failed to unfollow institution');
     }
   };
 
@@ -270,13 +347,33 @@ export default function NetworkPage() {
                         </div>
                       </div>
                       <div className="mt-3">
-                        {suggestion.connection_status === 'none' && (
-                          <button
-                            onClick={() => handleConnect(suggestion.id)}
-                            className="w-full px-3 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                          >
-                            Connect
-                          </button>
+                        {suggestion.profile_type === 'institution' ? (
+                          // Institution - Show Follow/Unfollow
+                          suggestion.follow_status === 'following' ? (
+                            <button
+                              onClick={() => handleUnfollow(suggestion.id)}
+                              className="w-full px-3 py-2 text-sm font-medium bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                            >
+                              Following
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleConnect(suggestion.id, 'institution')}
+                              className="w-full px-3 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                            >
+                              Follow
+                            </button>
+                          )
+                        ) : (
+                          // Individual - Show Connect
+                          suggestion.connection_status === 'none' && (
+                            <button
+                              onClick={() => handleConnect(suggestion.id, 'individual')}
+                              className="w-full px-3 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                            >
+                              Connect
+                            </button>
+                          )
                         )}
                         {suggestion.connection_status === 'pending' && (
                           <button

@@ -40,6 +40,9 @@ import {
   sendConnectionRequest,
   getProfileViewsCount,
   getOrCreateConversation,
+  followUser,
+  unfollowUser,
+  isFollowing,
   type Profile,
   type Experience,
   type Education,
@@ -47,11 +50,13 @@ import {
 } from '@/lib/queries';
 
 // Memoized components for better performance
-const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile, connectionStatus, onConnect, realTimeViewsCount }: {
+const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile, connectionStatus, followStatus, onConnect, onUnfollow, realTimeViewsCount }: {
   profile: Profile;
   isOwnProfile: boolean;
   connectionStatus: string;
+  followStatus: string;
   onConnect: () => void;
+  onUnfollow: () => void;
   realTimeViewsCount: number;
 }) {
   const { user } = useAuth();
@@ -135,16 +140,40 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
                 <ChatBubbleLeftIcon className="w-4 h-4 mr-2" />
                 Message
               </Button>
-              <Button
-                onClick={onConnect}
-                disabled={connectionStatus === 'pending' || connectionStatus === 'connected'}
-                className="bg-linkedin-primary hover:bg-linkedin-secondary text-white shadow-lg"
-                size="sm"
-              >
-                <UserPlusIcon className="w-4 h-4 mr-2" />
-                {connectionStatus === 'connected' ? 'Connected' : 
-                 connectionStatus === 'pending' ? 'Pending' : 'Connect'}
-              </Button>
+              {profile.profile_type === 'institution' ? (
+                // Institution - Show Follow/Unfollow
+                followStatus === 'following' ? (
+                  <Button
+                    onClick={onUnfollow}
+                    className="bg-gray-200 hover:bg-gray-300 text-gray-700 shadow-lg"
+                    size="sm"
+                  >
+                    <UserPlusIcon className="w-4 h-4 mr-2" />
+                    Following
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={onConnect}
+                    className="bg-linkedin-primary hover:bg-linkedin-secondary text-white shadow-lg"
+                    size="sm"
+                  >
+                    <UserPlusIcon className="w-4 h-4 mr-2" />
+                    Follow
+                  </Button>
+                )
+              ) : (
+                // Individual - Show Connect
+                <Button
+                  onClick={onConnect}
+                  disabled={connectionStatus === 'pending' || connectionStatus === 'connected'}
+                  className="bg-linkedin-primary hover:bg-linkedin-secondary text-white shadow-lg"
+                  size="sm"
+                >
+                  <UserPlusIcon className="w-4 h-4 mr-2" />
+                  {connectionStatus === 'connected' ? 'Connected' : 
+                   connectionStatus === 'pending' ? 'Pending' : 'Connect'}
+                </Button>
+              )}
             </>
           )}
           
@@ -244,6 +273,7 @@ export default function ProfilePage() {
   const [education, setEducation] = useState<Education[]>([]);
   const [posts, setPosts] = useState<PostWithAuthor[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<'none' | 'pending' | 'connected'>('none');
+  const [followStatus, setFollowStatus] = useState<'following' | 'not_following'>('not_following');
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState('about');
   const [realTimeViewsCount, setRealTimeViewsCount] = useState<number>(0);
@@ -295,10 +325,17 @@ export default function ProfilePage() {
         setRealTimeViewsCount(updatedViewsCount);
       }
 
-      // Get connection status if not own profile
+      // Get connection/follow status if not own profile
       if (!isOwnProfile && user?.id) {
-        const status = await getConnectionStatus(user.id, profileId);
-        setConnectionStatus((status as 'none' | 'pending' | 'connected') || 'none');
+        if (profileData.profile_type === 'institution') {
+          // For institutions, check follow status
+          const isFollowingUser = await isFollowing(user.id, profileId);
+          setFollowStatus(isFollowingUser ? 'following' : 'not_following');
+        } else {
+          // For individuals, check connection status
+          const status = await getConnectionStatus(user.id, profileId);
+          setConnectionStatus((status as 'none' | 'pending' | 'connected') || 'none');
+        }
       }
 
       debugLog('Profile data loaded successfully', {
@@ -320,26 +357,64 @@ export default function ProfilePage() {
   }, [fetchProfileData]);
 
   const handleConnect = useCallback(async () => {
-    if (!user?.id || !profileId) {
+    if (!user?.id || !profileId || !profile) {
       toast.error('Please log in to connect with others');
       return;
     }
 
-    debugLog('Sending connection request', { fromUserId: user.id, toUserId: profileId });
+    debugLog('Handling connect/follow action', { fromUserId: user.id, toUserId: profileId, profileType: profile.profile_type });
 
     try {
-      const success = await sendConnectionRequest(user.id, profileId);
-      if (success) {
-        setConnectionStatus('pending');
-        toast.success('Connection request sent!');
-        debugLog('Connection request sent successfully');
+      if (profile.profile_type === 'institution') {
+        // For institutions, use follow system
+        const success = await followUser(user.id, profileId, 'individual', 'institution');
+        if (success) {
+          setFollowStatus('following');
+          toast.success('Now following this institution!');
+          debugLog('Follow action successful');
+        } else {
+          toast.error('Failed to follow institution');
+          debugLog('Failed to follow institution');
+        }
       } else {
-        toast.error('Failed to send connection request');
-        debugLog('Failed to send connection request');
+        // For individuals, use connection system
+        const success = await sendConnectionRequest(user.id, profileId);
+        if (success) {
+          setConnectionStatus('pending');
+          toast.success('Connection request sent!');
+          debugLog('Connection request sent successfully');
+        } else {
+          toast.error('Failed to send connection request');
+          debugLog('Failed to send connection request');
+        }
       }
     } catch (error) {
-      debugLog('Error sending connection request', error);
-      toast.error('Failed to send connection request');
+      debugLog('Error in connect/follow action', error);
+      toast.error('Failed to complete action');
+    }
+  }, [user?.id, profileId, profile, debugLog]);
+
+  const handleUnfollow = useCallback(async () => {
+    if (!user?.id || !profileId) {
+      toast.error('Please log in to unfollow');
+      return;
+    }
+
+    debugLog('Unfollowing institution', { fromUserId: user.id, toUserId: profileId });
+
+    try {
+      const success = await unfollowUser(user.id, profileId);
+      if (success) {
+        setFollowStatus('not_following');
+        toast.success('Unfollowed institution');
+        debugLog('Unfollow action successful');
+      } else {
+        toast.error('Failed to unfollow institution');
+        debugLog('Failed to unfollow institution');
+      }
+    } catch (error) {
+      debugLog('Error unfollowing institution', error);
+      toast.error('Failed to unfollow institution');
     }
   }, [user?.id, profileId, debugLog]);
 
@@ -423,7 +498,9 @@ export default function ProfilePage() {
                 profile={profile}
                 isOwnProfile={isOwnProfile}
                 connectionStatus={connectionStatus}
+                followStatus={followStatus}
                 onConnect={handleConnect}
+                onUnfollow={handleUnfollow}
                 realTimeViewsCount={realTimeViewsCount}
               />
             </div>
