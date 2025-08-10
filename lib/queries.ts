@@ -7,6 +7,14 @@ import type { Profile, Post, PostComment,
   Message, MessageWithSender, MessageReaction, ClinicalNote, MessagingSettings,
   ConversationParticipant } from '@/types/database.types';
 
+// Helper function to get Supabase client with null check
+export const getSupabase = () => {
+  if (!supabase) {
+    throw new Error('Supabase client is not available. Please check your configuration.');
+  }
+  return supabase;
+};
+
 // Re-export types for convenience
 export type { 
   EventWithOrganizer, 
@@ -35,7 +43,7 @@ export async function getProfile(userId: string): Promise<Profile> {
   try {
     console.log('[Queries] Getting profile for user:', userId);
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('profiles')
       .select('*')
       .eq('id', userId)
@@ -62,7 +70,7 @@ export async function updateProfile(userId: string, updates: Partial<Profile>): 
   try {
     console.log('[Queries] Updating profile', { userId, updates });
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('profiles')
       .update(updates)
       .eq('id', userId)
@@ -91,7 +99,13 @@ export async function ensureProfileExists(
   try {
     console.log('[Queries] Ensuring profile exists for user:', userId);
     
-    const { data, error } = await supabase
+    // Check if Supabase is available
+    if (!supabase) {
+      console.error('[Queries] Supabase client is not available');
+      throw new Error('Database connection not available');
+    }
+    
+    const { data, error } = await getSupabase()
       .from('profiles')
       .upsert({
         id: userId,
@@ -117,7 +131,18 @@ export async function ensureProfileExists(
 
     if (error) {
       console.error('[Queries] Error ensuring profile exists:', error);
-      throw error;
+      
+      // Handle specific error types
+      if (error.code === 'PGRST301' || error.message.includes('JWT') || error.message.includes('401')) {
+        throw new Error('Authentication error. Please check your Supabase credentials and database permissions.');
+      } else if (error.code === 'PGRST116') {
+        // No rows returned - this might be expected for new users
+        console.log('[Queries] No existing profile found, creating new one');
+      } else if (error.code === 'PGRST114') {
+        throw new Error('Database table not found. Please run the database migrations.');
+      } else {
+        throw error;
+      }
     }
 
     console.log('[Queries] Profile ensured successfully');
@@ -134,7 +159,7 @@ export async function getPosts(limit = 10, offset = 0): Promise<Post[]> {
     console.log('[Queries] Getting posts');
     
     // First get posts without joins to avoid complex query issues
-    const { data: posts, error } = await supabase
+    const { data: posts, error } = await getSupabase()
       .from('posts')
       .select('*')
       .order('created_at', { ascending: false })
@@ -154,7 +179,7 @@ export async function getPosts(limit = 10, offset = 0): Promise<Post[]> {
     const authorIds = [...new Set(posts.map(post => post.author_id))];
     
     // Fetch authors separately
-    const { data: authors, error: authorsError } = await supabase
+    const { data: authors, error: authorsError } = await getSupabase()
       .from('profiles')
       .select('id, full_name, avatar_url, headline, user_type')
       .in('id', authorIds);
@@ -191,7 +216,7 @@ export async function getPostsByAuthor(authorId: string): Promise<PostWithAuthor
     }
     
     // Get posts without join first
-    const { data: posts, error: postsError } = await supabase
+    const { data: posts, error: postsError } = await getSupabase()
       .from('posts')
       .select('*')
       .eq('author_id', authorId)
@@ -208,7 +233,7 @@ export async function getPostsByAuthor(authorId: string): Promise<PostWithAuthor
     }
     
     // Fetch author separately
-    const { data: author, error: authorError } = await supabase
+    const { data: author, error: authorError } = await getSupabase()
       .from('profiles')
       .select('id, full_name, avatar_url, headline, email')
       .eq('id', authorId)
@@ -257,7 +282,7 @@ export async function createPost(
   try {
     console.log('[Queries] Creating post for user:', authorId);
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('posts')
       .insert({
         author_id: authorId,
@@ -293,7 +318,7 @@ export async function getConnections(userId: string): Promise<Profile[]> {
       return [];
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('connections')
       .select(`
         requester_id,
@@ -339,7 +364,7 @@ export async function getConnectionStatus(userId: string, targetUserId: string):
       return null;
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('connections')
       .select('status')
       .or(`and(requester_id.eq.${userId},recipient_id.eq.${targetUserId}),and(requester_id.eq.${targetUserId},recipient_id.eq.${userId})`)
@@ -371,7 +396,7 @@ export async function sendConnectionRequest(requesterId: string, recipientId: st
     // Get requester profile for notification
     const requesterProfile = await getProfile(requesterId);
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('connections')
       .insert({
         requester_id: requesterId,
@@ -417,7 +442,7 @@ export async function getSuggestedConnections(userId: string, limit = 10): Promi
     }
     
     // Get existing connections to exclude them from suggestions
-    const { data: existingConnections } = await supabase
+    const { data: existingConnections } = await getSupabase()
       .from('connections')
       .select('requester_id, recipient_id')
       .or(`requester_id.eq.${userId},recipient_id.eq.${userId}`)
@@ -428,7 +453,7 @@ export async function getSuggestedConnections(userId: string, limit = 10): Promi
     ) || [];
     
     // Get pending connection requests to exclude them
-    const { data: pendingRequests } = await supabase
+    const { data: pendingRequests } = await getSupabase()
       .from('connections')
       .select('requester_id, recipient_id')
       .or(`requester_id.eq.${userId},recipient_id.eq.${userId}`)
@@ -441,7 +466,7 @@ export async function getSuggestedConnections(userId: string, limit = 10): Promi
     // Combine all users to exclude
     const excludeUserIds = [userId, ...connectedUserIds, ...pendingUserIds];
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('profiles')
       .select('*')
       .not('id', 'in', `(${excludeUserIds.join(',')})`)
@@ -470,7 +495,7 @@ export async function getConnectionRequests(userId: string): Promise<ConnectionW
       return [];
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('connections')
       .select(`
         *,
@@ -502,7 +527,7 @@ export async function acceptConnectionRequest(connectionId: string): Promise<boo
     }
     
     // First, get the connection details to know who to notify
-    const { data: connection, error: fetchError } = await supabase
+    const { data: connection, error: fetchError } = await getSupabase()
       .from('connections')
       .select('*')
       .eq('id', connectionId)
@@ -511,7 +536,7 @@ export async function acceptConnectionRequest(connectionId: string): Promise<boo
     if (fetchError) throw fetchError;
     
     // Update the connection status
-    const { error } = await supabase
+    const { error } = await getSupabase()
       .from('connections')
       .update({ 
         status: 'accepted', 
@@ -555,7 +580,7 @@ export async function rejectConnectionRequest(connectionId: string): Promise<boo
       return false;
     }
     
-    const { error } = await supabase
+    const { error } = await getSupabase()
       .from('connections')
       .update({ 
         status: 'rejected', 
@@ -584,7 +609,7 @@ export async function getExperiences(profileId: string): Promise<Experience[]> {
       return [];
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('experiences')
       .select('*')
       .eq('profile_id', profileId)
@@ -611,7 +636,7 @@ export async function getEducation(profileId: string): Promise<Education[]> {
       return [];
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('education')
       .select('*')
       .eq('profile_id', profileId)
@@ -673,7 +698,7 @@ export async function getNotifications(userId: string): Promise<Notification[]> 
     }
     
     // Try to get notifications from database
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('notifications')
       .select('*')
       .eq('recipient_id', userId) // Use recipient_id instead of user_id
@@ -784,7 +809,7 @@ export async function createNotification(notification: Omit<Notification, 'id' |
       return null;
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('notifications')
       .insert({
         recipient_id: notification.user_id, // Map user_id to recipient_id for database
@@ -819,7 +844,7 @@ export async function markNotificationAsRead(notificationId: string): Promise<bo
       return false;
     }
     
-    const { error } = await supabase
+    const { error } = await getSupabase()
       .from('notifications')
       .update({ read: true })
       .eq('id', notificationId);
@@ -840,7 +865,7 @@ export async function recordProfileView(viewerId: string, profileId: string): Pr
     console.log('[Queries] Recording profile view:', profileId, 'by user:', viewerId);
     
     // Add view record
-    const { error: viewError } = await supabase
+    const { error: viewError } = await getSupabase()
       .from('profile_views')
       .upsert({
         viewer_id: viewerId,
@@ -854,14 +879,14 @@ export async function recordProfileView(viewerId: string, profileId: string): Pr
     }
 
     // Update profile views count
-    const { data: profile } = await supabase
+    const { data: profile } = await getSupabase()
       .from('profiles')
       .select('profile_views')
       .eq('id', profileId)
       .single();
 
     if (profile) {
-      const { error: updateError } = await supabase
+      const { error: updateError } = await getSupabase()
         .from('profiles')
         .update({ profile_views: (profile.profile_views || 0) + 1 })
         .eq('id', profileId);
@@ -895,7 +920,7 @@ export async function createComment(comment: {
       return null;
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('post_comments')
       .insert({
         ...comment,
@@ -910,14 +935,14 @@ export async function createComment(comment: {
     }
     
     // Update post comments count
-    const { data: post } = await supabase
+    const { data: post } = await getSupabase()
       .from('posts')
       .select('comments_count')
       .eq('id', comment.post_id)
       .single();
 
     if (post) {
-      const { error: updateError } = await supabase
+      const { error: updateError } = await getSupabase()
         .from('posts')
         .update({ comments_count: (post.comments_count || 0) + 1 })
         .eq('id', comment.post_id);
@@ -947,7 +972,7 @@ export async function getPostComments(postId: string): Promise<CommentWithAuthor
     }
     
     // Try to fetch comments with author data
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('post_comments')
       .select(`
         *,
@@ -961,7 +986,7 @@ export async function getPostComments(postId: string): Promise<CommentWithAuthor
       
       // If the join fails, try fetching comments without author data
       console.log('[Queries] Trying to fetch comments without author data');
-      const { data: commentsOnly, error: commentsError } = await supabase
+      const { data: commentsOnly, error: commentsError } = await getSupabase()
         .from('post_comments')
         .select('*')
         .eq('post_id', postId)
@@ -977,7 +1002,7 @@ export async function getPostComments(postId: string): Promise<CommentWithAuthor
         const authorIds = [...new Set(commentsOnly.map(comment => comment.author_id))];
         console.log('[Queries] Fetching authors for comment IDs:', authorIds);
         
-        const { data: authors, error: authorsError } = await supabase
+        const { data: authors, error: authorsError } = await getSupabase()
           .from('profiles')
           .select('id, full_name, avatar_url, headline, user_type')
           .in('id', authorIds);
@@ -1017,7 +1042,7 @@ export async function likePost(postId: string, userId: string): Promise<boolean>
     console.log('[Queries] Liking post:', postId, 'by user:', userId);
     
     // Check if already liked
-    const { data: existingLike } = await supabase
+    const { data: existingLike } = await getSupabase()
       .from('post_likes')
       .select('id')
       .eq('user_id', userId)
@@ -1030,7 +1055,7 @@ export async function likePost(postId: string, userId: string): Promise<boolean>
     }
     
     // Add like record
-    const { error: likeError } = await supabase
+    const { error: likeError } = await getSupabase()
       .from('post_likes')
       .insert({
         user_id: userId,
@@ -1043,14 +1068,14 @@ export async function likePost(postId: string, userId: string): Promise<boolean>
     }
 
     // Update post likes count
-    const { data: post } = await supabase
+    const { data: post } = await getSupabase()
       .from('posts')
       .select('likes_count')
       .eq('id', postId)
       .single();
 
     if (post) {
-      const { error: updateError } = await supabase
+      const { error: updateError } = await getSupabase()
         .from('posts')
         .update({ likes_count: (post.likes_count || 0) + 1 })
         .eq('id', postId);
@@ -1073,7 +1098,7 @@ export async function unlikePost(postId: string, userId: string): Promise<boolea
     console.log('[Queries] Unliking post:', postId, 'by user:', userId);
     
     // Remove like record
-    const { error: unlikeError } = await supabase
+    const { error: unlikeError } = await getSupabase()
       .from('post_likes')
       .delete()
       .eq('user_id', userId)
@@ -1085,7 +1110,7 @@ export async function unlikePost(postId: string, userId: string): Promise<boolea
     }
 
     // Update post likes count
-    const { data: post } = await supabase
+    const { data: post } = await getSupabase()
       .from('posts')
       .select('likes_count')
       .eq('id', postId)
@@ -1093,7 +1118,7 @@ export async function unlikePost(postId: string, userId: string): Promise<boolea
 
     if (post) {
       const newCount = Math.max(0, (post.likes_count || 0) - 1);
-      const { error: updateError } = await supabase
+      const { error: updateError } = await getSupabase()
         .from('posts')
         .update({ likes_count: newCount })
         .eq('id', postId);
@@ -1115,7 +1140,7 @@ export async function isPostLiked(userId: string, postId: string): Promise<boole
   try {
     console.log('[Queries] Checking if post is liked by user:', userId, 'post:', postId);
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('post_likes')
       .select('id')
       .eq('user_id', userId)
@@ -1147,7 +1172,7 @@ export async function createInstitution(institution: Omit<Institution, 'id' | 'c
       return null;
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('institutions')
       .insert({
         ...institution,
@@ -1177,7 +1202,7 @@ export async function getInstitutions(): Promise<Institution[]> {
       return [];
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('institutions')
       .select('*')
       .order('created_at', { ascending: false });
@@ -1203,7 +1228,7 @@ export async function getInstitutionByAdminId(adminUserId: string): Promise<Inst
       return null;
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('institutions')
       .select('*')
       .eq('admin_user_id', adminUserId)
@@ -1293,7 +1318,7 @@ export async function createJob(job: Omit<Job, 'id' | 'created_at' | 'updated_at
     
     // Check if jobs table exists by trying to query it
     try {
-      const { error: tableCheckError } = await supabase
+      const { error: tableCheckError } = await getSupabase()
         .from('jobs')
         .select('id')
         .limit(1);
@@ -1316,7 +1341,7 @@ export async function createJob(job: Omit<Job, 'id' | 'created_at' | 'updated_at
       return null;
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('jobs')
       .insert({
         ...job,
@@ -1502,7 +1527,7 @@ export async function getJobs(): Promise<JobWithCompany[]> {
       ];
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('jobs')
       .select(`
         *,
@@ -1532,7 +1557,7 @@ export async function applyToJob(application: Omit<JobApplication, 'id' | 'creat
     }
     
     // First, create the job application
-    const { data: jobApplication, error: applicationError } = await supabase
+    const { data: jobApplication, error: applicationError } = await getSupabase()
       .from('job_applications')
       .insert({
         ...application,
@@ -1554,7 +1579,7 @@ export async function applyToJob(application: Omit<JobApplication, 'id' | 'creat
     console.log('Job application submitted successfully', jobApplication);
 
     // Get job details to create notifications
-    const { data: job, error: jobError } = await supabase
+    const { data: job, error: jobError } = await getSupabase()
       .from('jobs')
       .select('*, company:institutions(*)')
       .eq('id', application.job_id)
@@ -1617,7 +1642,7 @@ export async function createEvent(event: Omit<Event, 'id' | 'created_at' | 'upda
       return null;
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('events')
       .insert({
         ...event,
@@ -1647,7 +1672,7 @@ export async function getEvents(): Promise<EventWithOrganizer[]> {
       return [];
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('events')
       .select(`
         *,
@@ -1675,7 +1700,7 @@ export async function registerForEvent(registration: Omit<EventAttendee, 'id' | 
       return null;
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('event_attendees')
       .insert({
         ...registration,
@@ -1705,7 +1730,7 @@ export async function followUser(followerId: string, followingId: string, follow
       return null;
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('follows')
       .insert({
         follower_id: followerId,
@@ -1737,7 +1762,7 @@ export async function unfollowUser(followerId: string, followingId: string): Pro
       return false;
     }
     
-    const { error } = await supabase
+    const { error } = await getSupabase()
       .from('follows')
       .delete()
       .eq('follower_id', followerId)
@@ -1763,7 +1788,7 @@ export async function isFollowing(followerId: string, followingId: string): Prom
       return false;
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('follows')
       .select('id')
       .eq('follower_id', followerId)
@@ -1793,7 +1818,7 @@ export async function getFollowers(userId: string): Promise<FollowWithProfile[]>
       return [];
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('follows')
       .select(`
         *,
@@ -1822,7 +1847,7 @@ export async function getFollowing(userId: string): Promise<FollowWithProfile[]>
       return [];
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('follows')
       .select(`
         *,
@@ -1852,14 +1877,14 @@ export async function getSuggestedInstitutions(userId: string, limit: number = 1
     }
     
     // Get institutions that the user is not already following
-    const { data: following } = await supabase
+    const { data: following } = await getSupabase()
       .from('follows')
       .select('following_id')
       .eq('follower_id', userId);
     
     const followingIds = following?.map(f => f.following_id) || [];
     
-    let query = supabase
+    let query = getSupabase()
       .from('profiles')
       .select('*')
       .eq('profile_type', 'institution')
@@ -1887,7 +1912,7 @@ export async function ensurePostCommentsTable(): Promise<boolean> {
     console.log('[Queries] Checking if post_comments table exists');
     
     // Check if post_comments table exists by trying to select from it
-    const { error: tableCheckError } = await supabase
+    const { error: tableCheckError } = await getSupabase()
       .from('post_comments')
       .select('id')
       .limit(1);
@@ -1919,7 +1944,7 @@ export async function createDirectConversation(user1Id: string, user2Id: string)
     }
     
     // Check if conversation already exists
-    const { data: existingConversations, error: checkError } = await supabase
+    const { data: existingConversations, error: checkError } = await getSupabase()
       .from('conversations')
       .select('*')
       .eq('conversation_type', 'direct');
@@ -1941,7 +1966,7 @@ export async function createDirectConversation(user1Id: string, user2Id: string)
     }
     
     // Create new conversation
-    const { data: convData, error: convError } = await supabase
+    const { data: convData, error: convError } = await getSupabase()
       .from('conversations')
       .insert({
         title: `${user1Id}-${user2Id}`,
@@ -1972,14 +1997,14 @@ export async function createDirectConversation(user1Id: string, user2Id: string)
       },
     ];
     
-    const { error: partError } = await supabase
+    const { error: partError } = await getSupabase()
       .from('conversation_participants')
       .insert(participantData);
 
     if (partError) {
       console.log('Error adding participants', partError);
       // Delete the conversation if we can't add participants
-      await supabase.from('conversations').delete().eq('id', convData.id);
+      await getSupabase().from('conversations').delete().eq('id', convData.id);
       return null;
     }
     
@@ -2003,7 +2028,7 @@ export async function getOrCreateConversation(user1Id: string, user2Id: string):
     }
     
     // First try to find existing conversation
-    const { data: conversations, error: fetchError } = await supabase
+    const { data: conversations, error: fetchError } = await getSupabase()
       .from('conversations')
       .select(`
         *,
@@ -2047,7 +2072,7 @@ export async function getUserConversations(userId: string): Promise<Conversation
     }
     
     // Get conversations where user is a participant
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('conversations')
       .select(`
         *,
@@ -2102,7 +2127,7 @@ export async function createConversation(conversation: {
     }
     
     // Create conversation
-    const { data: convData, error: convError } = await supabase
+    const { data: convData, error: convError } = await getSupabase()
       .from('conversations')
       .insert({
         title: conversation.title,
@@ -2122,7 +2147,7 @@ export async function createConversation(conversation: {
       role: 'participant',
     }));
     
-    const { error: partError } = await supabase
+    const { error: partError } = await getSupabase()
       .from('conversation_participants')
       .insert(participantData);
 
@@ -2155,7 +2180,7 @@ export async function sendMessage(message: {
       return null;
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('messages')
       .insert({
         conversation_id: message.conversation_id,
@@ -2176,7 +2201,7 @@ export async function sendMessage(message: {
     if (error) throw error;
     
     // Update conversation's last_message_at
-    await supabase
+    await getSupabase()
       .from('conversations')
       .update({ last_message_at: new Date().toISOString() })
       .eq('id', message.conversation_id);
@@ -2200,7 +2225,7 @@ export async function getConversationMessages(conversationId: string, limit = 50
       return [];
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('messages')
       .select(`
         *,
@@ -2235,7 +2260,7 @@ export async function markMessageAsRead(messageId: string, userId: string): Prom
     }
     
     // Get current message
-    const { data: message, error: fetchError } = await supabase
+    const { data: message, error: fetchError } = await getSupabase()
       .from('messages')
       .select('read_by')
       .eq('id', messageId)
@@ -2248,7 +2273,7 @@ export async function markMessageAsRead(messageId: string, userId: string): Prom
     if (!readBy.includes(userId)) {
       readBy.push(userId);
       
-      const { error: updateError } = await supabase
+      const { error: updateError } = await getSupabase()
         .from('messages')
         .update({ read_by: readBy })
         .eq('id', messageId);
@@ -2280,7 +2305,7 @@ export async function addMessageReaction(reaction: {
       return null;
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('message_reactions')
       .insert({
         message_id: reaction.message_id,
@@ -2323,7 +2348,7 @@ export async function createClinicalNote(note: {
       return null;
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('clinical_notes')
       .insert({
         message_id: note.message_id,
@@ -2380,7 +2405,7 @@ export async function getMessagingSettings(userId: string): Promise<MessagingSet
       };
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('messaging_settings')
       .select('*')
       .eq('user_id', userId)
@@ -2402,7 +2427,7 @@ export async function getMessagingSettings(userId: string): Promise<MessagingSet
         hipaa_compliance_enabled: true,
       };
       
-      const { data: newSettings, error: createError } = await supabase
+      const { data: newSettings, error: createError } = await getSupabase()
         .from('messaging_settings')
         .insert(defaultSettings)
         .select()
@@ -2431,7 +2456,7 @@ export async function updateMessagingSettings(userId: string, settings: Partial<
       return null;
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('messaging_settings')
       .update({
         ...settings,
@@ -2468,7 +2493,7 @@ export async function updateJobApplicationStatus(
     }
     
     // Update the application status
-    const { data: application, error: updateError } = await supabase
+    const { data: application, error: updateError } = await getSupabase()
       .from('job_applications')
       .update({
         status,
@@ -2532,7 +2557,7 @@ export async function getJobApplications(jobId: string): Promise<JobApplication[
       return [];
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('job_applications')
       .select('*, applicant:profiles(*)')
       .eq('job_id', jobId)
@@ -2559,7 +2584,7 @@ export async function getUserApplications(userId: string): Promise<JobApplicatio
       return [];
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('job_applications')
       .select('*, job:jobs(*)')
       .eq('applicant_id', userId)
@@ -2586,7 +2611,7 @@ export async function hasAppliedToJob(userId: string, jobId: string): Promise<bo
       return false;
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('job_applications')
       .select('id')
       .eq('applicant_id', userId)
@@ -2625,7 +2650,7 @@ export async function getTrendingTopics(limit: number = 5): Promise<Array<{ hash
     }
     
     // Get all posts with content
-    const { data: posts, error } = await supabase
+    const { data: posts, error } = await getSupabase()
       .from('posts')
       .select('content')
       .not('content', 'is', null);
@@ -2679,7 +2704,7 @@ export async function searchUsers(query: string): Promise<Array<{
   try {
     console.log('[Queries] Searching users with query:', query);
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('profiles')
       .select('id, full_name, headline, avatar_url, user_type')
       .or(`full_name.ilike.%${query}%,headline.ilike.%${query}%`)
@@ -2746,7 +2771,7 @@ export async function getProfileViewsCount(userId: string): Promise<number> {
   try {
     console.log('[Queries] Getting profile views count for user:', userId);
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('profile_views')
       .select('id')
       .eq('profile_id', userId);

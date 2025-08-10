@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/queries';
 
 interface CacheItem<T> {
   data: T;
@@ -62,7 +62,7 @@ export function useSupabaseQuery<T = any>(
     setError(null);
 
     try {
-      const { data: newData, error: newError } = await queryFnRef.current(supabase);
+      const { data: newData, error: newError } = await queryFnRef.current(getSupabase());
 
       if (newError) {
         throw newError;

@@ -25,7 +25,7 @@ import {
   createComment,
 } from '@/lib/queries';
 import type { Post, CommentWithAuthor, Profile } from '@/types/database.types';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/queries';
 
 interface PostCardProps {
   post: Post & {
@@ -57,7 +57,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
   // Function to refresh post data from database
   const refreshPostData = async () => {
     try {
-      const { data: postData, error } = await supabase
+      const { data: postData, error } = await getSupabase()
         .from('posts')
         .select('likes_count, comments_count')
         .eq('id', post.id)

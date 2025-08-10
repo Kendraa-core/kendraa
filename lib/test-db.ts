@@ -1,11 +1,11 @@
-import { supabase } from './supabase';
+import { getSupabase } from './queries';
 
 export async function testDatabaseConnection() {
   console.log('🔍 Testing database connection...');
   
   try {
     // Test 1: Check if profiles table exists
-    const { data: profiles, error: profilesError } = await supabase
+    const { data: profiles, error: profilesError } = await getSupabase()
       .from('profiles')
       .select('count')
       .limit(1);
@@ -17,7 +17,7 @@ export async function testDatabaseConnection() {
     }
     
     // Test 2: Check if posts table exists
-    const { data: posts, error: postsError } = await supabase
+    const { data: posts, error: postsError } = await getSupabase()
       .from('posts')
       .select('count')
       .limit(1);
@@ -29,7 +29,7 @@ export async function testDatabaseConnection() {
     }
     
     // Test 3: Try to get a specific profile
-    const { data: profile, error: profileError } = await supabase
+    const { data: profile, error: profileError } = await getSupabase()
       .from('profiles')
       .select('*')
       .eq('id', 'ce8707f0-b83d-4140-8f39-f56850d6e560')
@@ -44,7 +44,7 @@ export async function testDatabaseConnection() {
     }
     
     // Test 4: Try to get posts with proper join
-    const { data: postsData, error: postsDataError } = await supabase
+    const { data: postsData, error: postsDataError } = await getSupabase()
       .from('posts')
       .select('*')
       .limit(5);
@@ -57,7 +57,7 @@ export async function testDatabaseConnection() {
       // If we have posts, try to get their authors
       if (postsData && postsData.length > 0) {
         const authorIds = [...new Set(postsData.map(post => post.author_id))];
-        const { data: authors, error: authorsError } = await supabase
+        const { data: authors, error: authorsError } = await getSupabase()
           .from('profiles')
           .select('id, full_name, avatar_url, headline, email')
           .in('id', authorIds);
@@ -82,7 +82,7 @@ export async function createSamplePostsWithHashtags() {
   
   try {
     // Get a sample user ID (you'll need to replace this with a real user ID)
-    const { data: profiles, error: profilesError } = await supabase
+    const { data: profiles, error: profilesError } = await getSupabase()
       .from('profiles')
       .select('id')
       .limit(1);
@@ -133,7 +133,7 @@ export async function createSamplePostsWithHashtags() {
     ];
     
     for (const post of samplePosts) {
-      const { error } = await supabase
+      const { error } = await getSupabase()
         .from('posts')
         .insert(post);
       

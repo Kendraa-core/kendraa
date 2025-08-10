@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/queries';
 import {
   UserCircleIcon,
   PhotoIcon,
@@ -63,12 +63,12 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
       if (avatarFile) {
         const avatarExt = avatarFile.name.split('.').pop();
         const avatarPath = `avatars/${user.id}_${Date.now()}.${avatarExt}`;
-        const { error: avatarError } = await supabase.storage
+        const { error: avatarError } = await getSupabase().storage
           .from('public')
           .upload(avatarPath, avatarFile);
 
         if (avatarError) throw avatarError;
-        const { data: { publicUrl } } = supabase.storage
+        const { data: { publicUrl } } = getSupabase().storage
           .from('public')
           .getPublicUrl(avatarPath);
         avatarUrl = publicUrl;
@@ -78,19 +78,19 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
       if (coverFile) {
         const coverExt = coverFile.name.split('.').pop();
         const coverPath = `covers/${user.id}_${Date.now()}.${coverExt}`;
-        const { error: coverError } = await supabase.storage
+        const { error: coverError } = await getSupabase().storage
           .from('public')
           .upload(coverPath, coverFile);
 
         if (coverError) throw coverError;
-        const { data: { publicUrl } } = supabase.storage
+        const { data: { publicUrl } } = getSupabase().storage
           .from('public')
           .getPublicUrl(coverPath);
         coverUrl = publicUrl;
       }
 
       // Update profile
-      const { error: updateError } = await supabase
+      const { error: updateError } = await getSupabase()
         .from('profiles')
         .update({
           ...formData,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/queries';
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { UserCircleIcon } from '@heroicons/react/24/outline';
@@ -15,7 +15,7 @@ export default function ProfileSetupPage() {
   const fetchProfile = useCallback(async () => {
     if (!user?.id) return;
     try {
-      const { data, error } = await supabase
+      const { data, error } = await getSupabase()
         .from('profiles')
         .select('*')
         .eq('id', user.id)

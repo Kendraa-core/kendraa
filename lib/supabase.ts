@@ -30,6 +30,8 @@ const getSupabaseClient = () => {
           detectSessionInUrl: true,
           autoRefreshToken: true,
           storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+          // Add better error handling for auth issues
+          flowType: 'pkce',
         },
         realtime: {
           params: {

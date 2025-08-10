@@ -36,11 +36,41 @@ export default function DemoPage() {
             )}
 
             {supabaseStatus === 'configured' && (
-              <div className="flex items-center space-x-3 text-green-600">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                <span className="font-medium">Supabase is properly configured!</span>
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3 text-green-600">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="font-medium">Supabase is configured!</span>
+                </div>
+                
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-blue-800 mb-2">Database Setup Required</h3>
+                  <p className="text-sm text-blue-700 mb-4">
+                    Your Supabase credentials are working, but you may need to set up the database schema.
+                  </p>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <h4 className="text-sm font-medium text-blue-800">If you see 401 errors:</h4>
+                      <ul className="text-sm text-blue-700 list-disc list-inside space-y-1">
+                        <li>Check that your Supabase project has the correct database tables</li>
+                        <li>Ensure Row Level Security (RLS) policies are configured</li>
+                        <li>Verify that the anon key has the necessary permissions</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-sm font-medium text-blue-800">Database Schema:</h4>
+                      <p className="text-sm text-blue-700">The application expects these tables: <code className="bg-blue-100 px-1 rounded">profiles</code>, <code className="bg-blue-100 px-1 rounded">posts</code>, <code className="bg-blue-100 px-1 rounded">jobs</code>, <code className="bg-blue-100 px-1 rounded">follows</code>, etc.</p>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-sm font-medium text-blue-800">Quick Fix:</h4>
+                      <p className="text-sm text-blue-700">Try creating a simple profile table in your Supabase dashboard to test the connection.</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 

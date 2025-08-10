@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/queries';
 
 interface ConnectionButtonProps {
   profileId: string;
@@ -19,7 +19,7 @@ export default function ConnectionButton({ profileId, onStatusChange }: Connecti
     if (!user?.id) return;
 
     try {
-      const { data, error } = await supabase
+      const { data, error } = await getSupabase()
         .from('connections')
         .select('status')
         .or(`requester_id.eq.${user.id},recipient_id.eq.${user.id}`)
@@ -49,7 +49,7 @@ export default function ConnectionButton({ profileId, onStatusChange }: Connecti
 
     setLoading(true);
     try {
-      const { error } = await supabase
+      const { error } = await getSupabase()
         .from('connections')
         .insert({
           requester_id: user.id,
@@ -73,7 +73,7 @@ export default function ConnectionButton({ profileId, onStatusChange }: Connecti
 
     setLoading(true);
     try {
-      const { error } = await supabase
+      const { error } = await getSupabase()
         .from('connections')
         .delete()
         .or(`requester_id.eq.${user.id},recipient_id.eq.${user.id}`)

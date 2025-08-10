@@ -178,23 +178,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (error) {
+        console.error('Supabase signup error:', error);
+        // Handle specific error types
+        if (error.message.includes('Invalid Refresh Token')) {
+          toast.error('Authentication error. Please try refreshing the page.');
+        } else if (error.message.includes('Email not confirmed')) {
+          toast.error('Please check your email and confirm your account before signing in.');
+        } else {
+          toast.error(error.message || 'Failed to create account');
+        }
         throw error;
       }
 
       if (data.user) {
-        // Create profile immediately
-        await ensureProfileExists(
-          data.user.id,
-          email,
-          fullName,
-          profileType
-        );
+        try {
+          // Create profile immediately
+          await ensureProfileExists(
+            data.user.id,
+            email,
+            fullName,
+            profileType
+          );
+        } catch (profileError) {
+          console.error('Profile creation error:', profileError);
+          // Don't fail the signup if profile creation fails
+          toast.error('Account created but profile setup failed. You can complete your profile later.');
+        }
       }
 
       toast.success('Account created successfully! Please check your email to verify your account.');
     } catch (error: any) {
       console.error('Sign up error:', error);
-      toast.error(error.message || 'Failed to create account');
+      // Don't show duplicate error messages
+      if (!error.message.includes('Invalid Refresh Token') && !error.message.includes('Email not confirmed')) {
+        toast.error(error.message || 'Failed to create account');
+      }
       throw error;
     }
   }, [isClient]);
