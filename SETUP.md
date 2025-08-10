@@ -53,11 +53,66 @@ The application is now ready for deployment to:
 - **Railway**
 - **Any other hosting platform**
 
+## 🚨 **FIXING 401 ERROR**
+
+### **The Issue:**
+You're getting a 401 error because there's a mismatch between the database schema and what the application expects. The database tables exist but have different column names than what the TypeScript types define.
+
+### **Solution: Run the Schema Fix Migration**
+
+1. **Go to your Supabase Dashboard** → SQL Editor
+2. **Copy and paste the entire content** from `supabase/migrations/002_fix_profiles_schema.sql`
+3. **Run the migration** by clicking "Run"
+4. **Wait for completion** (this will fix the column mismatches)
+
+### **Test the Connection:**
+After running the migration, test your connection:
+
+```bash
+node test-db-connection.js
+```
+
+### **Alternative Quick Fix:**
+If you want to test immediately without the full schema fix:
+
+```sql
+-- Add missing columns to profiles table
+ALTER TABLE public.profiles 
+ADD COLUMN IF NOT EXISTS website VARCHAR(255),
+ADD COLUMN IF NOT EXISTS phone VARCHAR(50),
+ADD COLUMN IF NOT EXISTS is_premium BOOLEAN DEFAULT FALSE,
+ADD COLUMN IF NOT EXISTS profile_views INTEGER DEFAULT 0,
+ADD COLUMN IF NOT EXISTS profile_type VARCHAR(50) DEFAULT 'individual';
+
+-- Rename cover_url to banner_url
+ALTER TABLE public.profiles RENAME COLUMN cover_url TO banner_url;
+
+-- Create follows table for the follow system
+CREATE TABLE IF NOT EXISTS public.follows (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    follower_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    following_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    follower_type VARCHAR(20) DEFAULT 'individual',
+    following_type VARCHAR(20) DEFAULT 'individual',
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(follower_id, following_id)
+);
+
+-- Enable RLS and create policies
+ALTER TABLE public.follows ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can view follows" ON public.follows FOR SELECT USING (true);
+CREATE POLICY "Users can create follows" ON public.follows FOR INSERT WITH CHECK (auth.uid()::uuid = follower_id);
+CREATE POLICY "Users can delete their own follows" ON public.follows FOR DELETE USING (auth.uid()::uuid = follower_id);
+
+-- Grant permissions
+GRANT ALL ON public.follows TO anon, authenticated;
+```
+
 ## 📦 **To Complete the Setup**
 
 ### **Option 1: Configure Supabase (Recommended)**
 1. **Create Supabase Project**: Go to [supabase.com](https://supabase.com) and create a new project
-2. **Get Credentials**: In your Supabase dashboard → Settings → API → Copy URL and anon key
+2. **Get Credentials**: In your Supabase dashboard, go to Settings → API and copy your URL and anon key
 3. **Update Environment**: Create `.env.local` file in the project root:
    ```env
    NEXT_PUBLIC_SUPABASE_URL=your_actual_supabase_url
