@@ -2,12 +2,14 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import Avatar from '@/components/common/Avatar';
 import Breadcrumb from '@/components/common/Breadcrumb';
-import BackButton from '@/components/common/BackButton';
+
+import ShareButton from '@/components/common/ShareButton';
 import PostCard from '@/components/post/PostCard';
 import { cn, formatDate } from '@/lib/utils';
 import {
@@ -35,10 +37,8 @@ import {
   getExperiences,
   getEducation,
   getPostsByAuthor,
-  recordProfileView,
   getConnectionStatus,
   sendConnectionRequest,
-  getProfileViewsCount,
   getOrCreateConversation,
   followUser,
   unfollowUser,
@@ -92,10 +92,11 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
       {/* Banner */}
       <div className="h-48 bg-gradient-to-br from-linkedin-primary via-linkedin-secondary to-linkedin-accent rounded-t-xl overflow-hidden">
         {profile.banner_url ? (
-          <img
+          <Image
             src={profile.banner_url}
             alt="Profile banner"
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-linkedin-primary via-linkedin-secondary to-linkedin-accent" />
@@ -209,10 +210,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
                 {profile.location}
               </div>
             )}
-            <div className="flex items-center">
-              <EyeIcon className="w-4 h-4 mr-1" />
-              {realTimeViewsCount} profile views
-            </div>
+            {/* Profile views removed - only visible in dashboard */}
           </div>
 
           {profile.bio && (
@@ -276,7 +274,7 @@ export default function ProfilePage() {
   const [followStatus, setFollowStatus] = useState<'following' | 'not_following'>('not_following');
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState('about');
-  const [realTimeViewsCount, setRealTimeViewsCount] = useState<number>(0);
+  // const [realTimeViewsCount, setRealTimeViewsCount] = useState<number>(0);
 
   const profileId = params.id as string;
   const isOwnProfile = user?.id === profileId;
@@ -313,17 +311,17 @@ export default function ProfilePage() {
       setEducation(educationData);
       setPosts(postsData);
 
-      // Get real-time profile views count
-      const viewsCount = await getProfileViewsCount(profileId);
-      setRealTimeViewsCount(viewsCount);
+      // Profile views functionality commented out - no longer tracking views
+      // const viewsCount = await getProfileViewsCount(profileId);
+      // setRealTimeViewsCount(viewsCount);
 
       // Record profile view if not own profile
-      if (!isOwnProfile && user?.id) {
-        await recordProfileView(profileId, user.id);
-        // Update the views count after recording the view
-        const updatedViewsCount = await getProfileViewsCount(profileId);
-        setRealTimeViewsCount(updatedViewsCount);
-      }
+      // if (!isOwnProfile && user?.id) {
+      //   await recordProfileView(profileId, user.id);
+      //   // Update the views count after recording the view
+      //   const updatedViewsCount = await getProfileViewsCount(profileId);
+      //   setRealTimeViewsCount(updatedViewsCount);
+      // }
 
       // Get connection/follow status if not own profile
       if (!isOwnProfile && user?.id) {
@@ -474,15 +472,13 @@ export default function ProfilePage() {
           />
         </div>
 
-        {/* Back Button */}
-        <div
-          
-          
-          className="mb-6"
-        >
-          <BackButton className="text-gray-600 hover:text-gray-900 hover:bg-white/50">
-            Back to Home
-          </BackButton>
+        {/* Elegant Header */}
+        <div className="mb-6 flex justify-end">
+          <ShareButton 
+            title={`${profile?.full_name || 'User'}'s Profile`}
+            description={`Check out ${profile?.full_name || 'this user'}'s professional profile on Kendraa`}
+            url={window.location.href}
+          />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -501,7 +497,7 @@ export default function ProfilePage() {
                 followStatus={followStatus}
                 onConnect={handleConnect}
                 onUnfollow={handleUnfollow}
-                realTimeViewsCount={realTimeViewsCount}
+                realTimeViewsCount={0}
               />
             </div>
 
@@ -731,10 +727,11 @@ export default function ProfilePage() {
                   <CardTitle className="text-lg text-gray-900">Profile Stats</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div className="flex items-center space-x-4 text-sm">
+                  {/* Profile views removed - no longer displaying */}
+                  {/* <div className="flex items-center space-x-4 text-sm">
                     <span className="text-gray-600">Profile views</span>
                     <span className="font-semibold text-gray-900">{realTimeViewsCount}</span>
-                  </div>
+                  </div> */}
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-gray-600">Posts</span>
                     <span className="font-semibold text-gray-900">{posts.length}</span>

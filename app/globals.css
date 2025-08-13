@@ -2,6 +2,249 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Accessibility Enhancements */
+
+/* Screen Reader Only Content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* High Contrast Mode */
+.accessibility-high-contrast {
+  --tw-bg-white: #000000;
+  --tw-text-gray-900: #ffffff;
+  --tw-text-gray-600: #cccccc;
+  --tw-text-gray-500: #aaaaaa;
+  --tw-border-gray-200: #666666;
+  --tw-border-gray-300: #888888;
+}
+
+.high-contrast {
+  filter: contrast(150%) saturate(200%);
+}
+
+.high-contrast .bg-white {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+.high-contrast .text-gray-900 {
+  color: #ffffff !important;
+}
+
+.high-contrast .text-gray-600 {
+  color: #cccccc !important;
+}
+
+.high-contrast .text-gray-500 {
+  color: #aaaaaa !important;
+}
+
+.high-contrast .border-gray-200,
+.high-contrast .border-gray-300 {
+  border-color: #666666 !important;
+}
+
+.high-contrast button,
+.high-contrast .bg-blue-600 {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 2px solid #ffffff;
+}
+
+.high-contrast button:hover,
+.high-contrast .bg-blue-600:hover {
+  background-color: #cccccc !important;
+}
+
+/* Enhanced Focus Indicators */
+.enhanced-focus *:focus {
+  outline: 3px solid #3b82f6 !important;
+  outline-offset: 2px !important;
+  border-radius: 4px;
+}
+
+.enhanced-focus button:focus,
+.enhanced-focus a:focus,
+.enhanced-focus input:focus,
+.enhanced-focus textarea:focus,
+.enhanced-focus select:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5) !important;
+}
+
+/* Reduced Motion */
+.reduce-motion,
+.accessibility-reduce-motion {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+.reduce-motion *,
+.accessibility-reduce-motion * {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+/* Simplified Interface */
+.accessibility-simplified {
+  background: #ffffff;
+}
+
+.accessibility-simplified * {
+  border-radius: 4px !important;
+  box-shadow: none !important;
+}
+
+.accessibility-simplified .bg-gradient-to-r,
+.accessibility-simplified .bg-gradient-to-br {
+  background: #3b82f6 !important;
+}
+
+/* Large Text Support */
+.text-extra-large {
+  font-size: 1.25rem !important;
+  line-height: 1.75rem !important;
+}
+
+/* Skip Links */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: #3b82f6;
+  color: white;
+  padding: 8px;
+  z-index: 1000;
+  text-decoration: none;
+  border-radius: 0 0 4px 4px;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* Medical Content Accessibility */
+.medical-content {
+  line-height: 1.6;
+  letter-spacing: 0.025em;
+}
+
+.medical-content h1,
+.medical-content h2,
+.medical-content h3 {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.medical-content p {
+  margin-bottom: 1em;
+}
+
+.medical-content ul,
+.medical-content ol {
+  margin-bottom: 1em;
+  padding-left: 1.5em;
+}
+
+.medical-content li {
+  margin-bottom: 0.25em;
+}
+
+/* Voice Navigation Indicators */
+.voice-navigation-active {
+  border: 3px dashed #10b981;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Reading Assistance */
+.reading-assistance .highlighted-text {
+  background-color: #fef3c7;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+.reading-assistance .current-sentence {
+  background-color: #ddd6fe;
+  padding: 4px;
+  border-radius: 4px;
+  border-left: 4px solid #8b5cf6;
+}
+
+/* Dyslexia-Friendly Font */
+.dyslexia-friendly {
+  font-family: 'OpenDyslexic', 'Comic Sans MS', cursive;
+}
+
+/* Mobile Accessibility */
+@media (max-width: 768px) {
+  .enhanced-focus *:focus {
+    outline-width: 4px !important;
+  }
+  
+  .accessibility-mobile-friendly button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .accessibility-mobile-friendly input,
+  .accessibility-mobile-friendly textarea,
+  .accessibility-mobile-friendly select {
+    min-height: 44px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+
+/* Print Accessibility */
+@media print {
+  .skip-link,
+  .voice-navigation-active,
+  .accessibility-controls {
+    display: none !important;
+  }
+  
+  .medical-content {
+    font-size: 12pt;
+    line-height: 1.4;
+    color: #000000;
+    background: #ffffff;
+  }
+  
+  .medical-content h1 {
+    font-size: 18pt;
+    font-weight: bold;
+  }
+  
+  .medical-content h2 {
+    font-size: 16pt;
+    font-weight: bold;
+  }
+  
+  .medical-content h3 {
+    font-size: 14pt;
+    font-weight: bold;
+  }
+}
+
 :root {
   --font-inter: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }

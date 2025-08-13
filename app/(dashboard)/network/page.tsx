@@ -4,6 +4,9 @@ import { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import ClickableProfileName from '@/components/common/ClickableProfileName';
+
+import ShareButton from '@/components/common/ShareButton';
 import { 
   getSuggestedConnectionsWithMutualCounts,
   getSuggestedInstitutions,
@@ -243,10 +246,16 @@ export default function NetworkPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">My Network</h1>
-          <p className="text-slate-600">Connect with healthcare professionals and grow your network</p>
+        {/* Elegant Header */}
+        <div className="mb-6 flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-semibold text-slate-900">My Network</h1>
+            <p className="text-slate-600 text-sm">Connect with healthcare professionals</p>
+          </div>
+          <ShareButton 
+            title="My Professional Network"
+            description="Connect with healthcare professionals on Kendraa"
+          />
         </div>
 
         {/* Search */}
@@ -285,9 +294,12 @@ export default function NetworkPage() {
                         {request.requester.full_name?.charAt(0) || 'U'}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-slate-900 truncate">
-                          {request.requester.full_name}
-                        </p>
+                        <ClickableProfileName
+                          userId={request.requester.id}
+                          name={request.requester.full_name || 'Unknown User'}
+                          userType={request.requester.user_type || 'individual'}
+                          className="text-sm font-medium truncate"
+                        />
                         <p className="text-xs text-slate-500 truncate">
                           {request.requester.headline}
                         </p>
@@ -333,9 +345,12 @@ export default function NetworkPage() {
                           {suggestion.full_name?.charAt(0) || 'U'}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-slate-900 truncate">
-                            {suggestion.full_name}
-                          </p>
+                          <ClickableProfileName
+                            userId={suggestion.id}
+                            name={suggestion.full_name || 'Unknown User'}
+                            userType={suggestion.user_type || 'individual'}
+                            className="text-sm font-semibold truncate"
+                          />
                           <p className="text-xs text-slate-500 truncate mb-2">
                             {suggestion.headline}
                           </p>

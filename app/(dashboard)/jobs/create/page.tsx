@@ -179,21 +179,10 @@ export default function CreateJobPage() {
           </nav>
         </div>
 
-        {/* Back Button */}
-        <div className="mb-8 animate-fade-in">
-          <Link
-            href="/jobs"
-            className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            <ChevronLeftIcon className="w-4 h-4 mr-1" />
-            Back to Jobs
-          </Link>
-        </div>
-
-        {/* Header */}
-        <div className="mb-8 animate-fade-in">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Post a Job</h1>
-          <p className="text-gray-600">Create a new job listing for healthcare professionals</p>
+        {/* Elegant Header */}
+        <div className="mb-6 animate-fade-in">
+          <h1 className="text-2xl font-semibold text-gray-900 mb-2">Post a Job</h1>
+          <p className="text-gray-600 text-sm">Create a new job listing for healthcare professionals</p>
         </div>
 
         {/* Form */}

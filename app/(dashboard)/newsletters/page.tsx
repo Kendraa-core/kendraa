@@ -1,0 +1,257 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { DocumentIcon, BellIcon, CheckIcon } from '@heroicons/react/24/outline';
+
+interface Newsletter {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  frequency: string;
+  isSubscribed: boolean;
+  subscriberCount: number;
+  lastIssue?: string;
+}
+
+export default function NewslettersPage() {
+  const { user } = useAuth();
+  const [newsletters, setNewsletters] = useState<Newsletter[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'subscribed' | 'discover'>('subscribed');
+
+  useEffect(() => {
+    const fetchNewsletters = async () => {
+      if (!user?.id) return;
+
+      try {
+        setLoading(true);
+        // TODO: Implement getNewsletters query
+        // Mock data for now
+        const mockNewsletters: Newsletter[] = [
+          {
+            id: '1',
+            title: 'Medical Innovation Weekly',
+            description: 'Stay updated with the latest breakthroughs in medical technology, research findings, and healthcare innovations.',
+            category: 'Innovation',
+            frequency: 'Weekly',
+            isSubscribed: true,
+            subscriberCount: 15420,
+            lastIssue: '2 days ago',
+          },
+          {
+            id: '2',
+            title: 'Healthcare Leadership Insights',
+            description: 'Expert insights on healthcare leadership, management strategies, and organizational development.',
+            category: 'Leadership',
+            frequency: 'Bi-weekly',
+            isSubscribed: true,
+            subscriberCount: 8920,
+            lastIssue: '1 week ago',
+          },
+          {
+            id: '3',
+            title: 'Clinical Research Updates',
+            description: 'Latest clinical trials, research methodologies, and evidence-based practice updates.',
+            category: 'Research',
+            frequency: 'Monthly',
+            isSubscribed: false,
+            subscriberCount: 12340,
+          },
+          {
+            id: '4',
+            title: 'Healthcare Policy Brief',
+            description: 'Analysis of healthcare policies, regulatory changes, and their impact on medical practice.',
+            category: 'Policy',
+            frequency: 'Weekly',
+            isSubscribed: false,
+            subscriberCount: 6780,
+          },
+          {
+            id: '5',
+            title: 'Medical Technology Trends',
+            description: 'Emerging technologies in healthcare, digital health solutions, and medical device innovations.',
+            category: 'Technology',
+            frequency: 'Weekly',
+            isSubscribed: false,
+            subscriberCount: 9450,
+          },
+          {
+            id: '6',
+            title: 'Patient Care Excellence',
+            description: 'Best practices in patient care, quality improvement, and healthcare delivery optimization.',
+            category: 'Patient Care',
+            frequency: 'Monthly',
+            isSubscribed: false,
+            subscriberCount: 11230,
+          },
+        ];
+        setNewsletters(mockNewsletters);
+      } catch (error) {
+        console.error('Error fetching newsletters:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNewsletters();
+  }, [user?.id]);
+
+  const handleSubscribe = (newsletterId: string) => {
+    setNewsletters(prev => prev.map(newsletter => 
+      newsletter.id === newsletterId 
+        ? { ...newsletter, isSubscribed: true, subscriberCount: newsletter.subscriberCount + 1 }
+        : newsletter
+    ));
+  };
+
+  const handleUnsubscribe = (newsletterId: string) => {
+    setNewsletters(prev => prev.map(newsletter => 
+      newsletter.id === newsletterId 
+        ? { ...newsletter, isSubscribed: false, subscriberCount: newsletter.subscriberCount - 1 }
+        : newsletter
+    ));
+  };
+
+  const subscribedNewsletters = newsletters.filter(newsletter => newsletter.isSubscribed);
+  const discoverNewsletters = newsletters.filter(newsletter => !newsletter.isSubscribed);
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <DocumentIcon className="w-6 h-6 text-blue-600" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Newsletters</h1>
+              <p className="text-gray-600">Stay informed with professional insights and updates</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
+          <div className="flex">
+            <button
+              onClick={() => setActiveTab('subscribed')}
+              className={`flex-1 py-3 px-4 text-center font-medium transition-colors ${
+                activeTab === 'subscribed'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Subscribed ({subscribedNewsletters.length})
+            </button>
+            <button
+              onClick={() => setActiveTab('discover')}
+              className={`flex-1 py-3 px-4 text-center font-medium transition-colors ${
+                activeTab === 'discover'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Discover ({discoverNewsletters.length})
+            </button>
+          </div>
+        </div>
+
+        {/* Content */}
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="bg-white rounded-xl shadow-sm p-6">
+                <div className="animate-pulse">
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/2 mb-4"></div>
+                  <div className="space-y-2">
+                    <div className="h-3 bg-gray-200 rounded"></div>
+                    <div className="h-3 bg-gray-200 rounded w-5/6"></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {(activeTab === 'subscribed' ? subscribedNewsletters : discoverNewsletters).map((newsletter) => (
+              <div key={newsletter.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-1">{newsletter.title}</h3>
+                    <div className="flex items-center space-x-2 text-sm text-gray-500">
+                      <BellIcon className="w-4 h-4" />
+                      <span>{newsletter.frequency}</span>
+                      <span>•</span>
+                      <span>{newsletter.subscriberCount.toLocaleString()} subscribers</span>
+                    </div>
+                  </div>
+                  <span className="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-600">
+                    {newsletter.category}
+                  </span>
+                </div>
+                
+                <p className="text-gray-600 text-sm mb-4 line-clamp-3">{newsletter.description}</p>
+                
+                {newsletter.lastIssue && (
+                  <p className="text-xs text-gray-500 mb-4">Last issue: {newsletter.lastIssue}</p>
+                )}
+                
+                <div className="flex justify-between items-center">
+                  <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                    View Issues
+                  </button>
+                  {newsletter.isSubscribed ? (
+                    <button
+                      onClick={() => handleUnsubscribe(newsletter.id)}
+                      className="flex items-center space-x-1 px-3 py-1 text-sm font-medium bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                    >
+                      <CheckIcon className="w-3 h-3" />
+                      <span>Subscribed</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleSubscribe(newsletter.id)}
+                      className="px-3 py-1 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Subscribe
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && (activeTab === 'subscribed' ? subscribedNewsletters : discoverNewsletters).length === 0 && (
+          <div className="bg-white rounded-xl shadow-sm p-12 text-center">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <DocumentIcon className="w-8 h-8 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              {activeTab === 'subscribed' ? 'No newsletters subscribed' : 'No newsletters available'}
+            </h3>
+            <p className="text-gray-600 mb-6">
+              {activeTab === 'subscribed' 
+                ? 'Subscribe to newsletters to stay updated with professional insights and industry news.'
+                : 'Check back later for new newsletters to subscribe to.'
+              }
+            </p>
+            {activeTab === 'subscribed' && (
+              <button
+                onClick={() => setActiveTab('discover')}
+                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Discover Newsletters
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

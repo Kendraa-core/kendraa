@@ -54,7 +54,7 @@ export default function NotificationList({ notifications, onMarkAsRead }: Notifi
           }
           break;
         case 'connection_request':
-          router.push('/network');
+          router.push('/notifications?tab=requests');
           break;
         case 'connection_accepted':
           router.push('/network');
@@ -153,16 +153,7 @@ export default function NotificationList({ notifications, onMarkAsRead }: Notifi
                       {formatRelativeTime(notification.created_at)}
                     </span>
                     {!notification.read && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleMarkAsRead(notification.id);
-                        }}
-                        disabled={markingAsRead === notification.id}
-                        className="text-xs text-blue-600 hover:text-blue-800 disabled:opacity-50"
-                      >
-                        {markingAsRead === notification.id ? 'Marking...' : 'Mark as read'}
-                      </button>
+                      <span className="inline-block w-2 h-2 bg-blue-500 rounded-full"></span>
                     )}
                   </div>
                 </div>

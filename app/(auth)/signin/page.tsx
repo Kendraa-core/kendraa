@@ -25,7 +25,7 @@ export default function SignIn() {
       toast.loading('Signing in...', { id: 'signin' });
       
       await signIn(email, password);
-      toast.success('Signed in successfully!', { id: 'signin' });
+      // Success toast is already shown in AuthContext, no need to show again
       // Navigate immediately without waiting
       router.push('/feed');
     } catch (error: any) {
@@ -111,9 +111,9 @@ export default function SignIn() {
               </div>
 
               <div className="text-sm">
-                <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
+                <Link href="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
                   Forgot your password?
-                </a>
+                </Link>
               </div>
             </div>
 

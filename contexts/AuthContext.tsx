@@ -30,30 +30,63 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!isClient) return;
     
     try {
+      console.log('[Auth] Loading profile for user:', userId);
       const profileData = await getProfile(userId);
       setProfile(profileData);
-    } catch (error) {
-      console.error('Error loading profile:', error);
-      // Set a basic profile to prevent UI blocking
-      setProfile({
-        id: userId,
-        full_name: 'User',
-        email: user?.email || '',
-        headline: '',
-        bio: '',
-        location: '',
-        avatar_url: '',
-        banner_url: '',
-        website: '',
-        phone: '',
-        specialization: [],
-        is_premium: false,
-        profile_views: 0,
-        user_type: 'individual',
-        profile_type: 'individual',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      });
+      console.log('[Auth] Profile loaded successfully');
+    } catch (error: any) {
+      console.error('[Auth] Error loading profile:', error);
+      
+      // Handle specific error types
+      if (error.message.includes('Authentication error')) {
+        console.error('[Auth] Authentication error while loading profile');
+        // Don't set a fallback profile for auth errors
+        return;
+      } else if (error.message.includes('Profile not found')) {
+        console.log('[Auth] Profile not found, creating fallback profile');
+        // Set a basic profile to prevent UI blocking
+        setProfile({
+          id: userId,
+          full_name: 'User',
+          email: user?.email || '',
+          headline: '',
+          bio: '',
+          location: '',
+          avatar_url: '',
+          banner_url: '',
+          website: '',
+          phone: '',
+          specialization: [],
+          is_premium: false,
+          profile_views: 0,
+          user_type: 'individual',
+          profile_type: 'individual',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+      } else {
+        console.error('[Auth] Unknown error loading profile:', error);
+        // Set a basic profile to prevent UI blocking
+        setProfile({
+          id: userId,
+          full_name: 'User',
+          email: user?.email || '',
+          headline: '',
+          bio: '',
+          location: '',
+          avatar_url: '',
+          banner_url: '',
+          website: '',
+          phone: '',
+          specialization: [],
+          is_premium: false,
+          profile_views: 0,
+          user_type: 'individual',
+          profile_type: 'individual',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+      }
     }
   }, [user?.email, isClient]);
 
@@ -131,32 +164,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, [loadProfile, isClient]);
 
-  const signIn = useCallback(async (email: string, password: string) => {
-    if (!isClient) return;
-    
-    if (!supabase) {
-      toast.error('Supabase is not configured. Please check your environment variables.');
-      return;
-    }
-    
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      toast.success('Signed in successfully!');
-    } catch (error: any) {
-      console.error('Sign in error:', error);
-      toast.error(error.message || 'Failed to sign in');
-      throw error;
-    }
-  }, [isClient]);
-
   const signUp = useCallback(async (email: string, password: string, fullName: string, profileType: 'individual' | 'institution') => {
     if (!isClient) return;
     
@@ -166,6 +173,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     
     try {
+      console.log('[Auth] Starting signup process for:', email);
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -178,41 +187,114 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (error) {
-        console.error('Supabase signup error:', error);
-        // Handle specific error types
+        console.error('[Auth] Supabase signup error:', error);
+        
+        // Handle specific error types with better messages
         if (error.message.includes('Invalid Refresh Token')) {
-          toast.error('Authentication error. Please try refreshing the page.');
+          toast.error('Authentication error. Please try refreshing the page and try again.');
         } else if (error.message.includes('Email not confirmed')) {
           toast.error('Please check your email and confirm your account before signing in.');
+        } else if (error.message.includes('User already registered')) {
+          toast.error('An account with this email already exists. Please sign in instead.');
+        } else if (error.message.includes('Password should be at least')) {
+          toast.error('Password must be at least 6 characters long.');
+        } else if (error.message.includes('Invalid email')) {
+          toast.error('Please enter a valid email address.');
         } else {
-          toast.error(error.message || 'Failed to create account');
+          toast.error(error.message || 'Failed to create account. Please try again.');
         }
         throw error;
       }
 
       if (data.user) {
+        console.log('[Auth] User created successfully, creating profile...');
+        
         try {
-          // Create profile immediately
+          // Create profile with retry logic
           await ensureProfileExists(
             data.user.id,
             email,
             fullName,
             profileType
           );
-        } catch (profileError) {
-          console.error('Profile creation error:', profileError);
-          // Don't fail the signup if profile creation fails
-          toast.error('Account created but profile setup failed. You can complete your profile later.');
+          
+          console.log('[Auth] Profile created successfully');
+          toast.success('Account created successfully! Please check your email to verify your account.');
+        } catch (profileError: any) {
+          console.error('[Auth] Profile creation error:', profileError);
+          
+          // Provide specific error messages for profile creation failures
+          if (profileError.message.includes('Authentication error')) {
+            toast.error('Account created but profile setup failed due to authentication issues. Please contact support.');
+          } else if (profileError.message.includes('Database table not found')) {
+            toast.error('Account created but database setup is incomplete. Please contact support.');
+          } else if (profileError.message.includes('race condition')) {
+            toast.success('Account created successfully! Profile setup completed.');
+          } else {
+            toast.error('Account created but profile setup failed. You can complete your profile later.');
+          }
+          
+          // Don't fail the signup if profile creation fails, but log it
+          console.warn('[Auth] Continuing with signup despite profile creation error');
         }
+      } else {
+        console.log('[Auth] No user data returned from signup');
+        toast.success('Account creation initiated! Please check your email to verify your account.');
+      }
+    } catch (error: any) {
+      console.error('[Auth] Sign up error:', error);
+      
+      // Don't show duplicate error messages
+      if (!error.message.includes('Invalid Refresh Token') && 
+          !error.message.includes('Email not confirmed') &&
+          !error.message.includes('User already registered')) {
+        // Error message already shown above, don't show again
+      }
+      throw error;
+    }
+  }, [isClient]);
+
+  const signIn = useCallback(async (email: string, password: string) => {
+    if (!isClient) return;
+    
+    if (!supabase) {
+      toast.error('Supabase is not configured. Please check your environment variables.');
+      return;
+    }
+    
+    try {
+      console.log('[Auth] Starting signin process for:', email);
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        console.error('[Auth] Sign in error:', error);
+        
+        // Provide specific error messages
+        if (error.message.includes('Invalid login credentials')) {
+          toast.error('Invalid email or password. Please try again.');
+        } else if (error.message.includes('Email not confirmed')) {
+          toast.error('Please check your email and confirm your account before signing in.');
+        } else if (error.message.includes('Too many requests')) {
+          toast.error('Too many login attempts. Please wait a moment and try again.');
+        } else if (error.message.includes('User not found')) {
+          toast.error('No account found with this email. Please sign up first.');
+        } else {
+          toast.error(error.message || 'Failed to sign in. Please try again.');
+        }
+        throw error;
       }
 
-      toast.success('Account created successfully! Please check your email to verify your account.');
-    } catch (error: any) {
-      console.error('Sign up error:', error);
-      // Don't show duplicate error messages
-      if (!error.message.includes('Invalid Refresh Token') && !error.message.includes('Email not confirmed')) {
-        toast.error(error.message || 'Failed to create account');
+      if (data.user) {
+        console.log('[Auth] User signed in successfully');
+        toast.success('Signed in successfully!');
       }
+    } catch (error: any) {
+      console.error('[Auth] Sign in error:', error);
+      // Error message already shown above, don't show again
       throw error;
     }
   }, [isClient]);

@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { getPosts, createPost } from '@/lib/queries';
-import type { Post } from '@/types/database.types';
+import { getPosts, createPost, getConnections, getSuggestedConnections, getProfile } from '@/lib/queries';
+import type { Post, Profile } from '@/types/database.types';
 import { 
   HeartIcon,
   ChatBubbleOvalLeftIcon,
@@ -14,48 +14,55 @@ import {
   VideoCameraIcon,
   DocumentIcon,
   FaceSmileIcon,
-  ChevronDownIcon
+  ChevronDownIcon,
+  UserGroupIcon,
+  EyeIcon,
+  CalendarIcon,
+  MapPinIcon,
+  BuildingOfficeIcon,
+  BellIcon,
+  CogIcon,
+  QuestionMarkCircleIcon
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
 import PostCard from '@/components/post/PostCard';
 import Avatar from '@/components/common/Avatar';
 import TrendingTopics from '@/components/feed/TrendingTopics';
+import MedicalFeed from '@/components/feed/MedicalFeed';
 import ProfileCompletionPrompt from '@/components/profile/ProfileCompletionPrompt';
-
-interface ProfileData {
-  id: string;
-  full_name: string;
-  headline: string;
-  profile_views: number;
-  connections_count: number;
-}
+import VerificationBadge from '@/components/common/VerificationBadge';
+import ShareButton from '@/components/common/ShareButton';
 
 export default function FeedPage() {
   const { user, profile } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
-  const [connections, setConnections] = useState<ProfileData[]>([]);
-  const [suggestedConnections, setSuggestedConnections] = useState<ProfileData[]>([]);
+  const [connections, setConnections] = useState<Profile[]>([]);
+  const [suggestedConnections, setSuggestedConnections] = useState<Profile[]>([]);
+  const [activeTab, setActiveTab] = useState<'posts' | 'medical'>('posts');
+  const [postContent, setPostContent] = useState('');
+  const [profileStats, setProfileStats] = useState({
+    connectionsCount: 0
+  });
 
-  const fetchProfile = useCallback(async () => {
+  const fetchProfileData = useCallback(async () => {
     if (!user?.id) return;
 
     try {
-      const [profileData, connectionsData, suggestedData] = await Promise.all([
-        Promise.resolve({
-          id: user.id,
-          full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
-          headline: 'Add a headline',
-          profile_views: 0,
-          connections_count: 0,
-        }),
-        Promise.resolve([]), // getConnections
-        Promise.resolve([]) // getSuggestedConnections
+      const [connectionsData, suggestedData, profileData] = await Promise.all([
+        getConnections(user.id),
+        getSuggestedConnections(user.id, 3),
+        getProfile(user.id)
       ]);
 
       setConnections(connectionsData);
       setSuggestedConnections(suggestedData);
+      
+      // Set real profile stats
+      setProfileStats({
+        connectionsCount: connectionsData.length
+      });
     } catch (error) {
       console.error('Error fetching profile data:', error);
     }
@@ -79,7 +86,8 @@ export default function FeedPage() {
 
   const handlePostCreated = useCallback(async () => {
     await fetchPosts();
-  }, [fetchPosts]);
+    await fetchProfileData(); // Refresh profile stats after new post
+  }, [fetchPosts, fetchProfileData]);
 
   const handleCreatePost = useCallback(async (content: string, imageUrl?: string) => {
     if (!user?.id) return;
@@ -88,96 +96,119 @@ export default function FeedPage() {
       const post = await createPost(user.id, content, imageUrl);
       if (post) {
         setPosts(prev => [post, ...prev]);
+        setPostContent('');
         toast.success('Post created successfully!');
+        await fetchProfileData(); // Refresh profile stats
       }
     } catch (error) {
       console.error('Error creating post:', error);
       toast.error('Failed to create post');
     }
-  }, [user?.id]);
+  }, [user?.id, fetchProfileData]);
 
   useEffect(() => {
-    fetchProfile();
+    fetchProfileData();
     fetchPosts();
-  }, [fetchProfile, fetchPosts]);
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
+  }, [fetchProfileData, fetchPosts]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-              <div className="flex items-center space-x-3 mb-4">
-                <Avatar
-                  src={profile?.avatar_url}
-                  alt={profile?.full_name || 'User'}
-                  size="lg"
-                />
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900">
-                    {profile?.full_name || 'User'}
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    {profile?.headline || 'Add a headline'}
-                  </p>
-                </div>
+          <div className="lg:col-span-3 space-y-6 sticky top-6 h-fit">
+            {/* Profile Card */}
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow duration-300">
+              {/* Banner */}
+              <div className="h-24 bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-600 relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20"></div>
               </div>
               
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Profile views</span>
-                  <span className="font-medium">{profile?.profile_views || 0}</span>
+              {/* Profile Info */}
+              <div className="px-6 pb-6 relative">
+                <div className="flex justify-center -mt-12 mb-6">
+                  <div className="relative">
+                    <Avatar
+                      src={profile?.avatar_url}
+                      alt={profile?.full_name || 'User'}
+                      size="xl"
+                      className="border-4 border-white shadow-lg"
+                    />
+                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 border-2 border-white rounded-full"></div>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Connections</span>
-                  <span className="font-medium">{connections.length}</span>
+                
+                <div className="text-center mb-6">
+                  <h3 className="font-bold text-gray-900 text-xl mb-2">
+                    {profile?.full_name || 'User'}
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-2 font-medium">
+                    {profile?.headline || 'Add a headline'}
+                  </p>
+                  <p className="text-xs text-gray-500 flex items-center justify-center">
+                    <MapPinIcon className="w-3 h-3 mr-1" />
+                    {profile?.location || 'Add location'}
+                  </p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h3 className="font-semibold text-gray-900 mb-4">Suggested Connections</h3>
-              <div className="space-y-3">
-                {suggestedConnections.slice(0, 3).map((connection) => (
-                  <div key={connection.id} className="flex items-center space-x-3">
-                    <Avatar
-                      src=""
-                      alt={connection.full_name}
-                      size="sm"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {connection.full_name}
-                      </p>
-                      <p className="text-xs text-gray-500 truncate">
-                        {connection.headline}
-                      </p>
+
+
+            {/* My Pages - Only show if user has pages */}
+            {profile?.user_type === 'institution' && (
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow duration-300">
+                <h4 className="font-bold text-gray-900 mb-4 text-lg">My pages</h4>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
+                        <BuildingOfficeIcon className="w-5 h-5 text-white" />
+                      </div>
+                      <span className="text-sm font-semibold text-gray-900">{profile.full_name}</span>
                     </div>
+                    <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">Active</span>
                   </div>
-                ))}
+                </div>
+              </div>
+            )}
+
+            {/* Navigation Links */}
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow duration-300">
+              <h4 className="font-bold text-gray-900 mb-4 text-lg">Quick Links</h4>
+              <div className="space-y-3">
+                <a href="/saved-items" className="flex items-center space-x-3 p-3 rounded-xl text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 group">
+                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                    <BookmarkIcon className="w-4 h-4" />
+                  </div>
+                  <span className="font-medium">Saved items</span>
+                </a>
+                <a href="/groups" className="flex items-center space-x-3 p-3 rounded-xl text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 group">
+                  <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                    <UserGroupIcon className="w-4 h-4" />
+                  </div>
+                  <span className="font-medium">Groups</span>
+                </a>
+                <a href="/newsletters" className="flex items-center space-x-3 p-3 rounded-xl text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 group">
+                  <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                    <DocumentIcon className="w-4 h-4" />
+                  </div>
+                  <span className="font-medium">Newsletters</span>
+                </a>
+                <a href="/events" className="flex items-center space-x-3 p-3 rounded-xl text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 group">
+                  <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center group-hover:bg-orange-200 transition-colors">
+                    <CalendarIcon className="w-4 h-4" />
+                  </div>
+                  <span className="font-medium">Events</span>
+                </a>
               </div>
             </div>
           </div>
 
           {/* Main Feed */}
-          <div className="lg:col-span-2">
-            {/* Profile Completion Prompt */}
-            <ProfileCompletionPrompt />
-            
+          <div className="lg:col-span-6 space-y-6">
             {/* Create Post */}
-            <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow duration-300">
               <div className="flex items-start space-x-3">
                 <Avatar
                   src={profile?.avatar_url}
@@ -186,30 +217,32 @@ export default function FeedPage() {
                 />
                 <div className="flex-1">
                   <textarea
-                    placeholder="What's on your mind?"
-                    className="w-full p-3 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Share your thoughts, insights, or professional updates..."
+                    value={postContent}
+                    onChange={(e) => setPostContent(e.target.value)}
+                    className="w-full p-4 border border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 placeholder-gray-500"
                     rows={3}
                   />
-                  <div className="flex items-center justify-between mt-3">
-                    <div className="flex items-center space-x-4">
-                      <button className="flex items-center space-x-2 text-gray-500 hover:text-blue-600 transition-colors">
+                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+                    <div className="flex items-center space-x-6">
+                      <button className="flex items-center space-x-2 text-gray-500 hover:text-blue-600 transition-colors p-2 rounded-lg hover:bg-blue-50">
                         <PhotoIcon className="w-5 h-5" />
-                        <span className="text-sm">Photo</span>
+                        <span className="text-sm font-medium">Media</span>
                       </button>
-                      <button className="flex items-center space-x-2 text-gray-500 hover:text-blue-600 transition-colors">
-                        <VideoCameraIcon className="w-5 h-5" />
-                        <span className="text-sm">Video</span>
-                      </button>
-                      <button className="flex items-center space-x-2 text-gray-500 hover:text-blue-600 transition-colors">
+                      <button className="flex items-center space-x-2 text-gray-500 hover:text-green-600 transition-colors p-2 rounded-lg hover:bg-green-50">
                         <DocumentIcon className="w-5 h-5" />
-                        <span className="text-sm">Document</span>
+                        <span className="text-sm font-medium">Job</span>
                       </button>
-                      <button className="flex items-center space-x-2 text-gray-500 hover:text-blue-600 transition-colors">
-                        <FaceSmileIcon className="w-5 h-5" />
-                        <span className="text-sm">Feeling</span>
+                      <button className="flex items-center space-x-2 text-gray-500 hover:text-purple-600 transition-colors p-2 rounded-lg hover:bg-purple-50">
+                        <DocumentIcon className="w-5 h-5" />
+                        <span className="text-sm font-medium">Write article</span>
                       </button>
                     </div>
-                    <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                    <button 
+                      onClick={() => handleCreatePost(postContent)}
+                      disabled={!postContent.trim()}
+                      className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                    >
                       Post
                     </button>
                   </div>
@@ -217,42 +250,72 @@ export default function FeedPage() {
               </div>
             </div>
 
-            {/* Posts */}
-            <div className="space-y-6">
-              {loading ? (
-                <div className="bg-white rounded-xl shadow-sm p-6">
-                  <div className="animate-pulse">
-                    <div className="flex items-center space-x-3 mb-4">
-                      <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
-                      <div className="flex-1">
-                        <div className="h-4 bg-gray-200 rounded w-1/3 mb-2"></div>
-                        <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+            {/* Tab Navigation */}
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-2">
+              <div className="flex bg-gray-50 rounded-xl p-1">
+                <button
+                  onClick={() => setActiveTab('posts')}
+                  className={`flex-1 py-3 px-6 text-center font-semibold transition-all duration-200 rounded-lg ${
+                    activeTab === 'posts'
+                      ? 'text-blue-700 bg-white shadow-md'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
+                >
+                  Community Posts
+                </button>
+                <button
+                  onClick={() => setActiveTab('medical')}
+                  className={`flex-1 py-3 px-6 text-center font-semibold transition-all duration-200 rounded-lg ${
+                    activeTab === 'medical'
+                      ? 'text-emerald-700 bg-white shadow-md'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
+                >
+                  Medical Hub
+                </button>
+              </div>
+            </div>
+
+            {/* Content based on active tab */}
+            {activeTab === 'posts' ? (
+              <div className="space-y-6">
+                {loading ? (
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div className="animate-pulse">
+                      <div className="flex items-center space-x-3 mb-4">
+                        <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+                        <div className="flex-1">
+                          <div className="h-4 bg-gray-200 rounded w-1/3 mb-2"></div>
+                          <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="h-4 bg-gray-200 rounded"></div>
+                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
                       </div>
                     </div>
-                    <div className="space-y-3">
-                      <div className="h-4 bg-gray-200 rounded"></div>
-                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                    </div>
                   </div>
-                </div>
-              ) : posts.length > 0 ? (
-                posts.map((post) => (
-                  <PostCard
-                    key={post.id}
-                    post={post as any}
-                    onInteraction={handlePostCreated}
-                  />
-                ))
-              ) : (
-                <div className="bg-white rounded-xl shadow-sm p-6 text-center">
-                  <p className="text-gray-500">No posts yet. Be the first to share something!</p>
-                </div>
-              )}
-            </div>
+                ) : posts.length > 0 ? (
+                  posts.map((post) => (
+                    <PostCard
+                      key={post.id}
+                      post={post as any}
+                    />
+                  ))
+                ) : (
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center">
+                    <p className="text-gray-500">No posts yet. Be the first to share something!</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <MedicalFeed />
+            )}
           </div>
 
           {/* Right Sidebar */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-3 space-y-6 sticky top-6 h-fit">
+            {/* Trending Topics */}
             <TrendingTopics />
           </div>
         </div>

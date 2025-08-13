@@ -21,8 +21,8 @@ export default function Logo({
   };
 
   const variantClasses = {
-    default: 'bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent',
-    gradient: 'bg-gradient-to-r from-primary-500 via-accent-500 to-primary-700 bg-clip-text text-transparent',
+    default: 'text-primary-600',
+    gradient: 'text-primary-600',
     simple: 'text-primary-600'
   };
 
@@ -48,7 +48,7 @@ export function LogoText({
 
   const variantClasses = {
     default: 'text-primary-600',
-    gradient: 'bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent',
+    gradient: 'text-primary-600',
     simple: 'text-primary-600'
   };
 

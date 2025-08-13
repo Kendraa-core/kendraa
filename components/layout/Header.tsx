@@ -126,7 +126,14 @@ export default function Header() {
                         notifications.map((notification) => (
                           <div
                             key={notification.id}
-                            className="px-4 py-3 hover:bg-gray-50 cursor-pointer"
+                            className={`px-4 py-3 hover:bg-gray-50 cursor-pointer ${
+                              !notification.read ? 'bg-blue-50' : ''
+                            }`}
+                            onClick={() => {
+                              if (!notification.read) {
+                                markAsRead(notification.id);
+                              }
+                            }}
                           >
                             <div className="flex items-start space-x-3">
                               <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
@@ -137,6 +144,11 @@ export default function Header() {
                                 <p className="text-xs text-gray-500 mt-1">
                                   {formatRelativeTime(notification.created_at)}
                                 </p>
+                                {!notification.read && (
+                                  <div className="mt-1">
+                                    <span className="inline-block w-2 h-2 bg-blue-500 rounded-full"></span>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </div>

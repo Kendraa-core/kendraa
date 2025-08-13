@@ -66,6 +66,11 @@ export interface Database {
         Insert: Omit<Notification, 'id' | 'created_at'>;
         Update: Partial<Omit<Notification, 'id' | 'created_at'>>;
       };
+      profile_views: {
+        Row: ProfileView;
+        Insert: Omit<ProfileView, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<ProfileView, 'id' | 'created_at' | 'updated_at'>>;
+      };
     };
   };
 }
@@ -87,7 +92,61 @@ export interface Profile {
   is_premium: boolean;
   profile_views: number;
   user_type: 'individual' | 'institution';
-  profile_type: 'individual' | 'institution'; // Only two profile types
+  profile_type: 'individual' | 'institution';
+  
+  // Enhanced Medical Professional Fields (Optional for backward compatibility)
+  medical_license?: {
+    license_number: string;
+    issuing_authority: string;
+    issue_date: string;
+    expiry_date: string;
+    status: 'active' | 'expired' | 'suspended' | 'pending_verification';
+  };
+  medical_degrees?: {
+    degree: string;
+    institution: string;
+    graduation_year: number;
+    verification_status: 'verified' | 'pending' | 'unverified';
+  }[];
+  certifications?: {
+    name: string;
+    issuing_body: string;
+    issue_date: string;
+    expiry_date?: string;
+    certificate_id?: string;
+    verification_status: 'verified' | 'pending' | 'unverified';
+  }[];
+  research_papers?: {
+    title: string;
+    journal: string;
+    publication_date: string;
+    doi?: string;
+    pubmed_id?: string;
+    authors: string[];
+    is_first_author: boolean;
+  }[];
+  languages_spoken?: string[];
+  years_of_experience?: number;
+  current_position?: string;
+  current_institution?: string;
+  npi_number?: string; // National Provider Identifier for US
+  dea_number?: string; // Drug Enforcement Administration number
+  
+  // Professional Verification
+  verification_status?: 'verified' | 'pending' | 'unverified' | 'rejected';
+  verification_documents?: {
+    type: 'license' | 'degree' | 'certification' | 'id_proof';
+    url: string;
+    uploaded_at: string;
+    verification_status: 'verified' | 'pending' | 'rejected';
+  }[];
+  
+  // Professional Interests
+  research_interests?: string[];
+  clinical_interests?: string[];
+  teaching_experience?: boolean;
+  mentoring_availability?: boolean;
+  
   // Institution-specific fields
   institution_type?: 'hospital' | 'clinic' | 'medical_college' | 'research_center' | 'pharmaceutical' | 'other';
   accreditations?: string[];
@@ -98,10 +157,26 @@ export interface Profile {
     email?: string;
     website?: string;
   };
+  
   // Student-specific fields
   education_level?: 'undergraduate' | 'graduate' | 'postgraduate' | 'resident' | 'fellow';
   graduation_year?: number;
-  current_institution?: string;
+  
+  // CME and Continuing Education
+  cme_credits?: {
+    total_credits: number;
+    current_year_credits: number;
+    last_updated: string;
+  };
+  
+  // Privacy and Communication Preferences
+  privacy_settings?: {
+    show_license_number: boolean;
+    show_contact_info: boolean;
+    allow_research_collaboration: boolean;
+    allow_case_consultation: boolean;
+    allow_mentoring_requests: boolean;
+  };
 }
 
 export interface Institution {
@@ -450,4 +525,181 @@ export interface MessagingSettings {
   clinical_messaging_enabled: boolean;
   audit_logging_enabled: boolean;
   hipaa_compliance_enabled: boolean;
+}
+
+// Medical Specialty Groups
+export interface SpecialtyGroup {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  name: string;
+  specialty: string;
+  description: string;
+  icon_url?: string;
+  member_count: number;
+  is_private: boolean;
+  requires_verification: boolean;
+  allowed_credentials: string[]; // e.g., ['MD', 'DO', 'RN', 'PharmD']
+  moderators: string[]; // Array of user IDs
+  guidelines: string;
+  tags: string[];
+}
+
+export interface SpecialtyGroupMember {
+  id: string;
+  created_at: string;
+  group_id: string;
+  user_id: string;
+  role: 'member' | 'moderator' | 'admin';
+  joined_at: string;
+  verification_status: 'verified' | 'pending' | 'rejected';
+}
+
+// Case Discussion System
+export interface CaseDiscussion {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  title: string;
+  description: string;
+  specialty_tags: string[];
+  age_group?: 'pediatric' | 'adult' | 'geriatric';
+  urgency_level: 'routine' | 'urgent' | 'emergent';
+  case_type: 'diagnostic' | 'treatment' | 'management' | 'ethical' | 'research';
+  author_id: string;
+  group_id?: string; // If posted in a specialty group
+  is_anonymous: boolean;
+  patient_demographics: {
+    age_range: string; // e.g., "25-30"
+    gender?: 'male' | 'female' | 'other' | 'not_disclosed';
+    relevant_history?: string;
+  };
+  media_attachments: {
+    type: 'image' | 'document' | 'lab_result' | 'scan';
+    url: string;
+    description: string;
+    is_anonymized: boolean;
+  }[];
+  responses_count: number;
+  views_count: number;
+  is_resolved: boolean;
+  best_response_id?: string;
+  hipaa_compliant: boolean;
+  retention_policy: 'standard' | 'clinical' | 'research';
+}
+
+export interface CaseResponse {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  case_id: string;
+  author_id: string;
+  content: string;
+  response_type: 'opinion' | 'experience' | 'research' | 'question';
+  confidence_level: 'low' | 'moderate' | 'high';
+  cited_references: {
+    title: string;
+    authors: string[];
+    journal?: string;
+    year: number;
+    doi?: string;
+    pubmed_id?: string;
+  }[];
+  likes_count: number;
+  is_marked_helpful: boolean;
+  is_best_response: boolean;
+}
+
+// CME and Education System
+export interface CMECourse {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  title: string;
+  description: string;
+  provider: string;
+  accreditation_body: string;
+  credit_hours: number;
+  specialty_tags: string[];
+  difficulty_level: 'beginner' | 'intermediate' | 'advanced';
+  course_type: 'video' | 'interactive' | 'reading' | 'simulation' | 'webinar';
+  duration_minutes: number;
+  price: number;
+  currency: string;
+  enrollment_count: number;
+  rating_average: number;
+  rating_count: number;
+  is_free: boolean;
+  expiry_date?: string;
+  certificate_template_url?: string;
+  learning_objectives: string[];
+  prerequisites: string[];
+}
+
+export interface CMEEnrollment {
+  id: string;
+  created_at: string;
+  course_id: string;
+  user_id: string;
+  enrollment_date: string;
+  completion_date?: string;
+  progress_percentage: number;
+  final_score?: number;
+  certificate_url?: string;
+  certificate_issued_date?: string;
+  status: 'enrolled' | 'in_progress' | 'completed' | 'expired' | 'failed';
+}
+
+// Medical Research and Publications
+export interface ResearchCollaboration {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  title: string;
+  description: string;
+  lead_researcher_id: string;
+  collaborators: string[];
+  specialty_area: string;
+  research_type: 'clinical_trial' | 'observational' | 'systematic_review' | 'meta_analysis' | 'case_series';
+  status: 'planning' | 'recruiting' | 'active' | 'completed' | 'published';
+  participant_criteria: string;
+  estimated_duration: string;
+  funding_source?: string;
+  ethics_approval_number?: string;
+  registration_number?: string; // Clinical trial registration
+  contact_email: string;
+  required_expertise: string[];
+  location_requirements: string[];
+}
+
+// Tele-Mentoring System
+export interface MentoringSession {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  mentor_id: string;
+  mentee_id: string;
+  title: string;
+  description: string;
+  specialty_focus: string;
+  session_type: 'one_time' | 'ongoing' | 'group';
+  duration_minutes: number;
+  scheduled_date?: string;
+  status: 'requested' | 'accepted' | 'scheduled' | 'completed' | 'cancelled';
+  meeting_link?: string;
+  notes?: string;
+  rating?: number;
+  feedback?: string;
+  skills_covered: string[];
+  is_recorded: boolean;
+  recording_url?: string;
+}
+
+// Profile Views
+export interface ProfileView {
+  id: string;
+  viewer_id: string;
+  profile_id: string;
+  created_at: string;
+  updated_at: string;
 } 

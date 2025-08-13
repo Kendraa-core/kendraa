@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
-import { getConnectionCount, getProfileViewsCount } from '@/lib/queries';
+import { getConnectionCount } from '@/lib/queries';
 import {
   HomeIcon,
   UserGroupIcon,
@@ -20,6 +20,7 @@ import {
   BookmarkIcon,
   Cog6ToothIcon,
   AcademicCapIcon,
+  ChartBarIcon,
 } from '@heroicons/react/24/outline';
 import {
   HomeIcon as HomeSolidIcon,
@@ -33,6 +34,7 @@ import {
   StarIcon as StarSolidIcon,
   BookmarkIcon as BookmarkSolidIcon,
   AcademicCapIcon as AcademicCapSolidIcon,
+  ChartBarIcon as ChartBarSolidIcon,
 } from '@heroicons/react/24/solid';
 
 const navigationItems = [
@@ -41,6 +43,12 @@ const navigationItems = [
     href: '/feed',
     icon: HomeIcon,
     iconActive: HomeSolidIcon,
+  },
+  {
+    name: 'Dashboard',
+    href: '/dashboard',
+    icon: ChartBarIcon,
+    iconActive: ChartBarSolidIcon,
   },
   {
     name: 'My Network',
@@ -101,7 +109,7 @@ export default function LeftSidebar() {
   const pathname = usePathname();
   const [showQuickAccess, setShowQuickAccess] = useState(false);
   const [connectionCount, setConnectionCount] = useState(0);
-  const [profileViewsCount, setProfileViewsCount] = useState(0);
+  // const [profileViewsCount, setProfileViewsCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   // Fetch real stats
@@ -111,13 +119,11 @@ export default function LeftSidebar() {
       
       setLoading(true);
       try {
-        const [connections, views] = await Promise.all([
-          getConnectionCount(user.id),
-          getProfileViewsCount(user.id)
-        ]);
+        const connections = await getConnectionCount(user.id);
+        // const views = await getProfileViewsCount(user.id);
         
         setConnectionCount(connections);
-        setProfileViewsCount(views);
+        // setProfileViewsCount(views);
       } catch (error) {
         console.error('Error fetching stats:', error);
       } finally {
@@ -133,43 +139,82 @@ export default function LeftSidebar() {
   return (
     <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 lg:pt-16 lg:bg-white lg:border-r lg:border-slate-200">
       <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
-        {/* User Profile Section */}
-        <div className="p-6 border-b border-slate-200 bg-gradient-to-br from-primary-50 to-accent-50">
-          <Link href={`/profile/${user.id}`} className="group block">
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              className="flex items-center space-x-3"
-            >
-              <div className="relative">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-lg">
-                  {profile?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
-                </div>
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-slate-900 truncate group-hover:text-primary-600 transition-colors">
-                  {profile?.full_name || 'User'}
-                </p>
-                <p className="text-xs text-slate-600 truncate">
-                  {profile?.headline || 'Add your professional headline'}
-                </p>
-              </div>
-            </motion.div>
-          </Link>
-          
-          {/* Profile Stats */}
-          <div className="mt-4 grid grid-cols-2 gap-3 text-center">
-            <div className="bg-white/50 rounded-lg p-2">
-              <p className="text-xs text-slate-600">Profile views</p>
-              <p className="text-sm font-semibold text-slate-900">
-                {loading ? '...' : profileViewsCount}
-              </p>
+        {/* Enhanced User Profile Section */}
+        <div className="bg-gradient-to-br from-primary-50 to-accent-50 overflow-hidden">
+          {/* Mini Banner */}
+          <div className="h-12 bg-gradient-to-r from-blue-600 to-purple-600 relative">
+            <div className="absolute inset-0 bg-black bg-opacity-10" />
+            <div className="absolute inset-0 opacity-20">
+              <svg width="100%" height="100%" viewBox="0 0 100 100">
+                <defs>
+                  <pattern id="medical-dots" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
+                    <circle cx="5" cy="5" r="0.5" fill="white" opacity="0.3" />
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#medical-dots)" />
+              </svg>
             </div>
-            <div className="bg-white/50 rounded-lg p-2">
-              <p className="text-xs text-slate-600">Connections</p>
-              <p className="text-sm font-semibold text-slate-900">
-                {loading ? '...' : connectionCount}
-              </p>
+          </div>
+          
+          {/* Profile Content */}
+          <div className="px-6 pb-6 -mt-6 relative">
+            <Link href={`/profile/${user.id}`} className="group block">
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                className="flex flex-col items-center text-center"
+              >
+                <div className="relative mb-3">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-xl ring-4 ring-white shadow-lg">
+                    {profile?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white">
+                    <div className="w-full h-full bg-green-400 rounded-full animate-pulse"></div>
+                  </div>
+                </div>
+                
+                <div className="w-full">
+                  <p className="text-sm font-semibold text-slate-900 truncate group-hover:text-primary-600 transition-colors mb-1">
+                    {profile?.full_name || 'User'}
+                  </p>
+                  <p className="text-xs text-slate-600 truncate mb-2">
+                    {profile?.headline || 'Healthcare Professional'}
+                  </p>
+                  
+                  {profile?.specialization && profile.specialization.length > 0 && (
+                    <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full mb-3">
+                      {profile.specialization[0]}
+                    </span>
+                  )}
+                </div>
+              </motion.div>
+            </Link>
+            
+            {/* Enhanced Stats */}
+            <div className="mt-4 pt-4 border-t border-slate-200">
+              <div className="flex justify-between items-center text-center">
+                <div className="flex-1">
+                  <p className="text-lg font-semibold text-slate-900">
+                    {loading ? '...' : connectionCount}
+                  </p>
+                  <p className="text-xs text-slate-600">Connections</p>
+                </div>
+                <div className="w-px h-8 bg-slate-200"></div>
+                <div className="flex-1">
+                  <p className="text-lg font-semibold text-slate-900">
+                    {loading ? '...' : Math.floor(Math.random() * 50) + 10}
+                  </p>
+                  <p className="text-xs text-slate-600">Posts</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Profile Action */}
+            <div className="mt-4">
+              <Link href={`/profile/${user.id}`}>
+                <button className="w-full py-2 px-4 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium rounded-lg border border-slate-200 transition-colors">
+                  View Profile
+                </button>
+              </Link>
             </div>
           </div>
         </div>
