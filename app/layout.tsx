@@ -68,10 +68,7 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   icons: {
-    icon: [
-      { url: '/mainicon.svg', type: 'image/svg+xml' },
-      { url: '/favicon.ico' },
-    ],
+    icon: '/mainicon.svg',
     apple: '/mainicon.svg',
   },
 };

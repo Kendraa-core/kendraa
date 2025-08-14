@@ -56,11 +56,16 @@ export default function PostReactions({ postId, userReaction, reactionCounts, on
     setShowReactions(true);
   };
 
+  const handleReactionMouseEnter = () => {
+    clearHoverTimeout();
+    setIsHovering(true);
+  };
+
   const handleMouseLeave = () => {
     setIsHovering(false);
     const timeout = setTimeout(() => {
       setShowReactions(false);
-    }, 1000); // Increased timeout to 1 second
+    }, 200); // Reduced timeout to 200ms for quick closing
     setHoverTimeout(timeout);
   };
 
@@ -110,9 +115,9 @@ export default function PostReactions({ postId, userReaction, reactionCounts, on
             initial={{ opacity: 0, scale: 0.8, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 10 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.15 }}
             className="absolute bottom-full left-0 mb-2 z-50 transform -translate-x-1/2"
-            onMouseEnter={handleMouseEnter}
+            onMouseEnter={handleReactionMouseEnter}
             onMouseLeave={handleMouseLeave}
           >
             <div className="bg-white rounded-full shadow-lg border border-gray-200 px-2 py-2 flex space-x-1">
