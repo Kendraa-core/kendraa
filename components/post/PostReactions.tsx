@@ -59,10 +59,8 @@ export default function PostReactions({ postId, userReaction, reactionCounts, on
   const handleMouseLeave = () => {
     setIsHovering(false);
     const timeout = setTimeout(() => {
-      if (!isHovering) {
-        setShowReactions(false);
-      }
-    }, 500);
+      setShowReactions(false);
+    }, 1000); // Increased timeout to 1 second
     setHoverTimeout(timeout);
   };
 
@@ -83,8 +81,8 @@ export default function PostReactions({ postId, userReaction, reactionCounts, on
         onTouchStart={handleLongPress}
         className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
           userReaction
-            ? `${userReactionData?.color} bg-blue-50 font-medium`
-            : 'text-gray-500 hover:text-blue-600 hover:bg-blue-50'
+            ? `${userReactionData?.color} bg-primary-50 font-medium`
+            : 'text-gray-500 hover:text-primary-600 hover:bg-primary-50'
         }`}
       >
         {userReaction && userReactionData ? (

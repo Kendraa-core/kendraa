@@ -54,9 +54,10 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [likesCount, setLikesCount] = useState(post?.likes_count || 0);
   const [commentsCount, setCommentsCount] = useState(post?.comments_count || 0);
-  const [showComments, setShowComments] = useState(false); // Hide comments by default
+  const [showComments, setShowComments] = useState(true); // Show comments by default
   const [comments, setComments] = useState<CommentWithAuthor[]>([]);
   const [newComment, setNewComment] = useState('');
+  const [showCommentBox, setShowCommentBox] = useState(false); // Control comment textbox visibility
   const [isCommenting, setIsCommenting] = useState(false);
   const [isLoadingComments, setIsLoadingComments] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
@@ -107,10 +108,10 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
 
   // Automatically load comments when component mounts
   useEffect(() => {
-    if (commentsCount > 0 && showComments && post?.id) {
+    if (post?.id) {
       loadComments();
     }
-  }, [post?.id, commentsCount, showComments]); // Include all dependencies
+  }, [post?.id]); // Load comments on mount
 
   // Validate post data after hooks are declared
   if (!post || !post.id) {
@@ -160,6 +161,11 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
         // Handle other reactions (support, love, insightful, celebrate, curious)
         // For now, we'll just show a toast for other reactions
         toast.success(`You reacted with ${reactionId}!`);
+        // Update the like state for other reactions too
+        if (!isLiked) {
+          setIsLiked(true);
+          setLikesCount((prev: number) => prev + 1);
+        }
       }
       
       // Don't call onInteraction to prevent page reload
@@ -259,6 +265,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
              if (result) {
          debugLog('Comment created successfully', result);
          setNewComment('');
+         setShowCommentBox(false); // Hide comment box after posting
          setCommentsCount(prev => prev + 1);
          // Refresh comments
          await loadComments();
@@ -380,6 +387,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
 
         <button
           onClick={() => {
+            setShowCommentBox(!showCommentBox); // Toggle comment box
             if (!showComments) {
               setShowComments(true);
               loadComments();
@@ -417,33 +425,35 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
       {/* Comments Section */}
       {showComments && (
         <div className="border-t border-gray-100 pt-4 mt-4">
-          {/* Add Comment */}
-          <div className="flex items-start space-x-3 mb-4">
-            <Avatar
-              src={user?.user_metadata?.avatar_url}
-              alt={user?.email || 'User'}
-              size="sm"
-            />
-            <div className="flex-1">
-              <textarea
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder="Write a comment..."
-                className="w-full p-3 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                rows={2}
-                autoFocus
+          {/* Add Comment - Hidden by default, shown only when user clicks "Comment" */}
+          {showCommentBox && (
+            <div className="flex items-start space-x-3 mb-4">
+              <Avatar
+                src={user?.user_metadata?.avatar_url}
+                alt={user?.email || 'User'}
+                size="sm"
               />
-              <div className="flex justify-end mt-2">
-                <button
-                  onClick={submitComment}
-                  disabled={isCommenting || !newComment.trim()}
-                  className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  {isCommenting ? 'Posting...' : 'Post'}
-                </button>
+              <div className="flex-1">
+                <textarea
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  placeholder="Write a comment..."
+                  className="w-full p-3 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  rows={2}
+                  autoFocus
+                />
+                <div className="flex justify-end mt-2">
+                  <button
+                    onClick={submitComment}
+                    disabled={isCommenting || !newComment.trim()}
+                    className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {isCommenting ? 'Posting...' : 'Post'}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Comments List */}
           <div className="space-y-4">
