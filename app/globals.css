@@ -247,6 +247,144 @@
 
 :root {
   --font-inter: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  /* === PRIMARY BRAND COLORS === */
+  --primary-50: #f0fdfa;
+  --primary-100: #ccfbf1;
+  --primary-200: #99f6e4;
+  --primary-300: #5eead4;
+  --primary-400: #2dd4bf;
+  --primary-500: #14b8a6;  /* Main Primary - Modern Medical Teal */
+  --primary-600: #0d9488;
+  --primary-700: #0f766e;
+  --primary-800: #115e59;
+  --primary-900: #134e4a;
+  --primary-950: #042f2e;
+
+  /* === SECONDARY COLORS === */
+  --secondary-50: #f0fdf4;
+  --secondary-100: #dcfce7;
+  --secondary-200: #bbf7d0;
+  --secondary-300: #86efac;
+  --secondary-400: #4ade80;
+  --secondary-500: #22c55e;  /* Health Green */
+  --secondary-600: #16a34a;
+  --secondary-700: #15803d;  /* Deep Medical Green */
+  --secondary-800: #166534;
+  --secondary-900: #14532d;
+  --secondary-950: #052e16;
+
+  /* === ACCENT COLORS === */
+  --accent-50: #fefce8;
+  --accent-100: #fef9c3;
+  --accent-200: #fef08a;
+  --accent-300: #fde047;
+  --accent-400: #facc15;
+  --accent-500: #eab308;  /* Warm Professional Gold */
+  --accent-600: #ca8a04;
+  --accent-700: #a16207;
+  --accent-800: #854d0e;
+  --accent-900: #713f12;
+  --accent-950: #422006;
+
+  /* === NEUTRAL COLORS === */
+  --neutral-50: #fafafa;   /* Pure backgrounds */
+  --neutral-100: #f5f5f5;  /* Light backgrounds */
+  --neutral-200: #e5e5e5;  /* Borders, dividers */
+  --neutral-300: #d4d4d4;  /* Disabled states */
+  --neutral-400: #a3a3a3;  /* Placeholder text */
+  --neutral-500: #737373;  /* Secondary text */
+  --neutral-600: #525252;  /* Primary text */
+  --neutral-700: #404040;  /* Headings */
+  --neutral-800: #262626;  /* Strong emphasis */
+  --neutral-900: #171717;  /* Maximum contrast */
+  --neutral-950: #0a0a0a;  /* Pure black alternative */
+
+  /* === SEMANTIC COLORS === */
+  /* Success - Medical Success/Healthy */
+  --success-50: #f0fdf4;
+  --success-100: #dcfce7;
+  --success-500: #22c55e;
+  --success-600: #16a34a;
+  --success-700: #15803d;
+
+  /* Warning - Medical Caution */
+  --warning-50: #fffbeb;
+  --warning-100: #fef3c7;
+  --warning-500: #f59e0b;
+  --warning-600: #d97706;
+  --warning-700: #b45309;
+
+  /* Error - Medical Alert */
+  --error-50: #fef2f2;
+  --error-100: #fee2e2;
+  --error-500: #ef4444;
+  --error-600: #dc2626;
+  --error-700: #b91c1c;
+
+  /* Info - Medical Information */
+  --info-50: #eff6ff;
+  --info-100: #dbeafe;
+  --info-500: #3b82f6;
+  --info-600: #2563eb;
+  --info-700: #1d4ed8;
+
+  /* === SPECIALIZED MEDICAL COLORS === */
+  --medical-scrub-green: #016064;  /* Traditional medical scrubs */
+  --medical-mint: #98e4d6;         /* Calming mint for backgrounds */
+  --medical-navy: #1e40af;         /* Professional navy for headers */
+  --medical-silver: #e5e7eb;       /* Medical equipment silver */
+
+  /* === TEXT COLORS === */
+  --text-primary: var(--neutral-800);
+  --text-secondary: var(--neutral-600);
+  --text-tertiary: var(--neutral-500);
+  --text-disabled: var(--neutral-400);
+  --text-inverse: var(--neutral-50);
+  --text-brand: var(--primary-600);
+  --text-link: var(--primary-600);
+  --text-link-hover: var(--primary-700);
+
+  /* === BACKGROUND COLORS === */
+  --bg-primary: var(--neutral-50);
+  --bg-secondary: var(--neutral-100);
+  --bg-tertiary: var(--neutral-200);
+  --bg-brand: var(--primary-500);
+  --bg-brand-subtle: var(--primary-50);
+  --bg-success: var(--success-50);
+  --bg-warning: var(--warning-50);
+  --bg-error: var(--error-50);
+  --bg-info: var(--info-50);
+
+  /* === BORDER COLORS === */
+  --border-default: var(--neutral-200);
+  --border-subtle: var(--neutral-100);
+  --border-strong: var(--neutral-300);
+  --border-brand: var(--primary-200);
+  --border-success: var(--success-200);
+  --border-warning: var(--warning-200);
+  --border-error: var(--error-200);
+  --border-info: var(--info-200);
+
+  /* === COMPONENT-SPECIFIC COLORS === */
+  --card-bg: var(--neutral-50);
+  --card-border: var(--neutral-200);
+  --header-bg: var(--primary-600);
+  --header-text: var(--neutral-50);
+  --sidebar-bg: var(--neutral-100);
+  --button-primary-bg: var(--primary-500);
+  --button-primary-text: var(--neutral-50);
+  --button-secondary-bg: var(--neutral-200);
+  --button-secondary-text: var(--neutral-700);
+  --input-bg: var(--neutral-50);
+  --input-border: var(--neutral-300);
+  --input-focus-border: var(--primary-400);
+
+  /* === SHADOW COLORS === */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-brand: 0 4px 14px 0 rgb(20 184 166 / 0.2);
 }
 
 * {
@@ -283,21 +421,52 @@ a {
   }
 }
 
-/* Custom utility classes */
+/* === DARK MODE VARIATIONS === */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: var(--neutral-900);
+    --bg-secondary: var(--neutral-800);
+    --bg-tertiary: var(--neutral-700);
+    --text-primary: var(--neutral-100);
+    --text-secondary: var(--neutral-300);
+    --text-tertiary: var(--neutral-400);
+    --card-bg: var(--neutral-800);
+    --card-border: var(--neutral-700);
+    --border-default: var(--neutral-700);
+    --border-subtle: var(--neutral-800);
+    --input-bg: var(--neutral-800);
+    --input-border: var(--neutral-600);
+  }
+}
+
+/* Medical Navigation Styles */
 .nav-item {
-  @apply text-gray-600 hover:text-blue-600 transition-colors duration-200;
+  color: var(--text-secondary);
+  transition: color 0.2s ease;
+}
+
+.nav-item:hover {
+  color: var(--primary-600);
 }
 
 .nav-item-active {
-  @apply text-blue-600 font-medium;
+  color: var(--primary-600);
+  font-weight: 500;
 }
 
 .nav-item-mobile {
-  @apply text-gray-700 hover:text-blue-600 transition-colors duration-200;
+  color: var(--text-primary);
+  transition: color 0.2s ease;
+}
+
+.nav-item-mobile:hover {
+  color: var(--primary-600);
 }
 
 .nav-item-mobile-active {
-  @apply text-blue-600 font-medium bg-blue-50;
+  color: var(--primary-600);
+  font-weight: 500;
+  background-color: var(--bg-brand-subtle);
 }
 
 /* Custom animations */
@@ -379,17 +548,66 @@ a {
   }
 }
 
-/* Custom button styles */
+/* Medical Component Button Styles */
 .btn-primary {
-  @apply bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 font-medium;
+  background-color: var(--button-primary-bg);
+  color: var(--button-primary-text);
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-600);
+  box-shadow: var(--shadow-brand);
 }
 
 .btn-secondary {
-  @apply bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg transition-colors duration-200 font-medium;
+  background-color: var(--button-secondary-bg);
+  color: var(--button-secondary-text);
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: 1px solid var(--border-default);
+}
+
+.btn-secondary:hover {
+  background-color: var(--neutral-300);
+  border-color: var(--border-strong);
 }
 
 .btn-outline {
-  @apply border border-gray-300 hover:border-gray-400 text-gray-700 hover:text-gray-900 px-4 py-2 rounded-lg transition-colors duration-200 font-medium;
+  background-color: transparent;
+  color: var(--text-primary);
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border-default);
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-outline:hover {
+  background-color: var(--bg-brand-subtle);
+  border-color: var(--primary-400);
+  color: var(--primary-700);
+}
+
+.btn-medical {
+  background-color: var(--secondary-500);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.btn-medical:hover {
+  background-color: var(--secondary-600);
+  box-shadow: 0 4px 14px 0 rgb(34 197 94 / 0.2);
 }
 
 /* Card styles */

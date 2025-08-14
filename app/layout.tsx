@@ -47,9 +47,9 @@ export const metadata: Metadata = {
     description: 'Connect with healthcare professionals worldwide and advance your medical career with the premier healthcare networking platform.',
     images: [
       {
-        url: '/Kendraa Logo.png',
-        width: 1200,
-        height: 630,
+        url: '/mainlogo.svg',
+        width: 300,
+        height: 80,
         alt: 'Kendraa - Royal Network for Healthcare Professionals',
       },
     ],
@@ -58,7 +58,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Kendraa - Royal Network for Healthcare Professionals',
     description: 'Connect with healthcare professionals worldwide and advance your medical career with the premier healthcare networking platform.',
-    images: ['/Kendraa Logo.png'],
+    images: ['/mainlogo.svg'],
     creator: '@kendraa_health',
   },
   verification: {
@@ -69,10 +69,10 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
+      { url: '/mainicon.svg', type: 'image/svg+xml' },
       { url: '/favicon.ico' },
-      { url: '/Kendraa Logo.png', type: 'image/png' },
     ],
-    apple: '/apple-touch-icon.png',
+    apple: '/mainicon.svg',
   },
 };
 

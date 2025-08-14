@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
+  <!-- Background -->
+  <rect width="80" height="80" rx="16" fill="#ffffff"/>
+  <!-- Medical cross -->
+  <rect x="30" y="10" width="20" height="20" rx="4" fill="#14b8a6"/>
+  <rect x="10" y="30" width="20" height="20" rx="4" fill="#14b8a6"/>
+  <rect x="50" y="30" width="20" height="20" rx="4" fill="#14b8a6"/>
+  <rect x="30" y="50" width="20" height="20" rx="4" fill="#14b8a6"/>
+  <!-- Nodes -->
+  <circle cx="40" cy="5" r="5" fill="#22c55e"/>
+  <circle cx="5" cy="40" r="5" fill="#22c55e"/>
+  <circle cx="75" cy="40" r="5" fill="#22c55e"/>
+  <circle cx="40" cy="75" r="5" fill="#eab308"/>
+</svg>

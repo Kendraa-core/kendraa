@@ -1,45 +1,39 @@
-# Kendraa - Royal Network for Healthcare Professionals
+# Kendraa - Healthcare Professional Networking Platform
 
-A premium professional networking platform designed specifically for healthcare professionals. Connect with peers, discover opportunities, and advance your medical career with Kendraa.
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat&logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue?style=flat&logo=typescript)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.3-38B2AC?style=flat&logo=tailwind-css)](https://tailwindcss.com/)
+[![Supabase](https://img.shields.io/badge/Supabase-2.0-3ECF8E?style=flat&logo=supabase)](https://supabase.com/)
 
-## 🚀 Features
+A modern, secure networking platform designed specifically for healthcare professionals to connect, collaborate, and advance their careers.
 
-### Core Functionality
-- **Professional Networking**: Connect with healthcare professionals worldwide
-- **Job Opportunities**: Discover and apply to healthcare positions
-- **Messaging System**: HIPAA-compliant communication tools
-- **Event Management**: Create and attend professional events
-- **Profile Management**: Comprehensive professional profiles
-- **Institution Support**: Dedicated features for healthcare institutions
+## 🏥 About Kendraa
 
-### Technical Features
-- **Real-time Messaging**: Instant communication between connected users
-- **Search & Discovery**: Advanced search with filters
-- **Notifications**: Real-time notifications for connections and messages
-- **Responsive Design**: Optimized for all devices
-- **Performance Optimized**: Fast loading times and smooth interactions
+Kendraa is the premier networking platform for healthcare professionals, designed to foster collaboration, knowledge sharing, and career growth in the medical community. Our platform combines the power of social networking with specialized features designed specifically for healthcare professionals.
 
-## 🛠 Tech Stack
+### Key Features
 
-- **Frontend**: Next.js 15, React 18, TypeScript
-- **Styling**: Tailwind CSS, Framer Motion
-- **Backend**: Supabase (Database, Auth, Real-time)
-- **Icons**: Heroicons
-- **Notifications**: React Hot Toast
+- **Professional Networking** - Connect with healthcare professionals worldwide
+- **Knowledge Sharing** - Share research, clinical insights, and medical innovations
+- **Career Opportunities** - Discover job opportunities and research collaborations
+- **Medical Events** - Stay updated with conferences and continuing education
+- **Secure Messaging** - HIPAA-compliant communication system
+- **Professional Analytics** - Track your professional growth and network expansion
 
-## 📦 Installation
+## 🚀 Quick Start
 
 ### Prerequisites
+
 - Node.js 18+ 
-- npm 8+
+- npm or yarn
 - Supabase account
 
-### Setup
+### Installation
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/psmithul/thinkify-2.git
-   cd linkedin-clone
+   git clone https://github.com/psmithul/kendra.git
+   cd kendra
    ```
 
 2. **Install dependencies**
@@ -47,182 +41,147 @@ A premium professional networking platform designed specifically for healthcare 
    npm install
    ```
 
-3. **Environment Setup**
+3. **Set up environment variables**
    ```bash
    cp .env.example .env.local
    ```
    
    Update `.env.local` with your Supabase credentials:
-   ```
+   ```env
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-   NEXT_PUBLIC_APP_URL=http://localhost:3000
+   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
    ```
 
-4. **Database Setup**
-   - Create a new Supabase project
-   - Run the migration in `supabase/migrations/001_initial_schema.sql`
-   - Update your environment variables with the Supabase credentials
+4. **Set up the database**
+   ```bash
+   # Run the database setup script
+   npm run db:setup
+   ```
 
-5. **Development**
+5. **Start the development server**
    ```bash
    npm run dev
    ```
 
-6. **Production Build**
-   ```bash
-   npm run build
-   npm start
-   ```
+6. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
 
-## 🚀 Deployment
+## 🛠️ Technology Stack
 
-### Vercel (Recommended)
+### Frontend
+- **Next.js 15** - React framework with App Router
+- **TypeScript** - Type-safe development
+- **Tailwind CSS** - Utility-first CSS framework
+- **Framer Motion** - Smooth animations
+- **Heroicons** - Beautiful SVG icons
 
-1. **Connect to Vercel**
-   ```bash
-   npm install -g vercel
-   vercel login
-   ```
+### Backend
+- **Supabase** - Backend-as-a-Service
+- **PostgreSQL** - Relational database
+- **Row Level Security** - Advanced data protection
+- **Real-time subscriptions** - Live updates
 
-2. **Deploy**
-   ```bash
-   vercel --prod
-   ```
+### Security
+- **HIPAA Compliance** - Healthcare data protection
+- **End-to-End Encryption** - Secure communications
+- **Multi-Factor Authentication** - Enhanced security
+- **Regular Security Audits** - Continuous monitoring
 
-3. **Environment Variables**
-   - Add your Supabase credentials in Vercel dashboard
-   - Set `NEXT_PUBLIC_APP_URL` to your production domain
+## 📁 Project Structure
 
-### Other Platforms
-
-#### Netlify
-```bash
-npm run build
-# Deploy the .next folder
+```
+kendraa/
+├── app/                    # Next.js App Router pages
+│   ├── (auth)/            # Authentication pages
+│   ├── (dashboard)/       # Dashboard pages
+│   ├── about/             # About page
+│   └── profile/           # Profile pages
+├── components/            # Reusable React components
+│   ├── common/           # Common UI components
+│   ├── layout/           # Layout components
+│   ├── post/             # Post-related components
+│   └── ui/               # Base UI components
+├── contexts/             # React contexts
+├── hooks/                # Custom React hooks
+├── lib/                  # Utility libraries
+├── types/                # TypeScript type definitions
+├── utils/                # Utility functions
+└── public/               # Static assets
 ```
 
-#### Railway
-```bash
-# Connect your GitHub repository
-# Railway will auto-detect Next.js and deploy
-```
+## 🔧 Available Scripts
 
-## 🔧 Configuration
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+- `npm run type-check` - Run TypeScript type checking
+- `npm run db:setup` - Set up database schema
 
-### Environment Variables
+## 🎨 Design System
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | Yes |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key | Yes |
-| `NEXT_PUBLIC_APP_URL` | Application URL | Yes |
-| `NODE_ENV` | Environment (development/production) | No |
+Kendraa uses a comprehensive medical-themed color palette:
 
-### Database Schema
+- **Primary**: Modern Medical Teal (#14b8a6)
+- **Secondary**: Health Green (#22c55e)
+- **Accent**: Professional Gold (#eab308)
+- **Neutral**: Clean grays for medical professionalism
 
-The application uses the following main tables:
-- `profiles` - User profiles
-- `posts` - Social media posts
-- `connections` - User connections
-- `jobs` - Job listings
-- `events` - Professional events
-- `conversations` - Messaging conversations
-- `messages` - Individual messages
+## 🔒 Security & Privacy
 
-## 📱 Usage
+- **HIPAA Compliance** - Healthcare data protection standards
+- **End-to-End Encryption** - Secure communication channels
+- **Multi-Factor Authentication** - Enhanced account security
+- **Regular Security Audits** - Continuous security monitoring
+- **Data Privacy** - Granular privacy controls
+
+## 📊 Features
 
 ### For Healthcare Professionals
-
-1. **Sign Up**: Create your professional profile
-2. **Connect**: Find and connect with other professionals
-3. **Network**: Join conversations and share insights
-4. **Discover**: Find job opportunities and events
-5. **Message**: Communicate with your connections
+- Professional profile creation and management
+- Network building and connection management
+- Knowledge sharing and content creation
+- Career opportunity discovery
+- Medical event participation
+- Secure messaging with colleagues
 
 ### For Healthcare Institutions
-
-1. **Create Institution Profile**: Set up your organization
-2. **Post Jobs**: Share career opportunities
-3. **Host Events**: Create professional events
-4. **Network**: Connect with healthcare professionals
-
-## 🔒 Security
-
-- **HIPAA Compliance**: Messaging system designed for healthcare privacy
-- **Authentication**: Secure user authentication via Supabase
-- **Data Protection**: Encrypted data transmission
-- **Privacy Controls**: User-controlled privacy settings
-
-## 🚀 Performance
-
-### Optimizations
-- **Code Splitting**: Automatic route-based code splitting
-- **Image Optimization**: Next.js Image component optimization
-- **Bundle Analysis**: Built-in bundle analyzer
-- **Caching**: Strategic caching for better performance
-
-### Monitoring
-- **Error Tracking**: Comprehensive error handling
-- **Performance Monitoring**: Built-in performance metrics
-- **Analytics**: Google Analytics integration ready
-
-## 🧪 Testing
-
-```bash
-# Run tests
-npm test
-
-# Run tests with coverage
-npm run test:coverage
-
-# Run tests in watch mode
-npm run test:watch
-```
-
-## 📊 Analytics
-
-The application is ready for analytics integration:
-- Google Analytics
-- Mixpanel
-- Hotjar
-- Custom event tracking
+- Organization profile management
+- Job posting and recruitment
+- Event hosting and management
+- Analytics and insights
+- Brand building and networking
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+We welcome contributions from the healthcare and developer communities! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
+
+### Development Guidelines
+- Follow TypeScript best practices
+- Write comprehensive tests
+- Maintain code documentation
+- Follow our design system
+- Ensure HIPAA compliance
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🆘 Support
+## 📞 Support
 
-For support and questions:
-- Create an issue on GitHub
-- Contact: support@kendraa.com
-- Documentation: [docs.kendraa.com](https://docs.kendraa.com)
+- **Documentation**: [docs.kendraa.com](https://docs.kendraa.com)
+- **Email**: support@kendraa.com
+- **Status Page**: [status.kendraa.com](https://status.kendraa.com)
 
-## 🎯 Roadmap
+## 🌟 Acknowledgments
 
-### Upcoming Features
-- [ ] Advanced search filters
-- [ ] Video calling integration
-- [ ] Mobile app development
-- [ ] AI-powered recommendations
-- [ ] Advanced analytics dashboard
-- [ ] Multi-language support
-
-### Performance Improvements
-- [ ] Service Worker implementation
-- [ ] Advanced caching strategies
-- [ ] CDN optimization
-- [ ] Database query optimization
+- Healthcare professionals worldwide for their feedback and insights
+- The Next.js and Supabase communities for excellent tooling
+- Medical professionals who contributed to our design and feature decisions
 
 ---
 
-**Built with ❤️ for the healthcare community** 
+**Kendraa - Connecting Healthcare Professionals Worldwide**
+
+*Built with ❤️ for the healthcare community* 

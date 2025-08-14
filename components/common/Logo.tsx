@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 
 interface LogoProps {
   className?: string;
@@ -14,21 +15,22 @@ export default function Logo({
   variant = 'default' 
 }: LogoProps) {
   const sizeClasses = {
-    sm: 'text-lg font-bold',
-    md: 'text-xl font-bold',
-    lg: 'text-2xl font-bold',
-    xl: 'text-3xl font-bold'
-  };
-
-  const variantClasses = {
-    default: 'text-primary-600',
-    gradient: 'text-primary-600',
-    simple: 'text-primary-600'
+    sm: 'h-8 w-auto',
+    md: 'h-10 w-auto',
+    lg: 'h-12 w-auto',
+    xl: 'h-16 w-auto'
   };
 
   return (
-    <div className={`font-display ${sizeClasses[size]} ${variantClasses[variant]} ${className}`}>
-      <span className="tracking-tight">Kendraa</span>
+    <div className={`${sizeClasses[size]} ${className}`}>
+      <Image
+        src="/mainlogo.svg"
+        alt="Kendraa - Healthcare Professional Networking"
+        width={300}
+        height={80}
+        className="h-full w-auto"
+        priority
+      />
     </div>
   );
 }
