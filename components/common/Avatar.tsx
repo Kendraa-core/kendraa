@@ -51,7 +51,7 @@ export default function Avatar({
       <div 
         className={cn(
           baseClasses,
-          'bg-gradient-to-br from-linkedin-primary to-linkedin-secondary text-white font-semibold',
+          'bg-gradient-to-br from-primary-500 to-secondary-600 text-white font-semibold',
           fallbackClassName
         )}
       >
@@ -63,7 +63,7 @@ export default function Avatar({
   return (
     <div className={baseClasses}>
       {isLoading && (
-        <div className="absolute inset-0 bg-gradient-to-br from-linkedin-primary to-linkedin-secondary text-white font-semibold flex items-center justify-center">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-500 to-secondary-600 text-white font-semibold flex items-center justify-center">
           {getInitials(alt)}
         </div>
       )}

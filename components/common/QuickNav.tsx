@@ -21,31 +21,31 @@ export default function QuickNav() {
       icon: MagnifyingGlassIcon,
       label: 'Search',
       href: '/search',
-      color: 'bg-blue-600 hover:bg-blue-700',
+      color: 'bg-primary-600 hover:bg-primary-700',
     },
     {
       icon: UserPlusIcon,
       label: 'Network',
       href: '/network',
-      color: 'bg-green-600 hover:bg-green-700',
+      color: 'bg-secondary-600 hover:bg-secondary-700',
     },
     {
       icon: ChatBubbleLeftIcon,
       label: 'Messages',
       href: '/messaging',
-      color: 'bg-purple-600 hover:bg-purple-700',
+      color: 'bg-accent-600 hover:bg-accent-700',
     },
     {
       icon: BellIcon,
       label: 'Notifications',
       href: '/notifications',
-      color: 'bg-orange-600 hover:bg-orange-700',
+      color: 'bg-primary-600 hover:bg-primary-700',
     },
     {
       icon: UserCircleIcon,
       label: 'Profile',
       href: `/profile/${user?.id}`,
-      color: 'bg-indigo-600 hover:bg-indigo-700',
+      color: 'bg-secondary-600 hover:bg-secondary-700',
     },
   ];
 
@@ -87,7 +87,7 @@ export default function QuickNav() {
         
         onClick={() => setIsOpen(!isOpen)}
         className={`w-14 h-14 rounded-full shadow-lg transition-colors duration-300 ${
-          isOpen ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
+          isOpen ? 'bg-error-600 hover:bg-error-700' : 'bg-primary-600 hover:bg-primary-700'
         } text-white flex items-center justify-center`}
       >
         <div

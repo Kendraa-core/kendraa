@@ -114,9 +114,9 @@ export default function FeedPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-secondary-50 to-accent-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Sidebar */}
-          <div className="lg:col-span-3 space-y-6 sticky top-6 h-fit">
+          <div className="lg:col-span-3 space-y-6 sticky top-24 h-fit">
             {/* Profile Card */}
             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow duration-300">
               {/* Banner */}
@@ -126,7 +126,7 @@ export default function FeedPage() {
               
               {/* Profile Info */}
               <div className="px-6 pb-6 relative">
-                <div className="flex justify-center -mt-12 mb-6">
+                <div className="flex justify-center -mt-12 mb-4">
                   <div className="relative">
                     <Avatar
                       src={profile?.avatar_url}
@@ -138,7 +138,7 @@ export default function FeedPage() {
                   </div>
                 </div>
                 
-                <div className="text-center mb-6">
+                <div className="text-center mb-4">
                   <h3 className="font-bold text-gray-900 text-xl mb-2">
                     {profile?.full_name || 'User'}
                   </h3>
@@ -209,7 +209,7 @@ export default function FeedPage() {
           <div className="lg:col-span-6 space-y-6">
             {/* Create Post */}
             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow duration-300">
-              <div className="flex items-start space-x-3">
+              <div className="flex items-start space-x-4">
                 <Avatar
                   src={profile?.avatar_url}
                   alt={profile?.full_name || 'User'}
@@ -224,7 +224,7 @@ export default function FeedPage() {
                     rows={3}
                   />
                   <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-                    <div className="flex items-center space-x-6">
+                    <div className="flex items-center space-x-4">
                       <button className="flex items-center space-x-2 text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-lg hover:bg-primary-50">
                         <PhotoIcon className="w-5 h-5" />
                         <span className="text-sm font-medium">Media</span>
@@ -314,7 +314,7 @@ export default function FeedPage() {
           </div>
 
           {/* Right Sidebar */}
-          <div className="lg:col-span-3 space-y-6 sticky top-6 h-fit">
+          <div className="lg:col-span-3 space-y-6 sticky top-24 h-fit">
             {/* Trending Topics */}
             <TrendingTopics />
           </div>
