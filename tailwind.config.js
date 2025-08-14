@@ -8,57 +8,100 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Modern gradient-based color scheme
+        // Kendraa Medical Color Scheme
         primary: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
-          950: '#082f49',
+          50: '#f0fdfa',
+          100: '#ccfbf1',
+          200: '#99f6e4',
+          300: '#5eead4',
+          400: '#2dd4bf',
+          500: '#14b8a6',  /* Main Primary - Modern Medical Teal */
+          600: '#0d9488',
+          700: '#0f766e',
+          800: '#115e59',
+          900: '#134e4a',
+          950: '#042f2e',
+        },
+        secondary: {
+          50: '#f0fdf4',
+          100: '#dcfce7',
+          200: '#bbf7d0',
+          300: '#86efac',
+          400: '#4ade80',
+          500: '#22c55e',  /* Health Green */
+          600: '#16a34a',
+          700: '#15803d',  /* Deep Medical Green */
+          800: '#166534',
+          900: '#14532d',
+          950: '#052e16',
         },
         accent: {
-          50: '#faf5ff',
-          100: '#f3e8ff',
-          200: '#e9d5ff',
-          300: '#d8b4fe',
-          400: '#c084fc',
-          500: '#a855f7',
-          600: '#9333ea',
-          700: '#7c3aed',
-          800: '#6b21a8',
-          900: '#581c87',
-          950: '#3b0764',
+          50: '#fefce8',
+          100: '#fef9c3',
+          200: '#fef08a',
+          300: '#fde047',
+          400: '#facc15',
+          500: '#eab308',  /* Warm Professional Gold */
+          600: '#ca8a04',
+          700: '#a16207',
+          800: '#854d0e',
+          900: '#713f12',
+          950: '#422006',
         },
         neutral: {
-          50: '#fafafa',
-          100: '#f5f5f5',
-          200: '#e5e5e5',
-          300: '#d4d4d4',
-          400: '#a3a3a3',
-          500: '#737373',
-          600: '#525252',
-          700: '#404040',
-          800: '#262626',
-          900: '#171717',
-          950: '#0a0a0a',
+          50: '#fafafa',   /* Pure backgrounds */
+          100: '#f5f5f5',  /* Light backgrounds */
+          200: '#e5e5e5',  /* Borders, dividers */
+          300: '#d4d4d4',  /* Disabled states */
+          400: '#a3a3a3',  /* Placeholder text */
+          500: '#737373',  /* Secondary text */
+          600: '#525252',  /* Primary text */
+          700: '#404040',  /* Headings */
+          800: '#262626',  /* Strong emphasis */
+          900: '#171717',  /* Maximum contrast */
+          950: '#0a0a0a',  /* Pure black alternative */
         },
-        // Legacy LinkedIn colors (keeping for compatibility)
+        // Medical-specific colors
+        medical: {
+          'scrub-green': '#016064',  /* Traditional medical scrubs */
+          'mint': '#98e4d6',         /* Calming mint for backgrounds */
+          'navy': '#1e40af',         /* Professional navy for headers */
+          'silver': '#e5e7eb',       /* Medical equipment silver */
+        },
+        // Semantic colors
+        success: {
+          50: '#f0fdf4',
+          100: '#dcfce7',
+          500: '#22c55e',
+          600: '#16a34a',
+          700: '#15803d',
+        },
+        warning: {
+          50: '#fffbeb',
+          100: '#fef3c7',
+          500: '#f59e0b',
+          600: '#d97706',
+          700: '#b45309',
+        },
+        error: {
+          50: '#fef2f2',
+          100: '#fee2e2',
+          500: '#ef4444',
+          600: '#dc2626',
+          700: '#b91c1c',
+        },
+        info: {
+          50: '#eff6ff',
+          100: '#dbeafe',
+          500: '#3b82f6',
+          600: '#2563eb',
+          700: '#1d4ed8',
+        },
+        // Legacy colors (keeping for compatibility)
         'linkedin-primary': '#0a66c2',
         'linkedin-secondary': '#004182',
         'linkedin-accent': '#0073b1',
         'linkedin-light': '#eef3f8',
-        // Modern theme colors
-        'modern-primary': '#6366f1', // Indigo-500
-        'modern-secondary': '#8b5cf6', // Violet-500
-        'modern-accent': '#06b6d4', // Cyan-500
-        'modern-surface': '#f8fafc', // Slate-50
-        'modern-muted': '#64748b', // Slate-500
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
@@ -100,8 +143,8 @@ module.exports = {
           '70%': { transform: 'translateY(-2px)' },
         },
         glow: {
-          '0%': { boxShadow: '0 0 20px rgba(99, 102, 241, 0.3)' },
-          '100%': { boxShadow: '0 0 30px rgba(139, 92, 246, 0.4)' },
+          '0%': { boxShadow: '0 0 20px rgba(20, 184, 166, 0.3)' },
+          '100%': { boxShadow: '0 0 30px rgba(34, 197, 94, 0.4)' },
         },
       },
       spacing: {
@@ -112,18 +155,20 @@ module.exports = {
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-        'modern-gradient': 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-        'modern-gradient-subtle': 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+        'medical-gradient': 'linear-gradient(135deg, #14b8a6 0%, #22c55e 100%)',
+        'medical-gradient-subtle': 'linear-gradient(135deg, #f0fdfa 0%, #f0fdf4 100%)',
+        'medical-gradient-warm': 'linear-gradient(135deg, #14b8a6 0%, #eab308 100%)',
       },
       backdropBlur: {
         xs: '2px',
       },
       boxShadow: {
-        'modern': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-        'modern-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-        'modern-xl': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-        'glow': '0 0 20px rgba(99, 102, 241, 0.3)',
-        'glow-lg': '0 0 30px rgba(139, 92, 246, 0.4)',
+        'medical': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        'medical-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        'medical-xl': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+        'medical-glow': '0 0 20px rgba(20, 184, 166, 0.3)',
+        'medical-glow-lg': '0 0 30px rgba(34, 197, 94, 0.4)',
+        'medical-brand': '0 4px 14px 0 rgba(20, 184, 166, 0.2)',
       },
     },
   },
