@@ -305,7 +305,7 @@ export default function JobsPage() {
             {isInstitution && (
               <Link
                 href="/jobs/create"
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
               >
                 <PlusIcon className="w-5 h-5 mr-2" />
                 Post a Job
@@ -365,7 +365,7 @@ export default function JobsPage() {
                   <h2 className="text-xl font-semibold text-gray-900">My Posted Jobs</h2>
                   <button
                     onClick={() => setShowApplicationsSection(!showApplicationsSection)}
-                    className="text-blue-600 hover:text-blue-700 font-medium"
+                    className="text-primary-600 hover:text-primary-700 font-medium"
                   >
                     {showApplicationsSection ? 'Hide' : 'View'} Applications
                   </button>
@@ -390,9 +390,9 @@ export default function JobsPage() {
                             {jobApplications[job.id].slice(0, 3).map((application) => (
                               <div key={application.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                 <div className="flex items-center space-x-3">
-                                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                    <DocumentTextIcon className="w-4 h-4 text-blue-600" />
-                                  </div>
+                                                  <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
+                  <DocumentTextIcon className="w-4 h-4 text-primary-600" />
+                </div>
                                   <div>
                                     <p className="text-sm font-medium text-gray-900">
                                       Application #{application.id.slice(0, 8)}
@@ -404,7 +404,7 @@ export default function JobsPage() {
                                 </div>
                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                                   application.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                  application.status === 'reviewed' ? 'bg-blue-100 text-blue-800' :
+                                  application.status === 'reviewed' ? 'bg-primary-100 text-primary-800' :
                                   application.status === 'interview' ? 'bg-purple-100 text-purple-800' :
                                   application.status === 'accepted' ? 'bg-green-100 text-green-800' :
                                   'bg-red-100 text-red-800'
@@ -416,7 +416,7 @@ export default function JobsPage() {
                             {jobApplications[job.id].length > 3 && (
                               <Link
                                 href={`/jobs/${job.id}/applications`}
-                                className="block text-center text-blue-600 hover:text-blue-700 text-sm font-medium py-2"
+                                className="block text-center text-primary-600 hover:text-primary-700 text-sm font-medium py-2"
                               >
                                 View all {jobApplications[job.id].length} applications
                               </Link>
@@ -448,16 +448,16 @@ export default function JobsPage() {
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-start space-x-4">
-                          <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <BriefcaseIcon className="w-6 h-6 text-blue-600" />
-                          </div>
+                                          <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <BriefcaseIcon className="w-6 h-6 text-primary-600" />
+                </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center space-x-2 mb-2">
                               <h3 className="text-lg font-semibold text-gray-900">
                                 {job.title}
                               </h3>
                               {job.company.verified && (
-                                <CheckBadgeSolidIcon className="w-5 h-5 text-blue-600" />
+                                <CheckBadgeSolidIcon className="w-5 h-5 text-primary-600" />
                               )}
                             </div>
                             <p className="text-gray-600 mb-2">{job.company.name}</p>
@@ -512,7 +512,7 @@ export default function JobsPage() {
                         ) : (
                           <Button
                             onClick={() => handleApply(job)}
-                            className="bg-blue-600 hover:bg-blue-700"
+                            className="bg-primary-600 hover:bg-primary-700"
                           >
                             Apply Now
                           </Button>
@@ -602,7 +602,7 @@ function ApplicationModal({ job, onClose, onSubmit }: ApplicationModalProps) {
                 value={coverLetter}
                 onChange={(e) => setCoverLetter(e.target.value)}
                 rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 placeholder="Introduce yourself and explain why you're interested in this position..."
                 required
               />
@@ -611,7 +611,7 @@ function ApplicationModal({ job, onClose, onSubmit }: ApplicationModalProps) {
             <div className="flex space-x-3">
               <Button
                 type="submit"
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                className="flex-1 bg-primary-600 hover:bg-primary-700 text-white"
                 disabled={loading}
               >
                 {loading ? 'Submitting...' : 'Submit Application'}

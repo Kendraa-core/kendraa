@@ -37,7 +37,7 @@ export default function TrendingTopics({ limit = 5 }: TrendingTopicsProps) {
     return (
       <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow duration-300">
         <div className="flex items-center space-x-3 mb-6">
-          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
+          <div className="w-10 h-10 bg-gradient-to-r from-primary-500 to-secondary-600 rounded-xl flex items-center justify-center shadow-md">
             <HashtagIcon className="w-5 h-5 text-white" />
           </div>
           <h3 className="font-bold text-gray-900 text-lg">Trending Topics</h3>
@@ -60,7 +60,7 @@ export default function TrendingTopics({ limit = 5 }: TrendingTopicsProps) {
     return (
       <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow duration-300">
         <div className="flex items-center space-x-3 mb-6">
-          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
+          <div className="w-10 h-10 bg-gradient-to-r from-primary-500 to-secondary-600 rounded-xl flex items-center justify-center shadow-md">
             <HashtagIcon className="w-5 h-5 text-white" />
           </div>
           <h3 className="font-bold text-gray-900 text-lg">Trending Topics</h3>
@@ -79,7 +79,7 @@ export default function TrendingTopics({ limit = 5 }: TrendingTopicsProps) {
   return (
     <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow duration-300">
       <div className="flex items-center space-x-3 mb-6">
-        <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
+        <div className="w-10 h-10 bg-gradient-to-r from-primary-500 to-secondary-600 rounded-xl flex items-center justify-center shadow-md">
           <HashtagIcon className="w-5 h-5 text-white" />
         </div>
         <h3 className="font-bold text-gray-900 text-lg">Trending Topics</h3>
@@ -89,10 +89,10 @@ export default function TrendingTopics({ limit = 5 }: TrendingTopicsProps) {
           <div key={topic.hashtag} className="group cursor-pointer">
             <div className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 transition-all duration-200">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-                  <HashtagIcon className="w-4 h-4 text-blue-600" />
+                <div className="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center group-hover:bg-primary-200 transition-colors">
+                  <HashtagIcon className="w-4 h-4 text-primary-600" />
                 </div>
-                <span className="text-sm font-semibold text-gray-700 group-hover:text-blue-600 transition-colors">
+                <span className="text-sm font-semibold text-gray-700 group-hover:text-primary-600 transition-colors">
                   {topic.hashtag}
                 </span>
               </div>

@@ -401,7 +401,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
           onClick={handleBookmark}
           className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
             isBookmarked
-              ? 'text-blue-600 hover:bg-blue-50'
+              ? 'text-primary-600 hover:bg-primary-50'
               : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
           }`}
         >
@@ -437,7 +437,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
                 <button
                   onClick={submitComment}
                   disabled={isCommenting || !newComment.trim()}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {isCommenting ? 'Posting...' : 'Post'}
                 </button>
@@ -449,7 +449,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
           <div className="space-y-4">
             {isLoadingComments ? (
               <div className="text-center py-4">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600 mx-auto"></div>
               </div>
             ) : comments.length > 0 ? (
               <>
@@ -510,7 +510,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
                   <div className="text-center pt-2">
                     <button
                       onClick={() => setShowAllComments(!showAllComments)}
-                      className="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                      className="text-sm text-primary-600 hover:text-primary-800 font-medium transition-colors"
                     >
                       {showAllComments ? `Show less` : `Show ${comments.length - 2} more comments`}
                     </button>

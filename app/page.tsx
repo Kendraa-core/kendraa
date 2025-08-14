@@ -32,19 +32,19 @@ export default function LandingPage() {
 
               {/* Navigation */}
               <nav className="hidden md:flex items-center space-x-8">
-                <a href="#features" className="text-gray-600 hover:text-blue-600 transition-colors">About</a>
-                <a href="#testimonials" className="text-gray-600 hover:text-blue-600 transition-colors">Stories</a>
-                <a href="#faq" className="text-gray-600 hover:text-blue-600 transition-colors">FAQ</a>
+                <a href="#features" className="text-gray-600 hover:text-primary-600 transition-colors">About</a>
+                <a href="#testimonials" className="text-gray-600 hover:text-primary-600 transition-colors">Stories</a>
+                <a href="#faq" className="text-gray-600 hover:text-primary-600 transition-colors">FAQ</a>
               </nav>
 
               {/* CTA Buttons */}
               <div className="flex items-center space-x-4">
-                <Link href="/signin" className="text-gray-600 hover:text-blue-600 transition-colors">
+                <Link href="/signin" className="text-gray-600 hover:text-primary-600 transition-colors">
                   Sign In
                 </Link>
                 <Link 
                   href="/signup" 
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors font-medium"
+                  className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg transition-colors font-medium"
                 >
                   Join Now
                 </Link>
@@ -76,14 +76,14 @@ export default function LandingPage() {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
                   <Link 
                     href="/signup" 
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 transform hover:scale-105 flex items-center space-x-2"
+                    className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 transform hover:scale-105 flex items-center space-x-2"
                   >
                     <span>Try It Out</span>
                     <ArrowRightIcon className="w-5 h-5" />
                   </Link>
                   <Link 
                     href="#features" 
-                    className="border-2 border-gray-300 hover:border-blue-600 text-gray-700 hover:text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200"
+                    className="border-2 border-gray-300 hover:border-primary-600 text-gray-700 hover:text-primary-600 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200"
                   >
                     Learn More
                   </Link>
@@ -101,8 +101,8 @@ export default function LandingPage() {
                   <div className="text-xs text-gray-500">Always-on community</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-blue-600 mb-2">
-                    <ShieldCheckIcon className="w-8 h-8 mx-auto mb-2 text-blue-600" />
+                  <div className="text-3xl font-bold text-primary-600 mb-2">
+                    <ShieldCheckIcon className="w-8 h-8 mx-auto mb-2 text-primary-600" />
                     100%
                   </div>
                   <div className="text-gray-600">Verified Professionals</div>

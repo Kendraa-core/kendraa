@@ -79,8 +79,8 @@ export default function Header() {
                       href={item.href}
                       className={`flex items-center space-x-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
                         isActive
-                          ? 'text-blue-600 bg-blue-50'
-                          : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
+                          ? 'text-primary-600 bg-primary-50'
+                          : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50'
                       }`}
                     >
                       <item.icon className="w-5 h-5" />
@@ -100,7 +100,7 @@ export default function Header() {
               <div className="relative">
                 <button
                   onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                  className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-all duration-200 relative"
+                  className="p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200 relative"
                 >
                   <BellIcon className="w-5 h-5" />
                   {unreadCount > 0 && (
@@ -127,7 +127,7 @@ export default function Header() {
                           <div
                             key={notification.id}
                             className={`px-4 py-3 hover:bg-gray-50 cursor-pointer ${
-                              !notification.read ? 'bg-blue-50' : ''
+                              !notification.read ? 'bg-primary-50' : ''
                             }`}
                             onClick={() => {
                               if (!notification.read) {
@@ -136,8 +136,8 @@ export default function Header() {
                             }}
                           >
                             <div className="flex items-start space-x-3">
-                              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                <BellIcon className="w-4 h-4 text-blue-600" />
+                              <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <BellIcon className="w-4 h-4 text-primary-600" />
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm text-gray-900">{notification.message}</p>
@@ -146,7 +146,7 @@ export default function Header() {
                                 </p>
                                 {!notification.read && (
                                   <div className="mt-1">
-                                    <span className="inline-block w-2 h-2 bg-blue-500 rounded-full"></span>
+                                    <span className="inline-block w-2 h-2 bg-primary-500 rounded-full"></span>
                                   </div>
                                 )}
                               </div>
@@ -159,7 +159,7 @@ export default function Header() {
                       <div className="px-4 py-2 border-t border-gray-100">
                         <Link
                           href="/notifications"
-                          className="text-sm text-blue-600 hover:text-blue-700"
+                          className="text-sm text-primary-600 hover:text-primary-700"
                         >
                           View all notifications
                         </Link>
@@ -173,7 +173,7 @@ export default function Header() {
               <div className="relative">
                 <button
                   onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                  className="flex items-center space-x-2 p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-all duration-200"
+                  className="flex items-center space-x-2 p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200"
                 >
                   <Avatar
                     src={profile?.avatar_url}
@@ -214,7 +214,7 @@ export default function Header() {
                             setShowProfileWizard(true);
                             setIsProfileMenuOpen(false);
                           }}
-                          className="block w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-blue-50"
+                          className="block w-full text-left px-4 py-2 text-sm text-primary-600 hover:bg-primary-50"
                         >
                           <div className="flex items-center space-x-2">
                             <ExclamationTriangleIcon className="w-4 h-4" />

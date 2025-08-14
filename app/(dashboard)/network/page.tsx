@@ -238,7 +238,7 @@ export default function NetworkPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600"></div>
       </div>
     );
   }
@@ -307,7 +307,7 @@ export default function NetworkPage() {
                       <div className="flex space-x-2">
                         <button
                           onClick={() => handleAcceptRequest(request.id)}
-                          className="px-3 py-1 text-xs font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                          className="px-3 py-1 text-xs font-medium bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
                         >
                           Accept
                         </button>
@@ -355,7 +355,7 @@ export default function NetworkPage() {
                             {suggestion.headline}
                           </p>
                           {suggestion.mutual_connections && (
-                            <p className="text-xs text-blue-600">
+                            <p className="text-xs text-primary-600">
                               {suggestion.mutual_connections} mutual connections
                             </p>
                           )}
@@ -374,7 +374,7 @@ export default function NetworkPage() {
                           ) : (
                             <button
                               onClick={() => handleConnect(suggestion.id, 'institution')}
-                              className="w-full px-3 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                              className="w-full px-3 py-2 text-sm font-medium bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
                             >
                               Follow
                             </button>
@@ -384,7 +384,7 @@ export default function NetworkPage() {
                           suggestion.connection_status === 'none' && (
                             <button
                               onClick={() => handleConnect(suggestion.id, 'individual')}
-                              className="w-full px-3 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                              className="w-full px-3 py-2 text-sm font-medium bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
                             >
                               Connect
                             </button>
@@ -431,7 +431,7 @@ export default function NetworkPage() {
                     className="p-4 border border-slate-200 rounded-xl hover:shadow-md transition-shadow"
                   >
                     <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-secondary-600 flex items-center justify-center text-white font-semibold">
                         {connection.full_name?.charAt(0) || 'U'}
                       </div>
                       <div className="flex-1 min-w-0">

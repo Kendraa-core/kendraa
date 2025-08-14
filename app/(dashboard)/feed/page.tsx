@@ -112,7 +112,7 @@ export default function FeedPage() {
   }, [fetchProfileData, fetchPosts]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-secondary-50 to-accent-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left Sidebar */}
@@ -120,8 +120,8 @@ export default function FeedPage() {
             {/* Profile Card */}
             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow duration-300">
               {/* Banner */}
-              <div className="h-24 bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-600 relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20"></div>
+              <div className="h-24 bg-gradient-to-r from-primary-500 via-secondary-500 to-accent-500 relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary-600/20 to-secondary-600/20"></div>
               </div>
               
               {/* Profile Info */}
@@ -134,7 +134,7 @@ export default function FeedPage() {
                       size="xl"
                       className="border-4 border-white shadow-lg"
                     />
-                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 border-2 border-white rounded-full"></div>
+                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-secondary-500 border-2 border-white rounded-full"></div>
                   </div>
                 </div>
                 
@@ -162,12 +162,12 @@ export default function FeedPage() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
                     <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
+                      <div className="w-10 h-10 bg-gradient-to-r from-primary-500 to-secondary-600 rounded-xl flex items-center justify-center shadow-md">
                         <BuildingOfficeIcon className="w-5 h-5 text-white" />
                       </div>
                       <span className="text-sm font-semibold text-gray-900">{profile.full_name}</span>
                     </div>
-                    <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">Active</span>
+                    <span className="px-2 py-1 bg-secondary-100 text-secondary-700 text-xs font-medium rounded-full">Active</span>
                   </div>
                 </div>
               </div>
@@ -177,26 +177,26 @@ export default function FeedPage() {
             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow duration-300">
               <h4 className="font-bold text-gray-900 mb-4 text-lg">Quick Links</h4>
               <div className="space-y-3">
-                <a href="/saved-items" className="flex items-center space-x-3 p-3 rounded-xl text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 group">
-                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                <a href="/saved-items" className="flex items-center space-x-3 p-3 rounded-xl text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 group">
+                  <div className="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center group-hover:bg-primary-200 transition-colors">
                     <BookmarkIcon className="w-4 h-4" />
                   </div>
                   <span className="font-medium">Saved items</span>
                 </a>
-                <a href="/groups" className="flex items-center space-x-3 p-3 rounded-xl text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 group">
-                  <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                <a href="/groups" className="flex items-center space-x-3 p-3 rounded-xl text-gray-700 hover:text-secondary-600 hover:bg-secondary-50 transition-all duration-200 group">
+                  <div className="w-8 h-8 bg-secondary-100 rounded-lg flex items-center justify-center group-hover:bg-secondary-200 transition-colors">
                     <UserGroupIcon className="w-4 h-4" />
                   </div>
                   <span className="font-medium">Groups</span>
                 </a>
-                <a href="/newsletters" className="flex items-center space-x-3 p-3 rounded-xl text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 group">
-                  <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                <a href="/newsletters" className="flex items-center space-x-3 p-3 rounded-xl text-gray-700 hover:text-accent-600 hover:bg-accent-50 transition-all duration-200 group">
+                  <div className="w-8 h-8 bg-accent-100 rounded-lg flex items-center justify-center group-hover:bg-accent-200 transition-colors">
                     <DocumentIcon className="w-4 h-4" />
                   </div>
                   <span className="font-medium">Newsletters</span>
                 </a>
-                <a href="/events" className="flex items-center space-x-3 p-3 rounded-xl text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 group">
-                  <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center group-hover:bg-orange-200 transition-colors">
+                <a href="/events" className="flex items-center space-x-3 p-3 rounded-xl text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 group">
+                  <div className="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center group-hover:bg-primary-200 transition-colors">
                     <CalendarIcon className="w-4 h-4" />
                   </div>
                   <span className="font-medium">Events</span>
@@ -220,20 +220,20 @@ export default function FeedPage() {
                     placeholder="Share your thoughts, insights, or professional updates..."
                     value={postContent}
                     onChange={(e) => setPostContent(e.target.value)}
-                    className="w-full p-4 border border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 placeholder-gray-500"
+                    className="w-full p-4 border border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-700 placeholder-gray-500"
                     rows={3}
                   />
                   <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
                     <div className="flex items-center space-x-6">
-                      <button className="flex items-center space-x-2 text-gray-500 hover:text-blue-600 transition-colors p-2 rounded-lg hover:bg-blue-50">
+                      <button className="flex items-center space-x-2 text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-lg hover:bg-primary-50">
                         <PhotoIcon className="w-5 h-5" />
                         <span className="text-sm font-medium">Media</span>
                       </button>
-                      <button className="flex items-center space-x-2 text-gray-500 hover:text-green-600 transition-colors p-2 rounded-lg hover:bg-green-50">
+                      <button className="flex items-center space-x-2 text-gray-500 hover:text-secondary-600 transition-colors p-2 rounded-lg hover:bg-secondary-50">
                         <DocumentIcon className="w-5 h-5" />
                         <span className="text-sm font-medium">Job</span>
                       </button>
-                      <button className="flex items-center space-x-2 text-gray-500 hover:text-purple-600 transition-colors p-2 rounded-lg hover:bg-purple-50">
+                      <button className="flex items-center space-x-2 text-gray-500 hover:text-accent-600 transition-colors p-2 rounded-lg hover:bg-accent-50">
                         <DocumentIcon className="w-5 h-5" />
                         <span className="text-sm font-medium">Write article</span>
                       </button>
@@ -241,7 +241,7 @@ export default function FeedPage() {
                     <button 
                       onClick={() => handleCreatePost(postContent)}
                       disabled={!postContent.trim()}
-                      className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                      className="bg-gradient-to-r from-primary-600 to-primary-700 text-white px-8 py-3 rounded-xl hover:from-primary-700 hover:to-primary-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                     >
                       Post
                     </button>
@@ -257,7 +257,7 @@ export default function FeedPage() {
                   onClick={() => setActiveTab('posts')}
                   className={`flex-1 py-3 px-6 text-center font-semibold transition-all duration-200 rounded-lg ${
                     activeTab === 'posts'
-                      ? 'text-blue-700 bg-white shadow-md'
+                      ? 'text-primary-700 bg-white shadow-md'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                   }`}
                 >
@@ -267,7 +267,7 @@ export default function FeedPage() {
                   onClick={() => setActiveTab('medical')}
                   className={`flex-1 py-3 px-6 text-center font-semibold transition-all duration-200 rounded-lg ${
                     activeTab === 'medical'
-                      ? 'text-emerald-700 bg-white shadow-md'
+                      ? 'text-secondary-700 bg-white shadow-md'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                   }`}
                 >
