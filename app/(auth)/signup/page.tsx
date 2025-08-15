@@ -68,7 +68,7 @@ export default function SignUp() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-secondary-50 to-accent-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-2xl">
         <div className="flex justify-center mb-8">
           <Logo />
@@ -81,7 +81,7 @@ export default function SignUp() {
         </p>
 
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-2xl">
-          <div className="bg-white py-8 px-6 shadow-sm rounded-xl border border-gray-200 sm:px-10">
+          <div className="bg-white py-8 px-6 shadow-lg rounded-xl border border-gray-200 backdrop-blur-sm sm:px-10">
             <form className="space-y-6" onSubmit={handleSubmit}>
               {error && (
                 <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
@@ -101,7 +101,7 @@ export default function SignUp() {
                   required
                   value={formData.fullName}
                   onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                  className="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-900 placeholder:text-gray-300 placeholder:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  className="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-900 placeholder:text-gray-300 placeholder:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
                   placeholder="Enter your full name"
                 />
               </div>
@@ -118,7 +118,7 @@ export default function SignUp() {
                   required
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-900 placeholder:text-gray-300 placeholder:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  className="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-900 placeholder:text-gray-300 placeholder:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
                   placeholder="Enter your email"
                 />
               </div>
@@ -135,14 +135,14 @@ export default function SignUp() {
                         key={type.id}
                         className={`relative p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
                           profileType === type.id
-                            ? 'border-blue-500 bg-blue-50'
+                            ? 'border-primary-500 bg-primary-50'
                             : 'border-gray-300 hover:border-gray-400'
                         }`}
                         onClick={() => setProfileType(type.id as typeof profileType)}
                       >
                         <div className="flex flex-col items-center text-center">
                           <IconComponent className={`h-8 w-8 mb-3 ${
-                            profileType === type.id ? 'text-blue-600' : 'text-gray-400'
+                            profileType === type.id ? 'text-primary-600' : 'text-gray-400'
                           }`} />
                           <h3 className="text-sm font-medium text-gray-900 mb-1">
                             {type.name}
@@ -153,7 +153,7 @@ export default function SignUp() {
                         </div>
                         {profileType === type.id && (
                           <div className="absolute top-2 right-2">
-                            <div className="w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center">
+                            <div className="w-4 h-4 bg-primary-600 rounded-full flex items-center justify-center">
                               <div className="w-2 h-2 bg-white rounded-full"></div>
                             </div>
                           </div>
@@ -177,13 +177,13 @@ export default function SignUp() {
                     required
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="appearance-none block w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-900 placeholder:text-gray-300 placeholder:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    className="appearance-none block w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-900 placeholder:text-gray-300 placeholder:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
                     placeholder="Create a password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer hover:text-blue-600 transition-colors"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer hover:text-primary-600 transition-colors"
                   >
                     {showPassword ? (
                       <EyeSlashIcon className="h-5 w-5 text-gray-500" />
@@ -207,13 +207,13 @@ export default function SignUp() {
                     required
                     value={formData.confirmPassword}
                     onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                    className="appearance-none block w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-900 placeholder:text-gray-300 placeholder:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    className="appearance-none block w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-900 placeholder:text-gray-300 placeholder:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
                     placeholder="Confirm your password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer hover:text-blue-600 transition-colors"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer hover:text-primary-600 transition-colors"
                   >
                     {showConfirmPassword ? (
                       <EyeSlashIcon className="h-5 w-5 text-gray-500" />
@@ -228,7 +228,7 @@ export default function SignUp() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+                  className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 shadow-md"
                 >
                   {loading ? (
                     <div className="flex items-center space-x-2">
@@ -246,7 +246,7 @@ export default function SignUp() {
                   Already have an account?{' '}
                   <Link
                     href="/signin"
-                    className="font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+                    className="font-semibold text-primary-600 hover:text-primary-700 transition-colors"
                   >
                     Sign in here
                   </Link>
