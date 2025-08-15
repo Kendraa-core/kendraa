@@ -2062,7 +2062,7 @@ export async function getOrCreateConversation(user1Id: string, user2Id: string):
       return null;
     }
     
-    // First try to find existing conversation
+    // First try to find existing conversation using a simpler approach
     const { data: conversations, error: fetchError } = await getSupabase()
       .from('conversations')
       .select(`
@@ -2070,7 +2070,7 @@ export async function getOrCreateConversation(user1Id: string, user2Id: string):
         participants:conversation_participants(user_id)
       `)
       .eq('conversation_type', 'direct');
-    
+
     if (fetchError) {
       console.log('Error fetching conversations', fetchError);
       return null;
@@ -2106,39 +2106,16 @@ export async function getUserConversations(userId: string): Promise<Conversation
       return [];
     }
     
-    // First get the conversation IDs where user is a participant
-    const { data: participantData, error: participantError } = await getSupabase()
-      .from('conversation_participants')
-      .select('conversation_id')
-      .eq('user_id', userId);
-
-    if (participantError) {
-      console.log('Error fetching participant data', participantError);
-      return [];
-    }
-
-    if (!participantData || participantData.length === 0) {
-      console.log('No conversations found for user');
-      return [];
-    }
-
-    const conversationIds = participantData.map(p => p.conversation_id);
-
-    // Then get the full conversation data
+    // Use a simpler approach to avoid RLS recursion
     const { data, error } = await getSupabase()
       .from('conversations')
       .select(`
         *,
         participants:conversation_participants(
-          *,
+          user_id,
           user:profiles(*)
-        ),
-        last_message:messages(
-          *,
-          sender:profiles(*)
         )
       `)
-      .in('id', conversationIds)
       .order('updated_at', { ascending: false });
 
     if (error) {
@@ -2146,8 +2123,10 @@ export async function getUserConversations(userId: string): Promise<Conversation
       return [];
     }
     
-    // All conversations returned are already filtered for the user
-    const userConversations = data || [];
+    // Filter conversations where user is a participant
+    const userConversations = (data || []).filter(conv => 
+      conv.participants?.some((p: any) => p.user_id === userId)
+    );
     
     // Add unread count and other metadata
     const conversationsWithMetadata = userConversations.map(conv => ({
