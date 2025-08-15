@@ -237,20 +237,20 @@ export default function NetworkPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-primary-50 via-secondary-50 to-accent-50">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-secondary-50 to-accent-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Elegant Header */}
         <div className="mb-6 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-semibold text-slate-900">My Network</h1>
-            <p className="text-slate-600 text-sm">Connect with healthcare professionals</p>
+            <h1 className="text-2xl font-semibold text-gray-900">My Network</h1>
+            <p className="text-gray-600 text-sm">Connect with healthcare professionals</p>
           </div>
           <ShareButton 
             title="My Professional Network"
@@ -266,9 +266,9 @@ export default function NetworkPage() {
               placeholder="Search people..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-3 pl-10 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             />
-            <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
@@ -277,10 +277,10 @@ export default function NetworkPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Connection Requests */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-              <h2 className="text-xl font-semibold text-slate-900 mb-4">Connection Requests</h2>
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Connection Requests</h2>
               {connectionRequests.length === 0 ? (
-                <p className="text-slate-500 text-center py-8">No pending requests</p>
+                <p className="text-gray-500 text-center py-8">No pending requests</p>
               ) : (
                 <div className="space-y-4">
                   {connectionRequests.map((request) => (
@@ -288,9 +288,9 @@ export default function NetworkPage() {
                       key={request.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="flex items-center space-x-3 p-3 bg-slate-50 rounded-xl"
+                      className="flex items-center space-x-3 p-3 bg-primary-50 rounded-xl"
                     >
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-secondary-600 flex items-center justify-center text-white font-semibold">
                         {request.requester.full_name?.charAt(0) || 'U'}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -300,20 +300,20 @@ export default function NetworkPage() {
                           userType={request.requester.user_type || 'individual'}
                           className="text-sm font-medium truncate"
                         />
-                        <p className="text-xs text-slate-500 truncate">
+                        <p className="text-xs text-gray-500 truncate">
                           {request.requester.headline}
                         </p>
                       </div>
                       <div className="flex space-x-2">
                         <button
                           onClick={() => handleAcceptRequest(request.id)}
-                          className="px-3 py-1 text-xs font-medium bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                          className="px-3 py-1 text-xs font-medium bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-lg hover:from-primary-700 hover:to-primary-800 transition-colors"
                         >
                           Accept
                         </button>
                         <button
                           onClick={() => handleRejectRequest(request.id)}
-                          className="px-3 py-1 text-xs font-medium bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors"
+                          className="px-3 py-1 text-xs font-medium bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
                         >
                           Decline
                         </button>
@@ -327,10 +327,10 @@ export default function NetworkPage() {
 
           {/* Suggested Connections */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-              <h2 className="text-xl font-semibold text-slate-900 mb-4">People You May Know</h2>
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">People You May Know</h2>
               {filteredSuggestions.length === 0 ? (
-                <p className="text-slate-500 text-center py-8">No suggestions available</p>
+                <p className="text-gray-500 text-center py-8">No suggestions available</p>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {filteredSuggestions.map((suggestion) => (
@@ -338,10 +338,10 @@ export default function NetworkPage() {
                       key={suggestion.id}
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className="p-4 border border-slate-200 rounded-xl hover:shadow-md transition-shadow"
+                      className="p-4 border border-gray-200 rounded-xl hover:shadow-md transition-shadow"
                     >
                       <div className="flex items-start space-x-3">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-secondary-600 flex items-center justify-center text-white font-semibold">
                           {suggestion.full_name?.charAt(0) || 'U'}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -351,7 +351,7 @@ export default function NetworkPage() {
                             userType={suggestion.user_type || 'individual'}
                             className="text-sm font-semibold truncate"
                           />
-                          <p className="text-xs text-slate-500 truncate mb-2">
+                          <p className="text-xs text-gray-500 truncate mb-2">
                             {suggestion.headline}
                           </p>
                           {suggestion.mutual_connections && (
@@ -374,7 +374,7 @@ export default function NetworkPage() {
                           ) : (
                             <button
                               onClick={() => handleConnect(suggestion.id, 'institution')}
-                              className="w-full px-3 py-2 text-sm font-medium bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                              className="w-full px-3 py-2 text-sm font-medium bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-lg hover:from-primary-700 hover:to-primary-800 transition-colors"
                             >
                               Follow
                             </button>
@@ -384,7 +384,7 @@ export default function NetworkPage() {
                           suggestion.connection_status === 'none' && (
                             <button
                               onClick={() => handleConnect(suggestion.id, 'individual')}
-                              className="w-full px-3 py-2 text-sm font-medium bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                              className="w-full px-3 py-2 text-sm font-medium bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-lg hover:from-primary-700 hover:to-primary-800 transition-colors"
                             >
                               Connect
                             </button>
@@ -393,7 +393,7 @@ export default function NetworkPage() {
                         {suggestion.connection_status === 'pending' && (
                           <button
                             disabled
-                            className="w-full px-3 py-2 text-sm font-medium bg-slate-200 text-slate-500 rounded-lg cursor-not-allowed"
+                            className="w-full px-3 py-2 text-sm font-medium bg-gray-200 text-gray-500 rounded-lg cursor-not-allowed"
                           >
                             Request Sent
                           </button>
@@ -401,7 +401,7 @@ export default function NetworkPage() {
                         {suggestion.connection_status === 'connected' && (
                           <button
                             disabled
-                            className="w-full px-3 py-2 text-sm font-medium bg-green-100 text-green-700 rounded-lg cursor-not-allowed"
+                            className="w-full px-3 py-2 text-sm font-medium bg-primary-100 text-primary-700 rounded-lg cursor-not-allowed"
                           >
                             Connected
                           </button>
@@ -417,10 +417,10 @@ export default function NetworkPage() {
 
         {/* My Connections */}
         <div className="mt-8">
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-            <h2 className="text-xl font-semibold text-slate-900 mb-4">My Connections</h2>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">My Connections</h2>
             {connections.length === 0 ? (
-              <p className="text-slate-500 text-center py-8">No connections yet</p>
+              <p className="text-gray-500 text-center py-8">No connections yet</p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {connections.map((connection) => (
@@ -428,17 +428,17 @@ export default function NetworkPage() {
                     key={connection.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="p-4 border border-slate-200 rounded-xl hover:shadow-md transition-shadow"
+                    className="p-4 border border-gray-200 rounded-xl hover:shadow-md transition-shadow"
                   >
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-secondary-600 flex items-center justify-center text-white font-semibold">
                         {connection.full_name?.charAt(0) || 'U'}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-slate-900 truncate">
+                        <p className="text-sm font-semibold text-gray-900 truncate">
                           {connection.full_name}
                         </p>
-                        <p className="text-xs text-slate-500 truncate">
+                        <p className="text-xs text-gray-500 truncate">
                           {connection.headline}
                         </p>
                       </div>
