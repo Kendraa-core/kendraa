@@ -167,7 +167,7 @@ export default function MessagingPage() {
       return <ShieldCheckIcon className="w-5 h-5 text-green-600" />;
     }
     if (conversation.conversation_type === 'group') {
-      return <UserGroupIcon className="w-5 h-5 text-blue-600" />;
+      return <UserGroupIcon className="w-5 h-5 text-primary-600" />;
     }
     return <ChatBubbleLeftRightIcon className="w-5 h-5 text-gray-600" />;
   };
@@ -203,7 +203,7 @@ export default function MessagingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-secondary-50 to-accent-50">
       <div className="max-w-7xl mx-auto h-screen flex">
         {/* Sidebar - Conversations List */}
         <div className="w-1/3 bg-white border-r border-gray-200 flex flex-col">
@@ -237,7 +237,7 @@ export default function MessagingPage() {
                 placeholder="Search conversations..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -254,7 +254,7 @@ export default function MessagingPage() {
                 <div className="mt-4 space-y-2">
                   <button
                     onClick={() => setShowStartConversationModal(true)}
-                    className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="w-full px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-lg hover:from-primary-700 hover:to-primary-800 transition-colors"
                   >
                     Message Connections
                   </button>
@@ -272,7 +272,7 @@ export default function MessagingPage() {
                   <div
                     key={conversation.id}
                     className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
-                      selectedConversation?.id === conversation.id ? 'bg-blue-50 border-blue-200' : ''
+                      selectedConversation?.id === conversation.id ? 'bg-primary-50 border-primary-200' : ''
                     }`}
                     onClick={() => handleSelectConversation(conversation)}
                   >
@@ -301,7 +301,7 @@ export default function MessagingPage() {
                             <ShieldCheckIcon className="w-3 h-3 text-green-600" />
                           )}
                           {conversation.unread_count > 0 && (
-                            <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
+                            <span className="bg-gradient-to-r from-primary-600 to-primary-700 text-white text-xs px-2 py-1 rounded-full">
                               {conversation.unread_count}
                             </span>
                           )}
@@ -359,7 +359,7 @@ export default function MessagingPage() {
                       >
                         <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
                           message.sender_id === user?.id 
-                            ? 'bg-blue-600 text-white' 
+                            ? 'bg-gradient-to-r from-primary-600 to-primary-700 text-white' 
                             : 'bg-gray-200 text-gray-900'
                         }`}>
                           <div className="flex items-center space-x-2 mb-1">
@@ -395,13 +395,13 @@ export default function MessagingPage() {
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                     placeholder="Type your message..."
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     disabled={sending}
                   />
                   <button
                     onClick={handleSendMessage}
                     disabled={!newMessage.trim() || sending}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-lg hover:from-primary-700 hover:to-primary-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     <PaperAirplaneIcon className="w-4 h-4" />
                   </button>
@@ -421,7 +421,7 @@ export default function MessagingPage() {
                 <div className="space-y-2">
                   <button
                     onClick={() => setShowStartConversationModal(true)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-lg hover:from-primary-700 hover:to-primary-800 transition-colors"
                   >
                     Message Connections
                   </button>
