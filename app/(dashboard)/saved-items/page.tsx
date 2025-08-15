@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-// import { getSavedPosts } from '@/lib/queries';
+import { getSavedPosts } from '@/lib/queries';
 import type { Post } from '@/types/database.types';
 import PostCard from '@/components/post/PostCard';
 import { BookmarkIcon } from '@heroicons/react/24/outline';
@@ -18,10 +18,8 @@ export default function SavedItemsPage() {
 
       try {
         setLoading(true);
-        // TODO: Implement getSavedPosts query
-        // const posts = await getSavedPosts(user.id);
-        // setSavedPosts(posts);
-        setSavedPosts([]); // Placeholder
+        const posts = await getSavedPosts(user.id);
+        setSavedPosts(posts);
       } catch (error) {
         console.error('Error fetching saved posts:', error);
       } finally {
@@ -33,13 +31,13 @@ export default function SavedItemsPage() {
   }, [user?.id]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-secondary-50 to-accent-50">
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center space-x-3 mb-4">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <BookmarkIcon className="w-6 h-6 text-blue-600" />
+            <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+              <BookmarkIcon className="w-6 h-6 text-primary-600" />
             </div>
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Saved Items</h1>
@@ -93,7 +91,7 @@ export default function SavedItemsPage() {
             </p>
             <a
               href="/feed"
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
             >
               Explore Feed
             </a>

@@ -2938,3 +2938,46 @@ export async function getPostStats(userId: string) {
     return { posts: 0, comments: 0, likes: 0 };
   }
 }
+
+// Get saved posts for a user
+export async function getSavedPosts(userId: string): Promise<Post[]> {
+  try {
+    console.log('[Queries] Getting saved posts for user:', userId);
+    
+    const { data: savedPosts, error } = await getSupabase()
+      .from('saved_posts')
+      .select(`
+        post_id,
+        posts (
+          id,
+          content,
+          image_url,
+          author_id,
+          likes_count,
+          comments_count,
+          created_at,
+          updated_at,
+          profiles (
+            id,
+            full_name,
+            headline,
+            avatar_url,
+            user_type
+          )
+        )
+      `)
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    
+    // Transform the data to match Post type
+    const posts = savedPosts?.map(item => item.posts) || [];
+    
+    console.log('[Queries] Saved posts fetched:', posts.length);
+    return posts as any;
+  } catch (error) {
+    console.error('[Queries] Error getting saved posts:', error);
+    return [];
+  }
+}

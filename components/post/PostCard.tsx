@@ -51,6 +51,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
   
   // Initialize state first, before any conditional returns
   const [isLiked, setIsLiked] = useState(false);
+  const [userReaction, setUserReaction] = useState<string | null>(null); // Track user's reaction type
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [likesCount, setLikesCount] = useState(post?.likes_count || 0);
   const [commentsCount, setCommentsCount] = useState(post?.comments_count || 0);
@@ -97,6 +98,8 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
       try {
         const liked = await isPostLiked(user.id, post.id);
         setIsLiked(liked);
+        // For now, if liked, set reaction as 'like' (we'll enhance this later)
+        setUserReaction(liked ? 'like' : null);
         debugLog('Like status checked', { postId: post.id, liked });
       } catch (error) {
         debugLog('Error checking like status', error);
@@ -142,6 +145,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
           const success = await unlikePost(post.id, user.id);
           if (success) {
             setIsLiked(false);
+            setUserReaction(null);
             setLikesCount((prev: number) => Math.max(0, prev - 1));
             debugLog('Post unliked successfully');
           } else {
@@ -151,6 +155,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
           const success = await likePost(post.id, user.id);
           if (success) {
             setIsLiked(true);
+            setUserReaction('like');
             setLikesCount((prev: number) => prev + 1);
             debugLog('Post liked successfully');
           } else {
@@ -164,7 +169,11 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
         // Update the like state for other reactions too
         if (!isLiked) {
           setIsLiked(true);
+          setUserReaction(reactionId);
           setLikesCount((prev: number) => prev + 1);
+        } else {
+          // If already liked, update the reaction type
+          setUserReaction(reactionId);
         }
       }
       
@@ -380,7 +389,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
       <div className="flex items-center justify-between border-t border-gray-100 pt-4">
         <PostReactions
           postId={post.id}
-          userReaction={isLiked ? 'like' : null}
+          userReaction={userReaction}
           reactionCounts={{ like: likesCount }}
           onReact={handleReaction}
         />
