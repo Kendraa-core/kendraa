@@ -2106,7 +2106,25 @@ export async function getUserConversations(userId: string): Promise<Conversation
       return [];
     }
     
-    // Get conversations where user is a participant
+    // First get the conversation IDs where user is a participant
+    const { data: participantData, error: participantError } = await getSupabase()
+      .from('conversation_participants')
+      .select('conversation_id')
+      .eq('participant_id', userId);
+
+    if (participantError) {
+      console.log('Error fetching participant data', participantError);
+      return [];
+    }
+
+    if (!participantData || participantData.length === 0) {
+      console.log('No conversations found for user');
+      return [];
+    }
+
+    const conversationIds = participantData.map(p => p.conversation_id);
+
+    // Then get the full conversation data
     const { data, error } = await getSupabase()
       .from('conversations')
       .select(`
@@ -2120,17 +2138,16 @@ export async function getUserConversations(userId: string): Promise<Conversation
           sender:profiles(*)
         )
       `)
-      .order('last_message_at', { ascending: false });
+      .in('id', conversationIds)
+      .order('updated_at', { ascending: false });
 
     if (error) {
       console.log('Error fetching conversations', error);
       return [];
     }
     
-    // Filter conversations where user is a participant
-    const userConversations = data?.filter(conv => 
-      conv.participants?.some((p: { user_id: string }) => p.user_id === userId)
-    ) || [];
+    // All conversations returned are already filtered for the user
+    const userConversations = data || [];
     
     // Add unread count and other metadata
     const conversationsWithMetadata = userConversations.map(conv => ({

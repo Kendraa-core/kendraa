@@ -427,19 +427,18 @@ CREATE POLICY "Users can create conversations" ON conversations FOR INSERT WITH 
 
 -- RLS Policies for conversation_participants
 CREATE POLICY "Users can view conversation participants" ON conversation_participants FOR SELECT USING (
-    EXISTS (
-        SELECT 1 FROM conversation_participants cp2
-        WHERE cp2.conversation_id = conversation_participants.conversation_id 
-        AND cp2.participant_id = auth.uid()
-    )
+    participant_id = auth.uid()
 );
 CREATE POLICY "Users can join conversations" ON conversation_participants FOR INSERT WITH CHECK (auth.uid() = participant_id);
 
 -- RLS Policies for messages
 CREATE POLICY "Users can view messages in their conversations" ON messages FOR SELECT USING (
+    sender_id = auth.uid() OR
     EXISTS (
-        SELECT 1 FROM conversation_participants 
-        WHERE conversation_id = messages.conversation_id AND participant_id = auth.uid()
+        SELECT 1 FROM conversation_participants cp
+        WHERE cp.conversation_id = messages.conversation_id 
+        AND cp.participant_id = auth.uid()
+        AND cp.left_at IS NULL
     )
 );
 CREATE POLICY "Users can send messages" ON messages FOR INSERT WITH CHECK (auth.uid() = sender_id);
@@ -455,7 +454,9 @@ CREATE POLICY "Users can view clinical notes they're involved with" ON clinical_
     EXISTS (
         SELECT 1 FROM messages m
         JOIN conversation_participants cp ON m.conversation_id = cp.conversation_id
-        WHERE m.id = clinical_notes.message_id AND cp.participant_id = auth.uid()
+        WHERE m.id = clinical_notes.message_id 
+        AND cp.participant_id = auth.uid()
+        AND cp.left_at IS NULL
     )
 );
 CREATE POLICY "Authorized users can create clinical notes" ON clinical_notes FOR INSERT WITH CHECK (true);
