@@ -449,17 +449,7 @@ CREATE POLICY "Users can view message reactions" ON message_reactions FOR SELECT
 CREATE POLICY "Users can create their own reactions" ON message_reactions FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can delete their own reactions" ON message_reactions FOR DELETE USING (auth.uid() = user_id);
 
--- RLS Policies for clinical_notes
-CREATE POLICY "Users can view clinical notes they're involved with" ON clinical_notes FOR SELECT USING (
-    EXISTS (
-        SELECT 1 FROM messages m
-        JOIN conversation_participants cp ON m.conversation_id = cp.conversation_id
-        WHERE m.id = clinical_notes.message_id 
-        AND cp.participant_id = auth.uid()
-        AND cp.left_at IS NULL
-    )
-);
-CREATE POLICY "Authorized users can create clinical notes" ON clinical_notes FOR INSERT WITH CHECK (true);
+
 
 -- RLS Policies for messaging_settings
 CREATE POLICY "Users can view their own settings" ON messaging_settings FOR SELECT USING (auth.uid() = user_id);
