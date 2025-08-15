@@ -68,7 +68,7 @@ export default function DashboardLayout({
       <Header />
 
       {/* Main Content */}
-      <main className="pt-16">
+      <main className="pt-0">
         {children}
       </main>
       

@@ -26,6 +26,10 @@ import {
   isPostLiked,
   getPostComments,
   createComment,
+  addPostReaction,
+  removePostReaction,
+  getUserPostReaction,
+  getPostReactionCounts,
 } from '@/lib/queries';
 import type { Post, CommentWithAuthor, Profile } from '@/types/database.types';
 import { getSupabase } from '@/lib/queries';
@@ -90,23 +94,29 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
     }
   };
 
-  // Check if current user has liked the post
+  // Check if current user has reacted to the post
   useEffect(() => {
     if (!user?.id || !post?.id) return;
     
-    const checkIfLiked = async () => {
+    const checkUserReaction = async () => {
       try {
-        const liked = await isPostLiked(user.id, post.id);
-        setIsLiked(liked);
-        // For now, if liked, set reaction as 'like' (we'll enhance this later)
-        setUserReaction(liked ? 'like' : null);
-        debugLog('Like status checked', { postId: post.id, liked });
+        const reaction = await getUserPostReaction(post.id, user.id);
+        if (reaction) {
+          setIsLiked(true);
+          setUserReaction(reaction);
+        } else {
+          setIsLiked(false);
+          setUserReaction(null);
+        }
+        debugLog('User reaction checked', { postId: post.id, reaction });
       } catch (error) {
-        debugLog('Error checking like status', error);
+        debugLog('Error checking user reaction', error);
+        setIsLiked(false);
+        setUserReaction(null);
       }
     };
 
-    checkIfLiked();
+    checkUserReaction();
   }, [post?.id, user?.id]);
 
   // Automatically load comments when component mounts
@@ -137,48 +147,37 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
       return;
     }
 
-    debugLog('Handling reaction', { postId: post.id, reactionId, currentlyLiked: isLiked });
+    debugLog('Handling reaction', { postId: post.id, reactionId, currentReaction: userReaction });
 
     try {
-      if (reactionId === 'like') {
-        if (isLiked) {
-          const success = await unlikePost(post.id, user.id);
-          if (success) {
-            setIsLiked(false);
-            setUserReaction(null);
-            setLikesCount((prev: number) => Math.max(0, prev - 1));
-            debugLog('Post unliked successfully');
-          } else {
-            toast.error('Failed to unlike post. Please try again.');
-          }
+      // If user already has this reaction, remove it (toggle off)
+      if (userReaction === reactionId) {
+        const success = await removePostReaction(post.id, user.id);
+        if (success) {
+          setIsLiked(false);
+          setUserReaction(null);
+          setLikesCount((prev: number) => Math.max(0, prev - 1));
+          debugLog('Reaction removed successfully');
         } else {
-          const success = await likePost(post.id, user.id);
-          if (success) {
-            setIsLiked(true);
-            setUserReaction('like');
-            setLikesCount((prev: number) => prev + 1);
-            debugLog('Post liked successfully');
-          } else {
-            toast.error('Failed to like post. Please try again.');
-          }
+          toast.error('Failed to remove reaction. Please try again.');
         }
       } else {
-        // Handle other reactions (support, love, insightful, celebrate, curious)
-        // For now, we'll just show a toast for other reactions
-        toast.success(`You reacted with ${reactionId}!`);
-        // Update the like state for other reactions too
-        if (!isLiked) {
+        // Add or update reaction
+        const success = await addPostReaction(post.id, user.id, reactionId);
+        if (success) {
           setIsLiked(true);
           setUserReaction(reactionId);
-          setLikesCount((prev: number) => prev + 1);
+          // If this is a new reaction (not updating existing), increment count
+          if (!userReaction) {
+            setLikesCount((prev: number) => prev + 1);
+          }
+          debugLog('Reaction added successfully');
         } else {
-          // If already liked, update the reaction type
-          setUserReaction(reactionId);
+          toast.error('Failed to add reaction. Please try again.');
         }
       }
       
       // Don't call onInteraction to prevent page reload
-      // await refreshPostData(); // Removed to prevent unnecessary API calls
     } catch (error: any) {
       logError('PostCard', error, { 
         postId: post.id, 

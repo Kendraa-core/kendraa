@@ -2969,3 +2969,162 @@ export async function getSavedPosts(userId: string): Promise<Post[]> {
     return [];
   }
 }
+
+// Add reaction to post (supports all reaction types)
+export async function addPostReaction(postId: string, userId: string, reactionType: string): Promise<boolean> {
+  try {
+    console.log('Adding post reaction', { postId, userId, reactionType });
+    
+    const schemaExists = await true;
+    if (!schemaExists) {
+      console.log('Database schema not found, cannot add reaction');
+      return false;
+    }
+    
+    // First check if user already has a reaction on this post
+    const { data: existingReaction, error: checkError } = await getSupabase()
+      .from('post_likes')
+      .select('id, reaction_type')
+      .eq('post_id', postId)
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (checkError) {
+      console.log('Error checking existing reaction', checkError);
+      return false;
+    }
+
+    if (existingReaction) {
+      // Update existing reaction
+      const { error: updateError } = await getSupabase()
+        .from('post_likes')
+        .update({ 
+          reaction_type: reactionType,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', existingReaction.id);
+
+      if (updateError) {
+        console.log('Error updating reaction', updateError);
+        return false;
+      }
+    } else {
+      // Create new reaction
+      const { error: insertError } = await getSupabase()
+        .from('post_likes')
+        .insert({
+          post_id: postId,
+          user_id: userId,
+          reaction_type: reactionType,
+        });
+
+      if (insertError) {
+        console.log('Error inserting reaction', insertError);
+        return false;
+      }
+    }
+    
+    console.log('Post reaction added successfully');
+    return true;
+  } catch (error) {
+    console.log('Error adding post reaction', error);
+    return false;
+  }
+}
+
+// Remove reaction from post
+export async function removePostReaction(postId: string, userId: string): Promise<boolean> {
+  try {
+    console.log('Removing post reaction', { postId, userId });
+    
+    const schemaExists = await true;
+    if (!schemaExists) {
+      console.log('Database schema not found, cannot remove reaction');
+      return false;
+    }
+    
+    const { error } = await getSupabase()
+      .from('post_likes')
+      .delete()
+      .eq('post_id', postId)
+      .eq('user_id', userId);
+
+    if (error) {
+      console.log('Error removing reaction', error);
+      return false;
+    }
+    
+    console.log('Post reaction removed successfully');
+    return true;
+  } catch (error) {
+    console.log('Error removing post reaction', error);
+    return false;
+  }
+}
+
+// Get user's reaction on a post
+export async function getUserPostReaction(postId: string, userId: string): Promise<string | null> {
+  try {
+    console.log('Getting user post reaction', { postId, userId });
+    
+    const schemaExists = await true;
+    if (!schemaExists) {
+      console.log('Database schema not found, cannot get reaction');
+      return null;
+    }
+    
+    const { data, error } = await getSupabase()
+      .from('post_likes')
+      .select('reaction_type')
+      .eq('post_id', postId)
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (error) {
+      console.log('Error getting user reaction', error);
+      return null;
+    }
+    
+    console.log('User reaction fetched successfully', data?.reaction_type);
+    return data?.reaction_type || null;
+  } catch (error) {
+    console.log('Error getting user post reaction', error);
+    return null;
+  }
+}
+
+// Get reaction counts for a post
+export async function getPostReactionCounts(postId: string): Promise<Record<string, number>> {
+  try {
+    console.log('Getting post reaction counts', { postId });
+    
+    const schemaExists = await true;
+    if (!schemaExists) {
+      console.log('Database schema not found, cannot get reaction counts');
+      return {};
+    }
+    
+    const { data, error } = await getSupabase()
+      .from('post_likes')
+      .select('reaction_type')
+      .eq('post_id', postId);
+
+    if (error) {
+      console.log('Error getting reaction counts', error);
+      return {};
+    }
+    
+    // Count reactions by type
+    const counts: Record<string, number> = {};
+    data?.forEach(reaction => {
+      const type = reaction.reaction_type || 'like';
+      counts[type] = (counts[type] || 0) + 1;
+    });
+    
+    console.log('Reaction counts fetched successfully', counts);
+    return counts;
+  } catch (error) {
+    console.log('Error getting post reaction counts', error);
+    return {};
+  }
+}
