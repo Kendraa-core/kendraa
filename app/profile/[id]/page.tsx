@@ -89,7 +89,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
   return (
     <div className="relative">
       {/* Banner */}
-      <div className="h-48 bg-gradient-to-br from-linkedin-primary via-linkedin-secondary to-linkedin-accent rounded-t-xl overflow-hidden">
+      <div className="h-48 bg-gradient-to-br from-primary-600 via-secondary-600 to-accent-600 rounded-t-xl overflow-hidden">
         {profile.banner_url ? (
           <Image
             src={profile.banner_url}
@@ -98,7 +98,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
             className="object-cover"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-linkedin-primary via-linkedin-secondary to-linkedin-accent" />
+          <div className="w-full h-full bg-gradient-to-br from-primary-600 via-secondary-600 to-accent-600" />
         )}
       </div>
 
@@ -113,7 +113,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
             className="ring-4 ring-white shadow-xl bg-white"
           />
           {profile.is_premium && (
-            <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-amber-400 rounded-full flex items-center justify-center ring-2 ring-white">
+            <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-r from-primary-500 to-secondary-600 rounded-full flex items-center justify-center ring-2 ring-white">
               <CheckBadgeIcon className="w-5 h-5 text-white" />
             </div>
           )}
@@ -126,7 +126,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
               <Button
                 variant="outline"
                 size="sm"
-                className="bg-white/90 backdrop-blur-sm border-slate-200 hover:bg-white shadow-sm"
+                className="bg-white/90 backdrop-blur-sm border-gray-200 hover:bg-white shadow-sm"
               >
                 <ShareIcon className="w-4 h-4 mr-2" />
                 Share
@@ -135,7 +135,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
                 onClick={handleMessage}
                 variant="outline" 
                 size="sm"
-                className="bg-white/90 backdrop-blur-sm border-slate-200 hover:bg-white shadow-sm"
+                className="bg-white/90 backdrop-blur-sm border-gray-200 hover:bg-white shadow-sm"
               >
                 <ChatBubbleLeftIcon className="w-4 h-4 mr-2" />
                 Message
@@ -154,7 +154,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
                 ) : (
                   <Button
                     onClick={onConnect}
-                    className="bg-linkedin-primary hover:bg-linkedin-secondary text-white shadow-lg"
+                    className="bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white shadow-lg"
                     size="sm"
                   >
                     <UserPlusIcon className="w-4 h-4 mr-2" />
@@ -166,7 +166,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
                 <Button
                   onClick={onConnect}
                   disabled={connectionStatus === 'pending' || connectionStatus === 'connected'}
-                  className="bg-linkedin-primary hover:bg-linkedin-secondary text-white shadow-lg"
+                  className="bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white shadow-lg"
                   size="sm"
                 >
                   <UserPlusIcon className="w-4 h-4 mr-2" />
@@ -505,7 +505,7 @@ export default function ProfilePage() {
                       {profile.specialization.map((spec, index) => (
                         <span
                           key={index}
-                          className="px-3 py-1 bg-linkedin-primary/10 text-linkedin-primary rounded-full text-sm font-medium"
+                          className="px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm font-medium"
                         >
                           {spec}
                         </span>
@@ -532,7 +532,7 @@ export default function ProfilePage() {
                         className={cn(
                           'flex-1 px-6 py-4 text-sm font-medium transition-colors flex items-center justify-center space-x-2',
                           activeSection === section.id
-                            ? 'text-linkedin-primary border-b-2 border-linkedin-primary bg-linkedin-primary/5'
+                            ? 'text-primary-600 border-b-2 border-primary-600 bg-primary-50'
                             : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                         )}
                       >
@@ -582,7 +582,7 @@ export default function ProfilePage() {
                             </div>
                             <div className="flex-1">
                               <h4 className="font-semibold text-gray-900">{exp.title}</h4>
-                              <p className="text-linkedin-primary font-medium">{exp.company}</p>
+                              <p className="text-primary-600 font-medium">{exp.company}</p>
                               {exp.location && (
                                 <p className="text-sm text-gray-500">{exp.location}</p>
                               )}
@@ -632,7 +632,7 @@ export default function ProfilePage() {
                             </div>
                             <div className="flex-1">
                               <h4 className="font-semibold text-gray-900">{edu.degree}</h4>
-                              <p className="text-linkedin-primary font-medium">{edu.school}</p>
+                              <p className="text-primary-600 font-medium">{edu.school}</p>
                               {edu.field && (
                                 <p className="text-sm text-gray-600">{edu.field}</p>
                               )}
@@ -650,7 +650,7 @@ export default function ProfilePage() {
                                   {edu.honors.map((honor, index) => (
                                     <span
                                       key={index}
-                                      className="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs"
+                                      className="px-2 py-1 bg-secondary-100 text-secondary-700 rounded text-xs"
                                     >
                                       {honor}
                                     </span>
