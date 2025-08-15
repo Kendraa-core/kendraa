@@ -2067,7 +2067,7 @@ export async function getOrCreateConversation(user1Id: string, user2Id: string):
       .from('conversations')
       .select(`
         *,
-        participants:conversation_participants(user_id)
+        participants:conversation_participants(participant_id)
       `)
       .eq('conversation_type', 'direct');
     
@@ -2078,7 +2078,7 @@ export async function getOrCreateConversation(user1Id: string, user2Id: string):
     
     // Find conversation with both users
     const existingConversation = conversations?.find(conv => {
-      const participantIds = conv.participants?.map((p: { user_id: string }) => p.user_id) || [];
+      const participantIds = conv.participants?.map((p: { participant_id: string }) => p.participant_id) || [];
       return participantIds.includes(user1Id) && participantIds.includes(user2Id);
     });
     
@@ -2194,9 +2194,7 @@ export async function createConversation(conversation: {
     // Add participants
     const participantData = conversation.participants.map(userId => ({
       conversation_id: convData.id,
-      user_id: userId,
-      user_type: 'individual', // Default, can be enhanced
-      role: 'participant',
+      participant_id: userId,
     }));
     
     const { error: partError } = await getSupabase()
