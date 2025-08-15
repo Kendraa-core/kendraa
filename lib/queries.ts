@@ -148,7 +148,7 @@ export async function ensureProfileExists(
             phone: '',
             specialization: [],
             is_premium: false,
-            profile_views: 0,
+    
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           })
@@ -1478,7 +1478,6 @@ export async function getJobs(): Promise<JobWithCompany[]> {
             phone: null,
             specialization: ['Cardiology'],
             is_premium: true,
-            profile_views: 150,
             user_type: 'institution',
             profile_type: 'institution',
             institution_type: 'hospital',
@@ -1547,7 +1546,6 @@ export async function getJobs(): Promise<JobWithCompany[]> {
             phone: null,
             specialization: ['Pediatrics', 'Nursing'],
             is_premium: true,
-            profile_views: 89,
             user_type: 'institution',
             profile_type: 'institution',
             institution_type: 'hospital',

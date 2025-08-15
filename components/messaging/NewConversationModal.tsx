@@ -48,7 +48,7 @@ export default function NewConversationModal({ isOpen, onClose, onConversationCr
           phone: null,
           specialization: ['Cardiology', 'Interventional Cardiology'],
           is_premium: true,
-          profile_views: 150,
+          
           user_type: 'individual',
           profile_type: 'individual',
         },
@@ -67,7 +67,7 @@ export default function NewConversationModal({ isOpen, onClose, onConversationCr
           phone: null,
           specialization: ['Neurology', 'Epilepsy'],
           is_premium: true,
-          profile_views: 120,
+          
           user_type: 'individual',
           profile_type: 'individual',
         },

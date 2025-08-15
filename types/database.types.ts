@@ -66,11 +66,7 @@ export interface Database {
         Insert: Omit<Notification, 'id' | 'created_at'>;
         Update: Partial<Omit<Notification, 'id' | 'created_at'>>;
       };
-      profile_views: {
-        Row: ProfileView;
-        Insert: Omit<ProfileView, 'id' | 'created_at' | 'updated_at'>;
-        Update: Partial<Omit<ProfileView, 'id' | 'created_at' | 'updated_at'>>;
-      };
+
     };
   };
 }
@@ -90,7 +86,7 @@ export interface Profile {
   phone: string | null;
   specialization: string[] | null;
   is_premium: boolean;
-  profile_views: number;
+
   user_type: 'individual' | 'institution';
   profile_type: 'individual' | 'institution';
   
@@ -695,11 +691,4 @@ export interface MentoringSession {
   recording_url?: string;
 }
 
-// Profile Views
-export interface ProfileView {
-  id: string;
-  viewer_id: string;
-  profile_id: string;
-  created_at: string;
-  updated_at: string;
-} 
+ 

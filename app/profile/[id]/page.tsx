@@ -50,14 +50,13 @@ import {
 } from '@/lib/queries';
 
 // Memoized components for better performance
-const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile, connectionStatus, followStatus, onConnect, onUnfollow, realTimeViewsCount }: {
+const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile, connectionStatus, followStatus, onConnect, onUnfollow }: {
   profile: Profile;
   isOwnProfile: boolean;
   connectionStatus: string;
   followStatus: string;
   onConnect: () => void;
   onUnfollow: () => void;
-  realTimeViewsCount: number;
 }) {
   const { user } = useAuth();
   const router = useRouter();
@@ -210,7 +209,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
                 {profile.location}
               </div>
             )}
-            {/* Profile views removed - only visible in dashboard */}
+
           </div>
 
           {profile.bio && (
@@ -274,7 +273,7 @@ export default function ProfilePage() {
   const [followStatus, setFollowStatus] = useState<'following' | 'not_following'>('not_following');
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState('about');
-  // const [realTimeViewsCount, setRealTimeViewsCount] = useState<number>(0);
+
 
   const profileId = params.id as string;
   const isOwnProfile = user?.id === profileId;
@@ -487,7 +486,6 @@ export default function ProfilePage() {
                 followStatus={followStatus}
                 onConnect={handleConnect}
                 onUnfollow={handleUnfollow}
-                realTimeViewsCount={0}
               />
             </div>
 
@@ -717,11 +715,7 @@ export default function ProfilePage() {
                   <CardTitle className="text-lg text-gray-900">Profile Stats</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {/* Profile views removed - no longer displaying */}
-                  {/* <div className="flex items-center space-x-4 text-sm">
-                    <span className="text-gray-600">Profile views</span>
-                    <span className="font-semibold text-gray-900">{realTimeViewsCount}</span>
-                  </div> */}
+
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-gray-600">Posts</span>
                     <span className="font-semibold text-gray-900">{posts.length}</span>

@@ -65,7 +65,6 @@ CREATE TABLE IF NOT EXISTS profiles (
     
     -- Common fields
     is_premium BOOLEAN DEFAULT FALSE,
-    profile_views INTEGER DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -165,13 +164,7 @@ CREATE TABLE IF NOT EXISTS notifications (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Profile views table
-CREATE TABLE IF NOT EXISTS profile_views (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    viewer_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
-    profile_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-    viewed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+
 
 -- Jobs table
 CREATE TABLE IF NOT EXISTS jobs (
@@ -324,7 +317,7 @@ CREATE INDEX IF NOT EXISTS idx_follows_follower_id ON follows(follower_id);
 CREATE INDEX IF NOT EXISTS idx_follows_following_id ON follows(following_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_read ON notifications(read);
-CREATE INDEX IF NOT EXISTS idx_profile_views_profile_id ON profile_views(profile_id);
+
 CREATE INDEX IF NOT EXISTS idx_jobs_posted_by ON jobs(posted_by);
 CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status);
 CREATE INDEX IF NOT EXISTS idx_job_applications_job_id ON job_applications(job_id);
@@ -345,7 +338,7 @@ ALTER TABLE post_likes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE connections ENABLE ROW LEVEL SECURITY;
 ALTER TABLE follows ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
-ALTER TABLE profile_views ENABLE ROW LEVEL SECURITY;
+
 ALTER TABLE jobs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE job_applications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE events ENABLE ROW LEVEL SECURITY;
@@ -399,9 +392,7 @@ CREATE POLICY "Users can view their own notifications" ON notifications FOR SELE
 CREATE POLICY "Users can update their own notifications" ON notifications FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "System can create notifications" ON notifications FOR INSERT WITH CHECK (true);
 
--- RLS Policies for profile_views
-CREATE POLICY "Users can view profile views" ON profile_views FOR SELECT USING (auth.uid() = viewer_id OR auth.uid() = profile_id);
-CREATE POLICY "Users can create profile views" ON profile_views FOR INSERT WITH CHECK (auth.uid() = viewer_id);
+
 
 -- RLS Policies for jobs
 CREATE POLICY "Users can view all jobs" ON jobs FOR SELECT USING (true);
