@@ -91,29 +91,29 @@ export default function NotificationsPage() {
       case 'connection_request':
         return {
           icon: UserPlusIcon,
-          color: 'text-blue-600',
-          bgColor: 'bg-blue-100',
+          color: 'text-primary-600',
+          bgColor: 'bg-primary-100',
           text: notification.message,
         };
       case 'connection_accepted':
         return {
           icon: CheckCircleIcon,
-          color: 'text-green-600',
-          bgColor: 'bg-green-100',
+          color: 'text-secondary-600',
+          bgColor: 'bg-secondary-100',
           text: notification.message,
         };
       case 'post_like':
         return {
           icon: HeartIcon,
-          color: 'text-red-600',
-          bgColor: 'bg-red-100',
+          color: 'text-accent-600',
+          bgColor: 'bg-accent-100',
           text: notification.message,
         };
       case 'post_comment':
         return {
           icon: ChatBubbleLeftIcon,
-          color: 'text-purple-600',
-          bgColor: 'bg-purple-100',
+          color: 'text-primary-600',
+          bgColor: 'bg-primary-100',
           text: notification.message,
         };
       default:
@@ -129,7 +129,7 @@ export default function NotificationsPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
       </div>
     );
   }
@@ -153,13 +153,13 @@ export default function NotificationsPage() {
               onClick={() => setActiveTab('all')}
               className={`flex-1 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === 'all'
-                  ? 'border-blue-600 text-blue-600'
+                  ? 'border-primary-600 text-primary-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
               All Notifications
               {unreadCount > 0 && (
-                <span className="ml-2 bg-blue-600 text-white text-xs rounded-full px-2 py-1">
+                <span className="ml-2 bg-primary-600 text-white text-xs rounded-full px-2 py-1">
                   {unreadCount}
                 </span>
               )}
@@ -168,13 +168,13 @@ export default function NotificationsPage() {
               onClick={() => setActiveTab('requests')}
               className={`flex-1 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === 'requests'
-                  ? 'border-blue-600 text-blue-600'
+                  ? 'border-primary-600 text-primary-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
               Connection Requests
               {pendingRequestsCount > 0 && (
-                <span className="ml-2 bg-orange-600 text-white text-xs rounded-full px-2 py-1">
+                <span className="ml-2 bg-secondary-600 text-white text-xs rounded-full px-2 py-1">
                   {pendingRequestsCount}
                 </span>
               )}
@@ -185,7 +185,7 @@ export default function NotificationsPage() {
         {/* Content */}
         {loadingNotifications ? (
           <div className="bg-white rounded-xl shadow-sm p-8 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto mb-4"></div>
             <p className="text-gray-500">Loading notifications...</p>
           </div>
         ) : activeTab === 'all' ? (
@@ -239,7 +239,7 @@ export default function NotificationsPage() {
                           
                           {/* Unread indicator */}
                           {!notification.read && (
-                            <div className="w-3 h-3 bg-blue-600 rounded-full flex-shrink-0 mt-2"></div>
+                            <div className="w-3 h-3 bg-primary-600 rounded-full flex-shrink-0 mt-2"></div>
                           )}
                         </div>
 
@@ -276,11 +276,11 @@ export default function NotificationsPage() {
                   
                   
                   
-                  className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-orange-500"
+                  className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-secondary-500"
                 >
                   <div className="flex items-start space-x-4">
                     {/* Avatar */}
-                    <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                    <div className="w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
                       {request.requester.full_name?.charAt(0) || 'U'}
                     </div>
 
@@ -299,7 +299,7 @@ export default function NotificationsPage() {
                           <div className="flex space-x-3">
                             <button
                               onClick={() => handleAcceptConnection(request.id)}
-                              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                              className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium"
                             >
                               <CheckCircleIcon className="w-4 h-4" />
                               <span>Accept</span>

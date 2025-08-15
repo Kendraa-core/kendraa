@@ -72,19 +72,19 @@ export default function NotificationList({ notifications, onMarkAsRead }: Notifi
   const getNotificationIcon = (type: Notification['type']) => {
     switch (type) {
       case 'connection_request':
-        return <UserPlusIcon className="w-5 h-5 text-blue-500" />;
+        return <UserPlusIcon className="w-5 h-5 text-primary-600" />;
       case 'connection_accepted':
-        return <CheckCircleIcon className="w-5 h-5 text-green-500" />;
+        return <CheckCircleIcon className="w-5 h-5 text-secondary-600" />;
       case 'post_like':
-        return <HeartIcon className="w-5 h-5 text-red-500" />;
+        return <HeartIcon className="w-5 h-5 text-accent-600" />;
       case 'post_comment':
-        return <ChatBubbleLeftIcon className="w-5 h-5 text-blue-500" />;
+        return <ChatBubbleLeftIcon className="w-5 h-5 text-primary-600" />;
       case 'job_application':
-        return <BriefcaseIcon className="w-5 h-5 text-purple-500" />;
+        return <BriefcaseIcon className="w-5 h-5 text-secondary-600" />;
       case 'event_reminder':
-        return <ClockIcon className="w-5 h-5 text-orange-500" />;
+        return <ClockIcon className="w-5 h-5 text-accent-600" />;
       case 'mention':
-        return <BellIcon className="w-5 h-5 text-yellow-500" />;
+        return <BellIcon className="w-5 h-5 text-primary-600" />;
       default:
         return <BellIcon className="w-5 h-5 text-gray-500" />;
     }
@@ -93,19 +93,19 @@ export default function NotificationList({ notifications, onMarkAsRead }: Notifi
   const getNotificationColor = (type: Notification['type']) => {
     switch (type) {
       case 'connection_request':
-        return 'border-blue-200 bg-blue-50';
+        return 'border-primary-200 bg-primary-50';
       case 'connection_accepted':
-        return 'border-green-200 bg-green-50';
+        return 'border-secondary-200 bg-secondary-50';
       case 'post_like':
-        return 'border-red-200 bg-red-50';
+        return 'border-accent-200 bg-accent-50';
       case 'post_comment':
-        return 'border-blue-200 bg-blue-50';
+        return 'border-primary-200 bg-primary-50';
       case 'job_application':
-        return 'border-purple-200 bg-purple-50';
+        return 'border-secondary-200 bg-secondary-50';
       case 'event_reminder':
-        return 'border-orange-200 bg-orange-50';
+        return 'border-accent-200 bg-accent-50';
       case 'mention':
-        return 'border-yellow-200 bg-yellow-50';
+        return 'border-primary-200 bg-primary-50';
       default:
         return 'border-gray-200 bg-gray-50';
     }
@@ -136,7 +136,7 @@ export default function NotificationList({ notifications, onMarkAsRead }: Notifi
             key={notification.id}
             onClick={() => handleNotificationClick(notification)}
             className={`p-4 cursor-pointer transition-colors hover:bg-gray-50 ${
-              !notification.read ? 'bg-blue-50' : ''
+              !notification.read ? 'bg-primary-50' : ''
             }`}
           >
             <div className="flex items-start space-x-3">
@@ -153,7 +153,7 @@ export default function NotificationList({ notifications, onMarkAsRead }: Notifi
                       {formatRelativeTime(notification.created_at)}
                     </span>
                     {!notification.read && (
-                      <span className="inline-block w-2 h-2 bg-blue-500 rounded-full"></span>
+                      <span className="inline-block w-2 h-2 bg-primary-600 rounded-full"></span>
                     )}
                   </div>
                 </div>
@@ -166,7 +166,7 @@ export default function NotificationList({ notifications, onMarkAsRead }: Notifi
                      notification.data && 
                      typeof notification.data === 'object' && 
                      'jobTitle' in notification.data && (
-                      <span className="inline-block bg-purple-100 text-purple-800 px-2 py-1 rounded">
+                      <span className="inline-block bg-secondary-100 text-secondary-800 px-2 py-1 rounded">
                         {String(notification.data.jobTitle)}
                       </span>
                     )}
