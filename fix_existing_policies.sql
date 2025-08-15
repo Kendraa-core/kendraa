@@ -89,7 +89,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 CREATE OR REPLACE FUNCTION get_user_conversations(user_id UUID)
 RETURNS TABLE (
     conversation_id UUID,
-    conversation_type conversation_type,
+    conversation_type TEXT,
     title TEXT,
     last_message_content TEXT,
     last_message_time TIMESTAMPTZ,
