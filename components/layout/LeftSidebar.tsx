@@ -86,7 +86,7 @@ const navigationItems = [
 const quickAccessItems = [
   {
     name: 'Saved Posts',
-    href: '/saved',
+    href: '/saved-items',
     icon: BookmarkIcon,
     iconActive: BookmarkSolidIcon,
   },

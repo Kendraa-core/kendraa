@@ -14,14 +14,20 @@ export default function SavedItemsPage() {
 
   useEffect(() => {
     const fetchSavedPosts = async () => {
-      if (!user?.id) return;
+      if (!user?.id) {
+        setLoading(false);
+        return;
+      }
 
       try {
         setLoading(true);
+        console.log('Fetching saved posts for user:', user.id);
         const posts = await getSavedPosts(user.id);
-        setSavedPosts(posts);
+        console.log('Fetched saved posts:', posts);
+        setSavedPosts(posts || []);
       } catch (error) {
         console.error('Error fetching saved posts:', error);
+        setSavedPosts([]);
       } finally {
         setLoading(false);
       }
