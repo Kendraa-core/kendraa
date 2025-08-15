@@ -7,49 +7,45 @@ DROP POLICY IF EXISTS "Users can join conversations" ON conversation_participant
 DROP POLICY IF EXISTS "Users can view messages in their conversations" ON messages;
 DROP POLICY IF EXISTS "Users can send messages" ON messages;
 DROP POLICY IF EXISTS "Users can update their own messages" ON messages;
+DROP POLICY IF EXISTS "Users can delete their own messages" ON messages;
 DROP POLICY IF EXISTS "Users can view their conversations" ON conversations;
 DROP POLICY IF EXISTS "Users can create conversations" ON conversations;
 
 -- 2. Create simple, working policies with dynamic column detection
 DO $$
 DECLARE
-    detected_column TEXT;
+    column_name TEXT;
 BEGIN
     -- Check which column name exists
-    SELECT c.column_name INTO detected_column
-    FROM information_schema.columns c
-    WHERE c.table_name = 'conversation_participants' 
-    AND c.table_schema = 'public'
-    AND c.column_name IN ('participant_id', 'user_id', 'uuid')
+    SELECT column_name INTO column_name
+    FROM information_schema.columns 
+    WHERE table_name = 'conversation_participants' 
+    AND table_schema = 'public'
+    AND column_name IN ('participant_id', 'user_id')
     LIMIT 1;
     
-    IF detected_column = 'participant_id' THEN
+    IF column_name = 'participant_id' THEN
         -- Create policies using participant_id
         EXECUTE 'CREATE POLICY "Users can view conversation participants" ON conversation_participants FOR SELECT USING (participant_id = auth.uid())';
         EXECUTE 'CREATE POLICY "Users can join conversations" ON conversation_participants FOR INSERT WITH CHECK (auth.uid() = participant_id)';
         RAISE NOTICE 'Created policies using participant_id column';
-    ELSIF detected_column = 'user_id' THEN
+    ELSIF column_name = 'user_id' THEN
         -- Create policies using user_id
         EXECUTE 'CREATE POLICY "Users can view conversation participants" ON conversation_participants FOR SELECT USING (user_id = auth.uid())';
         EXECUTE 'CREATE POLICY "Users can join conversations" ON conversation_participants FOR INSERT WITH CHECK (auth.uid() = user_id)';
         RAISE NOTICE 'Created policies using user_id column';
-    ELSIF detected_column = 'uuid' THEN
-        -- Create policies using uuid
-        EXECUTE 'CREATE POLICY "Users can view conversation participants" ON conversation_participants FOR SELECT USING (uuid = auth.uid())';
-        EXECUTE 'CREATE POLICY "Users can join conversations" ON conversation_participants FOR INSERT WITH CHECK (auth.uid() = uuid)';
-        RAISE NOTICE 'Created policies using uuid column';
     ELSE
-        RAISE EXCEPTION 'No suitable column (participant_id, user_id, or uuid) found in conversation_participants table';
+        RAISE EXCEPTION 'Neither participant_id nor user_id column found in conversation_participants table';
     END IF;
 END $$;
 
--- 3. Create simple message policies
+-- 3. Create simple message policies based on actual schema
 CREATE POLICY "Users can view messages in their conversations" ON messages FOR SELECT USING (
     sender_id = auth.uid() OR
     EXISTS (
         SELECT 1 FROM conversation_participants cp
         WHERE cp.conversation_id = messages.conversation_id 
-        AND cp.uuid = auth.uid()
+        AND cp.participant_id = auth.uid()
     )
 );
 
@@ -61,11 +57,15 @@ CREATE POLICY "Users can update their own messages" ON messages FOR UPDATE USING
     auth.uid() = sender_id
 );
 
+CREATE POLICY "Users can delete their own messages" ON messages FOR DELETE USING (
+    auth.uid() = sender_id
+);
+
 CREATE POLICY "Users can view their conversations" ON conversations FOR SELECT USING (
     EXISTS (
         SELECT 1 FROM conversation_participants 
         WHERE conversation_id = conversations.id 
-        AND uuid = auth.uid()
+        AND participant_id = auth.uid()
     )
 );
 
@@ -78,14 +78,14 @@ DECLARE
     user1_id UUID;
     user2_id UUID;
     conv_id UUID;
-    detected_column TEXT;
+    column_name TEXT;
 BEGIN
     -- Check which column name to use
-    SELECT c.column_name INTO detected_column
-    FROM information_schema.columns c
-    WHERE c.table_name = 'conversation_participants' 
-    AND c.table_schema = 'public'
-    AND c.column_name IN ('participant_id', 'user_id', 'uuid')
+    SELECT column_name INTO column_name
+    FROM information_schema.columns 
+    WHERE table_name = 'conversation_participants' 
+    AND table_schema = 'public'
+    AND column_name IN ('participant_id', 'user_id')
     LIMIT 1;
     
     -- Get first two users
@@ -102,20 +102,17 @@ BEGIN
     RETURNING id INTO conv_id;
     
     -- Add participants using the correct column name
-    IF detected_column = 'participant_id' THEN
+    IF column_name = 'participant_id' THEN
         INSERT INTO conversation_participants (conversation_id, participant_id)
         VALUES (conv_id, user1_id), (conv_id, user2_id);
-    ELSIF detected_column = 'user_id' THEN
+    ELSE
         INSERT INTO conversation_participants (conversation_id, user_id)
-        VALUES (conv_id, user1_id), (conv_id, user2_id);
-    ELSIF detected_column = 'uuid' THEN
-        INSERT INTO conversation_participants (conversation_id, uuid)
         VALUES (conv_id, user1_id), (conv_id, user2_id);
     END IF;
     
-    -- Add test message
-    INSERT INTO messages (conversation_id, sender_id, sender_type, content)
-    VALUES (conv_id, user1_id, 'individual', 'Test message from user 1');
+    -- Add test message using actual schema
+    INSERT INTO messages (conversation_id, sender_id, sender_type, content, message_type, is_read)
+    VALUES (conv_id, user1_id, 'individual', 'Test message from user 1', 'text', false);
     
     RETURN 'Test conversation created successfully with ID: ' || conv_id;
 END;

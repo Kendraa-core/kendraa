@@ -2240,6 +2240,7 @@ export async function sendMessage(message: {
         message_type: message.message_type || 'text',
         encryption_level: message.encryption_level || 'standard',
         retention_policy: message.retention_policy || 'standard',
+        is_read: false,
         audit_trail: {
           created_by: message.sender_id,
           created_at: new Date().toISOString(),
@@ -2250,10 +2251,10 @@ export async function sendMessage(message: {
 
     if (error) throw error;
     
-    // Update conversation's last_message_at
+    // Update conversation's updated_at
     await getSupabase()
       .from('conversations')
-      .update({ last_message_at: new Date().toISOString() })
+      .update({ updated_at: new Date().toISOString() })
       .eq('id', message.conversation_id);
     
     console.log('Message sent successfully', data);
@@ -2279,10 +2280,7 @@ export async function getConversationMessages(conversationId: string, limit = 50
       .from('messages')
       .select(`
         *,
-        sender:profiles(*),
-        attachments:message_attachments(*),
-        reactions:message_reactions(*),
-        clinical_note:clinical_notes(*)
+        sender:profiles(*)
       `)
       .eq('conversation_id', conversationId)
       .order('created_at', { ascending: false })
@@ -2309,27 +2307,13 @@ export async function markMessageAsRead(messageId: string, userId: string): Prom
       return false;
     }
     
-    // Get current message
-    const { data: message, error: fetchError } = await getSupabase()
+    // Update message to mark as read using is_read boolean field
+    const { error: updateError } = await getSupabase()
       .from('messages')
-      .select('read_by')
-      .eq('id', messageId)
-      .single();
+      .update({ is_read: true })
+      .eq('id', messageId);
 
-    if (fetchError) throw fetchError;
-    
-    // Add user to read_by array if not already present
-    const readBy = message.read_by || [];
-    if (!readBy.includes(userId)) {
-      readBy.push(userId);
-      
-      const { error: updateError } = await getSupabase()
-        .from('messages')
-        .update({ read_by: readBy })
-        .eq('id', messageId);
-
-      if (updateError) throw updateError;
-    }
+    if (updateError) throw updateError;
     
     console.log('Message marked as read successfully');
     return true;
