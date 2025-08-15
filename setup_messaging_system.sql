@@ -16,7 +16,7 @@ CREATE POLICY "Users can view their conversations" ON conversations FOR SELECT U
     EXISTS (
         SELECT 1 FROM conversation_participants 
         WHERE conversation_id = conversations.id 
-        AND participant_id = auth.uid()
+        AND uuid = auth.uid()
     )
 );
 
@@ -26,17 +26,17 @@ CREATE POLICY "Users can create conversations" ON conversations FOR INSERT WITH 
 -- Using dynamic column detection to handle both participant_id and user_id
 DO $$
 DECLARE
-    column_name TEXT;
+    detected_column TEXT;
 BEGIN
     -- Check if participant_id column exists
-    SELECT column_name INTO column_name
-    FROM information_schema.columns 
-    WHERE table_name = 'conversation_participants' 
-    AND table_schema = 'public'
-    AND column_name IN ('participant_id', 'user_id')
+    SELECT c.column_name INTO detected_column
+    FROM information_schema.columns c
+    WHERE c.table_name = 'conversation_participants' 
+    AND c.table_schema = 'public'
+    AND c.column_name IN ('participant_id', 'user_id', 'uuid')
     LIMIT 1;
     
-    IF column_name = 'participant_id' THEN
+    IF detected_column = 'participant_id' THEN
         -- Create policies using participant_id
         EXECUTE 'CREATE POLICY "Users can view conversation participants" ON conversation_participants FOR SELECT USING (
             participant_id = auth.uid() OR
@@ -57,7 +57,7 @@ BEGIN
         
         RAISE NOTICE 'Created policies using participant_id column';
         
-    ELSIF column_name = 'user_id' THEN
+    ELSIF detected_column = 'user_id' THEN
         -- Create policies using user_id
         EXECUTE 'CREATE POLICY "Users can view conversation participants" ON conversation_participants FOR SELECT USING (
             user_id = auth.uid() OR
@@ -78,8 +78,29 @@ BEGIN
         
         RAISE NOTICE 'Created policies using user_id column';
         
+    ELSIF detected_column = 'uuid' THEN
+        -- Create policies using uuid
+        EXECUTE 'CREATE POLICY "Users can view conversation participants" ON conversation_participants FOR SELECT USING (
+            uuid = auth.uid() OR
+            EXISTS (
+                SELECT 1 FROM conversation_participants cp2
+                WHERE cp2.conversation_id = conversation_participants.conversation_id 
+                AND cp2.uuid = auth.uid()
+            )
+        )';
+        
+        EXECUTE 'CREATE POLICY "Users can join conversations" ON conversation_participants FOR INSERT WITH CHECK (
+            auth.uid() = uuid
+        )';
+        
+        EXECUTE 'CREATE POLICY "Users can leave conversations" ON conversation_participants FOR UPDATE USING (
+            auth.uid() = uuid
+        )';
+        
+        RAISE NOTICE 'Created policies using uuid column';
+        
     ELSE
-        RAISE EXCEPTION 'Neither participant_id nor user_id column found in conversation_participants table';
+        RAISE EXCEPTION 'No suitable column (participant_id, user_id, or uuid) found in conversation_participants table';
     END IF;
 END $$;
 
@@ -89,7 +110,7 @@ CREATE POLICY "Users can view messages in their conversations" ON messages FOR S
     EXISTS (
         SELECT 1 FROM conversation_participants cp
         WHERE cp.conversation_id = messages.conversation_id 
-        AND cp.participant_id = auth.uid()
+        AND cp.uuid = auth.uid()
         AND (cp.left_at IS NULL OR cp.left_at > NOW())
     )
 );
@@ -99,7 +120,7 @@ CREATE POLICY "Users can send messages" ON messages FOR INSERT WITH CHECK (
     EXISTS (
         SELECT 1 FROM conversation_participants cp
         WHERE cp.conversation_id = messages.conversation_id 
-        AND cp.participant_id = auth.uid()
+        AND cp.uuid = auth.uid()
         AND (cp.left_at IS NULL OR cp.left_at > NOW())
     )
 );
@@ -117,14 +138,14 @@ CREATE OR REPLACE FUNCTION create_direct_conversation(user1_id UUID, user2_id UU
 RETURNS UUID AS $$
 DECLARE
     conversation_id UUID;
-    column_name TEXT;
+    detected_column TEXT;
 BEGIN
     -- Check which column name to use
-    SELECT column_name INTO column_name
-    FROM information_schema.columns 
-    WHERE table_name = 'conversation_participants' 
-    AND table_schema = 'public'
-    AND column_name IN ('participant_id', 'user_id')
+    SELECT c.column_name INTO detected_column
+    FROM information_schema.columns c
+    WHERE c.table_name = 'conversation_participants' 
+    AND c.table_schema = 'public'
+    AND c.column_name IN ('participant_id', 'user_id', 'uuid')
     LIMIT 1;
     
     -- Create the conversation
@@ -133,13 +154,18 @@ BEGIN
     RETURNING id INTO conversation_id;
     
     -- Add both users as participants
-    IF column_name = 'participant_id' THEN
+    IF detected_column = 'participant_id' THEN
         INSERT INTO conversation_participants (conversation_id, participant_id)
         VALUES 
             (conversation_id, user1_id),
             (conversation_id, user2_id);
-    ELSE
+    ELSIF detected_column = 'user_id' THEN
         INSERT INTO conversation_participants (conversation_id, user_id)
+        VALUES 
+            (conversation_id, user1_id),
+            (conversation_id, user2_id);
+    ELSIF detected_column = 'uuid' THEN
+        INSERT INTO conversation_participants (conversation_id, uuid)
         VALUES 
             (conversation_id, user1_id),
             (conversation_id, user2_id);
@@ -161,17 +187,17 @@ RETURNS TABLE (
     participant_count BIGINT
 ) AS $$
 DECLARE
-    column_name TEXT;
+    detected_column TEXT;
 BEGIN
     -- Check which column name to use
-    SELECT column_name INTO column_name
-    FROM information_schema.columns 
-    WHERE table_name = 'conversation_participants' 
-    AND table_schema = 'public'
-    AND column_name IN ('participant_id', 'user_id')
+    SELECT c.column_name INTO detected_column
+    FROM information_schema.columns c
+    WHERE c.table_name = 'conversation_participants' 
+    AND c.table_schema = 'public'
+    AND c.column_name IN ('participant_id', 'user_id', 'uuid')
     LIMIT 1;
     
-    IF column_name = 'participant_id' THEN
+    IF detected_column = 'participant_id' THEN
         RETURN QUERY
         SELECT 
             c.id,
@@ -201,7 +227,7 @@ BEGIN
         AND (cp.left_at IS NULL OR cp.left_at > NOW())
         GROUP BY c.id, c.conversation_type, c.title, m.content, m.created_at, unread.unread_count
         ORDER BY m.created_at DESC NULLS LAST;
-    ELSE
+    ELSIF detected_column = 'user_id' THEN
         RETURN QUERY
         SELECT 
             c.id,
@@ -231,6 +257,36 @@ BEGIN
         AND (cp.left_at IS NULL OR cp.left_at > NOW())
         GROUP BY c.id, c.conversation_type, c.title, m.content, m.created_at, unread.unread_count
         ORDER BY m.created_at DESC NULLS LAST;
+    ELSIF detected_column = 'uuid' THEN
+        RETURN QUERY
+        SELECT 
+            c.id,
+            c.conversation_type,
+            c.title,
+            m.content,
+            m.created_at,
+            COALESCE(unread.unread_count, 0),
+            COUNT(cp.uuid)::BIGINT
+        FROM conversations c
+        INNER JOIN conversation_participants cp ON c.id = cp.conversation_id
+        LEFT JOIN LATERAL (
+            SELECT content, created_at
+            FROM messages 
+            WHERE conversation_id = c.id 
+            ORDER BY created_at DESC 
+            LIMIT 1
+        ) m ON true
+        LEFT JOIN LATERAL (
+            SELECT COUNT(*) as unread_count
+            FROM messages 
+            WHERE conversation_id = c.id 
+            AND sender_id != user_id
+            AND (read_by IS NULL OR NOT (read_by ? user_id::TEXT))
+        ) unread ON true
+        WHERE cp.uuid = user_id
+        AND (cp.left_at IS NULL OR cp.left_at > NOW())
+        GROUP BY c.id, c.conversation_type, c.title, m.content, m.created_at, unread.unread_count
+        ORDER BY m.created_at DESC NULLS LAST;
     END IF;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -255,6 +311,7 @@ GRANT EXECUTE ON FUNCTION mark_conversation_as_read(UUID, UUID) TO authenticated
 -- Step 9: Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_conversation_participants_participant_id ON conversation_participants(participant_id);
 CREATE INDEX IF NOT EXISTS idx_conversation_participants_user_id ON conversation_participants(user_id);
+CREATE INDEX IF NOT EXISTS idx_conversation_participants_uuid ON conversation_participants(uuid);
 CREATE INDEX IF NOT EXISTS idx_conversation_participants_conversation_id ON conversation_participants(conversation_id);
 CREATE INDEX IF NOT EXISTS idx_messages_conversation_id_created_at ON messages(conversation_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_messages_sender_id ON messages(sender_id);

@@ -13,28 +13,33 @@ DROP POLICY IF EXISTS "Users can create conversations" ON conversations;
 -- 2. Create simple, working policies with dynamic column detection
 DO $$
 DECLARE
-    column_name TEXT;
+    detected_column TEXT;
 BEGIN
     -- Check which column name exists
-    SELECT column_name INTO column_name
-    FROM information_schema.columns 
-    WHERE table_name = 'conversation_participants' 
-    AND table_schema = 'public'
-    AND column_name IN ('participant_id', 'user_id')
+    SELECT c.column_name INTO detected_column
+    FROM information_schema.columns c
+    WHERE c.table_name = 'conversation_participants' 
+    AND c.table_schema = 'public'
+    AND c.column_name IN ('participant_id', 'user_id', 'uuid')
     LIMIT 1;
     
-    IF column_name = 'participant_id' THEN
+    IF detected_column = 'participant_id' THEN
         -- Create policies using participant_id
         EXECUTE 'CREATE POLICY "Users can view conversation participants" ON conversation_participants FOR SELECT USING (participant_id = auth.uid())';
         EXECUTE 'CREATE POLICY "Users can join conversations" ON conversation_participants FOR INSERT WITH CHECK (auth.uid() = participant_id)';
         RAISE NOTICE 'Created policies using participant_id column';
-    ELSIF column_name = 'user_id' THEN
+    ELSIF detected_column = 'user_id' THEN
         -- Create policies using user_id
         EXECUTE 'CREATE POLICY "Users can view conversation participants" ON conversation_participants FOR SELECT USING (user_id = auth.uid())';
         EXECUTE 'CREATE POLICY "Users can join conversations" ON conversation_participants FOR INSERT WITH CHECK (auth.uid() = user_id)';
         RAISE NOTICE 'Created policies using user_id column';
+    ELSIF detected_column = 'uuid' THEN
+        -- Create policies using uuid
+        EXECUTE 'CREATE POLICY "Users can view conversation participants" ON conversation_participants FOR SELECT USING (uuid = auth.uid())';
+        EXECUTE 'CREATE POLICY "Users can join conversations" ON conversation_participants FOR INSERT WITH CHECK (auth.uid() = uuid)';
+        RAISE NOTICE 'Created policies using uuid column';
     ELSE
-        RAISE EXCEPTION 'Neither participant_id nor user_id column found in conversation_participants table';
+        RAISE EXCEPTION 'No suitable column (participant_id, user_id, or uuid) found in conversation_participants table';
     END IF;
 END $$;
 
@@ -44,7 +49,7 @@ CREATE POLICY "Users can view messages in their conversations" ON messages FOR S
     EXISTS (
         SELECT 1 FROM conversation_participants cp
         WHERE cp.conversation_id = messages.conversation_id 
-        AND cp.participant_id = auth.uid()
+        AND cp.uuid = auth.uid()
     )
 );
 
@@ -60,7 +65,7 @@ CREATE POLICY "Users can view their conversations" ON conversations FOR SELECT U
     EXISTS (
         SELECT 1 FROM conversation_participants 
         WHERE conversation_id = conversations.id 
-        AND participant_id = auth.uid()
+        AND uuid = auth.uid()
     )
 );
 
@@ -73,14 +78,14 @@ DECLARE
     user1_id UUID;
     user2_id UUID;
     conv_id UUID;
-    column_name TEXT;
+    detected_column TEXT;
 BEGIN
     -- Check which column name to use
-    SELECT column_name INTO column_name
-    FROM information_schema.columns 
-    WHERE table_name = 'conversation_participants' 
-    AND table_schema = 'public'
-    AND column_name IN ('participant_id', 'user_id')
+    SELECT c.column_name INTO detected_column
+    FROM information_schema.columns c
+    WHERE c.table_name = 'conversation_participants' 
+    AND c.table_schema = 'public'
+    AND c.column_name IN ('participant_id', 'user_id', 'uuid')
     LIMIT 1;
     
     -- Get first two users
@@ -97,11 +102,14 @@ BEGIN
     RETURNING id INTO conv_id;
     
     -- Add participants using the correct column name
-    IF column_name = 'participant_id' THEN
+    IF detected_column = 'participant_id' THEN
         INSERT INTO conversation_participants (conversation_id, participant_id)
         VALUES (conv_id, user1_id), (conv_id, user2_id);
-    ELSE
+    ELSIF detected_column = 'user_id' THEN
         INSERT INTO conversation_participants (conversation_id, user_id)
+        VALUES (conv_id, user1_id), (conv_id, user2_id);
+    ELSIF detected_column = 'uuid' THEN
+        INSERT INTO conversation_participants (conversation_id, uuid)
         VALUES (conv_id, user1_id), (conv_id, user2_id);
     END IF;
     
