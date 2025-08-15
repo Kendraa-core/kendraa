@@ -2067,7 +2067,7 @@ export async function getOrCreateConversation(user1Id: string, user2Id: string):
       .from('conversations')
       .select(`
         *,
-        participants:conversation_participants(participant_id)
+        participants:conversation_participants(user_id)
       `)
       .eq('conversation_type', 'direct');
     
@@ -2078,7 +2078,7 @@ export async function getOrCreateConversation(user1Id: string, user2Id: string):
     
     // Find conversation with both users
     const existingConversation = conversations?.find(conv => {
-      const participantIds = conv.participants?.map((p: { participant_id: string }) => p.participant_id) || [];
+      const participantIds = conv.participants?.map((p: { user_id: string }) => p.user_id) || [];
       return participantIds.includes(user1Id) && participantIds.includes(user2Id);
     });
     
@@ -2110,7 +2110,7 @@ export async function getUserConversations(userId: string): Promise<Conversation
     const { data: participantData, error: participantError } = await getSupabase()
       .from('conversation_participants')
       .select('conversation_id')
-      .eq('participant_id', userId);
+      .eq('user_id', userId);
 
     if (participantError) {
       console.log('Error fetching participant data', participantError);
@@ -2194,7 +2194,7 @@ export async function createConversation(conversation: {
     // Add participants
     const participantData = conversation.participants.map(userId => ({
       conversation_id: convData.id,
-      participant_id: userId,
+      user_id: userId,
     }));
     
     const { error: partError } = await getSupabase()
