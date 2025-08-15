@@ -415,14 +415,14 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-secondary-50 to-accent-50">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="animate-pulse">
-            <div className="h-48 bg-gray-200 rounded-t-xl mb-4"></div>
+            <div className="h-48 bg-gradient-to-r from-primary-200 to-secondary-200 rounded-t-xl mb-4"></div>
             <div className="space-y-4">
-              <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-              <div className="h-6 bg-gray-200 rounded w-1/2"></div>
-              <div className="h-20 bg-gray-200 rounded"></div>
+              <div className="h-8 bg-gradient-to-r from-primary-200 to-secondary-200 rounded w-1/3"></div>
+              <div className="h-6 bg-gradient-to-r from-primary-200 to-secondary-200 rounded w-1/2"></div>
+              <div className="h-20 bg-gradient-to-r from-primary-200 to-secondary-200 rounded"></div>
             </div>
           </div>
         </div>
@@ -432,10 +432,10 @@ export default function ProfilePage() {
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-secondary-50 to-accent-50 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Profile not found</h1>
-          <Button onClick={() => router.push('/feed')} className="bg-linkedin-primary hover:bg-linkedin-secondary text-white">
+          <Button onClick={() => router.push('/feed')} className="bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white">
             <ArrowLeftIcon className="w-4 h-4 mr-2" />
             Back to Home
           </Button>
@@ -445,7 +445,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-secondary-50 to-accent-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumb Navigation */}
         <div
