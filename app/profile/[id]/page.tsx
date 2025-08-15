@@ -23,7 +23,6 @@ import {
   BriefcaseIcon,
   AcademicCapIcon,
   UserPlusIcon,
-  ChatBubbleLeftIcon,
   EyeIcon,
   ShareIcon,
   UserGroupIcon,
@@ -39,7 +38,6 @@ import {
   getPostsByAuthor,
   getConnectionStatus,
   sendConnectionRequest,
-  getOrCreateConversation,
   followUser,
   unfollowUser,
   isFollowing,
@@ -61,30 +59,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
   const { user } = useAuth();
   const router = useRouter();
 
-  const handleMessage = async () => {
-    if (!user?.id) {
-      toast.error('Please log in to send messages');
-      return;
-    }
 
-    if (isOwnProfile) {
-      toast.error('You cannot message yourself');
-      return;
-    }
-
-    try {
-      const conversation = await getOrCreateConversation(user.id, profile.id);
-      if (conversation) {
-        toast.success('Conversation started!');
-        router.push(`/messaging?conversation=${conversation.id}`);
-      } else {
-        toast.error('Failed to start conversation');
-      }
-    } catch (error) {
-      console.error('Error starting conversation:', error);
-      toast.error('Failed to start conversation');
-    }
-  };
 
   return (
     <div className="relative">
@@ -131,15 +106,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
                 <ShareIcon className="w-4 h-4 mr-2" />
                 Share
               </Button>
-              <Button
-                onClick={handleMessage}
-                variant="outline" 
-                size="sm"
-                className="bg-white/90 backdrop-blur-sm border-gray-200 hover:bg-white shadow-sm"
-              >
-                <ChatBubbleLeftIcon className="w-4 h-4 mr-2" />
-                Message
-              </Button>
+
               {profile.profile_type === 'institution' ? (
                 // Institution - Show Follow/Unfollow
                 followStatus === 'following' ? (
