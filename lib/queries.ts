@@ -1182,14 +1182,14 @@ export async function isPostLiked(userId: string, postId: string): Promise<boole
       .select('id')
       .eq('user_id', userId)
       .eq('post_id', postId)
-      .maybeSingle();
+      .limit(1);
 
     if (error) {
       console.error('[Queries] Error checking like status:', error);
       return false;
     }
     
-    const isLiked = !!data;
+    const isLiked = data && data.length > 0;
     console.log('[Queries] Post like status checked:', isLiked);
     return isLiked;
   } catch (error) {

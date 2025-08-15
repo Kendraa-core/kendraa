@@ -109,7 +109,7 @@ export default function LeftSidebar() {
   const pathname = usePathname();
   const [showQuickAccess, setShowQuickAccess] = useState(false);
   const [connectionCount, setConnectionCount] = useState(0);
-  // const [profileViewsCount, setProfileViewsCount] = useState(0);
+
   const [loading, setLoading] = useState(true);
 
   // Fetch real stats
@@ -120,10 +120,7 @@ export default function LeftSidebar() {
       setLoading(true);
       try {
         const connections = await getConnectionCount(user.id);
-        // const views = await getProfileViewsCount(user.id);
-        
         setConnectionCount(connections);
-        // setProfileViewsCount(views);
       } catch (error) {
         console.error('Error fetching stats:', error);
       } finally {

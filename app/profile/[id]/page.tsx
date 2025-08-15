@@ -311,17 +311,7 @@ export default function ProfilePage() {
       setEducation(educationData);
       setPosts(postsData);
 
-      // Profile views functionality commented out - no longer tracking views
-      // const viewsCount = await getProfileViewsCount(profileId);
-      // setRealTimeViewsCount(viewsCount);
-
-      // Record profile view if not own profile
-      // if (!isOwnProfile && user?.id) {
-      //   await recordProfileView(profileId, user.id);
-      //   // Update the views count after recording the view
-      //   const updatedViewsCount = await getProfileViewsCount(profileId);
-      //   setRealTimeViewsCount(updatedViewsCount);
-      // }
+      // Profile views functionality removed - no longer tracking views
 
       // Get connection/follow status if not own profile
       if (!isOwnProfile && user?.id) {
