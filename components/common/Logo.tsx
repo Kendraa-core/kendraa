@@ -6,7 +6,7 @@ import Image from 'next/image';
 interface LogoProps {
   className?: string;
   size?: 'sm' | 'md' | 'lg' | 'xl';
-  variant?: 'default' | 'gradient' | 'simple';
+  variant?: 'default' | 'gradient' | 'simple' | 'text-only';
 }
 
 export default function Logo({ 
@@ -20,6 +20,11 @@ export default function Logo({
     lg: 'h-12 w-auto',
     xl: 'h-16 w-auto'
   };
+
+  // If text-only variant, use CSS-based text
+  if (variant === 'text-only') {
+    return <LogoText className={className} size={size} variant={variant} />;
+  }
 
   return (
     <div className={`${sizeClasses[size]} ${className}`}>
@@ -51,12 +56,13 @@ export function LogoText({
   const variantClasses = {
     default: 'text-primary-600',
     gradient: 'text-primary-600',
-    simple: 'text-primary-600'
+    simple: 'text-primary-600',
+    'text-only': 'text-primary-600'
   };
 
   return (
     <span className={`font-display ${sizeClasses[size]} ${variantClasses[variant]} tracking-tight ${className}`}>
-      Kendraa
+      kendraa
     </span>
   );
 } 
