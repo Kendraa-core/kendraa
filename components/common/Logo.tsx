@@ -47,10 +47,10 @@ export function LogoText({
   variant = 'default' 
 }: LogoProps) {
   const sizeClasses = {
-    sm: 'text-base font-semibold',
-    md: 'text-lg font-semibold',
-    lg: 'text-xl font-semibold',
-    xl: 'text-2xl font-semibold'
+    sm: 'text-base font-bold',
+    md: 'text-lg font-bold',
+    lg: 'text-xl font-bold',
+    xl: 'text-2xl font-bold'
   };
 
   const variantClasses = {
