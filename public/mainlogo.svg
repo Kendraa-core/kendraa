@@ -1,8 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="300" height="80" viewBox="0 0 300 80">
   <defs>
     <style>
+      @import url(https://fonts.googleapis.com/css2?family=Afacad+Flux%3Aital%2Cwght%400%2C100..1000&amp;display=swap);
       .logo-text {
-        font-family: 'Century Gothic', 'CenturyGothic';
+        font-family: 'Afacad Flux', sans-serif;
         font-size: 42px;
         font-weight: 700;
         letter-spacing: -0.5px;
@@ -25,6 +27,6 @@
     <circle cx="30" cy="65" r="5" fill="#eab308"/>
   </g>
 
-  <!-- Text with Century Gothic font -->
+  <!-- Text with Afacad Flux font -->
   <text x="90" y="50" class="logo-text">kendraa</text>
 </svg>
