@@ -2502,15 +2502,7 @@ export async function getEvents(): Promise<Event[]> {
     
     const { data, error } = await getSupabase()
       .from('events')
-      .select(`
-        *,
-        organizer:profiles!events_organizer_id_fkey(
-          id,
-          full_name,
-          avatar_url,
-          user_type
-        )
-      `)
+      .select('*')
       .order('start_date', { ascending: true });
 
     if (error) {

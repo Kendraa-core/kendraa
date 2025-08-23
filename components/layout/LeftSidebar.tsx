@@ -343,21 +343,7 @@ export default function LeftSidebar({ onClose }: LeftSidebarProps) {
           </div>
         </nav>
 
-        {/* Premium Upgrade Card */}
-        <div className="p-4 m-4 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border border-amber-200">
-          <div className="text-center">
-            <StarIcon className="w-8 h-8 text-amber-500 mx-auto mb-2" />
-            <h3 className="text-sm font-semibold text-amber-900 mb-1">
-              Upgrade to Premium
-            </h3>
-            <p className="text-xs text-amber-700 mb-3">
-              Get advanced features and insights
-            </p>
-            <button className="w-full px-3 py-2 text-sm font-medium bg-amber-500 hover:bg-amber-600 text-white border-0 rounded-lg transition-colors">
-              Upgrade Now
-            </button>
-          </div>
-        </div>
+
       </div>
     </div>
   );

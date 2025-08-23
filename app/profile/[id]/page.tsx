@@ -87,11 +87,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
             size="2xl"
             className="ring-4 ring-white shadow-xl bg-white"
           />
-          {profile.is_premium && (
-            <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-r from-primary-500 to-secondary-600 rounded-full flex items-center justify-center ring-2 ring-white">
-              <CheckBadgeIcon className="w-5 h-5 text-white" />
-            </div>
-          )}
+
         </div>
 
         {/* Action Buttons */}
@@ -158,11 +154,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
             <h1 className="text-2xl font-bold text-gray-900">
               {profile.full_name || 'Anonymous User'}
             </h1>
-            {profile.is_premium && (
-              <span className="px-2 py-1 bg-amber-100 text-amber-800 text-xs font-medium rounded-full">
-                Premium
-              </span>
-            )}
+
           </div>
           
           {profile.headline && (

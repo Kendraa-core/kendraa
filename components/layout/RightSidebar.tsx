@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { UserCircleIcon, PlusIcon, HashtagIcon, StarIcon } from '@heroicons/react/24/outline';
+import { UserCircleIcon, PlusIcon, HashtagIcon } from '@heroicons/react/24/outline';
 import Avatar from '@/components/common/Avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { getTrendingTopics, getSuggestedConnections } from '@/lib/queries';
@@ -108,19 +108,7 @@ export default function RightSidebar() {
         </div>
       </div>
 
-      {/* Premium Card */}
-      <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl sm:rounded-2xl border border-purple-200 p-4 sm:p-6 hover:shadow-lg sm:hover:shadow-xl transition-shadow duration-300">
-        <div className="text-center">
-          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-            <StarIcon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-          </div>
-          <h3 className="text-base sm:text-lg font-bold text-purple-900 mb-2">Try Premium for free</h3>
-          <p className="text-sm sm:text-base text-purple-700 mb-4">One month free</p>
-          <button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 font-medium text-sm sm:text-base">
-            Try free
-          </button>
-        </div>
-      </div>
+
 
       {/* People You May Know */}
       <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm sm:shadow-lg border border-gray-200 p-4 sm:p-6">
