@@ -177,7 +177,7 @@ export default function GroupsPage() {
             </h3>
             <p className="text-gray-600 mb-6">
               Professional groups functionality is currently under development. 
-              You'll soon be able to join and create groups to connect with healthcare communities.
+              You&apos;ll soon be able to join and create groups to connect with healthcare communities.
             </p>
             <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
               <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>

@@ -43,7 +43,7 @@ interface DashboardStats {
 
 interface RecentActivity {
   id: string;
-  type: 'connection_request' | 'post_like' | 'comment' | 'job_application';
+  type: 'connection_request' | 'post_like' | 'comment' | 'job_application' | 'connection_accepted' | 'post_comment' | 'event_reminder' | 'mention';
   title: string;
   description: string;
   timestamp: string;
@@ -82,16 +82,18 @@ export default function UserDashboard() {
       });
 
       // Load real notifications for recent activity
-      const notifications = await getNotifications(user.id);
-      const recentNotifications = notifications.slice(0, 5).map(notification => ({
-        id: notification.id,
-        type: notification.type,
-        title: notification.title,
-        description: notification.message,
-        timestamp: notification.created_at,
-        icon: getActivityIcon(notification.type),
-      }));
-      setRecentActivity(recentNotifications);
+      if (user?.id) {
+        const notifications = await getNotifications(user.id);
+        const recentNotifications = notifications.slice(0, 5).map(notification => ({
+          id: notification.id,
+          type: notification.type,
+          title: notification.title,
+          description: notification.message,
+          timestamp: notification.created_at,
+          icon: getActivityIcon(notification.type),
+        }));
+        setRecentActivity(recentNotifications);
+      }
     } catch (error) {
       console.error('Error loading dashboard data:', error);
     } finally {
