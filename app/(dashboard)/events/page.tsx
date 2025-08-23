@@ -4,25 +4,34 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
   getEvents, 
+  getEventsByOrganizer,
   registerForEvent, 
   unregisterFromEvent, 
   isRegisteredForEvent,
   getUserRegisteredEvents 
 } from '@/lib/queries';
 import { CalendarIcon, MapPinIcon, ClockIcon, UsersIcon, PlusIcon } from '@heroicons/react/24/outline';
+import Avatar from '@/components/common/Avatar';
 import type { Event } from '@/types/database.types';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 
 interface EventWithRegistration extends Event {
   isRegistered?: boolean;
+  organizer?: {
+    id: string;
+    full_name: string;
+    avatar_url: string;
+    user_type: string;
+    headline: string;
+  };
 }
 
 export default function EventsPage() {
   const { user } = useAuth();
   const [events, setEvents] = useState<EventWithRegistration[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'upcoming' | 'registered'>('upcoming');
+  const [activeTab, setActiveTab] = useState<'upcoming' | 'registered' | 'my-events'>('upcoming');
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -31,18 +40,31 @@ export default function EventsPage() {
       try {
         setLoading(true);
         
-        // Fetch all events
-        const allEvents = await getEvents();
+        let allEvents: EventWithRegistration[] = [];
         
-        // Check registration status for each event
-        const eventsWithRegistration = await Promise.all(
-          allEvents.map(async (event) => {
-            const isRegistered = await isRegisteredForEvent(event.id, user.id);
-            return { ...event, isRegistered };
-          })
-        );
+        if (activeTab === 'my-events') {
+          // Fetch events created by the current user
+          allEvents = await getEventsByOrganizer(user.id);
+        } else if (activeTab === 'registered') {
+          // Fetch events the user is registered for
+          allEvents = await getUserRegisteredEvents(user.id);
+        } else {
+          // Fetch all events
+          allEvents = await getEvents();
+        }
         
-        setEvents(eventsWithRegistration);
+        // Check registration status for each event (except for my-events tab)
+        if (activeTab !== 'my-events') {
+          const eventsWithRegistration = await Promise.all(
+            allEvents.map(async (event) => {
+              const isRegistered = await isRegisteredForEvent(event.id, user.id);
+              return { ...event, isRegistered };
+            })
+          );
+          setEvents(eventsWithRegistration);
+        } else {
+          setEvents(allEvents);
+        }
       } catch (error) {
         console.error('Error fetching events:', error);
         toast.error('Failed to load events');
@@ -52,7 +74,7 @@ export default function EventsPage() {
     };
 
     fetchEvents();
-  }, [user?.id]);
+  }, [user?.id, activeTab]);
 
   const handleRegister = async (eventId: string) => {
     if (!user?.id) {
@@ -180,7 +202,7 @@ export default function EventsPage() {
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
-            Upcoming Events ({upcomingEvents.length})
+            All Events ({events.length})
           </button>
           <button
             onClick={() => setActiveTab('registered')}
@@ -190,7 +212,17 @@ export default function EventsPage() {
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
-            My Events ({registeredEvents.length})
+            Registered Events ({registeredEvents.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('my-events')}
+            className={`pb-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'my-events'
+                ? 'border-primary-500 text-primary-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            My Created Events ({events.filter(e => e.organizer_id === user?.id).length})
           </button>
         </div>
 
@@ -218,7 +250,15 @@ export default function EventsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {(activeTab === 'upcoming' ? upcomingEvents : registeredEvents).map((event) => (
+            {(() => {
+              let displayEvents = events;
+              if (activeTab === 'registered') {
+                displayEvents = registeredEvents;
+              } else if (activeTab === 'my-events') {
+                displayEvents = events.filter(e => e.organizer_id === user?.id);
+              }
+              return displayEvents;
+            })().map((event) => (
               <div key={event.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
                 <div className="flex items-start justify-between mb-4">
                   <span className={`px-2 py-1 text-xs font-medium rounded-full ${getEventTypeColor(event.event_type)}`}>
@@ -255,24 +295,50 @@ export default function EventsPage() {
                   </div>
                 </div>
 
+                {/* Organizer Information */}
+                <div className="flex items-center space-x-2 mb-4 p-3 bg-gray-50 rounded-lg">
+                  <Avatar
+                    src={event.organizer?.avatar_url}
+                    alt={event.organizer?.full_name || 'Organizer'}
+                    size="sm"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {event.organizer?.full_name || 'Unknown Organizer'}
+                    </p>
+                    <p className="text-xs text-gray-500 truncate">
+                      {event.organizer?.headline || 'Healthcare Professional'}
+                    </p>
+                  </div>
+                </div>
+
                 <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-500">
-                    by Unknown Organizer
-                  </span>
-                  {event.isRegistered ? (
-                    <button
-                      onClick={() => handleUnregister(event.id)}
-                      className="px-3 py-1 text-sm font-medium bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-                    >
-                      Unregister
-                    </button>
+                  {activeTab === 'my-events' ? (
+                    <span className="text-xs text-gray-500">
+                      You created this event
+                    </span>
                   ) : (
-                    <button
-                      onClick={() => handleRegister(event.id)}
-                      className="px-3 py-1 text-sm font-medium bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
-                    >
-                      Register
-                    </button>
+                    <span className="text-xs text-gray-500">
+                      by {event.organizer?.full_name || 'Unknown Organizer'}
+                    </span>
+                  )}
+                  
+                  {activeTab !== 'my-events' && (
+                    event.isRegistered ? (
+                      <button
+                        onClick={() => handleUnregister(event.id)}
+                        className="px-3 py-1 text-sm font-medium bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                      >
+                        Unregister
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleRegister(event.id)}
+                        className="px-3 py-1 text-sm font-medium bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                      >
+                        Register
+                      </button>
+                    )
                   )}
                 </div>
               </div>

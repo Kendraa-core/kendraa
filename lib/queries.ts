@@ -2502,7 +2502,16 @@ export async function getEvents(): Promise<Event[]> {
     
     const { data, error } = await getSupabase()
       .from('events')
-      .select('*')
+      .select(`
+        *,
+        organizer:profiles!organizer_id(
+          id,
+          full_name,
+          avatar_url,
+          user_type,
+          headline
+        )
+      `)
       .order('start_date', { ascending: true });
 
     if (error) {
@@ -2514,6 +2523,38 @@ export async function getEvents(): Promise<Event[]> {
     return data || [];
   } catch (error) {
     console.error('[Queries] Error in getEvents:', error);
+    return [];
+  }
+}
+
+export async function getEventsByOrganizer(organizerId: string): Promise<Event[]> {
+  try {
+    console.log('[Queries] Getting events by organizer:', organizerId);
+    
+    const { data, error } = await getSupabase()
+      .from('events')
+      .select(`
+        *,
+        organizer:profiles!organizer_id(
+          id,
+          full_name,
+          avatar_url,
+          user_type,
+          headline
+        )
+      `)
+      .eq('organizer_id', organizerId)
+      .order('start_date', { ascending: true });
+
+    if (error) {
+      console.error('[Queries] Error fetching events by organizer:', error);
+      return [];
+    }
+    
+    console.log('[Queries] Events by organizer fetched successfully:', data?.length || 0);
+    return data || [];
+  } catch (error) {
+    console.error('[Queries] Error in getEventsByOrganizer:', error);
     return [];
   }
 }
