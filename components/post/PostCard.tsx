@@ -128,8 +128,11 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
         } else {
           toast.error('Failed to remove reaction');
         }
+      } else if (userReaction) {
+        // User already has a different reaction
+        toast.error('You can only have one reaction per post. Remove your current reaction first.');
       } else {
-        // Add reaction
+        // Add new reaction
         success = await likePost(post.id, user.id, reactionType);
         if (success) {
           setUserReaction(reactionType);

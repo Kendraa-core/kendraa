@@ -1078,20 +1078,8 @@ export async function likePost(postId: string, userId: string, reactionType: str
       .single();
 
     if (existingReaction) {
-      // Update existing reaction
-      const { error: updateError } = await getSupabase()
-        .from('post_likes')
-        .update({ reaction_type: reactionType })
-        .eq('user_id', userId)
-        .eq('post_id', postId);
-
-      if (updateError) {
-        console.error('[Queries] Error updating reaction:', updateError);
-        throw updateError;
-      }
-
-      console.log('[Queries] Reaction updated successfully');
-      return true;
+      console.log('[Queries] User already reacted to this post');
+      return false; // Prevent multiple reactions
     }
     
     // Add new reaction record

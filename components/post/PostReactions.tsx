@@ -42,7 +42,10 @@ export default function PostReactions({ postId, userReaction, reactionCounts, on
   const currentReaction = reactionTypes.find(r => r.id === userReaction);
 
   const handleReactionClick = (reactionId: string) => {
-    onReact(reactionId);
+    // Only allow clicking if user has no reaction or is clicking their current reaction
+    if (!userReaction || userReaction === reactionId) {
+      onReact(reactionId);
+    }
     setShowReactionPicker(false);
   };
 
@@ -85,18 +88,26 @@ export default function PostReactions({ postId, userReaction, reactionCounts, on
               const Icon = reaction.icon;
               const SolidIcon = reaction.solidIcon;
               const isActive = userReaction === reaction.id;
+              const isDisabled = userReaction && userReaction !== reaction.id;
               const count = reactionCounts[reaction.id] || 0;
               
               return (
                 <button
                   key={reaction.id}
                   onClick={() => handleReactionClick(reaction.id)}
-                  className={`p-2 rounded-full transition-all duration-200 hover:scale-110 ${
+                  disabled={!!isDisabled}
+                  className={`p-2 rounded-full transition-all duration-200 ${
                     isActive 
                       ? `${reaction.color} ${reaction.bgColor}` 
-                      : 'hover:bg-gray-100'
+                      : isDisabled
+                      ? 'opacity-50 cursor-not-allowed'
+                      : 'hover:bg-gray-100 hover:scale-110'
                   }`}
-                  title={`${reaction.label}${count > 0 ? ` (${count})` : ''}`}
+                  title={
+                    isDisabled 
+                      ? 'You can only have one reaction per post' 
+                      : `${reaction.label}${count > 0 ? ` (${count})` : ''}`
+                  }
                 >
                   {isActive ? (
                     <SolidIcon className="w-6 h-6" />
