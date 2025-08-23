@@ -1065,34 +1065,47 @@ export async function getPostComments(postId: string, limit?: number): Promise<C
 }
 
 // Like functions
-export async function likePost(postId: string, userId: string): Promise<boolean> {
+export async function likePost(postId: string, userId: string, reactionType: string = 'like'): Promise<boolean> {
   try {
-    console.log('[Queries] Liking post:', postId, 'by user:', userId);
+    console.log('[Queries] Adding reaction to post:', postId, 'by user:', userId, 'reaction:', reactionType);
     
-    // Check if already liked
-    const { data: existingLike } = await getSupabase()
+    // Check if already reacted
+    const { data: existingReaction } = await getSupabase()
       .from('post_likes')
-      .select('id')
+      .select('id, reaction_type')
       .eq('user_id', userId)
       .eq('post_id', postId)
       .single();
 
-    if (existingLike) {
-      console.log('[Queries] Post already liked');
-      return false;
+    if (existingReaction) {
+      // Update existing reaction
+      const { error: updateError } = await getSupabase()
+        .from('post_likes')
+        .update({ reaction_type: reactionType })
+        .eq('user_id', userId)
+        .eq('post_id', postId);
+
+      if (updateError) {
+        console.error('[Queries] Error updating reaction:', updateError);
+        throw updateError;
+      }
+
+      console.log('[Queries] Reaction updated successfully');
+      return true;
     }
     
-    // Add like record
-    const { error: likeError } = await getSupabase()
+    // Add new reaction record
+    const { error: reactionError } = await getSupabase()
       .from('post_likes')
       .insert({
         user_id: userId,
         post_id: postId,
+        reaction_type: reactionType,
       });
 
-    if (likeError) {
-      console.error('[Queries] Error adding like:', likeError);
-      throw likeError;
+    if (reactionError) {
+      console.error('[Queries] Error adding reaction:', reactionError);
+      throw reactionError;
     }
 
     // Update post likes count
@@ -1113,7 +1126,7 @@ export async function likePost(postId: string, userId: string): Promise<boolean>
       }
     }
 
-    console.log('[Queries] Post liked successfully');
+    console.log('[Queries] Reaction added successfully');
     return true;
   } catch (error) {
     console.error('[Queries] Error in likePost:', error);
@@ -1164,28 +1177,28 @@ export async function unlikePost(postId: string, userId: string): Promise<boolea
   }
 }
 
-export async function isPostLiked(userId: string, postId: string): Promise<boolean> {
+export async function isPostLiked(userId: string, postId: string): Promise<string | null> {
   try {
-    console.log('[Queries] Checking if post is liked by user:', userId, 'post:', postId);
+    console.log('[Queries] Checking if post is reacted by user:', userId, 'post:', postId);
     
     const { data, error } = await getSupabase()
       .from('post_likes')
-      .select('id')
+      .select('reaction_type')
       .eq('user_id', userId)
       .eq('post_id', postId)
       .limit(1);
 
     if (error) {
-      console.error('[Queries] Error checking like status:', error);
-      return false;
+      console.error('[Queries] Error checking reaction status:', error);
+      return null;
     }
     
-    const isLiked = data && data.length > 0;
-    console.log('[Queries] Post like status checked:', isLiked);
-    return isLiked;
+    const reactionType = data && data.length > 0 ? data[0].reaction_type : null;
+    console.log('[Queries] Post reaction status checked:', reactionType);
+    return reactionType;
   } catch (error) {
     console.error('[Queries] Error in isPostLiked:', error);
-    return false;
+    return null;
   }
 }
 

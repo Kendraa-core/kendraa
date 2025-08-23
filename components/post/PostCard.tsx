@@ -23,6 +23,9 @@ import {
   savePost,
   unsavePost,
   isPostSaved,
+  likePost,
+  unlikePost,
+  isPostLiked,
 } from '@/lib/queries';
 import type { Post, CommentWithAuthor, Profile } from '@/types/database.types';
 import { 
@@ -52,6 +55,8 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
   const [showCommentBox, setShowCommentBox] = useState(false);
   const [isCommenting, setIsCommenting] = useState(false);
   const [isLoadingComments, setIsLoadingComments] = useState(false);
+  const [userReaction, setUserReaction] = useState<string | null>(null);
+  const [isReacting, setIsReacting] = useState(false);
 
   // Debug logging
   const debugLog = (message: string, data?: unknown) => {
@@ -64,12 +69,17 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
 
     const initializePostState = async () => {
       try {
-        const saved = await isPostSaved(post.id, user.id);
+        const [saved, reactionType] = await Promise.all([
+          isPostSaved(post.id, user.id),
+          isPostLiked(user.id, post.id)
+        ]);
         setIsBookmarked(saved);
-        debugLog('Post saved status checked', { postId: post.id, saved });
+        setUserReaction(reactionType);
+        debugLog('Post state initialized', { postId: post.id, saved, reactionType });
       } catch (error) {
-        debugLog('Error checking saved status', error);
+        debugLog('Error initializing post state', error);
         setIsBookmarked(false);
+        setUserReaction(null);
       }
     };
 
@@ -93,6 +103,58 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
       </div>
     );
   }
+
+  const handleReaction = async (reactionType: string) => {
+    if (!user?.id) {
+      toast.error('Please log in to react to posts');
+      return;
+    }
+
+    if (isReacting) return;
+
+    setIsReacting(true);
+    debugLog('Handling reaction', { postId: post.id, reactionType, currentReaction: userReaction });
+
+    try {
+      let success = false;
+      
+      if (userReaction === reactionType) {
+        // Remove reaction
+        success = await unlikePost(post.id, user.id);
+        if (success) {
+          setUserReaction(null);
+          setLikesCount(prev => Math.max(0, prev - 1));
+          toast.success('Reaction removed');
+        } else {
+          toast.error('Failed to remove reaction');
+        }
+      } else {
+        // Add reaction
+        success = await likePost(post.id, user.id, reactionType);
+        if (success) {
+          setUserReaction(reactionType);
+          setLikesCount(prev => prev + 1);
+          toast.success('Reaction added');
+        } else {
+          toast.error('Failed to add reaction');
+        }
+      }
+      
+      onInteraction?.();
+    } catch (error: any) {
+      logError('PostCard', error, { 
+        postId: post.id, 
+        action: 'handleReaction',
+        reactionType,
+        userId: user.id
+      });
+      
+      const appError = handleSupabaseError(error);
+      toast.error(getErrorMessage(appError));
+    } finally {
+      setIsReacting(false);
+    }
+  };
 
   const handleBookmark = async () => {
     if (!user?.id) {
@@ -293,9 +355,9 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
       <div className="flex items-center justify-between border-t border-gray-100 pt-4">
         <PostReactions
           postId={post.id}
-          userReaction={null}
+          userReaction={userReaction}
           reactionCounts={{ like: likesCount }}
-          onReact={() => {}}
+          onReact={handleReaction}
         />
 
         <button
