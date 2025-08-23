@@ -58,6 +58,32 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
     console.log(`[PostCard] ${message}`, data);
   };
 
+  // Initialize post state on mount
+  useEffect(() => {
+    if (!post?.id || !user?.id) return;
+
+    const initializePostState = async () => {
+      try {
+        const saved = await isPostSaved(post.id, user.id);
+        setIsBookmarked(saved);
+        debugLog('Post saved status checked', { postId: post.id, saved });
+      } catch (error) {
+        debugLog('Error checking saved status', error);
+        setIsBookmarked(false);
+      }
+    };
+
+    initializePostState();
+  }, [post?.id, user?.id]);
+
+  // Refresh post data when post changes
+  useEffect(() => {
+    if (post?.id) {
+      setLikesCount(post.likes_count || 0);
+      setCommentsCount(post.comments_count || 0);
+    }
+  }, [post?.id, post?.likes_count, post?.comments_count]);
+
   // Validate post data
   if (!post || !post.id) {
     console.error('[PostCard] Invalid post data:', post);
@@ -198,32 +224,6 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
   const getAuthorHeadline = () => {
     return post.profiles?.headline || 'Healthcare Professional';
   };
-
-  // Initialize post state on mount
-  useEffect(() => {
-    if (!post?.id || !user?.id) return;
-
-    const initializePostState = async () => {
-      try {
-        const saved = await isPostSaved(post.id, user.id);
-        setIsBookmarked(saved);
-        debugLog('Post saved status checked', { postId: post.id, saved });
-      } catch (error) {
-        debugLog('Error checking saved status', error);
-        setIsBookmarked(false);
-      }
-    };
-
-    initializePostState();
-  }, [post?.id, user?.id]);
-
-  // Refresh post data when post changes
-  useEffect(() => {
-    if (post?.id) {
-      setLikesCount(post.likes_count || 0);
-      setCommentsCount(post.comments_count || 0);
-    }
-  }, [post?.id, post?.likes_count, post?.comments_count]);
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
