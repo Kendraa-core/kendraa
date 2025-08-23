@@ -2070,66 +2070,9 @@ export async function hasAppliedToJob(userId: string, jobId: string): Promise<bo
   }
 }
 
-// Extract hashtags from text content
-function extractHashtags(text: string): string[] {
-  const hashtagRegex = /#[\w\u0590-\u05ff]+/g;
-  const matches = text.match(hashtagRegex);
-  return matches ? matches.map(tag => tag.toLowerCase()) : [];
-}
 
-// Get trending topics based on hashtags in posts
-export async function getTrendingTopics(limit: number = 5): Promise<Array<{ hashtag: string; count: number }>> {
-  try {
-    console.log('Getting trending topics');
-    
-    const schemaExists = await true;
-    if (!schemaExists) {
-      console.log('Database schema not found, returning empty trending topics');
-      return [];
-    }
-    
-    // Get all posts with content
-    const { data: posts, error } = await getSupabase()
-      .from('posts')
-      .select('content')
-      .not('content', 'is', null);
-    
-    if (error) {
-      console.log('Error fetching posts for trending topics', error);
-      return [];
-    }
-    
-    if (!posts || posts.length === 0) {
-      console.log('No posts found for trending topics');
-      return [];
-    }
-    
-    // Extract hashtags from all posts
-    const hashtagCounts: Record<string, number> = {};
-    
-    posts.forEach(post => {
-      if (post.content) {
-        const hashtags = extractHashtags(post.content);
-        hashtags.forEach(hashtag => {
-          hashtagCounts[hashtag] = (hashtagCounts[hashtag] || 0) + 1;
-        });
-      }
-    });
-    
-    // Convert to array and sort by count
-    const trendingTopics = Object.entries(hashtagCounts)
-      .map(([hashtag, count]) => ({ hashtag, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, limit);
-    
-    console.log('Trending topics calculated', { count: trendingTopics.length, topics: trendingTopics });
-    return trendingTopics;
-    
-  } catch (error) {
-    console.log('Error getting trending topics', error);
-    return [];
-  }
-}
+
+
 
 
 
@@ -2504,7 +2447,7 @@ export async function getEvents(): Promise<Event[]> {
       .from('events')
       .select(`
         *,
-        organizer:profiles!organizer_id(
+        organizer:profiles(
           id,
           full_name,
           avatar_url,
@@ -2535,7 +2478,7 @@ export async function getEventsByOrganizer(organizerId: string): Promise<Event[]
       .from('events')
       .select(`
         *,
-        organizer:profiles!organizer_id(
+        organizer:profiles(
           id,
           full_name,
           avatar_url,
@@ -2721,7 +2664,7 @@ export async function getUserRegisteredEvents(userId: string): Promise<Event[]> 
         event_id,
         events (
           *,
-          organizer:profiles!events_organizer_id_fkey(
+          organizer:profiles(
             id,
             full_name,
             avatar_url,

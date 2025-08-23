@@ -28,7 +28,7 @@ import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
 import PostCard from '@/components/post/PostCard';
 import Avatar from '@/components/common/Avatar';
-import TrendingTopics from '@/components/feed/TrendingTopics';
+
 import MedicalFeed from '@/components/feed/MedicalFeed';
 import ProfileCompletionPrompt from '@/components/profile/ProfileCompletionPrompt';
 import VerificationBadge from '@/components/common/VerificationBadge';

@@ -3,12 +3,20 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { UserCircleIcon, PlusIcon, HashtagIcon } from '@heroicons/react/24/outline';
+import { UserCircleIcon, PlusIcon, NewspaperIcon } from '@heroicons/react/24/outline';
 import Avatar from '@/components/common/Avatar';
 import { useAuth } from '@/contexts/AuthContext';
-import { getTrendingTopics, getSuggestedConnections } from '@/lib/queries';
+import { getSuggestedConnections } from '@/lib/queries';
 import { formatNumber } from '@/lib/utils';
 import type { Profile } from '@/types/database.types';
+
+interface NewsItem {
+  title: string;
+  description: string;
+  url: string;
+  publishedAt: string;
+  source: string;
+}
 
 interface PeopleCardProps {
   name: string;
@@ -41,7 +49,7 @@ const PeopleCard = ({ name, title, imageSrc = '' }: PeopleCardProps) => (
 
 export default function RightSidebar() {
   const { user } = useAuth();
-  const [trendingTopics, setTrendingTopics] = useState<Array<{ hashtag: string; count: number }>>([]);
+  const [topNews, setTopNews] = useState<NewsItem[]>([]);
   const [suggestedConnections, setSuggestedConnections] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -52,9 +60,9 @@ export default function RightSidebar() {
       try {
         setLoading(true);
         
-        // Load trending topics
-        const topics = await getTrendingTopics(5);
-        setTrendingTopics(topics);
+        // Load top healthcare news
+        const news = await fetchTopHealthcareNews();
+        setTopNews(news);
         
         // Load suggested connections
         const connections = await getSuggestedConnections(user.id, 3);
@@ -68,6 +76,88 @@ export default function RightSidebar() {
 
     loadData();
   }, [user?.id]);
+
+  const fetchTopHealthcareNews = async (): Promise<NewsItem[]> => {
+    try {
+      // Using NewsAPI.org for healthcare news
+      const response = await fetch(
+        `https://newsapi.org/v2/everything?q=healthcare+medical&language=en&sortBy=publishedAt&pageSize=5&apiKey=${process.env.NEXT_PUBLIC_NEWS_API_KEY || 'demo'}`
+      );
+      
+      if (!response.ok) {
+        // Fallback to demo data if API key is not available
+        return getDemoHealthcareNews();
+      }
+      
+      const data = await response.json();
+      
+      if (data.articles && data.articles.length > 0) {
+        return data.articles.map((article: any) => ({
+          title: article.title,
+          description: article.description || article.content?.substring(0, 100) + '...' || 'No description available',
+          url: article.url,
+          publishedAt: article.publishedAt,
+          source: article.source?.name || 'Unknown Source'
+        }));
+      }
+      
+      return getDemoHealthcareNews();
+    } catch (error) {
+      console.error('Error fetching news:', error);
+      return getDemoHealthcareNews();
+    }
+  };
+
+  const getDemoHealthcareNews = (): NewsItem[] => {
+    return [
+      {
+        title: "Breakthrough in Cancer Treatment Shows Promising Results",
+        description: "New immunotherapy treatment demonstrates 60% improvement in patient outcomes for advanced cancer cases.",
+        url: "#",
+        publishedAt: new Date().toISOString(),
+        source: "Medical News Today"
+      },
+      {
+        title: "FDA Approves Revolutionary Gene Therapy for Rare Diseases",
+        description: "First-of-its-kind treatment approved for patients with genetic disorders affecting the nervous system.",
+        url: "#",
+        publishedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+        source: "Health News"
+      },
+      {
+        title: "AI-Powered Diagnostic Tool Reduces Medical Errors by 40%",
+        description: "Machine learning algorithm helps doctors identify rare conditions with unprecedented accuracy.",
+        url: "#",
+        publishedAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+        source: "Tech Medicine"
+      },
+      {
+        title: "Global Healthcare Summit Addresses Mental Health Crisis",
+        description: "World leaders commit to increased funding and resources for mental health services worldwide.",
+        url: "#",
+        publishedAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+        source: "Global Health"
+      },
+      {
+        title: "New Telemedicine Platform Connects Rural Patients with Specialists",
+        description: "Innovative platform bridges healthcare gaps in underserved communities across the country.",
+        url: "#",
+        publishedAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
+        source: "Digital Health"
+      }
+    ];
+  };
+
+  const formatTimeAgo = (dateString: string): string => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return 'Just now';
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    const diffInDays = Math.floor(diffInHours / 24);
+    return `${diffInDays}d ago`;
+  };
 
   if (loading) {
     return (
@@ -88,34 +178,43 @@ export default function RightSidebar() {
 
   return (
     <div className="space-y-6">
-      {/* Trending Topics */}
+      {/* Top Healthcare News */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Trending Topics</h3>
-          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+          <h3 className="text-lg font-semibold text-gray-900">Top Healthcare News</h3>
+          <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
         </div>
         
-        {trendingTopics.length > 0 ? (
-          <div className="space-y-3">
-            {trendingTopics.map((topic, index) => (
+        {topNews.length > 0 ? (
+          <div className="space-y-4">
+            {topNews.map((news, index) => (
               <div 
                 key={index} 
-                className="group flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all duration-200 cursor-pointer border border-transparent hover:border-gray-200"
+                className="group cursor-pointer"
+                onClick={() => window.open(news.url, '_blank')}
               >
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                    <HashtagIcon className="w-4 h-4 text-white" />
+                <div className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all duration-200 border border-transparent hover:border-gray-200">
+                  <div className="flex items-start space-x-3">
+                    <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-orange-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <NewspaperIcon className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-sm font-medium text-gray-900 group-hover:text-red-600 transition-colors line-clamp-2 mb-1">
+                        {news.title}
+                      </h4>
+                      <p className="text-xs text-gray-600 line-clamp-2 mb-2">
+                        {news.description}
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-500 font-medium">
+                          {news.source}
+                        </span>
+                        <span className="text-xs text-gray-400">
+                          {formatTimeAgo(news.publishedAt)}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-sm font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
-                      {topic.hashtag}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-xs font-medium text-gray-500 bg-white px-2 py-1 rounded-full border border-gray-200">
-                    {formatNumber(topic.count)} posts
-                  </span>
                 </div>
               </div>
             ))}
@@ -123,10 +222,10 @@ export default function RightSidebar() {
         ) : (
           <div className="text-center py-8">
             <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-              <HashtagIcon className="w-6 h-6 text-gray-400" />
+              <NewspaperIcon className="w-6 h-6 text-gray-400" />
             </div>
-            <p className="text-sm text-gray-500">No trending topics yet</p>
-            <p className="text-xs text-gray-400 mt-1">Start posting to see trends</p>
+            <p className="text-sm text-gray-500">No news available</p>
+            <p className="text-xs text-gray-400 mt-1">Check back later for updates</p>
           </div>
         )}
       </div>
