@@ -54,24 +54,25 @@ export default function SavedItemsPage() {
 
         {/* Content */}
         {loading ? (
-          <div className="space-y-6">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white rounded-xl shadow-sm p-6">
-                <div className="animate-pulse">
-                  <div className="flex items-center space-x-3 mb-4">
-                    <div className="w-10 h-10 bg-gradient-to-r from-primary-200 to-secondary-200 rounded-full"></div>
-                    <div className="flex-1">
-                      <div className="h-4 bg-gradient-to-r from-primary-200 to-secondary-200 rounded w-1/3 mb-2"></div>
-                      <div className="h-3 bg-gradient-to-r from-primary-200 to-secondary-200 rounded w-1/4"></div>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="h-4 bg-gradient-to-r from-primary-200 to-secondary-200 rounded"></div>
-                    <div className="h-4 bg-gradient-to-r from-primary-200 to-secondary-200 rounded w-3/4"></div>
-                  </div>
-                </div>
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="relative">
+                {/* Main spinner */}
+                <div className="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
+                
+                {/* Pulse effect */}
+                <div className="absolute inset-0 w-12 h-12 border-4 border-transparent border-t-primary-400 rounded-full animate-ping opacity-20"></div>
               </div>
-            ))}
+              
+              <p className="text-gray-600 mt-4 text-sm font-medium">Loading saved posts...</p>
+              
+              {/* Progress dots */}
+              <div className="flex justify-center mt-2 space-x-1">
+                <div className="w-2 h-2 bg-primary-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                <div className="w-2 h-2 bg-primary-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                <div className="w-2 h-2 bg-primary-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+              </div>
+            </div>
           </div>
         ) : savedPosts.length > 0 ? (
           <div className="space-y-6">

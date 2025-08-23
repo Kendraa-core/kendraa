@@ -21,6 +21,11 @@ export interface Database {
         Insert: Omit<PostLike, 'id' | 'created_at'>;
         Update: Partial<Omit<PostLike, 'id' | 'created_at'>>;
       };
+      saved_posts: {
+        Row: SavedPost;
+        Insert: Omit<SavedPost, 'id' | 'created_at'>;
+        Update: Partial<Omit<SavedPost, 'id' | 'created_at'>>;
+      };
       connections: {
         Row: Connection;
         Insert: Omit<Connection, 'id' | 'created_at' | 'updated_at'>;
@@ -227,9 +232,18 @@ export interface PostComment {
 export interface PostLike {
   id: string;
   created_at: string;
+  updated_at: string;
   post_id: string;
   user_id: string;
   user_type: 'individual' | 'institution';
+  reaction_type: 'like' | 'love' | 'support' | 'insightful' | 'celebrate' | 'curious';
+}
+
+export interface SavedPost {
+  id: string;
+  created_at: string;
+  user_id: string;
+  post_id: string;
 }
 
 export interface Connection {

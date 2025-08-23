@@ -337,7 +337,7 @@ export async function createPost(
       .insert({
         author_id: authorId,
         content,
-        media_url: mediaUrl,
+        image_url: mediaUrl || null,
         likes_count: 0,
         comments_count: 0,
       })
@@ -1657,93 +1657,7 @@ export async function applyToJob(application: Omit<JobApplication, 'id' | 'creat
   }
 }
 
-// Event functions
-export async function createEvent(event: Omit<Event, 'id' | 'created_at' | 'updated_at'>): Promise<Event | null> {
-  try {
-    console.log('Creating event', event);
-    
-    const schemaExists = await true;
-    if (!schemaExists) {
-      console.log('Database schema not found, cannot create event');
-      return null;
-    }
-    
-    const { data, error } = await getSupabase()
-      .from('events')
-      .insert({
-        ...event,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-    
-    console.log('Event created successfully', data);
-    return data;
-  } catch (error) {
-    console.log('Error creating event', error);
-    return null;
-  }
-}
-
-export async function getEvents(): Promise<EventWithOrganizer[]> {
-  try {
-    console.log('Getting events');
-    
-    const schemaExists = await true;
-    if (!schemaExists) {
-      console.log('Database schema not found, returning empty events');
-      return [];
-    }
-    
-    const { data, error } = await getSupabase()
-      .from('events')
-      .select(`
-        *,
-        organizer:profiles(*)
-      `)
-      .order('start_date', { ascending: true });
-
-    if (error) throw error;
-    
-    console.log('Events fetched successfully', data);
-    return data || [];
-  } catch (error) {
-    console.log('Error fetching events', error);
-    return [];
-  }
-}
-
-export async function registerForEvent(registration: Omit<EventAttendee, 'id' | 'created_at'>): Promise<EventAttendee | null> {
-  try {
-    console.log('Registering for event', registration);
-    
-    const schemaExists = await true;
-    if (!schemaExists) {
-      console.log('Database schema not found, cannot register for event');
-      return null;
-    }
-    
-    const { data, error } = await getSupabase()
-      .from('event_attendees')
-      .insert({
-        ...registration,
-        created_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-    
-    console.log('Event registration successful', data);
-    return data;
-  } catch (error) {
-    console.log('Error registering for event', error);
-    return null;
-  }
-} 
+ 
 
 // Follow system functions
 export async function followUser(followerId: string, followingId: string, followerType: 'individual' | 'institution', followingType: 'individual' | 'institution'): Promise<Follow | null> {
@@ -2394,204 +2308,409 @@ export async function getSavedPosts(userId: string): Promise<Post[]> {
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
     
-    if (savedError) throw savedError;
+    if (savedError) {
+      console.error('[Queries] Error fetching saved post IDs:', savedError);
+      // If the table doesn't exist, return empty array instead of throwing
+      if (savedError.code === '42P01') { // Table doesn't exist
+        console.log('[Queries] saved_posts table does not exist yet');
+        return [];
+      }
+      // Log other errors but don't throw
+      console.error('[Queries] Saved posts error details:', {
+        code: savedError.code,
+        message: savedError.message,
+        details: savedError.details,
+        hint: savedError.hint
+      });
+      return [];
+    }
     
     if (!savedPostIds || savedPostIds.length === 0) {
       console.log('[Queries] No saved posts found');
       return [];
     }
     
+    console.log('[Queries] Found saved post IDs:', savedPostIds.length);
+    
     // Extract post IDs
     const postIds = savedPostIds.map(item => item.post_id);
+    console.log('[Queries] Post IDs to fetch:', postIds);
     
-    // Get the actual posts with author profiles
+    // Get the actual posts without joins first
     const { data: posts, error: postsError } = await getSupabase()
       .from('posts')
-      .select(`
-        id,
-        content,
-        image_url,
-        author_id,
-        likes_count,
-        comments_count,
-        created_at,
-        updated_at,
-        profiles (
-          id,
-          full_name,
-          headline,
-          avatar_url,
-          user_type
-        )
-      `)
+      .select('*')
       .in('id', postIds)
       .order('created_at', { ascending: false });
     
-    if (postsError) throw postsError;
+    if (postsError) {
+      console.error('[Queries] Error fetching posts:', postsError);
+      console.error('[Queries] Posts error details:', {
+        code: postsError.code,
+        message: postsError.message,
+        details: postsError.details,
+        hint: postsError.hint
+      });
+      return [];
+    }
     
-    console.log('[Queries] Saved posts fetched:', posts?.length || 0);
-    return posts as any || [];
+    if (!posts || posts.length === 0) {
+      console.log('[Queries] No posts found for saved post IDs');
+      return [];
+    }
+    
+    console.log('[Queries] Found posts:', posts.length);
+    
+    // Get author IDs for the posts
+    const authorIds = [...new Set(posts.map(post => post.author_id))];
+    console.log('[Queries] Author IDs to fetch:', authorIds);
+    
+    // Fetch authors separately
+    const { data: authors, error: authorsError } = await getSupabase()
+      .from('profiles')
+      .select('id, full_name, avatar_url, headline, user_type')
+      .in('id', authorIds);
+    
+    if (authorsError) {
+      console.error('[Queries] Error fetching authors:', authorsError);
+      console.error('[Queries] Authors error details:', {
+        code: authorsError.code,
+        message: authorsError.message,
+        details: authorsError.details,
+        hint: authorsError.hint
+      });
+    }
+    
+    console.log('[Queries] Found authors:', authors?.length || 0);
+    
+    // Create author lookup map
+    const authorMap = new Map(authors?.map(author => [author.id, author]) || []);
+    
+    // Combine posts with author data
+    const postsWithAuthors = posts.map(post => ({
+      ...post,
+      profiles: authorMap.get(post.author_id) || null
+    }));
+    
+    console.log('[Queries] Saved posts fetched successfully:', postsWithAuthors.length);
+    return postsWithAuthors;
   } catch (error) {
     console.error('[Queries] Error getting saved posts:', error);
+    console.error('[Queries] Full error details:', {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    });
     return [];
   }
 }
 
-// Add reaction to post (supports all reaction types)
-export async function addPostReaction(postId: string, userId: string, reactionType: string): Promise<boolean> {
+// Save a post for a user
+export async function savePost(postId: string, userId: string): Promise<boolean> {
   try {
-    console.log('Adding post reaction', { postId, userId, reactionType });
-    
-    const schemaExists = await true;
-    if (!schemaExists) {
-      console.log('Database schema not found, cannot add reaction');
-      return false;
-    }
-    
-    // First check if user already has a reaction on this post
-    const { data: existingReaction, error: checkError } = await getSupabase()
-      .from('post_likes')
-      .select('id, reaction_type')
-      .eq('post_id', postId)
-      .eq('user_id', userId)
-      .maybeSingle();
-
-    if (checkError) {
-      console.log('Error checking existing reaction', checkError);
-      return false;
-    }
-
-    if (existingReaction) {
-      // Update existing reaction
-      const { error: updateError } = await getSupabase()
-        .from('post_likes')
-        .update({ 
-          reaction_type: reactionType,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', existingReaction.id);
-
-      if (updateError) {
-        console.log('Error updating reaction', updateError);
-        return false;
-      }
-    } else {
-      // Create new reaction
-      const { error: insertError } = await getSupabase()
-        .from('post_likes')
-        .insert({
-          post_id: postId,
-          user_id: userId,
-          reaction_type: reactionType,
-        });
-
-      if (insertError) {
-        console.log('Error inserting reaction', insertError);
-        return false;
-      }
-    }
-    
-    console.log('Post reaction added successfully');
-    return true;
-  } catch (error) {
-    console.log('Error adding post reaction', error);
-    return false;
-  }
-}
-
-// Remove reaction from post
-export async function removePostReaction(postId: string, userId: string): Promise<boolean> {
-  try {
-    console.log('Removing post reaction', { postId, userId });
-    
-    const schemaExists = await true;
-    if (!schemaExists) {
-      console.log('Database schema not found, cannot remove reaction');
-      return false;
-    }
+    console.log('[Queries] Saving post:', postId, 'for user:', userId);
     
     const { error } = await getSupabase()
-      .from('post_likes')
-      .delete()
-      .eq('post_id', postId)
-      .eq('user_id', userId);
+      .from('saved_posts')
+      .insert({
+        user_id: userId,
+        post_id: postId,
+      });
 
     if (error) {
-      console.log('Error removing reaction', error);
+      console.error('[Queries] Error saving post:', error);
+      // If the table doesn't exist, return false instead of throwing
+      if (error.code === '42P01') { // Table doesn't exist
+        console.log('[Queries] saved_posts table does not exist yet');
+        return false;
+      }
       return false;
     }
     
-    console.log('Post reaction removed successfully');
+    console.log('[Queries] Post saved successfully');
     return true;
   } catch (error) {
-    console.log('Error removing post reaction', error);
+    console.error('[Queries] Error in savePost:', error);
     return false;
   }
 }
 
-// Get user's reaction on a post
-export async function getUserPostReaction(postId: string, userId: string): Promise<string | null> {
+// Unsave a post for a user
+export async function unsavePost(postId: string, userId: string): Promise<boolean> {
   try {
-    console.log('Getting user post reaction', { postId, userId });
+    console.log('[Queries] Unsaving post:', postId, 'for user:', userId);
     
-    const schemaExists = await true;
-    if (!schemaExists) {
-      console.log('Database schema not found, cannot get reaction');
-      return null;
-    }
-    
-    const { data, error } = await getSupabase()
-      .from('post_likes')
-      .select('reaction_type')
-      .eq('post_id', postId)
+    const { error } = await getSupabase()
+      .from('saved_posts')
+      .delete()
       .eq('user_id', userId)
-      .maybeSingle();
-
-    if (error) {
-      console.log('Error getting user reaction', error);
-      return null;
-    }
-    
-    console.log('User reaction fetched successfully', data?.reaction_type);
-    return data?.reaction_type || null;
-  } catch (error) {
-    console.log('Error getting user post reaction', error);
-    return null;
-  }
-}
-
-// Get reaction counts for a post
-export async function getPostReactionCounts(postId: string): Promise<Record<string, number>> {
-  try {
-    console.log('Getting post reaction counts', { postId });
-    
-    const schemaExists = await true;
-    if (!schemaExists) {
-      console.log('Database schema not found, cannot get reaction counts');
-      return {};
-    }
-    
-    const { data, error } = await getSupabase()
-      .from('post_likes')
-      .select('reaction_type')
       .eq('post_id', postId);
 
     if (error) {
-      console.log('Error getting reaction counts', error);
-      return {};
+      console.error('[Queries] Error unsaving post:', error);
+      // If the table doesn't exist, return false instead of throwing
+      if (error.code === '42P01') { // Table doesn't exist
+        console.log('[Queries] saved_posts table does not exist yet');
+        return false;
+      }
+      return false;
     }
     
-    // Count reactions by type
-    const counts: Record<string, number> = {};
-    data?.forEach(reaction => {
-      const type = reaction.reaction_type || 'like';
-      counts[type] = (counts[type] || 0) + 1;
-    });
-    
-    console.log('Reaction counts fetched successfully', counts);
-    return counts;
+    console.log('[Queries] Post unsaved successfully');
+    return true;
   } catch (error) {
-    console.log('Error getting post reaction counts', error);
-    return {};
+    console.error('[Queries] Error in unsavePost:', error);
+    return false;
   }
 }
+
+// Check if a post is saved by a user
+export async function isPostSaved(postId: string, userId: string): Promise<boolean> {
+  try {
+    console.log('[Queries] Checking if post is saved:', postId, 'by user:', userId);
+    
+    const { data, error } = await getSupabase()
+      .from('saved_posts')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('post_id', postId)
+      .limit(1);
+
+    if (error) {
+      console.error('[Queries] Error checking saved status:', error);
+      // If the table doesn't exist, return false instead of throwing
+      if (error.code === '42P01') { // Table doesn't exist
+        console.log('[Queries] saved_posts table does not exist yet');
+        return false;
+      }
+      return false;
+    }
+    
+    const isSaved = data && data.length > 0;
+    console.log('[Queries] Post saved status checked:', isSaved);
+    return isSaved;
+  } catch (error) {
+    console.error('[Queries] Error in isPostSaved:', error);
+    return false;
+  }
+}
+
+// Event functions
+export async function getEvents(): Promise<Event[]> {
+  try {
+    console.log('[Queries] Getting events');
+    
+    const { data, error } = await getSupabase()
+      .from('events')
+      .select(`
+        *,
+        organizer:profiles!events_organizer_id_fkey(
+          id,
+          full_name,
+          avatar_url,
+          user_type
+        )
+      `)
+      .order('start_date', { ascending: true });
+
+    if (error) {
+      console.error('[Queries] Error fetching events:', error);
+      return [];
+    }
+    
+    console.log('[Queries] Events fetched successfully:', data?.length || 0);
+    return data || [];
+  } catch (error) {
+    console.error('[Queries] Error in getEvents:', error);
+    return [];
+  }
+}
+
+export async function createEvent(eventData: Omit<Event, 'id' | 'created_at' | 'updated_at' | 'attendees_count'>): Promise<Event | null> {
+  try {
+    console.log('[Queries] Creating event:', eventData.title);
+    
+    const { data, error } = await getSupabase()
+      .from('events')
+      .insert({
+        ...eventData,
+        attendees_count: 0,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('[Queries] Error creating event:', error);
+      throw error;
+    }
+    
+    console.log('[Queries] Event created successfully');
+    return data as Event;
+  } catch (error) {
+    console.error('[Queries] Error in createEvent:', error);
+    throw error;
+  }
+}
+
+export async function registerForEvent(eventId: string, userId: string): Promise<boolean> {
+  try {
+    console.log('[Queries] Registering for event:', eventId, 'by user:', userId);
+    
+    // Check if already registered
+    const { data: existingRegistration } = await getSupabase()
+      .from('event_attendees')
+      .select('id')
+      .eq('event_id', eventId)
+      .eq('attendee_id', userId)
+      .single();
+
+    if (existingRegistration) {
+      console.log('[Queries] User already registered for event');
+      return false;
+    }
+    
+    // Add registration
+    const { error: registrationError } = await getSupabase()
+      .from('event_attendees')
+      .insert({
+        event_id: eventId,
+        attendee_id: userId,
+        attendee_type: 'individual',
+        status: 'registered',
+        registration_date: new Date().toISOString(),
+      });
+
+    if (registrationError) {
+      console.error('[Queries] Error registering for event:', registrationError);
+      throw registrationError;
+    }
+
+    // Update event attendees count
+    const { data: event } = await getSupabase()
+      .from('events')
+      .select('attendees_count')
+      .eq('id', eventId)
+      .single();
+
+    if (event) {
+      const { error: updateError } = await getSupabase()
+        .from('events')
+        .update({ attendees_count: (event.attendees_count || 0) + 1 })
+        .eq('id', eventId);
+
+      if (updateError) {
+        console.error('[Queries] Error updating attendees count:', updateError);
+      }
+    }
+
+    console.log('[Queries] Event registration successful');
+    return true;
+  } catch (error) {
+    console.error('[Queries] Error in registerForEvent:', error);
+    return false;
+  }
+}
+
+export async function unregisterFromEvent(eventId: string, userId: string): Promise<boolean> {
+  try {
+    console.log('[Queries] Unregistering from event:', eventId, 'by user:', userId);
+    
+    // Remove registration
+    const { error: unregisterError } = await getSupabase()
+      .from('event_attendees')
+      .delete()
+      .eq('event_id', eventId)
+      .eq('attendee_id', userId);
+
+    if (unregisterError) {
+      console.error('[Queries] Error unregistering from event:', unregisterError);
+      throw unregisterError;
+    }
+
+    // Update event attendees count
+    const { data: event } = await getSupabase()
+      .from('events')
+      .select('attendees_count')
+      .eq('id', eventId)
+      .single();
+
+    if (event) {
+      const { error: updateError } = await getSupabase()
+        .from('events')
+        .update({ attendees_count: Math.max(0, (event.attendees_count || 0) - 1) })
+        .eq('id', eventId);
+
+      if (updateError) {
+        console.error('[Queries] Error updating attendees count:', updateError);
+      }
+    }
+
+    console.log('[Queries] Event unregistration successful');
+    return true;
+  } catch (error) {
+    console.error('[Queries] Error in unregisterFromEvent:', error);
+    return false;
+  }
+}
+
+export async function isRegisteredForEvent(eventId: string, userId: string): Promise<boolean> {
+  try {
+    console.log('[Queries] Checking if user is registered for event:', eventId, 'user:', userId);
+    
+    const { data, error } = await getSupabase()
+      .from('event_attendees')
+      .select('id')
+      .eq('event_id', eventId)
+      .eq('attendee_id', userId)
+      .limit(1);
+
+    if (error) {
+      console.error('[Queries] Error checking event registration:', error);
+      return false;
+    }
+    
+    const isRegistered = data && data.length > 0;
+    console.log('[Queries] Event registration status checked:', isRegistered);
+    return isRegistered;
+  } catch (error) {
+    console.error('[Queries] Error in isRegisteredForEvent:', error);
+    return false;
+  }
+}
+
+export async function getUserRegisteredEvents(userId: string): Promise<Event[]> {
+  try {
+    console.log('[Queries] Getting user registered events:', userId);
+    
+    const { data, error } = await getSupabase()
+      .from('event_attendees')
+      .select(`
+        event_id,
+        events (
+          *,
+          organizer:profiles!events_organizer_id_fkey(
+            id,
+            full_name,
+            avatar_url,
+            user_type
+          )
+        )
+      `)
+      .eq('attendee_id', userId)
+      .eq('status', 'registered')
+      .order('registration_date', { ascending: false });
+
+    if (error) {
+      console.error('[Queries] Error fetching user registered events:', error);
+      return [];
+    }
+    
+    const events = data?.map(item => item.events).filter(Boolean) || [];
+    console.log('[Queries] User registered events fetched:', events.length);
+    return events as unknown as Event[];
+  } catch (error) {
+    console.error('[Queries] Error in getUserRegisteredEvents:', error);
+    return [];
+  }
+}
+

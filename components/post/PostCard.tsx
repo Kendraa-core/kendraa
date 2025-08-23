@@ -8,44 +8,33 @@ import ClickableProfileName from '@/components/common/ClickableProfileName';
 import ShareButton from '@/components/common/ShareButton';
 import PostReactions from '@/components/post/PostReactions';
 import {
-  HeartIcon,
   ChatBubbleOvalLeftIcon,
-  ShareIcon,
   BookmarkIcon,
   EllipsisHorizontalIcon,
 } from '@heroicons/react/24/outline';
 import {
-  HeartIcon as HeartSolidIcon,
   BookmarkIcon as BookmarkSolidIcon,
 } from '@heroicons/react/24/solid';
 import { formatRelativeTime } from '@/lib/utils';
 import toast from 'react-hot-toast';
 import {
-  likePost,
-  unlikePost,
-  isPostLiked,
   getPostComments,
   createComment,
-  addPostReaction,
-  removePostReaction,
-  getUserPostReaction,
-  getPostReactionCounts,
+  savePost,
+  unsavePost,
+  isPostSaved,
 } from '@/lib/queries';
 import type { Post, CommentWithAuthor, Profile } from '@/types/database.types';
-import { getSupabase } from '@/lib/queries';
 import { 
   handleSupabaseError, 
   logError, 
   getErrorMessage, 
-  validateStringLength,
-  ValidationError 
+  validateStringLength
 } from '@/utils/errorHandler';
 
 interface PostCardProps {
   post: Post & {
     profiles?: Profile;
-    post_likes?: Array<{ id: string; user_id: string }>;
-    post_comments?: Array<{ id: string; content: string; author_id: string; created_at: string }>;
   };
   onInteraction?: () => void;
 }
@@ -53,80 +42,23 @@ interface PostCardProps {
 export default function PostCard({ post, onInteraction }: PostCardProps) {
   const { user } = useAuth();
   
-  // Initialize state first, before any conditional returns
-  const [isLiked, setIsLiked] = useState(false);
-  const [userReaction, setUserReaction] = useState<string | null>(null); // Track user's reaction type
+  // State management
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [likesCount, setLikesCount] = useState(post?.likes_count || 0);
   const [commentsCount, setCommentsCount] = useState(post?.comments_count || 0);
-  const [showComments, setShowComments] = useState(true); // Show comments by default
+  const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState<CommentWithAuthor[]>([]);
   const [newComment, setNewComment] = useState('');
-  const [showCommentBox, setShowCommentBox] = useState(false); // Control comment textbox visibility
+  const [showCommentBox, setShowCommentBox] = useState(false);
   const [isCommenting, setIsCommenting] = useState(false);
   const [isLoadingComments, setIsLoadingComments] = useState(false);
-  const [showOptions, setShowOptions] = useState(false);
-  const [showAllComments, setShowAllComments] = useState(false); // For showing more than 2 comments
 
   // Debug logging
   const debugLog = (message: string, data?: unknown) => {
     console.log(`[PostCard] ${message}`, data);
   };
 
-  // Function to refresh post data from database
-  const refreshPostData = async () => {
-    if (!post?.id) return;
-    
-    try {
-      const { data: postData, error } = await getSupabase()
-        .from('posts')
-        .select('likes_count, comments_count')
-        .eq('id', post.id)
-        .single();
-      
-      if (!error && postData) {
-        setLikesCount(postData.likes_count || 0);
-        setCommentsCount(postData.comments_count || 0);
-        debugLog('Post data refreshed', postData);
-      }
-    } catch (error) {
-      debugLog('Error refreshing post data', error);
-    }
-  };
-
-  // Check if current user has reacted to the post
-  useEffect(() => {
-    if (!user?.id || !post?.id) return;
-    
-    const checkUserReaction = async () => {
-      try {
-        const reaction = await getUserPostReaction(post.id, user.id);
-        if (reaction) {
-          setIsLiked(true);
-          setUserReaction(reaction);
-        } else {
-          setIsLiked(false);
-          setUserReaction(null);
-        }
-        debugLog('User reaction checked', { postId: post.id, reaction });
-      } catch (error) {
-        debugLog('Error checking user reaction', error);
-        setIsLiked(false);
-        setUserReaction(null);
-      }
-    };
-
-    checkUserReaction();
-  }, [post?.id, user?.id]);
-
-  // Automatically load comments when component mounts
-  useEffect(() => {
-    if (post?.id) {
-      loadComments();
-    }
-  }, [post?.id]); // Load comments on mount
-
-  // Validate post data after hooks are declared
+  // Validate post data
   if (!post || !post.id) {
     console.error('[PostCard] Invalid post data:', post);
     return (
@@ -136,98 +68,66 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
     );
   }
 
-  const handleReaction = async (reactionId: string) => {
+  const handleBookmark = async () => {
     if (!user?.id) {
-      toast.error('Please log in to react to posts');
+      toast.error('Please log in to save posts');
       return;
     }
 
-    if (!post?.id) {
-      toast.error('Invalid post. Cannot react.');
-      return;
-    }
-
-    debugLog('Handling reaction', { postId: post.id, reactionId, currentReaction: userReaction });
+    debugLog('Handling bookmark', { postId: post.id, currentBookmarked: isBookmarked });
 
     try {
-      // If user already has this reaction, remove it (toggle off)
-      if (userReaction === reactionId) {
-        const success = await removePostReaction(post.id, user.id);
+      if (isBookmarked) {
+        const success = await unsavePost(post.id, user.id);
         if (success) {
-          setIsLiked(false);
-          setUserReaction(null);
-          setLikesCount((prev: number) => Math.max(0, prev - 1));
-          debugLog('Reaction removed successfully');
+          setIsBookmarked(false);
+          toast.success('Post removed from saved items');
         } else {
-          toast.error('Failed to remove reaction. Please try again.');
+          toast.error('Failed to remove post from saved items');
         }
       } else {
-        // Add or update reaction
-        const success = await addPostReaction(post.id, user.id, reactionId);
+        const success = await savePost(post.id, user.id);
         if (success) {
-          setIsLiked(true);
-          setUserReaction(reactionId);
-          // If this is a new reaction (not updating existing), increment count
-          if (!userReaction) {
-            setLikesCount((prev: number) => prev + 1);
-          }
-          debugLog('Reaction added successfully');
+          setIsBookmarked(true);
+          toast.success('Post saved to your collection');
         } else {
-          toast.error('Failed to add reaction. Please try again.');
+          toast.error('Failed to save post');
         }
       }
       
-      // Don't call onInteraction to prevent page reload
+      onInteraction?.();
     } catch (error: any) {
       logError('PostCard', error, { 
         postId: post.id, 
-        action: 'handleReaction',
-        userId: user.id,
-        reactionId 
+        action: 'handleBookmark',
+        userId: user.id
       });
       
-      // Handle error with proper error handling utility
       const appError = handleSupabaseError(error);
       toast.error(getErrorMessage(appError));
     }
   };
 
-  const toggleComments = () => {
-    setShowComments(!showComments);
-    if (!showComments) {
-      loadComments();
-    }
-  };
-
   const loadComments = async () => {
-    if (!post?.id) {
-      logError('PostCard', new Error('Cannot load comments: Invalid post ID'));
-      return;
-    }
+    if (!post?.id) return;
 
     setIsLoadingComments(true);
     debugLog('Loading comments', { postId: post.id });
     
     try {
-      // Load top 5 comments by default
       const fetchedComments = await getPostComments(post.id, 5);
       
-      // Validate comments data
       if (Array.isArray(fetchedComments)) {
         setComments(fetchedComments);
         debugLog('Comments loaded', { count: fetchedComments.length });
       } else {
-        logError('PostCard', new Error('Invalid comments data received'), { fetchedComments });
         setComments([]);
         toast.error('Invalid comments data received');
       }
     } catch (error: any) {
       logError('PostCard', error, { postId: post.id, action: 'loadComments' });
-      
-      // Handle error with proper error handling utility
       const appError = handleSupabaseError(error);
       toast.error(getErrorMessage(appError));
-      
       setComments([]);
     } finally {
       setIsLoadingComments(false);
@@ -235,7 +135,6 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
   };
 
   const submitComment = async () => {
-    // Validate input
     if (!newComment.trim()) {
       toast.error('Please enter a comment');
       return;
@@ -246,12 +145,6 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
       return;
     }
 
-    if (!post?.id) {
-      toast.error('Invalid post. Cannot add comment.');
-      return;
-    }
-
-    // Validate comment length using utility
     const lengthError = validateStringLength(newComment.trim(), 'Comment', 1, 1000);
     if (lengthError) {
       toast.error(lengthError.message);
@@ -270,17 +163,15 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
 
       const result = await createComment(commentData);
       
-             if (result) {
-         debugLog('Comment created successfully', result);
-         setNewComment('');
-         setShowCommentBox(false); // Hide comment box after posting
-         setCommentsCount(prev => prev + 1);
-         // Refresh comments
-         await loadComments();
-         toast.success('Comment added successfully!');
-         // Don't call onInteraction to prevent page reload
-       } else {
-        toast.error('Failed to add comment. Please try again.');
+      if (result) {
+        debugLog('Comment created successfully', result);
+        setNewComment('');
+        setShowCommentBox(false);
+        setCommentsCount(prev => prev + 1);
+        await loadComments();
+        toast.success('Comment added successfully!');
+      } else {
+        toast.error('Failed to add comment');
       }
     } catch (error: any) {
       logError('PostCard', error, { 
@@ -289,22 +180,11 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
         commentLength: newComment.length 
       });
       
-      // Handle error with proper error handling utility
       const appError = handleSupabaseError(error);
       toast.error(getErrorMessage(appError));
     } finally {
       setIsCommenting(false);
     }
-  };
-
-  const handleShare = () => {
-    // Implement share functionality
-    toast('Share functionality coming soon!');
-  };
-
-  const handleBookmark = () => {
-    setIsBookmarked(!isBookmarked);
-    toast.success(isBookmarked ? 'Removed from bookmarks' : 'Added to bookmarks');
   };
 
   const getAuthorName = () => {
@@ -319,17 +199,43 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
     return post.profiles?.headline || 'Healthcare Professional';
   };
 
+  // Initialize post state on mount
+  useEffect(() => {
+    if (!post?.id || !user?.id) return;
+
+    const initializePostState = async () => {
+      try {
+        const saved = await isPostSaved(post.id, user.id);
+        setIsBookmarked(saved);
+        debugLog('Post saved status checked', { postId: post.id, saved });
+      } catch (error) {
+        debugLog('Error checking saved status', error);
+        setIsBookmarked(false);
+      }
+    };
+
+    initializePostState();
+  }, [post?.id, user?.id]);
+
+  // Refresh post data when post changes
+  useEffect(() => {
+    if (post?.id) {
+      setLikesCount(post.likes_count || 0);
+      setCommentsCount(post.comments_count || 0);
+    }
+  }, [post?.id, post?.likes_count, post?.comments_count]);
+
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6">
+    <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
       {/* Post Header */}
       <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-3 min-w-0 flex-1">
           <Avatar
             src={getAuthorAvatar()}
             alt={getAuthorName()}
             size="md"
           />
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <div className="flex items-center space-x-2">
               <ClickableProfileName
                 userId={post.author_id}
@@ -337,15 +243,14 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
                 userType={post.profiles?.user_type}
               />
             </div>
-            <p className="text-sm text-gray-500">{getAuthorHeadline()}</p>
+            <p className="text-sm text-gray-500 truncate">{getAuthorHeadline()}</p>
             <p className="text-xs text-gray-400">
               {formatRelativeTime(post.created_at)} • Public
             </p>
           </div>
         </div>
         <button
-          onClick={() => setShowOptions(!showOptions)}
-          className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+          className="p-1 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
         >
           <EllipsisHorizontalIcon className="w-5 h-5" />
         </button>
@@ -353,7 +258,8 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
 
       {/* Post Content */}
       <div className="mb-4">
-        <p className="text-gray-900 whitespace-pre-wrap">{post.content}</p>
+        <p className="text-gray-900 whitespace-pre-wrap break-words">{post.content}</p>
+        
         {post.image_url && (
           <div className="mt-3">
             <Image
@@ -380,7 +286,6 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
               {commentsCount} {commentsCount === 1 ? 'comment' : 'comments'}
             </span>
           )}
-          <span>0 shares</span>
         </div>
       </div>
 
@@ -388,14 +293,14 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
       <div className="flex items-center justify-between border-t border-gray-100 pt-4">
         <PostReactions
           postId={post.id}
-          userReaction={userReaction}
+          userReaction={null}
           reactionCounts={{ like: likesCount }}
-          onReact={handleReaction}
+          onReact={() => {}}
         />
 
         <button
           onClick={() => {
-            setShowCommentBox(!showCommentBox); // Toggle comment box
+            setShowCommentBox(!showCommentBox);
             if (!showComments) {
               setShowComments(true);
               loadComments();
@@ -404,7 +309,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
           className="flex items-center space-x-2 px-3 py-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors"
         >
           <ChatBubbleOvalLeftIcon className="w-5 h-5" />
-          <span className="text-sm">Comment</span>
+          <span className="text-sm hidden sm:inline">Comment</span>
         </button>
 
         <ShareButton 
@@ -426,14 +331,14 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
           ) : (
             <BookmarkIcon className="w-5 h-5" />
           )}
-          <span className="text-sm">Save</span>
+          <span className="text-sm hidden sm:inline">Save</span>
         </button>
       </div>
 
       {/* Comments Section */}
       {showComments && (
         <div className="border-t border-gray-100 pt-4 mt-4">
-          {/* Add Comment - Hidden by default, shown only when user clicks "Comment" */}
+          {/* Add Comment */}
           {showCommentBox && (
             <div className="flex items-start space-x-3 mb-4">
               <Avatar
@@ -470,71 +375,49 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600 mx-auto"></div>
               </div>
             ) : comments.length > 0 ? (
-              <>
-                {/* Show top 5 comments or all if showAllComments is true */}
-                {(showAllComments ? comments : comments.slice(0, 2)).map((comment) => {
-                  // Validate comment data
-                  if (!comment || !comment.id || !comment.author_id) {
-                    console.error('[PostCard] Invalid comment data:', comment);
-                    return null;
-                  }
+              comments.map((comment) => {
+                if (!comment || !comment.id || !comment.author_id) {
+                  return null;
+                }
 
-                  // Safely extract author data
-                  const authorName = comment.author && 'full_name' in comment.author 
-                    ? comment.author.full_name || 'Unknown User'
-                    : comment.author && 'name' in comment.author
-                    ? comment.author.name || 'Unknown User'
-                    : 'Unknown User';
+                const authorName = comment.author && 'full_name' in comment.author 
+                  ? comment.author.full_name || 'Unknown User'
+                  : 'Unknown User';
 
-                  const authorAvatar = comment.author && 'avatar_url' in comment.author 
-                    ? comment.author.avatar_url || ''
-                    : comment.author && 'logo_url' in comment.author
-                    ? comment.author.logo_url || ''
-                    : '';
+                const authorAvatar = comment.author && 'avatar_url' in comment.author 
+                  ? comment.author.avatar_url || ''
+                  : '';
 
-                  const authorType = comment.author && 'user_type' in comment.author 
-                    ? comment.author.user_type 
-                    : 'individual';
+                const authorType = comment.author && 'user_type' in comment.author 
+                  ? comment.author.user_type 
+                  : 'individual';
 
-                  return (
-                    <div key={comment.id} className="flex items-start space-x-3">
-                      <Avatar
-                        src={authorAvatar}
-                        alt={authorName}
-                        size="sm"
-                      />
-                      <div className="flex-1">
-                        <div className="bg-gray-50 rounded-lg p-3">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <ClickableProfileName
-                              userId={comment.author_id}
-                              name={authorName}
-                              userType={authorType}
-                              className="text-sm"
-                            />
-                            <span className="text-xs text-gray-500">
-                              {comment.created_at ? formatRelativeTime(comment.created_at) : 'Just now'}
-                            </span>
-                          </div>
-                          <p className="text-sm text-gray-700">{comment.content || 'Comment content unavailable'}</p>
+                return (
+                  <div key={comment.id} className="flex items-start space-x-3">
+                    <Avatar
+                      src={authorAvatar}
+                      alt={authorName}
+                      size="sm"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="bg-gray-50 rounded-lg p-3">
+                        <div className="flex items-center space-x-2 mb-1">
+                          <ClickableProfileName
+                            userId={comment.author_id}
+                            name={authorName}
+                            userType={authorType}
+                            className="text-sm"
+                          />
+                          <span className="text-xs text-gray-500">
+                            {comment.created_at ? formatRelativeTime(comment.created_at) : 'Just now'}
+                          </span>
                         </div>
+                        <p className="text-sm text-gray-700 break-words">{comment.content || 'Comment content unavailable'}</p>
                       </div>
                     </div>
-                  );
-                })}
-                
-                {/* Show more/less button if there are more than 5 comments */}
-                {comments.length > 2 && (
-                  <div className="text-center pt-2">
-                    <button
-                      onClick={() => setShowAllComments(!showAllComments)}
-                      className="text-sm text-primary-600 hover:text-primary-800 font-medium transition-colors"
-                    >
-                      {showAllComments ? `Show less` : `Show ${comments.length - 2} more comments`}
-                    </button>
                   </div>
-                )}
-              </>
+                );
+              })
             ) : (
               <p className="text-center text-gray-500 text-sm py-4">
                 No comments yet. Be the first to comment!

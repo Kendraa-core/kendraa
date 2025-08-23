@@ -13,7 +13,6 @@ import {
   UserIcon,
   BellIcon,
   BriefcaseIcon,
-  ChatBubbleLeftIcon,
   BuildingOfficeIcon,
   CalendarIcon,
   StarIcon,
@@ -21,6 +20,7 @@ import {
   Cog6ToothIcon,
   AcademicCapIcon,
   ChartBarIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import {
   HomeIcon as HomeSolidIcon,
@@ -28,7 +28,6 @@ import {
   UserIcon as UserSolidIcon,
   BellIcon as BellSolidIcon,
   BriefcaseIcon as BriefcaseSolidIcon,
-  ChatBubbleLeftIcon as ChatBubbleLeftSolidIcon,
   BuildingOfficeIcon as BuildingOfficeSolidIcon,
   CalendarIcon as CalendarSolidIcon,
   StarIcon as StarSolidIcon,
@@ -69,12 +68,7 @@ const navigationItems = [
     iconActive: CalendarSolidIcon,
     isNew: true,
   },
-  {
-    name: 'Messaging',
-    href: '/messaging',
-    icon: ChatBubbleLeftIcon,
-    iconActive: ChatBubbleLeftSolidIcon,
-  },
+
   {
     name: 'Notifications',
     href: '/notifications',
@@ -104,12 +98,15 @@ const quickAccessItems = [
   },
 ];
 
-export default function LeftSidebar() {
+interface LeftSidebarProps {
+  onClose?: () => void;
+}
+
+export default function LeftSidebar({ onClose }: LeftSidebarProps) {
   const { user, profile } = useAuth();
   const pathname = usePathname();
   const [showQuickAccess, setShowQuickAccess] = useState(false);
   const [connectionCount, setConnectionCount] = useState(0);
-
   const [loading, setLoading] = useState(true);
 
   // Fetch real stats
@@ -133,13 +130,36 @@ export default function LeftSidebar() {
 
   if (!user) return null;
 
+  const isMobile = onClose !== undefined;
+
   return (
-    <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 lg:pt-16 lg:bg-white lg:border-r lg:border-slate-200">
+    <div className={cn(
+      "flex flex-col h-full bg-white",
+      isMobile ? "w-full" : "hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 lg:pt-16 lg:border-r lg:border-gray-200 lg:shadow-sm"
+    )}>
       <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+        {/* Mobile Header */}
+        {isMobile && (
+          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">K</span>
+              </div>
+              <span className="text-lg font-semibold text-gray-900">Menu</span>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              <XMarkIcon className="w-6 h-6 text-gray-600" />
+            </button>
+          </div>
+        )}
+
         {/* Enhanced User Profile Section */}
-        <div className="bg-gradient-to-br from-primary-50 to-accent-50 overflow-hidden">
+        <div className="bg-gradient-to-br from-primary-50 via-secondary-50 to-accent-50 overflow-hidden">
           {/* Mini Banner */}
-          <div className="h-12 bg-gradient-to-r from-blue-600 to-purple-600 relative">
+          <div className="h-16 bg-gradient-to-r from-primary-600 via-secondary-600 to-accent-600 relative">
             <div className="absolute inset-0 bg-black bg-opacity-10" />
             <div className="absolute inset-0 opacity-20">
               <svg width="100%" height="100%" viewBox="0 0 100 100">
@@ -154,14 +174,14 @@ export default function LeftSidebar() {
           </div>
           
           {/* Profile Content */}
-          <div className="px-6 pb-6 -mt-6 relative">
-            <Link href={`/profile/${user.id}`} className="group block">
+          <div className="px-6 pb-6 -mt-8 relative">
+            <Link href={`/profile/${user.id}`} className="group block" onClick={onClose}>
               <motion.div
                 whileHover={{ scale: 1.02 }}
                 className="flex flex-col items-center text-center"
               >
-                <div className="relative mb-3">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-xl ring-4 ring-white shadow-lg">
+                <div className="relative mb-4">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary-500 to-secondary-600 flex items-center justify-center text-white font-semibold text-xl ring-4 ring-white shadow-lg">
                     {profile?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
                   </div>
                   <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white">
@@ -170,15 +190,15 @@ export default function LeftSidebar() {
                 </div>
                 
                 <div className="w-full">
-                  <p className="text-sm font-semibold text-slate-900 truncate group-hover:text-primary-600 transition-colors mb-1">
+                  <p className="text-sm font-semibold text-gray-900 truncate group-hover:text-primary-600 transition-colors mb-1">
                     {profile?.full_name || 'User'}
                   </p>
-                  <p className="text-xs text-slate-600 truncate mb-2">
-                    {profile?.headline || 'Healthcare Professional'}
+                  <p className="text-xs text-gray-600 truncate mb-2">
+                    {profile?.headline || 'Add a headline'}
                   </p>
                   
                   {profile?.specialization && profile.specialization.length > 0 && (
-                    <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full mb-3">
+                    <span className="inline-block px-2 py-1 bg-primary-100 text-primary-800 text-xs rounded-full mb-3">
                       {profile.specialization[0]}
                     </span>
                   )}
@@ -187,28 +207,28 @@ export default function LeftSidebar() {
             </Link>
             
             {/* Enhanced Stats */}
-            <div className="mt-4 pt-4 border-t border-slate-200">
+            <div className="mt-4 pt-4 border-t border-gray-200">
               <div className="flex justify-between items-center text-center">
                 <div className="flex-1">
-                  <p className="text-lg font-semibold text-slate-900">
+                  <p className="text-lg font-semibold text-gray-900">
                     {loading ? '...' : connectionCount}
                   </p>
-                  <p className="text-xs text-slate-600">Connections</p>
+                  <p className="text-xs text-gray-600">Connections</p>
                 </div>
-                <div className="w-px h-8 bg-slate-200"></div>
+                <div className="w-px h-8 bg-gray-200"></div>
                 <div className="flex-1">
-                  <p className="text-lg font-semibold text-slate-900">
+                  <p className="text-lg font-semibold text-gray-900">
                     {loading ? '...' : Math.floor(Math.random() * 50) + 10}
                   </p>
-                  <p className="text-xs text-slate-600">Posts</p>
+                  <p className="text-xs text-gray-600">Posts</p>
                 </div>
               </div>
             </div>
 
             {/* Quick Profile Action */}
             <div className="mt-4">
-              <Link href={`/profile/${user.id}`}>
-                <button className="w-full py-2 px-4 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium rounded-lg border border-slate-200 transition-colors">
+              <Link href={`/profile/${user.id}`} onClick={onClose}>
+                <button className="w-full py-2 px-4 bg-white hover:bg-gray-50 text-gray-700 text-xs font-medium rounded-lg border border-gray-200 transition-colors">
                   View Profile
                 </button>
               </Link>
@@ -224,20 +244,20 @@ export default function LeftSidebar() {
               const Icon = isActive ? item.iconActive : item.icon;
 
               return (
-                <Link key={item.name} href={item.href}>
+                <Link key={item.name} href={item.href} onClick={onClose}>
                   <motion.div
                     whileHover={{ x: 2 }}
                     className={cn(
-                      'group flex items-center px-3 py-2 text-sm font-medium rounded-xl transition-all duration-200',
+                      'group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200',
                       isActive
-                        ? 'modern-gradient text-white shadow-glow'
-                        : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+                        ? 'bg-gradient-to-r from-primary-500 to-secondary-600 text-white shadow-md'
+                        : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                     )}
                   >
                     <Icon 
                       className={cn(
                         'mr-3 h-5 w-5 flex-shrink-0',
-                        isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-500'
+                        isActive ? 'text-white' : 'text-gray-400 group-hover:text-gray-500'
                       )} 
                     />
                     <span className="truncate">{item.name}</span>
@@ -256,7 +276,7 @@ export default function LeftSidebar() {
           <div className="mt-8 px-3">
             <button
               onClick={() => setShowQuickAccess(!showQuickAccess)}
-              className="flex items-center justify-between w-full px-3 py-2 text-xs font-medium text-slate-500 hover:text-slate-700 transition-colors"
+              className="flex items-center justify-between w-full px-3 py-2 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors"
             >
               <span>Quick Access</span>
               <div
@@ -284,20 +304,20 @@ export default function LeftSidebar() {
                   const Icon = isActive ? item.iconActive : item.icon;
 
                   return (
-                    <Link key={item.name} href={item.href}>
+                    <Link key={item.name} href={item.href} onClick={onClose}>
                       <motion.div
                         whileHover={{ x: 2 }}
                         className={cn(
                           'group flex items-center px-3 py-2 text-sm font-medium rounded-xl transition-all duration-200',
                           isActive
                             ? 'bg-primary-50 text-primary-700'
-                            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                         )}
                       >
                         <Icon 
                           className={cn(
                             'mr-3 h-4 w-4 flex-shrink-0',
-                            isActive ? 'text-primary-600' : 'text-slate-400 group-hover:text-slate-500'
+                            isActive ? 'text-primary-600' : 'text-gray-400 group-hover:text-gray-500'
                           )} 
                         />
                         <span className="truncate">{item.name}</span>
@@ -310,13 +330,13 @@ export default function LeftSidebar() {
           </div>
 
           {/* Settings */}
-          <div className="mt-auto p-3 border-t border-slate-200">
-            <Link href="/settings">
+          <div className="mt-auto p-3 border-t border-gray-200">
+            <Link href="/settings" onClick={onClose}>
               <motion.div
                 whileHover={{ x: 2 }}
-                className="group flex items-center px-3 py-2 text-sm font-medium text-slate-600 rounded-xl hover:bg-slate-50 hover:text-slate-900 transition-all duration-200"
+                className="group flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-xl hover:bg-gray-50 hover:text-gray-900 transition-all duration-200"
               >
-                <Cog6ToothIcon className="mr-3 h-5 w-5 flex-shrink-0 text-slate-400 group-hover:text-slate-500" />
+                <Cog6ToothIcon className="mr-3 h-5 w-5 flex-shrink-0 text-gray-400 group-hover:text-gray-500" />
                 <span>Settings</span>
               </motion.div>
             </Link>

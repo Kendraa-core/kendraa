@@ -2,10 +2,26 @@
 const nextConfig = {
   // Optimize images
   images: {
-    domains: ['localhost', '127.0.0.1'],
+    domains: [
+      'localhost', 
+      '127.0.0.1',
+      'via.placeholder.com',
+      'images.unsplash.com',
+      'picsum.photos',
+      'ui-avatars.com',
+      'gravatar.com',
+      'lh3.googleusercontent.com',
+      'platform-lookaside.fbsbx.com',
+      'graph.facebook.com',
+      'avatars.githubusercontent.com',
+      'camo.githubusercontent.com'
+    ],
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    minimumCacheTTL: 60,
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 
   // Webpack configuration

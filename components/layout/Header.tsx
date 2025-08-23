@@ -20,11 +20,17 @@ import {
   UserGroupIcon,
   BriefcaseIcon,
   CalendarDaysIcon,
+  Squares2X2Icon,
 } from '@heroicons/react/24/outline';
 import { useNotifications } from '@/contexts/NotificationContext';
 import { formatRelativeTime } from '@/utils/formatRelativeTime';
 
-export default function Header() {
+interface HeaderProps {
+  onSidebarToggle?: () => void;
+  onRightSidebarToggle?: () => void;
+}
+
+export default function Header({ onSidebarToggle, onRightSidebarToggle }: HeaderProps) {
   const { user, profile, signOut } = useAuth();
   const { unreadCount, notifications, markAsRead } = useNotifications();
   const router = useRouter();
@@ -63,8 +69,17 @@ export default function Header() {
       <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <div className="flex items-center space-x-8">
+            {/* Left Side */}
+            <div className="flex items-center space-x-4">
+              {/* Mobile Sidebar Toggle */}
+              <button
+                onClick={onSidebarToggle}
+                className="lg:hidden p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-50 rounded-xl transition-all duration-200"
+              >
+                <Bars3Icon className="w-5 h-5" />
+              </button>
+
+              {/* Logo */}
               <Link href="/" className="flex items-center space-x-2">
                 <Logo />
               </Link>
@@ -77,9 +92,9 @@ export default function Header() {
                     <Link
                       key={item.name}
                       href={item.href}
-                      className={`flex items-center space-x-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                      className={`flex items-center space-x-2 px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 ${
                         isActive
-                          ? 'text-primary-600 bg-primary-50'
+                          ? 'text-primary-700 bg-primary-50 shadow-sm'
                           : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50'
                       }`}
                     >
@@ -92,15 +107,17 @@ export default function Header() {
             </div>
 
             {/* Right Side */}
-            <div className="flex items-center space-x-4">
-              {/* Search */}
-              <UserSearch />
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              {/* Search - Hidden on mobile */}
+              <div className="hidden sm:block">
+                <UserSearch />
+              </div>
 
               {/* Notifications */}
-              <div className="relative">
+              <div className="relative" ref={notificationsDropdownRef}>
                 <button
                   onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                  className="p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200 relative"
+                  className="p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-50 rounded-xl transition-all duration-200 relative"
                 >
                   <BellIcon className="w-5 h-5" />
                   {unreadCount > 0 && (
@@ -112,9 +129,9 @@ export default function Header() {
 
                 {/* Notifications Dropdown */}
                 {isNotificationsOpen && (
-                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                    <div className="px-4 py-2 border-b border-gray-100">
-                      <h3 className="text-sm font-medium text-gray-900">Notifications</h3>
+                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-lg border border-gray-200 py-2 z-50">
+                    <div className="px-4 py-3 border-b border-gray-100">
+                      <h3 className="text-sm font-bold text-gray-900">Notifications</h3>
                     </div>
                     <div className="max-h-64 overflow-y-auto">
                       {notifications.length === 0 ? (
@@ -156,10 +173,10 @@ export default function Header() {
                       )}
                     </div>
                     {notifications.length > 0 && (
-                      <div className="px-4 py-2 border-t border-gray-100">
+                      <div className="px-4 py-3 border-t border-gray-100">
                         <Link
                           href="/notifications"
-                          className="text-sm text-primary-600 hover:text-primary-700"
+                          className="text-sm text-primary-600 hover:text-primary-700 font-medium"
                         >
                           View all notifications
                         </Link>
@@ -170,24 +187,24 @@ export default function Header() {
               </div>
 
               {/* Profile Menu */}
-              <div className="relative">
+              <div className="relative" ref={profileDropdownRef}>
                 <button
                   onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                  className="flex items-center space-x-2 p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200"
+                  className="flex items-center space-x-2 p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-50 rounded-xl transition-all duration-200"
                 >
                   <Avatar
                     src={profile?.avatar_url}
                     alt={profile?.full_name || 'User'}
                     size="sm"
                   />
-                  <ChevronDownIcon className="w-4 h-4" />
+                  <ChevronDownIcon className="w-4 h-4 hidden sm:block" />
                 </button>
 
                 {/* Profile Dropdown */}
                 {isProfileMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-lg border border-gray-200 py-2 z-50">
                     <div className="px-4 py-3 border-b border-gray-100">
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-sm font-bold text-gray-900">
                         {profile?.full_name || 'User'}
                       </div>
                       <div className="text-sm text-gray-500">{profile?.headline}</div>
@@ -246,12 +263,12 @@ export default function Header() {
                 )}
               </div>
 
-              {/* Mobile Menu Button */}
+              {/* Mobile Right Sidebar Toggle */}
               <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-all duration-200"
+                onClick={onRightSidebarToggle}
+                className="lg:hidden p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-50 rounded-xl transition-all duration-200"
               >
-                <Bars3Icon className="w-5 h-5" />
+                <Squares2X2Icon className="w-5 h-5" />
               </button>
             </div>
           </div>
@@ -268,8 +285,8 @@ export default function Header() {
                   href={item.href}
                   className={`flex items-center space-x-2 px-4 py-2 text-sm font-medium ${
                     isActive
-                      ? 'text-blue-600'
-                      : 'text-gray-600 hover:text-blue-600'
+                      ? 'text-primary-600 bg-primary-50'
+                      : 'text-gray-600 hover:text-primary-600'
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >

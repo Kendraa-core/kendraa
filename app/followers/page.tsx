@@ -42,16 +42,25 @@ export default function FollowersPage() {
 
         {loading ? (
           <div className="bg-white rounded-lg shadow p-6">
-            <div className="animate-pulse space-y-4">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="flex items-center space-x-4">
-                  <div className="h-10 w-10 bg-gray-200 rounded-full"></div>
-                  <div className="flex-1">
-                    <div className="h-4 bg-gray-200 rounded w-1/3 mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                  </div>
+            <div className="flex items-center justify-center py-8">
+              <div className="text-center">
+                <div className="relative">
+                  {/* Main spinner */}
+                  <div className="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
+                  
+                  {/* Pulse effect */}
+                  <div className="absolute inset-0 w-12 h-12 border-4 border-transparent border-t-primary-400 rounded-full animate-ping opacity-20"></div>
                 </div>
-              ))}
+                
+                <p className="text-gray-600 mt-4 text-sm font-medium">Loading followers...</p>
+                
+                {/* Progress dots */}
+                <div className="flex justify-center mt-2 space-x-1">
+                  <div className="w-2 h-2 bg-primary-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                  <div className="w-2 h-2 bg-primary-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                  <div className="w-2 h-2 bg-primary-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                </div>
+              </div>
             </div>
           </div>
         ) : followers.length === 0 ? (
