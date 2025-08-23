@@ -30,7 +30,7 @@ import {
   MapPinIcon,
 } from '@heroicons/react/24/outline';
 import { formatRelativeTime } from '@/lib/utils';
-import { getConnectionStats, getPostStats } from '@/lib/queries';
+import { getConnectionStats, getPostStats, getNotifications } from '@/lib/queries';
 import ShareButton from '@/components/common/ShareButton';
 
 
@@ -81,33 +81,17 @@ export default function UserDashboard() {
         likes: postStats.likes || 0,
       });
 
-      // Mock recent activity (replace with real data)
-      setRecentActivity([
-        {
-          id: '1',
-          type: 'connection_request',
-          title: 'Connection request from Dr. Michael Chen',
-          description: 'Neurologist at Stanford Health',
-          timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-          icon: UserGroupIcon,
-        },
-        {
-          id: '2',
-          type: 'post_like',
-          title: 'Your post received 5 new likes',
-          description: 'Research on innovative treatment methods',
-          timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
-          icon: HeartIcon,
-        },
-        {
-          id: '3',
-          type: 'comment',
-          title: 'New comment on your post',
-          description: 'Great insights on the treatment approach',
-          timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
-          icon: ChatBubbleLeftIcon,
-        },
-      ]);
+      // Load real notifications for recent activity
+      const notifications = await getNotifications(user.id);
+      const recentNotifications = notifications.slice(0, 5).map(notification => ({
+        id: notification.id,
+        type: notification.type,
+        title: notification.title,
+        description: notification.message,
+        timestamp: notification.created_at,
+        icon: getActivityIcon(notification.type),
+      }));
+      setRecentActivity(recentNotifications);
     } catch (error) {
       console.error('Error loading dashboard data:', error);
     } finally {

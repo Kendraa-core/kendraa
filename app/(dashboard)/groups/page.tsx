@@ -21,54 +21,19 @@ export default function GroupsPage() {
   const [activeTab, setActiveTab] = useState<'my-groups' | 'discover'>('my-groups');
 
   useEffect(() => {
-    const fetchGroups = async () => {
-      if (!user?.id) return;
+      const fetchGroups = async () => {
+    if (!user?.id) return;
 
-      try {
-        setLoading(true);
-        // TODO: Implement getGroups query
-        // Mock data for now
-        const mockGroups: Group[] = [
-          {
-            id: '1',
-            name: 'Healthcare Professionals Network',
-            description: 'Connect with healthcare professionals from around the world. Share insights, discuss trends, and build meaningful connections.',
-            memberCount: 1247,
-            isMember: true,
-            category: 'Healthcare',
-          },
-          {
-            id: '2',
-            name: 'Medical Innovation Hub',
-            description: 'Stay updated with the latest medical innovations, research breakthroughs, and technological advancements in healthcare.',
-            memberCount: 892,
-            isMember: true,
-            category: 'Innovation',
-          },
-          {
-            id: '3',
-            name: 'Physician Leadership Forum',
-            description: 'A community for physician leaders to discuss leadership challenges, share best practices, and mentor emerging leaders.',
-            memberCount: 456,
-            isMember: false,
-            category: 'Leadership',
-          },
-          {
-            id: '4',
-            name: 'Medical Research Collaboration',
-            description: 'Connect with researchers, share findings, and collaborate on medical research projects across different specialties.',
-            memberCount: 678,
-            isMember: false,
-            category: 'Research',
-          },
-        ];
-        setGroups(mockGroups);
-      } catch (error) {
-        console.error('Error fetching groups:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    try {
+      setLoading(true);
+      // Groups functionality not yet implemented in database
+      setGroups([]);
+    } catch (error) {
+      console.error('Error fetching groups:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
     fetchGroups();
   }, [user?.id]);
@@ -208,22 +173,16 @@ export default function GroupsPage() {
               <UserGroupIcon className="w-8 h-8 text-gray-400" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              {activeTab === 'my-groups' ? 'No groups joined yet' : 'No groups available'}
+              Groups Coming Soon
             </h3>
             <p className="text-gray-600 mb-6">
-              {activeTab === 'my-groups' 
-                ? 'Join some groups to start connecting with professional communities.'
-                : 'Check back later for new groups to join.'
-              }
+              Professional groups functionality is currently under development. 
+              You'll soon be able to join and create groups to connect with healthcare communities.
             </p>
-            {activeTab === 'my-groups' && (
-              <button
-                onClick={() => setActiveTab('discover')}
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Discover Groups
-              </button>
-            )}
+            <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+              <span>Feature in development</span>
+            </div>
           </div>
         )}
       </div>

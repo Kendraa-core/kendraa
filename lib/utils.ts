@@ -86,71 +86,7 @@ export function getColorFromString(str: string): string {
   return colors[Math.abs(hash) % colors.length];
 }
 
-// Generate placeholder medical professionals
-export function getPlaceholderMedicalProfessionals() {
-  return [
-    {
-      id: 1,
-      full_name: 'Dr. Sarah Johnson',
-      avatar_url: '',
-      headline: 'Cardiologist at Mayo Clinic',
-      specialization: 'Cardiology'
-    },
-    {
-      id: 2,
-      full_name: 'Dr. Michael Chen',
-      avatar_url: '',
-      headline: 'Neurologist at Johns Hopkins',
-      specialization: 'Neurology'
-    },
-    {
-      id: 3,
-      full_name: 'Dr. Emily Rodriguez',
-      avatar_url: '',
-      headline: 'Pediatrician at Children\'s Hospital',
-      specialization: 'Pediatrics'
-    },
-    {
-      id: 4,
-      full_name: 'Dr. James Wilson',
-      avatar_url: '',
-      headline: 'Orthopedic Surgeon at Cleveland Clinic',
-      specialization: 'Orthopedics'
-    },
-    {
-      id: 5,
-      full_name: 'Dr. Lisa Thompson',
-      avatar_url: '',
-      headline: 'Oncologist at Memorial Sloan Kettering',
-      specialization: 'Oncology'
-    }
-  ];
-}
 
-// Generate placeholder medical groups
-export function getPlaceholderMedicalGroups() {
-  return [
-    { name: 'Cardiology Network', members: 1200, description: 'Connect with cardiologists worldwide' },
-    { name: 'Medical Research', members: 1500, description: 'Share research findings and collaborate' },
-    { name: 'Healthcare Innovation', members: 2000, description: 'Discuss latest healthcare technologies' },
-    { name: 'Pediatric Care', members: 800, description: 'Pediatricians and child healthcare specialists' },
-    { name: 'Emergency Medicine', members: 950, description: 'Emergency medicine professionals network' }
-  ];
-}
-
-// Generate placeholder trending topics
-export function getPlaceholderTrendingTopics() {
-  return [
-    { name: 'healthcarenetwork', count: 156 },
-    { name: 'medicalcommunity', count: 89 },
-    { name: 'cardiology', count: 234 },
-    { name: 'innovation', count: 67 },
-    { name: 'telemedicine', count: 123 },
-    { name: 'research', count: 78 },
-    { name: 'patientcare', count: 145 },
-    { name: 'medicaltechnology', count: 92 }
-  ];
-}
 
 // Performance utilities
 export function debounce<T extends (...args: unknown[]) => unknown>(

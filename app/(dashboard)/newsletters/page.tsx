@@ -27,67 +27,8 @@ export default function NewslettersPage() {
 
       try {
         setLoading(true);
-        // TODO: Implement getNewsletters query
-        // Mock data for now
-        const mockNewsletters: Newsletter[] = [
-          {
-            id: '1',
-            title: 'Medical Innovation Weekly',
-            description: 'Stay updated with the latest breakthroughs in medical technology, research findings, and healthcare innovations.',
-            category: 'Innovation',
-            frequency: 'Weekly',
-            isSubscribed: true,
-            subscriberCount: 15420,
-            lastIssue: '2 days ago',
-          },
-          {
-            id: '2',
-            title: 'Healthcare Leadership Insights',
-            description: 'Expert insights on healthcare leadership, management strategies, and organizational development.',
-            category: 'Leadership',
-            frequency: 'Bi-weekly',
-            isSubscribed: true,
-            subscriberCount: 8920,
-            lastIssue: '1 week ago',
-          },
-          {
-            id: '3',
-            title: 'Clinical Research Updates',
-            description: 'Latest clinical trials, research methodologies, and evidence-based practice updates.',
-            category: 'Research',
-            frequency: 'Monthly',
-            isSubscribed: false,
-            subscriberCount: 12340,
-          },
-          {
-            id: '4',
-            title: 'Healthcare Policy Brief',
-            description: 'Analysis of healthcare policies, regulatory changes, and their impact on medical practice.',
-            category: 'Policy',
-            frequency: 'Weekly',
-            isSubscribed: false,
-            subscriberCount: 6780,
-          },
-          {
-            id: '5',
-            title: 'Medical Technology Trends',
-            description: 'Emerging technologies in healthcare, digital health solutions, and medical device innovations.',
-            category: 'Technology',
-            frequency: 'Weekly',
-            isSubscribed: false,
-            subscriberCount: 9450,
-          },
-          {
-            id: '6',
-            title: 'Patient Care Excellence',
-            description: 'Best practices in patient care, quality improvement, and healthcare delivery optimization.',
-            category: 'Patient Care',
-            frequency: 'Monthly',
-            isSubscribed: false,
-            subscriberCount: 11230,
-          },
-        ];
-        setNewsletters(mockNewsletters);
+        // Newsletters functionality not yet implemented in database
+        setNewsletters([]);
       } catch (error) {
         console.error('Error fetching newsletters:', error);
       } finally {
@@ -239,22 +180,16 @@ export default function NewslettersPage() {
               <DocumentIcon className="w-8 h-8 text-gray-400" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              {activeTab === 'subscribed' ? 'No newsletters subscribed' : 'No newsletters available'}
+              Newsletters Coming Soon
             </h3>
             <p className="text-gray-600 mb-6">
-              {activeTab === 'subscribed' 
-                ? 'Subscribe to newsletters to stay updated with professional insights and industry news.'
-                : 'Check back later for new newsletters to subscribe to.'
-              }
+              Professional newsletters functionality is currently under development. 
+              You'll soon be able to subscribe to curated healthcare insights and industry updates.
             </p>
-            {activeTab === 'subscribed' && (
-              <button
-                onClick={() => setActiveTab('discover')}
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Discover Newsletters
-              </button>
-            )}
+            <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+              <span>Feature in development</span>
+            </div>
           </div>
         )}
       </div>
