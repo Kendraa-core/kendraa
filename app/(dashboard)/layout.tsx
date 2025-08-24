@@ -6,7 +6,7 @@ import { useEffect, useState, useRef } from 'react';
 import UserSearch from '@/components/search/UserSearch';
 import NotificationList from '@/components/notifications/NotificationList';
 import QuickNav from '@/components/common/QuickNav';
-import OnboardingModal from '@/components/profile/OnboardingModal';
+
 import { useNotifications } from '@/contexts/NotificationContext';
 import { getProfile, type Profile } from '@/lib/queries';
 import Header from '@/components/layout/Header';
@@ -27,7 +27,7 @@ export default function DashboardLayout({
   const [profileLoading, setProfileLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(false);
+
   const profileDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -45,13 +45,11 @@ export default function DashboardLayout({
           const profile = await getProfile(user.id);
           setUserProfile(profile);
           
-          // Check if profile is incomplete and show onboarding
+          // Check if profile is incomplete and redirect to onboarding
           const isIncomplete = !profile?.full_name || !profile?.headline || !profile?.specialization?.length;
           if (isIncomplete) {
-            // Delay showing onboarding to avoid immediate popup
-            setTimeout(() => {
-              setShowOnboarding(true);
-            }, 2000);
+            // Redirect to onboarding page
+            router.push('/onboarding');
           }
         } catch (error) {
           console.error('Error loading user profile:', error);
@@ -218,11 +216,7 @@ export default function DashboardLayout({
         </div>
       )}
 
-      {/* Onboarding Modal */}
-      <OnboardingModal 
-        isOpen={showOnboarding} 
-        onClose={() => setShowOnboarding(false)} 
-      />
+
     </div>
   );
 } 

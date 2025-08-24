@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import EditProfileModal from './EditProfileModal';
@@ -20,13 +21,7 @@ import {
   MapPinIcon,
   DocumentTextIcon,
 } from '@heroicons/react/24/outline';
-
 import toast from 'react-hot-toast';
-
-interface OnboardingModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
 
 const ONBOARDING_STEPS = [
   {
@@ -125,7 +120,7 @@ const ONBOARDING_STEPS = [
   }
 ];
 
-export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
+export default function OnboardingPage() {
   const { user, profile, updateProfile } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState({
@@ -140,6 +135,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
   const [avatarPreview, setAvatarPreview] = useState<string | null>(profile?.avatar_url || null);
   const [loading, setLoading] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const router = useRouter();
 
   // Check if profile is 80% complete
   const isProfileComplete = () => {
@@ -175,21 +171,27 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
     return Math.round((completed / fields.length) * 100);
   };
 
-  // Show modal if profile is less than 80% complete
+  // Redirect if profile is already complete
   useEffect(() => {
-    if (!isProfileComplete() && isOpen) {
-      setCurrentStep(0);
-    }
-  }, [profile, isOpen]);
-
-  const handleClose = () => {
-    // Only allow closing if profile is 80% complete
     if (isProfileComplete()) {
-      onClose();
-    } else {
-      toast.error('Please complete your profile to continue');
+      router.push('/feed');
     }
-  };
+  }, [profile, router]);
+
+  // Initialize form data when profile loads
+  useEffect(() => {
+    if (profile) {
+      setFormData({
+        full_name: profile.full_name || '',
+        headline: profile.headline || '',
+        specialization: profile.specialization || [],
+        bio: profile.bio || '',
+        location: profile.location || '',
+        avatar_url: profile.avatar_url || '',
+      });
+      setAvatarPreview(profile.avatar_url || null);
+    }
+  }, [profile]);
 
   const handleCompleteProfile = () => {
     setShowEditModal(true);
@@ -281,6 +283,12 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
       return Array.isArray(fieldValue) && fieldValue.length > 0;
     }
     return fieldValue && String(fieldValue).trim().length > 0;
+  };
+
+  const handleSkip = () => {
+    if (currentStep < ONBOARDING_STEPS.length - 1) {
+      setCurrentStep(currentStep + 1);
+    }
   };
 
   const renderStep = () => {
@@ -422,14 +430,14 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
             </div>
             <div className="space-y-6">
               {avatarPreview ? (
-                                 <div className="relative">
-                   <div className="w-32 h-32 rounded-full mx-auto overflow-hidden border-4 border-blue-500">
-                     <img
-                       src={avatarPreview}
-                       alt="Profile preview"
-                       className="w-full h-full object-cover"
-                     />
-                   </div>
+                <div className="relative">
+                  <div className="w-32 h-32 rounded-full mx-auto overflow-hidden border-4 border-blue-500">
+                    <img
+                      src={avatarPreview}
+                      alt="Profile preview"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                   <button
                     onClick={() => {
                       setAvatarFile(null);
@@ -493,38 +501,40 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
     }
   };
 
-  if (!isOpen) return null;
+  // If profile is complete, redirect to feed
+  if (isProfileComplete()) {
+    return null;
+  }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-      <div className="bg-white w-full h-full max-w-4xl max-h-screen overflow-hidden flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-white">
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={handlePrevious}
-              disabled={currentStep === 0}
-              className={`p-2 rounded-lg transition-colors ${
-                currentStep === 0
-                  ? 'text-gray-400 cursor-not-allowed'
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
-            >
-              <ChevronLeftIcon className="w-6 h-6" />
-            </button>
-            <div>
-              <h1 className="text-xl font-semibold text-gray-900">Complete Your Profile</h1>
-              <p className="text-sm text-gray-500">
-                Step {currentStep + 1} of {ONBOARDING_STEPS.length}
-              </p>
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-4xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={handlePrevious}
+                disabled={currentStep === 0}
+                className={`p-2 rounded-lg transition-colors ${
+                  currentStep === 0
+                    ? 'text-gray-400 cursor-not-allowed'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <ChevronLeftIcon className="w-6 h-6" />
+              </button>
+              <div>
+                <h1 className="text-xl font-semibold text-gray-900">Complete Your Profile</h1>
+                <p className="text-sm text-gray-500">
+                  Step {currentStep + 1} of {ONBOARDING_STEPS.length}
+                </p>
+              </div>
+            </div>
+            <div className="text-sm text-gray-500">
+              {getCompletionPercentage()}% Complete
             </div>
           </div>
-          <button
-            onClick={handleClose}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <XMarkIcon className="w-6 h-6" />
-          </button>
         </div>
 
         {/* Progress Bar */}
@@ -534,9 +544,11 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
             style={{ width: `${((currentStep + 1) / ONBOARDING_STEPS.length) * 100}%` }}
           ></div>
         </div>
+      </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-8">
+      {/* Content */}
+      <div className="flex-1 flex items-center justify-center py-12 px-6">
+        <div className="w-full max-w-4xl">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentStep}
@@ -544,15 +556,17 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3 }}
-              className="h-full flex items-center justify-center"
+              className="flex items-center justify-center min-h-[500px]"
             >
               {renderStep()}
             </motion.div>
           </AnimatePresence>
         </div>
+      </div>
 
-        {/* Footer */}
-        <div className="p-6 border-t border-gray-200 bg-white">
+      {/* Footer */}
+      <div className="bg-white border-t border-gray-200">
+        <div className="max-w-4xl mx-auto px-6 py-6">
           <div className="flex justify-between items-center">
             <div className="text-sm text-gray-500">
               {currentStep < ONBOARDING_STEPS.length - 1 && (
@@ -599,7 +613,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
                 </>
               ) : (
                 <button
-                  onClick={handleClose}
+                  onClick={() => router.push('/feed')}
                   className="px-8 py-3 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 transition-colors"
                 >
                   Get Started
@@ -619,7 +633,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
             setShowEditModal(false);
             // Check if profile is now complete
             if (isProfileComplete()) {
-              onClose();
+              router.push('/feed');
             }
           }}
         />
