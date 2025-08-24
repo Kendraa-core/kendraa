@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import Avatar from '@/components/common/Avatar';
 import Breadcrumb from '@/components/common/Breadcrumb';
+import EditProfileModal from '@/components/profile/EditProfileModal';
 
 import ShareButton from '@/components/common/ShareButton';
 import PostCard from '@/components/post/PostCard';
@@ -48,13 +49,14 @@ import {
 } from '@/lib/queries';
 
 // Memoized components for better performance
-const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile, connectionStatus, followStatus, onConnect, onUnfollow }: {
+const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile, connectionStatus, followStatus, onConnect, onUnfollow, onEditProfile }: {
   profile: Profile;
   isOwnProfile: boolean;
   connectionStatus: string;
   followStatus: string;
   onConnect: () => void;
   onUnfollow: () => void;
+  onEditProfile: () => void;
 }) {
   const { user } = useAuth();
   const router = useRouter();
@@ -141,7 +143,11 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
           )}
           
           {isOwnProfile && (
-            <Button className="bg-linkedin-primary hover:bg-linkedin-secondary text-white shadow-lg" size="sm">
+            <Button 
+              onClick={onEditProfile}
+              className="bg-linkedin-primary hover:bg-linkedin-secondary text-white shadow-lg" 
+              size="sm"
+            >
               <PencilIcon className="w-4 h-4 mr-2" />
               Edit Profile
             </Button>
@@ -232,6 +238,7 @@ export default function ProfilePage() {
   const [followStatus, setFollowStatus] = useState<'following' | 'not_following'>('not_following');
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState('about');
+  const [showEditModal, setShowEditModal] = useState(false);
 
 
   const profileId = params.id as string;
@@ -364,6 +371,11 @@ export default function ProfilePage() {
     }
   }, [user?.id, profileId, debugLog]);
 
+  const handleProfileUpdate = useCallback(() => {
+    // Refresh profile data after update
+    fetchProfileData();
+  }, [fetchProfileData]);
+
   // Memoized section navigation
   const sections = useMemo(() => [
     { id: 'about', label: 'About', icon: UserPlusIcon },
@@ -382,12 +394,21 @@ export default function ProfilePage() {
               <div className="h-8 bg-gradient-to-r from-primary-200 to-secondary-200 rounded w-1/3"></div>
               <div className="h-6 bg-gradient-to-r from-primary-200 to-secondary-200 rounded w-1/2"></div>
               <div className="h-20 bg-gradient-to-r from-primary-200 to-secondary-200 rounded"></div>
-            </div>
-          </div>
+                      </div>
         </div>
       </div>
-    );
-  }
+
+      {/* Edit Profile Modal */}
+      {showEditModal && profile && (
+        <EditProfileModal
+          profile={profile}
+          onClose={() => setShowEditModal(false)}
+          onUpdate={handleProfileUpdate}
+        />
+      )}
+    </div>
+  );
+}
 
   if (!profile) {
     return (
@@ -445,6 +466,7 @@ export default function ProfilePage() {
                 followStatus={followStatus}
                 onConnect={handleConnect}
                 onUnfollow={handleUnfollow}
+                onEditProfile={() => setShowEditModal(true)}
               />
             </div>
 
@@ -717,6 +739,15 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* Edit Profile Modal */}
+      {showEditModal && profile && (
+        <EditProfileModal
+          profile={profile}
+          onClose={() => setShowEditModal(false)}
+          onUpdate={handleProfileUpdate}
+        />
+      )}
     </div>
   );
 } 
