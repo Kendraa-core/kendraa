@@ -26,7 +26,7 @@ interface PostReactionsProps {
 }
 
 const reactionTypes = [
-  { id: 'like', icon: HandThumbUpIcon, solidIcon: HandThumbUpSolidIcon, label: 'Like', color: 'text-blue-600', bgColor: 'bg-blue-50' },
+  { id: 'like', icon: HandThumbUpIcon, solidIcon: HandThumbUpSolidIcon, label: 'Like', color: 'text-azure-500', bgColor: 'bg-azure-50' },
   { id: 'love', icon: HeartIcon, solidIcon: HeartSolidIcon, label: 'Love', color: 'text-red-600', bgColor: 'bg-red-50' },
   { id: 'support', icon: FaceSmileIcon, solidIcon: FaceSmileSolidIcon, label: 'Support', color: 'text-green-600', bgColor: 'bg-green-50' },
   { id: 'insightful', icon: LightBulbIcon, solidIcon: LightBulbSolidIcon, label: 'Insightful', color: 'text-yellow-600', bgColor: 'bg-yellow-50' },
@@ -64,7 +64,7 @@ export default function PostReactions({ postId, userReaction, reactionCounts, on
         className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
           userReaction
             ? `${currentReaction?.color} ${currentReaction?.bgColor} font-medium`
-            : 'text-gray-500 hover:text-blue-600 hover:bg-blue-50'
+            : 'text-gray-500 hover:text-azure-500 hover:bg-azure-50'
         }`}
       >
         {userReaction && currentReaction ? (

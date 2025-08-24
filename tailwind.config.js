@@ -8,45 +8,53 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Kendraa Medical Color Scheme
+        azure: {
+          50: '#f0f8ff',
+          100: '#e0f0ff',
+          200: '#b3d9ff',
+          300: '#80bfff',
+          400: '#4da6ff',
+          500: '#007FFF', // Azure Blue
+          600: '#0066cc',
+          700: '#004d99',
+          800: '#003366',
+          900: '#001a33',
+        },
         primary: {
-          50: '#f0fdfa',
-          100: '#ccfbf1',
-          200: '#99f6e4',
-          300: '#5eead4',
-          400: '#2dd4bf',
-          500: '#14b8a6',  /* Main Primary - Modern Medical Teal */
-          600: '#0d9488',
-          700: '#0f766e',
-          800: '#115e59',
-          900: '#134e4a',
-          950: '#042f2e',
+          50: '#f0f8ff',
+          100: '#e0f0ff',
+          200: '#b3d9ff',
+          300: '#80bfff',
+          400: '#4da6ff',
+          500: '#007FFF', // Azure Blue
+          600: '#0066cc',
+          700: '#004d99',
+          800: '#003366',
+          900: '#001a33',
         },
         secondary: {
-          50: '#f0fdf4',
-          100: '#dcfce7',
-          200: '#bbf7d0',
-          300: '#86efac',
-          400: '#4ade80',
-          500: '#22c55e',  /* Health Green */
-          600: '#16a34a',
-          700: '#15803d',  /* Deep Medical Green */
-          800: '#166534',
-          900: '#14532d',
-          950: '#052e16',
+          50: '#f0f8ff',
+          100: '#e0f0ff',
+          200: '#b3d9ff',
+          300: '#80bfff',
+          400: '#4da6ff',
+          500: '#007FFF', // Azure Blue
+          600: '#0066cc',
+          700: '#004d99',
+          800: '#003366',
+          900: '#001a33',
         },
         accent: {
-          50: '#fefce8',
-          100: '#fef9c3',
-          200: '#fef08a',
-          300: '#fde047',
-          400: '#facc15',
-          500: '#eab308',  /* Warm Professional Gold */
-          600: '#ca8a04',
-          700: '#a16207',
-          800: '#854d0e',
-          900: '#713f12',
-          950: '#422006',
+          50: '#f0f8ff',
+          100: '#e0f0ff',
+          200: '#b3d9ff',
+          300: '#80bfff',
+          400: '#4da6ff',
+          500: '#007FFF', // Azure Blue
+          600: '#0066cc',
+          700: '#004d99',
+          800: '#003366',
+          900: '#001a33',
         },
         neutral: {
           50: '#fafafa',   /* Pure backgrounds */
@@ -154,7 +162,8 @@ module.exports = {
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+        'gradient-conic':
+          'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
         'medical-gradient': 'linear-gradient(135deg, #14b8a6 0%, #22c55e 100%)',
         'medical-gradient-subtle': 'linear-gradient(135deg, #f0fdfa 0%, #f0fdf4 100%)',
         'medical-gradient-warm': 'linear-gradient(135deg, #14b8a6 0%, #eab308 100%)',

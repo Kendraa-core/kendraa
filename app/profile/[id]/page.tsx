@@ -67,7 +67,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
   return (
     <Card className="bg-white shadow-sm border border-gray-200 rounded-2xl overflow-hidden">
       {/* Banner */}
-      <div className="h-48 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 relative overflow-hidden">
+      <div className="h-48 bg-gradient-to-br from-azure-500 via-azure-600 to-azure-700 relative overflow-hidden">
         {profile.banner_url ? (
           <Image
             src={profile.banner_url}
@@ -76,7 +76,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
             className="object-cover"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800" />
+          <div className="w-full h-full bg-gradient-to-br from-azure-500 via-azure-600 to-azure-700" />
         )}
         {/* Overlay pattern for visual interest */}
         <div className="absolute inset-0 opacity-10">
@@ -130,7 +130,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
                 ) : (
                   <Button
                     onClick={onConnect}
-                    className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+                    className="bg-azure-500 hover:bg-azure-600 text-white shadow-sm"
                     size="sm"
                   >
                     <UserPlusIcon className="w-4 h-4 mr-2" />
@@ -142,7 +142,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
                 <Button
                   onClick={onConnect}
                   disabled={connectionStatus === 'pending' || connectionStatus === 'connected'}
-                  className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+                  className="bg-azure-500 hover:bg-azure-600 text-white shadow-sm"
                   size="sm"
                 >
                   <UserPlusIcon className="w-4 h-4 mr-2" />
@@ -156,7 +156,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
           {isOwnProfile && (
             <Button 
               onClick={onEditProfile}
-              className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm" 
+              className="bg-azure-500 hover:bg-azure-600 text-white shadow-sm" 
               size="sm"
             >
               <PencilIcon className="w-4 h-4 mr-2" />
@@ -404,7 +404,7 @@ export default function ProfilePage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Profile not found</h1>
-          <Button onClick={() => router.push('/feed')} className="bg-blue-600 hover:bg-blue-700 text-white">
+          <Button onClick={() => router.push('/feed')} className="bg-azure-500 hover:bg-azure-600 text-white">
             <ArrowLeftIcon className="w-4 h-4 mr-2" />
             Back to Home
           </Button>
@@ -451,7 +451,7 @@ export default function ProfilePage() {
                     {profile.specialization.map((spec, index) => (
                       <span
                         key={index}
-                        className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
+                        className="px-3 py-1 bg-azure-100 text-azure-700 rounded-full text-sm font-medium"
                       >
                         {spec}
                       </span>
@@ -472,7 +472,7 @@ export default function ProfilePage() {
                       className={cn(
                         'flex-1 px-6 py-4 text-sm font-medium transition-colors flex items-center justify-center space-x-2',
                         activeSection === section.id
-                          ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                          ? 'text-azure-500 border-b-2 border-azure-500 bg-azure-50'
                           : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                       )}
                     >
@@ -516,7 +516,7 @@ export default function ProfilePage() {
                             </div>
                             <div className="flex-1">
                               <h4 className="font-semibold text-gray-900">{exp.title}</h4>
-                              <p className="text-blue-600 font-medium">{exp.company}</p>
+                              <p className="text-azure-500 font-medium">{exp.company}</p>
                               {exp.location && (
                                 <p className="text-sm text-gray-500">{exp.location}</p>
                               )}
@@ -566,7 +566,7 @@ export default function ProfilePage() {
                             </div>
                             <div className="flex-1">
                               <h4 className="font-semibold text-gray-900">{edu.degree}</h4>
-                              <p className="text-blue-600 font-medium">{edu.school}</p>
+                              <p className="text-azure-500 font-medium">{edu.school}</p>
                               {edu.field && (
                                 <p className="text-sm text-gray-600">{edu.field}</p>
                               )}
@@ -584,7 +584,7 @@ export default function ProfilePage() {
                                   {edu.honors.map((honor, index) => (
                                     <span
                                       key={index}
-                                      className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs"
+                                      className="px-2 py-1 bg-azure-100 text-azure-700 rounded text-xs"
                                     >
                                       {honor}
                                     </span>

@@ -98,7 +98,7 @@ export default function ConnectionButton({ profileId, onStatusChange }: Connecti
         <button
           onClick={handleConnect}
           disabled={loading}
-          className="px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50"
+          className="px-4 py-2 bg-azure-500 text-white rounded-full hover:bg-azure-600 disabled:opacity-50"
         >
           {loading ? 'Connecting...' : 'Connect'}
         </button>

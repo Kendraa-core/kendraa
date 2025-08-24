@@ -267,7 +267,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
                 type="text"
                 value={formData.full_name}
                 onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500 transition-colors"
                 placeholder="Enter your full name"
                 required
               />
@@ -281,7 +281,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
                 type="text"
                 value={formData.headline}
                 onChange={(e) => setFormData(prev => ({ ...prev, headline: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500 transition-colors"
                 placeholder="e.g. Senior Cardiologist at City Hospital"
               />
             </div>
@@ -294,7 +294,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
                 value={formData.bio}
                 onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
                 rows={4}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500 transition-colors resize-none"
                 placeholder="Tell us about yourself, your experience, and what you're passionate about..."
               />
             </div>
@@ -308,7 +308,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
                   type="text"
                   value={formData.location}
                   onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500 transition-colors"
                   placeholder="e.g. San Francisco, CA"
                 />
               </div>
@@ -321,7 +321,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500 transition-colors"
                   placeholder="e.g. +1 (555) 123-4567"
                 />
               </div>
@@ -335,7 +335,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
                 type="url"
                 value={formData.website}
                 onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500 transition-colors"
                 placeholder="e.g. https://yourwebsite.com"
               />
             </div>
@@ -350,7 +350,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
               <button
                 type="button"
                 onClick={addExperience}
-                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="flex items-center space-x-2 px-4 py-2 bg-azure-500 text-white rounded-lg hover:bg-azure-600 transition-colors"
               >
                 <PlusIcon className="w-4 h-4" />
                 <span>Add Experience</span>
@@ -384,7 +384,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
                           type="text"
                           value={exp.title}
                           onChange={(e) => updateExperience(index, 'title', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
                           placeholder="e.g. Senior Cardiologist"
                         />
                       </div>
@@ -395,7 +395,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
                           type="text"
                           value={exp.company}
                           onChange={(e) => updateExperience(index, 'company', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
                           placeholder="e.g. City Hospital"
                         />
                       </div>
@@ -406,7 +406,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
                           type="text"
                           value={exp.location}
                           onChange={(e) => updateExperience(index, 'location', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
                           placeholder="e.g. San Francisco, CA"
                         />
                       </div>
@@ -417,7 +417,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
                           type="date"
                           value={exp.start_date}
                           onChange={(e) => updateExperience(index, 'start_date', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
                         />
                       </div>
 
@@ -427,7 +427,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
                           type="date"
                           value={exp.end_date}
                           onChange={(e) => updateExperience(index, 'end_date', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
                           disabled={exp.current}
                         />
                       </div>
@@ -449,7 +449,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
                         value={exp.description}
                         onChange={(e) => updateExperience(index, 'description', e.target.value)}
                         rows={3}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500 resize-none"
                         placeholder="Describe your role and achievements..."
                       />
                     </div>
@@ -468,7 +468,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
               <button
                 type="button"
                 onClick={addEducation}
-                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="flex items-center space-x-2 px-4 py-2 bg-azure-500 text-white rounded-lg hover:bg-azure-600 transition-colors"
               >
                 <PlusIcon className="w-4 h-4" />
                 <span>Add Education</span>
@@ -502,7 +502,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
                           type="text"
                           value={edu.school}
                           onChange={(e) => updateEducation(index, 'school', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
                           placeholder="e.g. Harvard Medical School"
                         />
                       </div>
@@ -513,7 +513,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
                           type="text"
                           value={edu.degree}
                           onChange={(e) => updateEducation(index, 'degree', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
                           placeholder="e.g. Doctor of Medicine"
                         />
                       </div>
@@ -524,7 +524,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
                           type="text"
                           value={edu.field}
                           onChange={(e) => updateEducation(index, 'field', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
                           placeholder="e.g. Medicine"
                         />
                       </div>
@@ -535,7 +535,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
                           type="text"
                           value={edu.specialization}
                           onChange={(e) => updateEducation(index, 'specialization', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
                           placeholder="e.g. Cardiology"
                         />
                       </div>
@@ -546,7 +546,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
                           type="date"
                           value={edu.start_date}
                           onChange={(e) => updateEducation(index, 'start_date', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
                         />
                       </div>
 
@@ -556,7 +556,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
                           type="date"
                           value={edu.end_date}
                           onChange={(e) => updateEducation(index, 'end_date', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
                           disabled={edu.current}
                         />
                       </div>
@@ -577,7 +577,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
                           type="text"
                           value={edu.gpa}
                           onChange={(e) => updateEducation(index, 'gpa', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
                           placeholder="e.g. 3.8"
                         />
                       </div>
@@ -589,7 +589,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
                         value={edu.description}
                         onChange={(e) => updateEducation(index, 'description', e.target.value)}
                         rows={3}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500 resize-none"
                         placeholder="Describe your studies, achievements, or activities..."
                       />
                     </div>
@@ -701,7 +701,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
             {STEPS.map((step, index) => (
               <div key={step.id} className="flex items-center">
                 <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                  index <= currentStep ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
+                  index < currentStep ? 'bg-azure-500 text-white' : 'bg-gray-200 text-gray-600'
                 }`}>
                   {index < currentStep ? (
                     <CheckIcon className="w-4 h-4" />
@@ -710,13 +710,13 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
                   )}
                 </div>
                 <span className={`ml-2 text-sm font-medium ${
-                  index <= currentStep ? 'text-blue-600' : 'text-gray-500'
+                  index <= currentStep ? 'text-azure-500' : 'text-gray-500'
                 }`}>
                   {step.title}
                 </span>
                 {index < STEPS.length - 1 && (
                   <div className={`w-16 h-0.5 mx-4 ${
-                    index < currentStep ? 'bg-blue-600' : 'bg-gray-200'
+                    index < currentStep ? 'bg-azure-600' : 'bg-gray-200'
                   }`} />
                 )}
               </div>
@@ -752,7 +752,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
                   <button
                     type="button"
                     onClick={nextStep}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="px-6 py-2 bg-azure-500 text-white rounded-lg hover:bg-azure-600 transition-colors"
                   >
                     Next
                     <ChevronRightIcon className="w-4 h-4 ml-2 inline" />
@@ -761,7 +761,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="px-6 py-2 bg-azure-500 text-white rounded-lg hover:bg-azure-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     {loading ? 'Saving...' : 'Save Changes'}
                   </button>

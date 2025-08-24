@@ -147,7 +147,7 @@ export default function LeftSidebar({ onClose }: LeftSidebarProps) {
           className={cn(
             'group flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-200 mb-2',
             isActive
-              ? 'bg-blue-500 text-white shadow-lg'
+              ? 'bg-azure-500 text-white shadow-lg'
               : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
           )}
           title={item.name}
@@ -186,7 +186,7 @@ export default function LeftSidebar({ onClose }: LeftSidebarProps) {
         {isMobile && (
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-azure-500 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">K</span>
               </div>
               <span className="text-lg font-semibold text-gray-900">Menu</span>
@@ -209,7 +209,7 @@ export default function LeftSidebar({ onClose }: LeftSidebarProps) {
                 className="flex flex-col items-center"
               >
                 <div className="relative mb-2">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm ring-2 ring-white shadow-md">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-azure-500 to-azure-600 flex items-center justify-center text-white font-semibold text-sm ring-2 ring-white shadow-md">
                     {profile?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
                   </div>
                   <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border border-white">
@@ -235,7 +235,7 @@ export default function LeftSidebar({ onClose }: LeftSidebarProps) {
             <Link href={`/profile/${user.id}`} onClick={onClose}>
               <div className="flex items-center space-x-3">
                 <div className="relative">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-lg">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-azure-500 to-azure-600 flex items-center justify-center text-white font-semibold text-lg">
                     {profile?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
                   </div>
                   <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white">

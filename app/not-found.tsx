@@ -7,8 +7,8 @@ export default function NotFound() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center">
-        <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
-          <HomeIcon className="h-6 w-6 text-blue-600" />
+        <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-azure-100 mb-4">
+          <HomeIcon className="h-6 w-6 text-azure-500" />
         </div>
         
         <h2 className="text-lg font-semibold text-gray-900 mb-2">
@@ -22,7 +22,7 @@ export default function NotFound() {
         <div className="space-y-3">
           <Link
             href="/"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center justify-center space-x-2"
+            className="w-full bg-azure-500 hover:bg-azure-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center justify-center space-x-2"
           >
             <HomeIcon className="h-4 w-4" />
             <span>Go Home</span>

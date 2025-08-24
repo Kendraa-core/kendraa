@@ -30,6 +30,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useNotifications } from '@/contexts/NotificationContext';
 import { formatRelativeTime } from '@/utils/formatRelativeTime';
+import { cn } from '@/lib/utils';
 
 interface HeaderProps {
   onSidebarToggle?: () => void;
@@ -99,7 +100,7 @@ export default function Header({ onSidebarToggle, onRightSidebarToggle }: Header
               {/* Mobile Sidebar Toggle */}
               <button
                 onClick={onSidebarToggle}
-                className="lg:hidden p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-all duration-200"
+                className="lg:hidden p-2 text-gray-600 hover:text-azure-500 hover:bg-gray-50 rounded-lg transition-all duration-200"
               >
                 <Bars3Icon className="w-5 h-5" />
               </button>
@@ -117,11 +118,12 @@ export default function Header({ onSidebarToggle, onRightSidebarToggle }: Header
                     <Link
                       key={item.name}
                       href={item.href}
-                      className={`flex items-center space-x-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-                        isActive
-                          ? 'text-blue-700 bg-blue-50'
-                          : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
-                      }`}
+                      className={cn(
+                        'hidden lg:inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors',
+                        pathname === item.href
+                          ? 'text-azure-500 bg-azure-50'
+                          : 'text-gray-600 hover:text-azure-500 hover:bg-gray-50'
+                      )}
                     >
                       <item.icon className="w-4 h-4" />
                       <span className="hidden lg:inline">{item.name}</span>
@@ -142,7 +144,7 @@ export default function Header({ onSidebarToggle, onRightSidebarToggle }: Header
               <div className="relative" ref={notificationsDropdownRef}>
                 <button
                   onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                  className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-all duration-200 relative"
+                  className="p-2 text-gray-600 hover:text-azure-500 hover:bg-gray-50 rounded-lg transition-all duration-200 relative"
                 >
                   <BellIcon className="w-5 h-5" />
                   {unreadCount > 0 && (
@@ -168,8 +170,8 @@ export default function Header({ onSidebarToggle, onRightSidebarToggle }: Header
                         notifications.map((notification) => (
                           <div
                             key={notification.id}
-                            className={`px-4 py-3 hover:bg-gray-50 cursor-pointer ${
-                              !notification.read ? 'bg-blue-50' : ''
+                            className={`w-full p-3 hover:bg-gray-50 transition-colors duration-200 ${
+                              !notification.read ? 'bg-azure-50' : ''
                             }`}
                             onClick={() => {
                               if (!notification.read) {
@@ -178,8 +180,8 @@ export default function Header({ onSidebarToggle, onRightSidebarToggle }: Header
                             }}
                           >
                             <div className="flex items-start space-x-3">
-                              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                <BellIcon className="w-4 h-4 text-blue-600" />
+                              <div className="w-8 h-8 bg-azure-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <BellIcon className="w-4 h-4 text-azure-500" />
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm text-gray-900">{notification.message}</p>
@@ -188,7 +190,7 @@ export default function Header({ onSidebarToggle, onRightSidebarToggle }: Header
                                 </p>
                                 {!notification.read && (
                                   <div className="mt-1">
-                                    <span className="inline-block w-2 h-2 bg-blue-500 rounded-full"></span>
+                                    <span className="inline-block w-2 h-2 bg-azure-500 rounded-full"></span>
                                   </div>
                                 )}
                               </div>
@@ -201,7 +203,7 @@ export default function Header({ onSidebarToggle, onRightSidebarToggle }: Header
                       <div className="px-4 py-3 border-t border-gray-100">
                         <Link
                           href="/notifications"
-                          className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                          className="text-sm text-azure-500 hover:text-azure-600 font-medium"
                         >
                           View all notifications
                         </Link>
@@ -215,7 +217,7 @@ export default function Header({ onSidebarToggle, onRightSidebarToggle }: Header
               <div className="relative" ref={profileDropdownRef}>
                 <button
                   onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                  className="flex items-center space-x-2 p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-all duration-200"
+                  className="flex items-center space-x-2 p-2 text-gray-600 hover:text-azure-500 hover:bg-gray-50 rounded-lg transition-all duration-200"
                 >
                   <Avatar
                     src={profile?.avatar_url}
@@ -255,7 +257,7 @@ export default function Header({ onSidebarToggle, onRightSidebarToggle }: Header
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-1.5">
                             <div
-                              className="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
+                              className="bg-azure-500 h-1.5 rounded-full transition-all duration-300"
                               style={{ width: `${profileCompletion}%` }}
                             />
                           </div>
@@ -376,7 +378,7 @@ export default function Header({ onSidebarToggle, onRightSidebarToggle }: Header
               {/* Mobile Right Sidebar Toggle */}
               <button
                 onClick={onRightSidebarToggle}
-                className="lg:hidden p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-all duration-200"
+                className="lg:hidden p-2 text-azure-500 hover:text-azure-600 hover:bg-gray-50 rounded-lg transition-all duration-200"
               >
                 <Squares2X2Icon className="w-5 h-5" />
               </button>
