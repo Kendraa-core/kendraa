@@ -4,6 +4,9 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Logo from '@/components/common/Logo';
 import { useIsClient } from '@/hooks/useIsClient';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import {
   UserGroupIcon,
   BriefcaseIcon,
@@ -22,7 +25,31 @@ import {
 
 export default function LandingPage() {
   const isClient = useIsClient();
+  const { user } = useAuth();
+  const router = useRouter();
   
+  // Redirect logged-in users to feed
+  useEffect(() => {
+    if (isClient && user) {
+      router.push('/feed');
+    }
+  }, [isClient, user, router]);
+
+  // Show loading while checking authentication
+  if (!isClient || user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-secondary-50 to-accent-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="relative">
+            <div className="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
+            <div className="absolute inset-0 w-12 h-12 border-4 border-transparent border-t-primary-400 rounded-full animate-ping opacity-20"></div>
+          </div>
+          <p className="text-gray-600 mt-4 text-sm font-medium">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   const features = [
     {
       icon: ShieldCheckIcon,

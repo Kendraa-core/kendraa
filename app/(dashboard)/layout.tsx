@@ -45,10 +45,28 @@ export default function DashboardLayout({
           const profile = await getProfile(user.id);
           setUserProfile(profile);
           
-          // Check if profile is incomplete and redirect to onboarding
-          const isIncomplete = !profile?.full_name || !profile?.headline || !profile?.specialization?.length;
-          if (isIncomplete) {
-            // Redirect to onboarding page
+          // Calculate profile completion percentage
+          const calculateProfileCompletion = (profile: any) => {
+            if (!profile) return 0;
+            
+            const requiredFields = [
+              profile.full_name,
+              profile.headline,
+              profile.specialization?.length > 0,
+              profile.bio,
+              profile.location,
+              profile.phone,
+              profile.avatar_url
+            ];
+            
+            const completedFields = requiredFields.filter(Boolean).length;
+            return Math.round((completedFields / requiredFields.length) * 100);
+          };
+          
+          const completionPercentage = calculateProfileCompletion(profile);
+          
+          // Redirect to onboarding if completion is below 80%
+          if (completionPercentage < 80) {
             router.push('/onboarding');
           }
         } catch (error) {
@@ -61,7 +79,7 @@ export default function DashboardLayout({
 
     // Load profile in background without blocking UI
     loadUserProfile();
-  }, [user?.id, userProfile]);
+  }, [user?.id, userProfile, router]);
 
   // Close sidebars when screen size changes
   useEffect(() => {
