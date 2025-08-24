@@ -16,6 +16,19 @@ export default function ForgotPassword() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!email.trim()) {
+      toast.error('Please enter your email address');
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -24,13 +37,25 @@ export default function ForgotPassword() {
       });
 
       if (error) {
+        console.error('Password reset error:', error);
         throw error;
       }
 
       setSent(true);
       toast.success('Password reset email sent! Check your inbox.');
     } catch (error: any) {
-      toast.error(error.message || 'Failed to send reset email');
+      console.error('Password reset error:', error);
+      
+      // Handle specific Supabase errors
+      if (error.message?.includes('User not found')) {
+        toast.error('No account found with this email address');
+      } else if (error.message?.includes('Email not confirmed')) {
+        toast.error('Please confirm your email address first');
+      } else if (error.message?.includes('Too many requests')) {
+        toast.error('Too many requests. Please try again later.');
+      } else {
+        toast.error(error.message || 'Failed to send reset email. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -45,12 +70,12 @@ export default function ForgotPassword() {
             <h2 className="mt-6 text-3xl font-bold text-gray-900">
               Check your email
             </h2>
-                          <p className="mt-2 text-sm text-gray-600">
-                We&apos;ve sent a password reset link to <strong>{email}</strong>
-              </p>
-              <p className="mt-4 text-sm text-gray-500">
-                Click the link in your email to reset your password. The link will expire in 1 hour.
-              </p>
+            <p className="mt-2 text-sm text-gray-600">
+              We&apos;ve sent a password reset link to <strong>{email}</strong>
+            </p>
+            <p className="mt-4 text-sm text-gray-500">
+              Click the link in your email to reset your password. The link will expire in 1 hour.
+            </p>
           </div>
 
           <div className="bg-white py-8 px-6 shadow-sm rounded-xl border border-gray-200">
@@ -65,7 +90,7 @@ export default function ForgotPassword() {
               </p>
               <button
                 onClick={() => setSent(false)}
-                className="text-blue-600 hover:text-blue-500 text-sm font-medium"
+                className="text-blue-600 hover:text-blue-500 text-sm font-medium transition-colors"
               >
                 Try again
               </button>
@@ -112,18 +137,26 @@ export default function ForgotPassword() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors placeholder:text-gray-300 placeholder:opacity-100"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors placeholder:text-gray-400"
                 placeholder="Enter your email"
+                disabled={loading}
               />
             </div>
 
             <div>
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || !email.trim()}
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {loading ? 'Sending...' : 'Send reset link'}
+                {loading ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Sending...</span>
+                  </div>
+                ) : (
+                  'Send reset link'
+                )}
               </button>
             </div>
           </form>
