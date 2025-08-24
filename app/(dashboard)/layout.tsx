@@ -1,208 +1,131 @@
 'use client';
 
-import { useAuth } from '@/contexts/AuthContext';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useRef } from 'react';
-import UserSearch from '@/components/search/UserSearch';
-import NotificationList from '@/components/notifications/NotificationList';
-import QuickNav from '@/components/common/QuickNav';
-
-import { useNotifications } from '@/contexts/NotificationContext';
-import { getProfile, type Profile } from '@/lib/queries';
+import { useAuth } from '@/contexts/AuthContext';
+import { getProfile } from '@/lib/queries';
 import Header from '@/components/layout/Header';
 import RightSidebar from '@/components/layout/RightSidebar';
+import LeftSidebar from '@/components/layout/LeftSidebar';
 import MobileNavigation from '@/components/layout/MobileNavigation';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { user, loading } = useAuth();
+  const { user, profile, updateProfile } = useAuth();
   const router = useRouter();
-  const [showSearch, setShowSearch] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [userProfile, setUserProfile] = useState<Profile | null>(null);
-  const [profileLoading, setProfileLoading] = useState(false);
-  const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const profileDropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/signin');
-    }
-  }, [user, loading, router]);
-
-  // Load user profile to determine navigation options - but don't block the UI
   useEffect(() => {
     const loadUserProfile = async () => {
-      if (user?.id && !userProfile) {
-        setProfileLoading(true);
-        try {
-          const profile = await getProfile(user.id);
-          setUserProfile(profile);
-          
-          // Calculate profile completion percentage
-          const calculateProfileCompletion = (profile: any) => {
-            if (!profile) return 0;
-            
-            const requiredFields = [
-              profile.full_name,
-              profile.headline,
-              profile.specialization?.length > 0,
-              profile.bio,
-              profile.location,
-              profile.phone,
-              profile.avatar_url
-            ];
-            
-            const completedFields = requiredFields.filter(Boolean).length;
-            return Math.round((completedFields / requiredFields.length) * 100);
-          };
-          
-          const completionPercentage = calculateProfileCompletion(profile);
-          
-          // Redirect to onboarding if completion is below 80%
-          if (completionPercentage < 80) {
-            router.push('/onboarding');
-          }
-        } catch (error) {
-          console.error('Error loading user profile:', error);
-        } finally {
-          setProfileLoading(false);
+      if (!user?.id) {
+        router.push('/signin');
+        return;
+      }
+
+      try {
+        const userProfile = await getProfile(user.id);
+        
+        // Update profile in context if it's different
+        if (userProfile && (!profile || profile.id !== userProfile.id)) {
+          await updateProfile(userProfile);
         }
+
+        // Calculate profile completion percentage
+        const calculateProfileCompletion = () => {
+          if (!userProfile) return 0;
+          
+          const fields = [
+            userProfile.full_name,
+            userProfile.headline,
+            userProfile.bio,
+            userProfile.location,
+            userProfile.avatar_url,
+            Array.isArray(userProfile.specialization) ? userProfile.specialization.length > 0 : userProfile.specialization
+          ];
+          
+          const completedFields = fields.filter(field => {
+            if (typeof field === 'string') {
+              return field && field.trim() !== '';
+            }
+            return field;
+          }).length;
+          return Math.round((completedFields / fields.length) * 100);
+        };
+
+        const completionPercentage = calculateProfileCompletion();
+        
+        // Redirect to onboarding if profile completion is below 80%
+        if (completionPercentage < 80) {
+          router.push('/onboarding');
+          return;
+        }
+      } catch (error) {
+        console.error('Error loading user profile:', error);
+        router.push('/onboarding');
+        return;
+      } finally {
+        setLoading(false);
       }
     };
 
-    // Load profile in background without blocking UI
     loadUserProfile();
-  }, [user?.id, userProfile, router]);
-
-  // Close sidebars when screen size changes
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 1024) {
-        setIsRightSidebarOpen(false);
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [user?.id, router, updateProfile, profile]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="animate-pulse space-y-6">
-            <div className="h-48 bg-gray-200 rounded-2xl mb-4"></div>
-            <div className="space-y-4">
-              <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-              <div className="h-6 bg-gray-200 rounded w-1/2"></div>
-              <div className="h-20 bg-gray-200 rounded"></div>
-            </div>
-          </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <LoadingSpinner />
+          <p className="mt-4 text-gray-600">Loading your dashboard...</p>
         </div>
       </div>
     );
   }
 
-  if (!user) return null;
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header - Fixed at top */}
-      <Header 
-        onRightSidebarToggle={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
-      />
-
-      {/* Main Layout Container */}
+      {/* Header */}
+      <Header />
+      
+      {/* Main Content */}
       <div className="flex pt-16">
-        {/* Main Content Area */}
-        <div className="flex-1">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
-            {/* Mobile Content Layout */}
-            <div className="lg:hidden">
-              {children}
-            </div>
-
-            {/* Desktop Content Layout */}
-            <div className="hidden lg:grid lg:grid-cols-12 gap-6">
-              {/* Main Content */}
-              <div className="lg:col-span-8 xl:col-span-9">
-                {children}
-              </div>
-
-              {/* Right Sidebar - Desktop */}
-              <div className="lg:col-span-4 xl:col-span-3">
-                <div className="sticky top-24 space-y-6">
-                  <RightSidebar />
-                </div>
-              </div>
-            </div>
+        {/* Left Sidebar - Desktop */}
+        <div className="hidden lg:block lg:w-80 lg:fixed lg:left-0 lg:top-16 lg:bottom-0 lg:overflow-y-auto lg:bg-gray-50 lg:border-r lg:border-gray-200">
+          <div className="p-6">
+            <LeftSidebar />
           </div>
         </div>
 
-        {/* Right Sidebar - Mobile Overlay */}
-        {isRightSidebarOpen && (
-          <div className="fixed inset-0 z-50 lg:hidden">
-            <div 
-              className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
-              onClick={() => setIsRightSidebarOpen(false)}
-            />
-            <div className="fixed right-0 top-0 h-full w-80 max-w-[85vw] bg-white shadow-xl transform transition-transform">
-              <div className="p-4 border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900">Quick Access</h3>
-                  <button
-                    onClick={() => setIsRightSidebarOpen(false)}
-                    className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-              <div className="p-4 overflow-y-auto h-full">
+        {/* Main Content Area */}
+        <div className="flex-1 lg:ml-80">
+          <div className="flex">
+            {/* Center Content */}
+            <div className="flex-1 min-w-0">
+              <main className="p-6">
+                {children}
+              </main>
+            </div>
+
+            {/* Right Sidebar - Desktop */}
+            <div className="hidden xl:block xl:w-80 xl:flex-shrink-0">
+              <div className="p-6">
                 <RightSidebar />
               </div>
             </div>
           </div>
-        )}
-      </div>
-      
-      {/* Quick Navigation - Mobile Bottom Navigation */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
-        <MobileNavigation />
-      </div>
-      
-      {/* Quick Navigation - Desktop */}
-      <div className="hidden lg:block fixed bottom-6 right-6 z-40">
-        <QuickNav />
-      </div>
-      
-      {/* Search Modal */}
-      {showSearch && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-20 px-4">
-          <div className="w-full max-w-md">
-            <UserSearch />
-          </div>
         </div>
-      )}
+      </div>
 
-      {/* Notifications Modal */}
-      {showNotifications && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-20 px-4">
-          <div className="w-full max-w-md">
-            <NotificationList 
-              notifications={[]} 
-              onMarkAsRead={async () => {}} 
-            />
-          </div>
-        </div>
-      )}
+      {/* Mobile Navigation */}
+      <MobileNavigation />
     </div>
   );
 } 
