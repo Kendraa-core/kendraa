@@ -5,8 +5,17 @@ import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import ClickableProfileName from '@/components/common/ClickableProfileName';
-
-import ShareButton from '@/components/common/ShareButton';
+import Avatar from '@/components/common/Avatar';
+import { 
+  MagnifyingGlassIcon,
+  XMarkIcon,
+  UserPlusIcon,
+  UserGroupIcon,
+  BuildingOfficeIcon,
+  CheckIcon,
+  XCircleIcon,
+  MapPinIcon
+} from '@heroicons/react/24/outline';
 import { 
   getSuggestedConnectionsWithMutualCounts,
   getSuggestedInstitutions,
@@ -21,6 +30,7 @@ import {
   isFollowing
 } from '@/lib/queries';
 import { Profile, ConnectionWithProfile } from '@/types/database.types';
+import { formatNumber } from '@/lib/utils';
 
 interface ProfilePreview extends Profile {
   mutual_connections?: number;
@@ -35,6 +45,7 @@ export default function NetworkPage() {
   const [connections, setConnections] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState<'suggestions' | 'connections' | 'requests'>('suggestions');
 
   const debugLog = (message: string, data?: unknown) => {
     if (process.env.NODE_ENV === 'development') {
@@ -50,8 +61,8 @@ export default function NetworkPage() {
     
     try {
       const [individualsData, institutionsData, requestsData, connectionsData] = await Promise.all([
-        getSuggestedConnectionsWithMutualCounts(user.id, 8),
-        getSuggestedInstitutions(user.id, 4),
+        getSuggestedConnectionsWithMutualCounts(user.id, 12),
+        getSuggestedInstitutions(user.id, 6),
         getConnectionRequests(user.id),
         getConnections(user.id)
       ]);
@@ -65,16 +76,6 @@ export default function NetworkPage() {
         suggestions: suggestionsData.length,
         requests: requestsData.length,
         connections: connectionsData.length 
-      });
-
-      // Debug: Log the profile types
-      suggestionsData.forEach((profile, index) => {
-        debugLog(`Profile ${index}:`, { 
-          id: profile.id, 
-          name: profile.full_name, 
-          type: profile.profile_type,
-          mutual_connections: (profile as any).mutual_connections 
-        });
       });
 
       // Add connection status and follow status to suggestions
@@ -235,157 +236,193 @@ export default function NetworkPage() {
     suggestion.headline?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const filteredConnections = connections.filter(connection =>
+    connection.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    connection.headline?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-primary-50 via-secondary-50 to-accent-50">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600"></div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-azure-200 border-t-azure-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading your network...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-secondary-50 to-accent-50">
+    <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Elegant Header */}
-        <div className="mb-6 flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900">My Network</h1>
-            <p className="text-gray-600 text-sm">Connect with healthcare professionals</p>
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">My Network</h1>
+              <p className="text-gray-600 mt-1">Connect with healthcare professionals and institutions</p>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <UserGroupIcon className="w-5 h-5" />
+              <span>{formatNumber(connections.length)} connections</span>
+              {connectionRequests.length > 0 && (
+                <>
+                  <span>•</span>
+                  <span className="text-azure-600 font-medium">{connectionRequests.length} pending requests</span>
+                </>
+              )}
+            </div>
           </div>
-          <ShareButton 
-            title="My Professional Network"
-            description="Connect with healthcare professionals on Kendraa"
-          />
         </div>
 
-        {/* Search */}
-        <div className="mb-6">
-          <div className="relative">
+        {/* Search Bar */}
+        <div className="mb-8">
+          <div className="relative max-w-md">
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Search people..."
+              placeholder="Search people and institutions..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-3 pl-10 pr-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-azure-500 focus:border-azure-500 transition-colors"
             />
-            <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <XMarkIcon className="w-5 h-5" />
               </button>
             )}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Connection Requests */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Connection Requests</h2>
-              {connectionRequests.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">No pending requests</p>
-              ) : (
-                <div className="space-y-4">
-                  {connectionRequests.map((request) => (
-                    <motion.div
-                      key={request.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="flex items-center space-x-3 p-3 bg-primary-50 rounded-xl"
-                    >
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-secondary-600 flex items-center justify-center text-white font-semibold">
-                        {request.requester.full_name?.charAt(0) || 'U'}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <ClickableProfileName
-                          userId={request.requester.id}
-                          name={request.requester.full_name || 'Unknown User'}
-                          userType={request.requester.user_type || 'individual'}
-                          className="text-sm font-medium truncate"
-                        />
-                        <p className="text-xs text-gray-500 truncate">
-                          {request.requester.headline}
-                        </p>
-                      </div>
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleAcceptRequest(request.id)}
-                          className="px-3 py-1 text-xs font-medium bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-lg hover:from-primary-700 hover:to-primary-800 transition-colors"
-                        >
-                          Accept
-                        </button>
-                        <button
-                          onClick={() => handleRejectRequest(request.id)}
-                          className="px-3 py-1 text-xs font-medium bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-                        >
-                          Decline
-                        </button>
-                      </div>
-                    </motion.div>
-                  ))}
+        {/* Tab Navigation */}
+        <div className="mb-8">
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-8">
+              <button
+                onClick={() => setActiveTab('suggestions')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === 'suggestions'
+                    ? 'border-azure-500 text-azure-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <UserPlusIcon className="w-4 h-4" />
+                  Suggestions ({filteredSuggestions.length})
                 </div>
+              </button>
+              <button
+                onClick={() => setActiveTab('connections')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === 'connections'
+                    ? 'border-azure-500 text-azure-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <UserGroupIcon className="w-4 h-4" />
+                  Connections ({filteredConnections.length})
+                </div>
+              </button>
+              {connectionRequests.length > 0 && (
+                <button
+                  onClick={() => setActiveTab('requests')}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                    activeTab === 'requests'
+                      ? 'border-azure-500 text-azure-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <UserPlusIcon className="w-4 h-4" />
+                    Requests ({connectionRequests.length})
+                  </div>
+                </button>
               )}
-            </div>
+            </nav>
           </div>
+        </div>
 
-          {/* Suggested Connections */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">People You May Know</h2>
-              {filteredSuggestions.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">No suggestions available</p>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {filteredSuggestions.map((suggestion) => (
+        {/* Content */}
+        <div className="space-y-8">
+          {/* Suggestions Tab */}
+          {activeTab === 'suggestions' && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredSuggestions.length === 0 ? (
+                  <div className="col-span-full text-center py-12">
+                    <UserPlusIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                                         <h3 className="text-lg font-medium text-gray-900 mb-2">No suggestions available</h3>
+                     <p className="text-gray-500">We&apos;ll show you people you may know based on your profile and connections.</p>
+                  </div>
+                ) : (
+                  filteredSuggestions.map((suggestion) => (
                     <motion.div
                       key={suggestion.id}
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className="p-4 border border-gray-200 rounded-xl hover:shadow-md transition-shadow"
+                      className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all duration-200"
                     >
-                      <div className="flex items-start space-x-3">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-secondary-600 flex items-center justify-center text-white font-semibold">
-                          {suggestion.full_name?.charAt(0) || 'U'}
-                        </div>
+                      <div className="flex items-start space-x-4">
+                        <Avatar
+                          src={suggestion.avatar_url}
+                          alt={suggestion.full_name || 'User'}
+                          size="lg"
+                          className="flex-shrink-0"
+                        />
                         <div className="flex-1 min-w-0">
-                          <ClickableProfileName
-                            userId={suggestion.id}
-                            name={suggestion.full_name || 'Unknown User'}
-                            userType={suggestion.user_type || 'individual'}
-                            className="text-sm font-semibold truncate"
-                          />
-                          <p className="text-xs text-gray-500 truncate mb-2">
-                            {suggestion.headline}
+                          <div className="flex items-center gap-2 mb-1">
+                            <ClickableProfileName
+                              userId={suggestion.id}
+                              name={suggestion.full_name || 'Unknown User'}
+                              userType={suggestion.user_type || 'individual'}
+                              className="text-lg font-semibold text-gray-900 truncate"
+                            />
+                            {suggestion.profile_type === 'institution' && (
+                              <BuildingOfficeIcon className="w-4 h-4 text-azure-500" />
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                            {suggestion.headline || 'Healthcare Professional'}
                           </p>
-                          {suggestion.mutual_connections && (
-                            <p className="text-xs text-primary-600">
-                              {suggestion.mutual_connections} mutual connections
+                          {suggestion.location && (
+                            <div className="flex items-center text-xs text-gray-500 mb-2">
+                              <MapPinIcon className="w-3 h-3 mr-1" />
+                              {suggestion.location}
+                            </div>
+                          )}
+                          {suggestion.mutual_connections && suggestion.mutual_connections > 0 && (
+                            <p className="text-xs text-azure-600 font-medium">
+                              {suggestion.mutual_connections} mutual connection{suggestion.mutual_connections !== 1 ? 's' : ''}
                             </p>
                           )}
                         </div>
                       </div>
-                      <div className="mt-3">
+                      
+                      <div className="mt-4">
                         {suggestion.profile_type === 'institution' ? (
                           // Institution - Show Follow/Unfollow
                           suggestion.follow_status === 'following' ? (
                             <button
                               onClick={() => handleUnfollow(suggestion.id)}
-                              className="w-full px-3 py-2 text-sm font-medium bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                              className="w-full px-4 py-2 text-sm font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
                             >
+                              <CheckIcon className="w-4 h-4" />
                               Following
                             </button>
                           ) : (
                             <button
                               onClick={() => handleConnect(suggestion.id, 'institution')}
-                              className="w-full px-3 py-2 text-sm font-medium bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-lg hover:from-primary-700 hover:to-primary-800 transition-colors"
+                              className="w-full px-4 py-2 text-sm font-medium bg-azure-500 text-white rounded-lg hover:bg-azure-600 transition-colors flex items-center justify-center gap-2"
                             >
+                              <UserPlusIcon className="w-4 h-4" />
                               Follow
                             </button>
                           )
@@ -394,8 +431,9 @@ export default function NetworkPage() {
                           suggestion.connection_status === 'none' && (
                             <button
                               onClick={() => handleConnect(suggestion.id, 'individual')}
-                              className="w-full px-3 py-2 text-sm font-medium bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-lg hover:from-primary-700 hover:to-primary-800 transition-colors"
+                              className="w-full px-4 py-2 text-sm font-medium bg-azure-500 text-white rounded-lg hover:bg-azure-600 transition-colors flex items-center justify-center gap-2"
                             >
+                              <UserPlusIcon className="w-4 h-4" />
                               Connect
                             </button>
                           )
@@ -403,61 +441,145 @@ export default function NetworkPage() {
                         {suggestion.connection_status === 'pending' && (
                           <button
                             disabled
-                            className="w-full px-3 py-2 text-sm font-medium bg-gray-200 text-gray-500 rounded-lg cursor-not-allowed"
+                            className="w-full px-4 py-2 text-sm font-medium bg-gray-100 text-gray-500 rounded-lg cursor-not-allowed flex items-center justify-center gap-2"
                           >
+                            <UserPlusIcon className="w-4 h-4" />
                             Request Sent
                           </button>
                         )}
                         {suggestion.connection_status === 'connected' && (
                           <button
                             disabled
-                            className="w-full px-3 py-2 text-sm font-medium bg-primary-100 text-primary-700 rounded-lg cursor-not-allowed"
+                            className="w-full px-4 py-2 text-sm font-medium bg-azure-100 text-azure-700 rounded-lg cursor-not-allowed flex items-center justify-center gap-2"
                           >
+                            <CheckIcon className="w-4 h-4" />
                             Connected
                           </button>
                         )}
                       </div>
                     </motion.div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+                  ))
+                )}
+              </div>
+            </motion.div>
+          )}
 
-        {/* My Connections */}
-        <div className="mt-8">
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">My Connections</h2>
-            {connections.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">No connections yet</p>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {connections.map((connection) => (
+          {/* Connections Tab */}
+          {activeTab === 'connections' && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredConnections.length === 0 ? (
+                  <div className="col-span-full text-center py-12">
+                    <UserGroupIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No connections yet</h3>
+                    <p className="text-gray-500">Start connecting with healthcare professionals to build your network.</p>
+                  </div>
+                ) : (
+                  filteredConnections.map((connection) => (
+                    <motion.div
+                      key={connection.id}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all duration-200"
+                    >
+                      <div className="flex items-center space-x-4">
+                        <Avatar
+                          src={connection.avatar_url}
+                          alt={connection.full_name || 'User'}
+                          size="lg"
+                          className="flex-shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <ClickableProfileName
+                            userId={connection.id}
+                            name={connection.full_name || 'Unknown User'}
+                            userType={connection.user_type || 'individual'}
+                            className="text-lg font-semibold text-gray-900 truncate"
+                          />
+                          <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                            {connection.headline || 'Healthcare Professional'}
+                          </p>
+                          {connection.location && (
+                            <div className="flex items-center text-xs text-gray-500 mt-2">
+                              <MapPinIcon className="w-3 h-3 mr-1" />
+                              {connection.location}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))
+                )}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Requests Tab */}
+          {activeTab === 'requests' && connectionRequests.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {connectionRequests.map((request) => (
                   <motion.div
-                    key={connection.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="p-4 border border-gray-200 rounded-xl hover:shadow-md transition-shadow"
+                    key={request.id}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all duration-200"
                   >
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-secondary-600 flex items-center justify-center text-white font-semibold">
-                        {connection.full_name?.charAt(0) || 'U'}
-                      </div>
+                    <div className="flex items-start space-x-4 mb-4">
+                      <Avatar
+                        src={request.requester.avatar_url}
+                        alt={request.requester.full_name || 'User'}
+                        size="lg"
+                        className="flex-shrink-0"
+                      />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-gray-900 truncate">
-                          {connection.full_name}
+                        <ClickableProfileName
+                          userId={request.requester.id}
+                          name={request.requester.full_name || 'Unknown User'}
+                          userType={request.requester.user_type || 'individual'}
+                          className="text-lg font-semibold text-gray-900 truncate"
+                        />
+                        <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                          {request.requester.headline || 'Healthcare Professional'}
                         </p>
-                        <p className="text-xs text-gray-500 truncate">
-                          {connection.headline}
-                        </p>
+                        {request.requester.location && (
+                          <div className="flex items-center text-xs text-gray-500 mt-2">
+                            <MapPinIcon className="w-3 h-3 mr-1" />
+                            {request.requester.location}
+                          </div>
+                        )}
                       </div>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleAcceptRequest(request.id)}
+                        className="flex-1 px-4 py-2 text-sm font-medium bg-azure-500 text-white rounded-lg hover:bg-azure-600 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <CheckIcon className="w-4 h-4" />
+                        Accept
+                      </button>
+                      <button
+                        onClick={() => handleRejectRequest(request.id)}
+                        className="flex-1 px-4 py-2 text-sm font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <XCircleIcon className="w-4 h-4" />
+                        Decline
+                      </button>
                     </div>
                   </motion.div>
                 ))}
               </div>
-            )}
-          </div>
+            </motion.div>
+          )}
         </div>
       </div>
     </div>
