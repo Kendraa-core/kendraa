@@ -21,6 +21,12 @@ import {
   BriefcaseIcon,
   CalendarDaysIcon,
   Squares2X2Icon,
+  BookmarkIcon,
+  HeartIcon,
+  ShieldCheckIcon,
+  QuestionMarkCircleIcon,
+  ChartBarIcon,
+  PlusIcon,
 } from '@heroicons/react/24/outline';
 import { useNotifications } from '@/contexts/NotificationContext';
 import { formatRelativeTime } from '@/utils/formatRelativeTime';
@@ -63,6 +69,25 @@ export default function Header({ onSidebarToggle, onRightSidebarToggle }: Header
     { name: 'Jobs', href: '/jobs', icon: BriefcaseIcon },
     { name: 'Events', href: '/events', icon: CalendarDaysIcon },
   ], []);
+
+  // Calculate profile completion percentage
+  const getProfileCompletion = () => {
+    if (!profile) return 0;
+    
+    const fields = [
+      profile.full_name,
+      profile.headline,
+      profile.bio,
+      profile.location,
+      profile.avatar_url,
+      profile.specialization && profile.specialization.length > 0,
+    ];
+    
+    const completed = fields.filter(field => field).length;
+    return Math.round((completed / fields.length) * 100);
+  };
+
+  const profileCompletion = getProfileCompletion();
 
   return (
     <>
@@ -202,61 +227,146 @@ export default function Header({ onSidebarToggle, onRightSidebarToggle }: Header
 
                 {/* Profile Dropdown */}
                 {isProfileMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-lg border border-gray-200 py-2 z-50">
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <div className="text-sm font-bold text-gray-900">
-                        {profile?.full_name || 'User'}
+                  <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-lg border border-gray-200 py-2 z-50">
+                    {/* User Info Section */}
+                    <div className="px-4 py-4 border-b border-gray-100">
+                      <div className="flex items-center space-x-3">
+                        <Avatar
+                          src={profile?.avatar_url}
+                          alt={profile?.full_name || 'User'}
+                          size="md"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-bold text-gray-900 truncate">
+                            {profile?.full_name || 'User'}
+                          </div>
+                          <div className="text-xs text-gray-500 truncate">
+                            {profile?.headline || 'Healthcare Professional'}
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-sm text-gray-500">{profile?.headline}</div>
+                      
+                      {/* Profile Completion */}
+                      {profileCompletion < 100 && (
+                        <div className="mt-3">
+                          <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                            <span>Profile Completion</span>
+                            <span className="font-medium">{profileCompletion}%</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-1.5">
+                            <div
+                              className="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
+                              style={{ width: `${profileCompletion}%` }}
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
 
-                    <div className="py-1">
+                    {/* Quick Actions */}
+                    <div className="py-2">
+                      <div className="px-3 py-1">
+                        <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Quick Actions</span>
+                      </div>
+                      
                       <Link
                         href={`/profile/${user?.id}`}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                         onClick={() => setIsProfileMenuOpen(false)}
                       >
-                        View Profile
+                        <UserIcon className="w-4 h-4" />
+                        <span>View Profile</span>
                       </Link>
+
                       <Link
-                        href="/profile/setup"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        href="/jobs/create"
+                        className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                         onClick={() => setIsProfileMenuOpen(false)}
                       >
-                        Edit Profile
+                        <PlusIcon className="w-4 h-4" />
+                        <span>Post a Job</span>
                       </Link>
-                      {(!profile?.full_name || !profile?.headline || !profile?.specialization?.length) && (
-                        <button
-                          onClick={() => {
-                            setShowProfileWizard(true);
-                            setIsProfileMenuOpen(false);
-                          }}
-                          className="block w-full text-left px-4 py-2 text-sm text-primary-600 hover:bg-primary-50"
-                        >
-                          <div className="flex items-center space-x-2">
-                            <ExclamationTriangleIcon className="w-4 h-4" />
-                            <span>Complete Profile</span>
-                          </div>
-                        </button>
-                      )}
+
                       <Link
-                        href="/settings"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        href="/events/create"
+                        className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                         onClick={() => setIsProfileMenuOpen(false)}
                       >
-                        Settings
+                        <CalendarDaysIcon className="w-4 h-4" />
+                        <span>Create Event</span>
                       </Link>
                     </div>
 
-                    <div className="border-t border-gray-100 pt-1">
+                    {/* Account Management */}
+                    <div className="py-2 border-t border-gray-100">
+                      <div className="px-3 py-1">
+                        <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Account</span>
+                      </div>
+                      
+                      <Link
+                        href="/saved-items"
+                        className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        onClick={() => setIsProfileMenuOpen(false)}
+                      >
+                        <BookmarkIcon className="w-4 h-4" />
+                        <span>Saved Items</span>
+                      </Link>
+
+                      <Link
+                        href="/applications"
+                        className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        onClick={() => setIsProfileMenuOpen(false)}
+                      >
+                        <BriefcaseIcon className="w-4 h-4" />
+                        <span>My Applications</span>
+                      </Link>
+
+                      <Link
+                        href="/settings"
+                        className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        onClick={() => setIsProfileMenuOpen(false)}
+                      >
+                        <Cog6ToothIcon className="w-4 h-4" />
+                        <span>Settings</span>
+                      </Link>
+                    </div>
+
+                    {/* Help & Support */}
+                    <div className="py-2 border-t border-gray-100">
+                      <div className="px-3 py-1">
+                        <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Support</span>
+                      </div>
+                      
+                      <Link
+                        href="/help"
+                        className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        onClick={() => setIsProfileMenuOpen(false)}
+                      >
+                        <QuestionMarkCircleIcon className="w-4 h-4" />
+                        <span>Help Center</span>
+                      </Link>
+
+                      <Link
+                        href="/privacy"
+                        className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        onClick={() => setIsProfileMenuOpen(false)}
+                      >
+                        <ShieldCheckIcon className="w-4 h-4" />
+                        <span>Privacy Policy</span>
+                      </Link>
+                    </div>
+
+                    {/* Sign Out */}
+                    <div className="border-t border-gray-100 pt-2">
                       <button
                         onClick={async () => {
                           await signOut();
                           router.push('/signin');
                         }}
-                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                        className="flex items-center space-x-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                       >
-                        Sign Out
+                        <ArrowRightOnRectangleIcon className="w-4 h-4" />
+                        <span>Sign Out</span>
                       </button>
                     </div>
                   </div>
