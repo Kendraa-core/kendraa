@@ -57,7 +57,7 @@ export default function FeedPage() {
   }, [fetchPosts]);
 
   return (
-    <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Create Post */}
       <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
         <div className="flex items-start space-x-3 sm:space-x-4">
@@ -71,16 +71,16 @@ export default function FeedPage() {
               placeholder="Share your thoughts, insights, or professional updates..."
               value={postContent}
               onChange={(e) => setPostContent(e.target.value)}
-              className="w-full p-3 sm:p-4 border border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 placeholder-gray-500 text-sm sm:text-base"
+              className="w-full p-3 sm:p-4 border border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-azure-500 focus:border-transparent text-gray-700 placeholder-gray-500 text-sm sm:text-base"
               rows={3}
             />
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-100 space-y-3 sm:space-y-0">
               <div className="flex items-center space-x-3 sm:space-x-4">
-                <button className="flex items-center space-x-2 text-gray-500 hover:text-blue-600 transition-colors p-2 rounded-lg hover:bg-blue-50">
+                <button className="flex items-center space-x-2 text-gray-500 hover:text-azure-600 transition-colors p-2 rounded-lg hover:bg-azure-50">
                   <PhotoIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                   <span className="text-xs sm:text-sm font-medium">Media</span>
                 </button>
-                <button className="flex items-center space-x-2 text-gray-500 hover:text-blue-600 transition-colors p-2 rounded-lg hover:bg-blue-50">
+                <button className="flex items-center space-x-2 text-gray-500 hover:text-azure-600 transition-colors p-2 rounded-lg hover:bg-azure-50">
                   <DocumentIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                   <span className="text-xs sm:text-sm font-medium">Article</span>
                 </button>
@@ -88,7 +88,7 @@ export default function FeedPage() {
               <button 
                 onClick={() => handleCreatePost(postContent)}
                 disabled={!postContent.trim()}
-                className="w-full sm:w-auto bg-blue-600 text-white px-6 py-2 sm:py-3 rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                className="w-full sm:w-auto bg-azure-500 text-white px-6 py-2 sm:py-3 rounded-xl hover:bg-azure-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
               >
                 Post
               </button>
@@ -104,7 +104,7 @@ export default function FeedPage() {
             onClick={() => setActiveTab('posts')}
             className={`flex-1 py-2 sm:py-3 px-3 sm:px-6 text-center font-medium transition-all duration-200 rounded-lg text-sm sm:text-base ${
               activeTab === 'posts'
-                ? 'text-blue-700 bg-white shadow-sm'
+                ? 'text-azure-700 bg-white shadow-sm'
                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
             }`}
           >
@@ -114,7 +114,7 @@ export default function FeedPage() {
             onClick={() => setActiveTab('medical')}
             className={`flex-1 py-2 sm:py-3 px-3 sm:px-6 text-center font-medium transition-all duration-200 rounded-lg text-sm sm:text-base ${
               activeTab === 'medical'
-                ? 'text-blue-700 bg-white shadow-sm'
+                ? 'text-azure-700 bg-white shadow-sm'
                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
             }`}
           >
