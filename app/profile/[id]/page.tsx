@@ -10,8 +10,8 @@ import Avatar from '@/components/common/Avatar';
 import Breadcrumb from '@/components/common/Breadcrumb';
 import EditProfileModal from '@/components/profile/EditProfileModal';
 
-import ShareButton from '@/components/common/ShareButton';
 import PostCard from '@/components/post/PostCard';
+import SimilarPeople from '@/components/profile/SimilarPeople';
 import { cn, formatDate } from '@/lib/utils';
 import {
   ArrowLeftIcon,
@@ -186,45 +186,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
   );
 });
 
-const ContactInfo = React.memo(function ContactInfo({ profile }: { profile: Profile }) {
-  return (
-    <Card className="bg-white shadow-lg border-0">
-      <CardHeader>
-        <CardTitle className="text-lg text-gray-900">Contact Information</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {profile.email && (
-          <div className="flex items-center text-sm">
-            <EnvelopeIcon className="w-4 h-4 mr-3 text-gray-400" />
-            <span className="text-gray-600">Email:</span>
-            <span className="ml-2 text-gray-900">{profile.email}</span>
-          </div>
-        )}
-        {profile.phone && (
-          <div className="flex items-center text-sm">
-            <PhoneIcon className="w-4 h-4 mr-3 text-gray-400" />
-            <span className="text-gray-600">Phone:</span>
-            <span className="ml-2 text-gray-900">{profile.phone}</span>
-          </div>
-        )}
-        {profile.website && (
-          <div className="flex items-center text-sm">
-            <GlobeAltIcon className="w-4 h-4 mr-3 text-gray-400" />
-            <span className="text-gray-600">Website:</span>
-            <a
-              href={profile.website}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="ml-2 text-linkedin-primary hover:underline"
-            >
-              {profile.website}
-            </a>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-});
+
 
 export default function ProfilePage() {
   const params = useParams();
@@ -441,14 +403,7 @@ export default function ProfilePage() {
           />
         </div>
 
-        {/* Elegant Header */}
-        <div className="mb-6 flex justify-end">
-          <ShareButton 
-            title={`${profile?.full_name || 'User'}'s Profile`}
-            description={`Check out ${profile?.full_name || 'this user'}'s professional profile on Kendraa`}
-            url={window.location.href}
-          />
-        </div>
+
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Main Profile Column */}
@@ -676,38 +631,8 @@ export default function ProfilePage() {
 
           {/* Sidebar */}
           <div className="lg:col-span-4 space-y-6">
-            {/* Contact Information */}
-            <div
-              
-              
-              
-            >
-              <ContactInfo profile={profile} />
-            </div>
-
-            {/* Quick Stats */}
-            <div
-              
-              
-              
-            >
-              <Card className="bg-white shadow-lg border-0">
-                <CardHeader>
-                  <CardTitle className="text-lg text-gray-900">Profile Stats</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-600">Posts</span>
-                    <span className="font-semibold text-gray-900">{posts.length}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-600">Experience</span>
-                    <span className="font-semibold text-gray-900">{experiences.length}</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            {/* Similar People */}
+            <SimilarPeople />
 
             {/* Navigation Links */}
             <div

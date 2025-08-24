@@ -49,14 +49,18 @@ export default function ProfileCompletionPrompt() {
 
   // Show prompt if profile is incomplete
   useEffect(() => {
-    if (!isProfileComplete()) {
-      // Delay showing the prompt to avoid immediate popup
-      const timer = setTimeout(() => {
-        setShowPrompt(true);
-      }, 2000);
-      
-      return () => clearTimeout(timer);
-    }
+    const checkProfileCompletion = () => {
+      if (!isProfileComplete()) {
+        // Delay showing the prompt to avoid immediate popup
+        const timer = setTimeout(() => {
+          setShowPrompt(true);
+        }, 2000);
+        
+        return () => clearTimeout(timer);
+      }
+    };
+
+    checkProfileCompletion();
   }, [profile]);
 
   const handleClose = () => {

@@ -6,7 +6,7 @@ import { useEffect, useState, useRef } from 'react';
 import UserSearch from '@/components/search/UserSearch';
 import NotificationList from '@/components/notifications/NotificationList';
 import QuickNav from '@/components/common/QuickNav';
-import ProfileCompletionPrompt from '@/components/profile/ProfileCompletionPrompt';
+import OnboardingModal from '@/components/profile/OnboardingModal';
 import { useNotifications } from '@/contexts/NotificationContext';
 import { getProfile, type Profile } from '@/lib/queries';
 import Header from '@/components/layout/Header';
@@ -208,8 +208,8 @@ export default function DashboardLayout({
         </div>
       )}
 
-      {/* Profile Completion Prompt */}
-      <ProfileCompletionPrompt />
+      {/* Onboarding Modal */}
+      <OnboardingModal />
     </div>
   );
 } 
