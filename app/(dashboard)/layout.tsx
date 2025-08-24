@@ -10,7 +10,6 @@ import QuickNav from '@/components/common/QuickNav';
 import { useNotifications } from '@/contexts/NotificationContext';
 import { getProfile, type Profile } from '@/lib/queries';
 import Header from '@/components/layout/Header';
-import LeftSidebar from '@/components/layout/LeftSidebar';
 import RightSidebar from '@/components/layout/RightSidebar';
 import MobileNavigation from '@/components/layout/MobileNavigation';
 
@@ -25,7 +24,6 @@ export default function DashboardLayout({
   const [showNotifications, setShowNotifications] = useState(false);
   const [userProfile, setUserProfile] = useState<Profile | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
 
   const profileDropdownRef = useRef<HTMLDivElement>(null);
@@ -85,7 +83,6 @@ export default function DashboardLayout({
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1024) {
-        setIsSidebarOpen(false);
         setIsRightSidebarOpen(false);
       }
     };
@@ -117,32 +114,13 @@ export default function DashboardLayout({
     <div className="min-h-screen bg-gray-50">
       {/* Header - Fixed at top */}
       <Header 
-        onSidebarToggle={() => setIsSidebarOpen(!isSidebarOpen)}
         onRightSidebarToggle={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
       />
 
       {/* Main Layout Container */}
       <div className="flex pt-16">
-        {/* Left Sidebar - Desktop (Floating) */}
-        <div className="hidden lg:block">
-          <LeftSidebar />
-        </div>
-
-        {/* Left Sidebar - Mobile Overlay */}
-        {isSidebarOpen && (
-          <div className="fixed inset-0 z-50 lg:hidden">
-            <div 
-              className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
-              onClick={() => setIsSidebarOpen(false)}
-            />
-            <div className="fixed left-0 top-0 h-full w-80 max-w-[85vw] bg-white shadow-xl transform transition-transform">
-              <LeftSidebar onClose={() => setIsSidebarOpen(false)} />
-            </div>
-          </div>
-        )}
-
         {/* Main Content Area */}
-        <div className="flex-1 lg:ml-20">
+        <div className="flex-1">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
             {/* Mobile Content Layout */}
             <div className="lg:hidden">

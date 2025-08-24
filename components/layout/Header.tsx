@@ -33,11 +33,10 @@ import { formatRelativeTime } from '@/utils/formatRelativeTime';
 import { cn } from '@/lib/utils';
 
 interface HeaderProps {
-  onSidebarToggle?: () => void;
   onRightSidebarToggle?: () => void;
 }
 
-export default function Header({ onSidebarToggle, onRightSidebarToggle }: HeaderProps) {
+export default function Header({ onRightSidebarToggle }: HeaderProps) {
   const { user, profile, signOut } = useAuth();
   const { unreadCount, notifications, markAsRead } = useNotifications();
   const router = useRouter();
@@ -97,14 +96,6 @@ export default function Header({ onSidebarToggle, onRightSidebarToggle }: Header
           <div className="flex items-center justify-between h-16">
             {/* Left Side */}
             <div className="flex items-center space-x-4">
-              {/* Mobile Sidebar Toggle */}
-              <button
-                onClick={onSidebarToggle}
-                className="lg:hidden p-2 text-gray-600 hover:text-azure-500 hover:bg-gray-50 rounded-lg transition-all duration-200"
-              >
-                <Bars3Icon className="w-5 h-5" />
-              </button>
-
               {/* Logo */}
               <Link href="/feed" className="flex items-center space-x-2">
                 <Logo />
