@@ -10,19 +10,13 @@ import {
   BriefcaseIcon,
   CalendarDaysIcon,
   PlusIcon,
-  UsersIcon,
   UserCircleIcon,
-  MagnifyingGlassIcon,
-  BellIcon,
-  Bars3Icon,
-  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { getProfile, type Profile } from '@/lib/queries';
 
 export default function MobileNavigation() {
   const { user } = useAuth();
   const pathname = usePathname();
-  const [isOpen, setIsOpen] = useState(false);
   const [userProfile, setUserProfile] = useState<Profile | null>(null);
 
   // Load user profile to determine navigation options
@@ -44,26 +38,23 @@ export default function MobileNavigation() {
   const getNavigationItems = () => {
     const isInstitution = userProfile?.profile_type === 'institution';
     
-    const baseItems = [
-      { href: '/feed', icon: HomeIcon, label: 'Home' },
-    ];
-
     if (isInstitution) {
       // Institution navigation
       return [
-        ...baseItems,
+        { href: '/feed', icon: HomeIcon, label: 'Home' },
         { href: '/jobs', icon: BriefcaseIcon, label: 'Jobs' },
-        { href: '/jobs/create', icon: PlusIcon, label: 'Post Job' },
+        { href: '/jobs/create', icon: PlusIcon, label: 'Post' },
         { href: '/events', icon: CalendarDaysIcon, label: 'Events' },
-        { href: '/followers', icon: UsersIcon, label: 'Followers' },
+        { href: `/profile/${user?.id}`, icon: UserCircleIcon, label: 'Profile' },
       ];
     } else {
       // Individual/Student navigation
       return [
-        ...baseItems,
+        { href: '/feed', icon: HomeIcon, label: 'Home' },
         { href: '/network', icon: UserGroupIcon, label: 'Network' },
         { href: '/jobs', icon: BriefcaseIcon, label: 'Jobs' },
         { href: '/events', icon: CalendarDaysIcon, label: 'Events' },
+        { href: `/profile/${user?.id}`, icon: UserCircleIcon, label: 'Profile' },
       ];
     }
   };
@@ -71,107 +62,26 @@ export default function MobileNavigation() {
   const navigationItems = getNavigationItems();
 
   return (
-    <>
-      {/* Mobile Menu Button */}
-      <button
-        onClick={() => setIsOpen(true)}
-        className="md:hidden flex items-center justify-center w-10 h-10 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
-      >
-        <Bars3Icon className="w-6 h-6 text-gray-600" />
-      </button>
-
-      {/* Mobile Menu Overlay */}
-      <>
-        {isOpen && (
-          <div
-            
-            
-            
-            className="fixed inset-0 bg-black/50 z-50 md:hidden"
-            onClick={() => setIsOpen(false)}
+    <nav className="flex items-center justify-around px-2 py-2 bg-white border-t border-gray-200">
+      {navigationItems.map((item) => {
+        const IconComponent = item.icon;
+        const isActive = pathname === item.href;
+        
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`flex flex-col items-center justify-center w-full py-2 px-1 rounded-lg transition-colors ${
+              isActive
+                ? 'text-blue-600 bg-blue-50'
+                : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
+            }`}
           >
-            <div
-              
-              
-              
-              className="absolute right-0 top-0 h-full w-80 bg-white shadow-xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">K</span>
-                  </div>
-                  <span className="text-lg font-semibold text-gray-900">Menu</span>
-                </div>
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-                >
-                  <XMarkIcon className="w-6 h-6 text-gray-600" />
-                </button>
-              </div>
-
-              {/* Navigation Items */}
-              <div className="p-4 space-y-2">
-                {navigationItems.map((item) => {
-                  const IconComponent = item.icon;
-                  const isActive = pathname === item.href;
-                  
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setIsOpen(false)}
-                      className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                        isActive
-                          ? 'bg-blue-50 text-blue-600'
-                          : 'text-gray-700 hover:bg-gray-50'
-                      }`}
-                    >
-                      <IconComponent className="w-5 h-5" />
-                      <span className="font-medium">{item.label}</span>
-                    </Link>
-                  );
-                })}
-              </div>
-
-              {/* Quick Actions */}
-              <div className="p-4 border-t border-gray-200">
-                <div className="space-y-2">
-                  <Link
-                    href="/search"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                  >
-                    <MagnifyingGlassIcon className="w-5 h-5" />
-                    <span className="font-medium">Search</span>
-                  </Link>
-                  
-                  <Link
-                    href="/notifications"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                  >
-                    <BellIcon className="w-5 h-5" />
-                    <span className="font-medium">Notifications</span>
-                  </Link>
-                  
-                  <Link
-                    href={`/profile/${user?.id}`}
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                  >
-                    <UserCircleIcon className="w-5 h-5" />
-                    <span className="font-medium">My Profile</span>
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </>
-    </>
+            <IconComponent className="w-6 h-6 mb-1" />
+            <span className="text-xs font-medium">{item.label}</span>
+          </Link>
+        );
+      })}
+    </nav>
   );
 } 

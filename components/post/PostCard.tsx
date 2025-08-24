@@ -291,7 +291,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
       {/* Post Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-3 min-w-0 flex-1">
@@ -323,7 +323,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
 
       {/* Post Content */}
       <div className="mb-4">
-        <p className="text-gray-900 whitespace-pre-wrap break-words">{post.content}</p>
+        <p className="text-gray-900 whitespace-pre-wrap break-words leading-relaxed">{post.content}</p>
         
         {post.image_url && (
           <div className="mt-3">
@@ -333,6 +333,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
               width={600}
               height={400}
               className="w-full rounded-lg object-cover"
+              priority={false}
             />
           </div>
         )}
@@ -387,7 +388,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
           onClick={handleBookmark}
           className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
             isBookmarked
-              ? 'text-primary-600 hover:bg-primary-50'
+              ? 'text-blue-600 hover:bg-blue-50'
               : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
           }`}
         >
@@ -416,7 +417,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                   placeholder="Write a comment..."
-                  className="w-full p-3 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="w-full p-3 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   rows={2}
                   autoFocus
                 />
@@ -424,7 +425,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
                   <button
                     onClick={submitComment}
                     disabled={isCommenting || !newComment.trim()}
-                    className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     {isCommenting ? 'Posting...' : 'Post'}
                   </button>
@@ -437,7 +438,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
           <div className="space-y-4">
             {isLoadingComments ? (
               <div className="text-center py-4">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600 mx-auto"></div>
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
               </div>
             ) : comments.length > 0 ? (
               comments.map((comment) => {

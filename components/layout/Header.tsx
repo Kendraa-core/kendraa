@@ -99,32 +99,32 @@ export default function Header({ onSidebarToggle, onRightSidebarToggle }: Header
               {/* Mobile Sidebar Toggle */}
               <button
                 onClick={onSidebarToggle}
-                className="lg:hidden p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-50 rounded-xl transition-all duration-200"
+                className="lg:hidden p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-all duration-200"
               >
                 <Bars3Icon className="w-5 h-5" />
               </button>
 
               {/* Logo */}
-              <Link href="/" className="flex items-center space-x-2">
+              <Link href="/feed" className="flex items-center space-x-2">
                 <Logo />
               </Link>
 
               {/* Desktop Navigation */}
-              <nav className="hidden md:flex items-center space-x-2">
+              <nav className="hidden md:flex items-center space-x-1">
                 {navigationItems.map((item) => {
                   const isActive = pathname === item.href;
                   return (
                     <Link
                       key={item.name}
                       href={item.href}
-                      className={`flex items-center space-x-2 px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 ${
+                      className={`flex items-center space-x-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
                         isActive
-                          ? 'text-primary-700 bg-primary-50 shadow-sm'
-                          : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50'
+                          ? 'text-blue-700 bg-blue-50'
+                          : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
                       }`}
                     >
-                      <item.icon className="w-5 h-5" />
-                      <span>{item.name}</span>
+                      <item.icon className="w-4 h-4" />
+                      <span className="hidden lg:inline">{item.name}</span>
                     </Link>
                   );
                 })}
@@ -132,7 +132,7 @@ export default function Header({ onSidebarToggle, onRightSidebarToggle }: Header
             </div>
 
             {/* Right Side */}
-            <div className="flex items-center space-x-2 sm:space-x-4">
+            <div className="flex items-center space-x-2">
               {/* Search - Hidden on mobile */}
               <div className="hidden sm:block">
                 <UserSearch />
@@ -142,7 +142,7 @@ export default function Header({ onSidebarToggle, onRightSidebarToggle }: Header
               <div className="relative" ref={notificationsDropdownRef}>
                 <button
                   onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                  className="p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-50 rounded-xl transition-all duration-200 relative"
+                  className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-all duration-200 relative"
                 >
                   <BellIcon className="w-5 h-5" />
                   {unreadCount > 0 && (
@@ -154,7 +154,7 @@ export default function Header({ onSidebarToggle, onRightSidebarToggle }: Header
 
                 {/* Notifications Dropdown */}
                 {isNotificationsOpen && (
-                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-lg border border-gray-200 py-2 z-50">
+                  <div className="absolute right-0 mt-2 w-80 max-w-[90vw] bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
                     <div className="px-4 py-3 border-b border-gray-100">
                       <h3 className="text-sm font-bold text-gray-900">Notifications</h3>
                     </div>
@@ -169,7 +169,7 @@ export default function Header({ onSidebarToggle, onRightSidebarToggle }: Header
                           <div
                             key={notification.id}
                             className={`px-4 py-3 hover:bg-gray-50 cursor-pointer ${
-                              !notification.read ? 'bg-primary-50' : ''
+                              !notification.read ? 'bg-blue-50' : ''
                             }`}
                             onClick={() => {
                               if (!notification.read) {
@@ -178,8 +178,8 @@ export default function Header({ onSidebarToggle, onRightSidebarToggle }: Header
                             }}
                           >
                             <div className="flex items-start space-x-3">
-                              <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                <BellIcon className="w-4 h-4 text-primary-600" />
+                              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <BellIcon className="w-4 h-4 text-blue-600" />
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm text-gray-900">{notification.message}</p>
@@ -188,7 +188,7 @@ export default function Header({ onSidebarToggle, onRightSidebarToggle }: Header
                                 </p>
                                 {!notification.read && (
                                   <div className="mt-1">
-                                    <span className="inline-block w-2 h-2 bg-primary-500 rounded-full"></span>
+                                    <span className="inline-block w-2 h-2 bg-blue-500 rounded-full"></span>
                                   </div>
                                 )}
                               </div>
@@ -201,7 +201,7 @@ export default function Header({ onSidebarToggle, onRightSidebarToggle }: Header
                       <div className="px-4 py-3 border-t border-gray-100">
                         <Link
                           href="/notifications"
-                          className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+                          className="text-sm text-blue-600 hover:text-blue-700 font-medium"
                         >
                           View all notifications
                         </Link>
@@ -215,7 +215,7 @@ export default function Header({ onSidebarToggle, onRightSidebarToggle }: Header
               <div className="relative" ref={profileDropdownRef}>
                 <button
                   onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                  className="flex items-center space-x-2 p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-50 rounded-xl transition-all duration-200"
+                  className="flex items-center space-x-2 p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-all duration-200"
                 >
                   <Avatar
                     src={profile?.avatar_url}
@@ -227,7 +227,7 @@ export default function Header({ onSidebarToggle, onRightSidebarToggle }: Header
 
                 {/* Profile Dropdown */}
                 {isProfileMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-lg border border-gray-200 py-2 z-50">
+                  <div className="absolute right-0 mt-2 w-72 max-w-[90vw] bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
                     {/* User Info Section */}
                     <div className="px-4 py-4 border-b border-gray-100">
                       <div className="flex items-center space-x-3">
@@ -376,37 +376,13 @@ export default function Header({ onSidebarToggle, onRightSidebarToggle }: Header
               {/* Mobile Right Sidebar Toggle */}
               <button
                 onClick={onRightSidebarToggle}
-                className="lg:hidden p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-50 rounded-xl transition-all duration-200"
+                className="lg:hidden p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-all duration-200"
               >
                 <Squares2X2Icon className="w-5 h-5" />
               </button>
             </div>
           </div>
         </div>
-
-        {/* Mobile Navigation */}
-        {isMobileMenuOpen && (
-          <nav className="md:hidden border-t border-gray-200 py-2">
-            {navigationItems.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`flex items-center space-x-2 px-4 py-2 text-sm font-medium ${
-                    isActive
-                      ? 'text-primary-600 bg-primary-50'
-                      : 'text-gray-600 hover:text-primary-600'
-                  }`}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <item.icon className="w-5 h-5" />
-                  <span>{item.name}</span>
-                </Link>
-              );
-            })}
-          </nav>
-        )}
       </header>
     
       {/* Profile Wizard */}

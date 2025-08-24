@@ -57,10 +57,10 @@ export default function FeedPage() {
   }, [fetchPosts]);
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
       {/* Create Post */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <div className="flex items-start space-x-4">
+      <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
+        <div className="flex items-start space-x-3 sm:space-x-4">
           <Avatar
             src={user?.user_metadata?.avatar_url}
             alt={user?.email || 'User'}
@@ -71,24 +71,24 @@ export default function FeedPage() {
               placeholder="Share your thoughts, insights, or professional updates..."
               value={postContent}
               onChange={(e) => setPostContent(e.target.value)}
-              className="w-full p-4 border border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 placeholder-gray-500 text-base"
+              className="w-full p-3 sm:p-4 border border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 placeholder-gray-500 text-sm sm:text-base"
               rows={3}
             />
-            <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-              <div className="flex items-center space-x-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-100 space-y-3 sm:space-y-0">
+              <div className="flex items-center space-x-3 sm:space-x-4">
                 <button className="flex items-center space-x-2 text-gray-500 hover:text-blue-600 transition-colors p-2 rounded-lg hover:bg-blue-50">
-                  <PhotoIcon className="w-5 h-5" />
-                  <span className="text-sm font-medium">Media</span>
+                  <PhotoIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="text-xs sm:text-sm font-medium">Media</span>
                 </button>
                 <button className="flex items-center space-x-2 text-gray-500 hover:text-blue-600 transition-colors p-2 rounded-lg hover:bg-blue-50">
-                  <DocumentIcon className="w-5 h-5" />
-                  <span className="text-sm font-medium">Article</span>
+                  <DocumentIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="text-xs sm:text-sm font-medium">Article</span>
                 </button>
               </div>
               <button 
                 onClick={() => handleCreatePost(postContent)}
                 disabled={!postContent.trim()}
-                className="bg-blue-600 text-white px-6 py-2 rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                className="w-full sm:w-auto bg-blue-600 text-white px-6 py-2 sm:py-3 rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
               >
                 Post
               </button>
@@ -98,11 +98,11 @@ export default function FeedPage() {
       </div>
 
       {/* Tab Navigation */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-2">
-        <div className="flex bg-gray-50 rounded-xl p-1">
+      <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-2">
+        <div className="flex bg-gray-50 rounded-lg sm:rounded-xl p-1">
           <button
             onClick={() => setActiveTab('posts')}
-            className={`flex-1 py-3 px-6 text-center font-medium transition-all duration-200 rounded-lg ${
+            className={`flex-1 py-2 sm:py-3 px-3 sm:px-6 text-center font-medium transition-all duration-200 rounded-lg text-sm sm:text-base ${
               activeTab === 'posts'
                 ? 'text-blue-700 bg-white shadow-sm'
                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
@@ -112,7 +112,7 @@ export default function FeedPage() {
           </button>
           <button
             onClick={() => setActiveTab('medical')}
-            className={`flex-1 py-3 px-6 text-center font-medium transition-all duration-200 rounded-lg ${
+            className={`flex-1 py-2 sm:py-3 px-3 sm:px-6 text-center font-medium transition-all duration-200 rounded-lg text-sm sm:text-base ${
               activeTab === 'medical'
                 ? 'text-blue-700 bg-white shadow-sm'
                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
@@ -125,9 +125,9 @@ export default function FeedPage() {
 
       {/* Content based on active tab */}
       {activeTab === 'posts' ? (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {loading ? (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
               <div className="animate-pulse">
                 <div className="flex items-center space-x-3 mb-4">
                   <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
@@ -150,7 +150,7 @@ export default function FeedPage() {
               />
             ))
           ) : (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 text-center">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <PlusIcon className="w-8 h-8 text-gray-400" />
               </div>

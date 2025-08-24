@@ -96,24 +96,13 @@ export default function DashboardLayout({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-secondary-50 to-accent-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
         <div className="text-center">
           <div className="relative">
-            {/* Main spinner */}
-            <div className="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
-            
-            {/* Pulse effect */}
-            <div className="absolute inset-0 w-12 h-12 border-4 border-transparent border-t-primary-400 rounded-full animate-ping opacity-20"></div>
+            <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+            <div className="absolute inset-0 w-12 h-12 border-4 border-transparent border-t-blue-400 rounded-full animate-ping opacity-20"></div>
           </div>
-          
           <p className="text-gray-600 mt-4 text-sm font-medium">Loading Kendraa...</p>
-          
-          {/* Progress dots */}
-          <div className="flex justify-center mt-2 space-x-1">
-            <div className="w-2 h-2 bg-primary-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-            <div className="w-2 h-2 bg-primary-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-            <div className="w-2 h-2 bg-primary-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-          </div>
         </div>
       </div>
     );
@@ -122,33 +111,30 @@ export default function DashboardLayout({
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-secondary-50 to-accent-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Header - Fixed at top */}
       <Header 
         onSidebarToggle={() => setIsSidebarOpen(!isSidebarOpen)}
         onRightSidebarToggle={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
       />
 
-      {/* Mobile Navigation */}
-      <div className="lg:hidden">
-        <MobileNavigation />
-      </div>
-
       {/* Main Layout Container */}
       <div className="flex pt-16">
         {/* Left Sidebar - Desktop */}
-        <div className="hidden lg:block">
-          <LeftSidebar />
+        <div className="hidden lg:block lg:w-64 lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:flex-col">
+          <div className="flex-1 flex flex-col min-h-0 bg-white border-r border-gray-200">
+            <LeftSidebar />
+          </div>
         </div>
 
         {/* Left Sidebar - Mobile Overlay */}
         {isSidebarOpen && (
-          <div className="fixed inset-0 z-40 lg:hidden">
+          <div className="fixed inset-0 z-50 lg:hidden">
             <div 
-              className="fixed inset-0 bg-black bg-opacity-50"
+              className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
               onClick={() => setIsSidebarOpen(false)}
             />
-            <div className="fixed left-0 top-0 h-full w-80 bg-white shadow-xl z-50">
+            <div className="fixed left-0 top-0 h-full w-80 max-w-[85vw] bg-white shadow-xl transform transition-transform">
               <LeftSidebar onClose={() => setIsSidebarOpen(false)} />
             </div>
           </div>
@@ -181,12 +167,12 @@ export default function DashboardLayout({
 
         {/* Right Sidebar - Mobile Overlay */}
         {isRightSidebarOpen && (
-          <div className="fixed inset-0 z-40 lg:hidden">
+          <div className="fixed inset-0 z-50 lg:hidden">
             <div 
-              className="fixed inset-0 bg-black bg-opacity-50"
+              className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
               onClick={() => setIsRightSidebarOpen(false)}
             />
-            <div className="fixed right-0 top-0 h-full w-80 bg-white shadow-xl z-50">
+            <div className="fixed right-0 top-0 h-full w-80 max-w-[85vw] bg-white shadow-xl transform transition-transform">
               <div className="p-4 border-b border-gray-200">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold text-gray-900">Quick Access</h3>
@@ -200,7 +186,7 @@ export default function DashboardLayout({
                   </button>
                 </div>
               </div>
-              <div className="p-4">
+              <div className="p-4 overflow-y-auto h-full">
                 <RightSidebar />
               </div>
             </div>
@@ -208,8 +194,13 @@ export default function DashboardLayout({
         )}
       </div>
       
-      {/* Quick Navigation - Responsive positioning */}
-      <div className="fixed bottom-4 right-4 lg:bottom-6 lg:right-6 z-40">
+      {/* Quick Navigation - Mobile Bottom Navigation */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
+        <MobileNavigation />
+      </div>
+      
+      {/* Quick Navigation - Desktop */}
+      <div className="hidden lg:block fixed bottom-6 right-6 z-40">
         <QuickNav />
       </div>
       
@@ -233,8 +224,6 @@ export default function DashboardLayout({
           </div>
         </div>
       )}
-
-
     </div>
   );
 } 

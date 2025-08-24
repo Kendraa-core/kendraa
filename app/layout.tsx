@@ -6,7 +6,6 @@ import { NotificationProvider } from '@/contexts/NotificationContext';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import ClientOnly from '@/components/common/ClientOnly';
 import './globals.css';
-import PerformanceOptimizer from '@/components/common/PerformanceOptimizer';
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -80,8 +79,8 @@ export const viewport: Viewport = {
   ],
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5,
+  userScalable: true,
 };
 
 export default function RootLayout({
@@ -91,60 +90,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.className} ${inter.variable}`} suppressHydrationWarning>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              // Completely disable service workers
-              if ('serviceWorker' in navigator) {
-                // Override the register method to prevent new registrations
-                const originalRegister = navigator.serviceWorker.register;
-                navigator.serviceWorker.register = function() {
-                  console.log('Service worker registration blocked');
-                  return Promise.reject(new Error('Service workers are disabled'));
-                };
-                
-                // Unregister all existing service workers
-                navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                  for(let registration of registrations) {
-                    registration.unregister();
-                    console.log('Service worker unregistered');
-                  }
-                });
-                
-                // Clear all caches
-                if ('caches' in window) {
-                  caches.keys().then(function(names) {
-                    for (let name of names) {
-                      caches.delete(name);
-                      console.log('Cache deleted:', name);
-                    }
-                  });
-                }
-                
-                // Prevent new service workers from registering
-                navigator.serviceWorker.addEventListener('message', function(event) {
-                  if (event.data && event.data.type === 'SKIP_WAITING') {
-                    event.preventDefault();
-                  }
-                });
-              }
-              
-              // Clear any existing service worker
-              if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.ready.then(function(registration) {
-                  registration.unregister();
-                });
-              }
-              
-              // Disable any existing service worker
-              if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-                navigator.serviceWorker.controller.postMessage({type: 'TERMINATE'});
-              }
-            `,
-          }}
-        />
-      </head>
       <body className="min-h-screen bg-gray-50 antialiased font-sans" suppressHydrationWarning>
         <ErrorBoundary>
           <AuthProvider>
@@ -159,6 +104,7 @@ export default function RootLayout({
                     borderRadius: '12px',
                     padding: '16px',
                     fontSize: '14px',
+                    maxWidth: '400px',
                   },
                   success: {
                     style: {
@@ -173,9 +119,8 @@ export default function RootLayout({
                 }}
               />
               <ClientOnly>
-                <PerformanceOptimizer />
+                {children}
               </ClientOnly>
-              {children}
             </NotificationProvider>
           </AuthProvider>
         </ErrorBoundary>

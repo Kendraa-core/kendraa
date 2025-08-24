@@ -510,9 +510,9 @@ export default function OnboardingPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-6 py-4">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3 sm:space-x-4">
               <button
                 onClick={handlePrevious}
                 disabled={currentStep === 0}
@@ -522,16 +522,16 @@ export default function OnboardingPage() {
                     : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >
-                <ChevronLeftIcon className="w-6 h-6" />
+                <ChevronLeftIcon className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
               <div>
-                <h1 className="text-xl font-semibold text-gray-900">Complete Your Profile</h1>
-                <p className="text-sm text-gray-500">
+                <h1 className="text-lg sm:text-xl font-semibold text-gray-900">Complete Your Profile</h1>
+                <p className="text-xs sm:text-sm text-gray-500">
                   Step {currentStep + 1} of {ONBOARDING_STEPS.length}
                 </p>
               </div>
             </div>
-            <div className="text-sm text-gray-500">
+            <div className="text-xs sm:text-sm text-gray-500">
               {getCompletionPercentage()}% Complete
             </div>
           </div>
@@ -547,7 +547,7 @@ export default function OnboardingPage() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 flex items-center justify-center py-12 px-6">
+      <div className="flex-1 flex items-center justify-center py-8 sm:py-12 px-4 sm:px-6">
         <div className="w-full max-w-4xl">
           <AnimatePresence mode="wait">
             <motion.div
@@ -556,7 +556,7 @@ export default function OnboardingPage() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3 }}
-              className="flex items-center justify-center min-h-[500px]"
+              className="flex items-center justify-center min-h-[400px] sm:min-h-[500px]"
             >
               {renderStep()}
             </motion.div>
@@ -566,22 +566,22 @@ export default function OnboardingPage() {
 
       {/* Footer */}
       <div className="bg-white border-t border-gray-200">
-        <div className="max-w-4xl mx-auto px-6 py-6">
-          <div className="flex justify-between items-center">
-            <div className="text-sm text-gray-500">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+          <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+            <div className="text-xs sm:text-sm text-gray-500">
               {currentStep < ONBOARDING_STEPS.length - 1 && (
                 <span>
                   {getCompletionPercentage()}% Complete
                 </span>
               )}
             </div>
-            <div className="flex space-x-4">
+            <div className="flex space-x-3 sm:space-x-4 w-full sm:w-auto">
               {currentStep < ONBOARDING_STEPS.length - 1 ? (
                 <>
                   <button
                     onClick={handlePrevious}
                     disabled={currentStep === 0}
-                    className={`px-6 py-3 rounded-xl font-medium transition-colors ${
+                    className={`flex-1 sm:flex-none px-4 sm:px-6 py-3 rounded-xl font-medium transition-colors ${
                       currentStep === 0
                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -592,7 +592,7 @@ export default function OnboardingPage() {
                   <button
                     onClick={handleNext}
                     disabled={!canProceed() || loading}
-                    className={`px-8 py-3 rounded-xl font-medium transition-colors flex items-center space-x-2 ${
+                    className={`flex-1 sm:flex-none px-6 sm:px-8 py-3 rounded-xl font-medium transition-colors flex items-center justify-center space-x-2 ${
                       canProceed() && !loading
                         ? 'bg-blue-500 text-white hover:bg-blue-600'
                         : 'bg-gray-100 text-gray-400 cursor-not-allowed'
@@ -614,7 +614,7 @@ export default function OnboardingPage() {
               ) : (
                 <button
                   onClick={() => router.push('/feed')}
-                  className="px-8 py-3 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 transition-colors"
+                  className="w-full sm:w-auto px-8 py-3 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 transition-colors"
                 >
                   Get Started
                 </button>
