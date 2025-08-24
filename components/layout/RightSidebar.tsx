@@ -15,7 +15,9 @@ import {
   TagIcon,
   BriefcaseIcon,
   ChatBubbleLeftIcon,
-  MagnifyingGlassIcon
+  MagnifyingGlassIcon,
+  MapPinIcon,
+  BuildingOfficeIcon
 } from '@heroicons/react/24/outline';
 import Avatar from '@/components/common/Avatar';
 import { useAuth } from '@/contexts/AuthContext';
@@ -178,17 +180,42 @@ export default function RightSidebar() {
 
   return (
     <div className="space-y-6">
-      {/* Profile Analytics Card */}
+      {/* Profile Widget */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Profile viewers</span>
-            <span className="text-sm font-semibold text-azure-500">{formatNumber(connectionCount * 2)}</span>
+        <div className="text-center">
+          <div className="relative mb-4">
+            <Avatar
+              src={profile?.avatar_url}
+              alt={profile?.full_name || 'User'}
+              size="lg"
+              className="mx-auto"
+            />
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white">
+              <div className="w-full h-full bg-green-400 rounded-full animate-pulse"></div>
+            </div>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Post impressions</span>
-            <span className="text-sm font-semibold text-azure-500">{formatNumber(connectionCount * 3)}</span>
+          <h3 className="text-lg font-semibold text-gray-900 mb-1">
+            {profile?.full_name || 'Your Name'}
+          </h3>
+          <p className="text-sm text-gray-600 mb-2">
+            {profile?.headline || 'Professional Headline'}
+          </p>
+          {profile?.location && (
+            <div className="flex items-center justify-center text-xs text-gray-500 mb-3">
+              <MapPinIcon className="w-3 h-3 mr-1" />
+              {profile.location}
+            </div>
+          )}
+          <div className="flex items-center justify-center text-xs text-gray-500 mb-4">
+            <UserGroupIcon className="w-3 h-3 mr-1" />
+            {formatNumber(connectionCount)} connections
           </div>
+          <Link 
+            href={`/profile/${user?.id}`}
+            className="inline-block bg-azure-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-azure-600 transition-colors"
+          >
+            View Profile
+          </Link>
         </div>
       </div>
 
@@ -233,19 +260,6 @@ export default function RightSidebar() {
         )}
       </div>
 
-      {/* Grow Your Business Card */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-azure-100 rounded-lg flex items-center justify-center">
-            <TagIcon className="w-4 h-4 text-azure-500" />
-          </div>
-          <div className="flex-1">
-            <h3 className="text-sm font-semibold text-gray-900">Grow your business</h3>
-            <p className="text-xs text-gray-500">Try Campaign Manager</p>
-          </div>
-        </div>
-      </div>
-
       {/* Quick Links Card */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
         <div className="space-y-3">
@@ -268,15 +282,15 @@ export default function RightSidebar() {
         </div>
       </div>
 
-      {/* LinkedIn News Card */}
+      {/* Top Medical News Card */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-gray-900">LinkedIn News</h3>
+          <h3 className="text-sm font-semibold text-gray-900">Top Medical News</h3>
           <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
         </div>
         
         <div className="mb-3">
-          <h4 className="text-xs font-semibold text-gray-700 mb-3">Top stories</h4>
+          <h4 className="text-xs font-semibold text-gray-700 mb-3">Latest stories</h4>
         </div>
         
         {topNews.length > 0 ? (
@@ -305,7 +319,7 @@ export default function RightSidebar() {
               </div>
             ))}
             <div className="pt-2">
-              <Link href="#" className="text-xs text-azure-500 hover:text-azure-600 font-medium">
+              <Link href="/news" className="text-xs text-azure-500 hover:text-azure-600 font-medium">
                 Show more
               </Link>
             </div>
@@ -320,48 +334,47 @@ export default function RightSidebar() {
         )}
       </div>
 
-      {/* Messaging Card */}
+      {/* People You May Know */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-gray-900">Messaging</h3>
-          <Link href="/messages" className="text-xs text-azure-500 hover:text-azure-600 font-medium">
+          <h3 className="text-sm font-semibold text-gray-900">People You May Know</h3>
+          <Link href="/network" className="text-xs text-azure-500 hover:text-azure-600 font-medium">
             See all
           </Link>
         </div>
         
-        <div className="mb-3">
-          <h4 className="text-xs font-semibold text-gray-700 mb-3">Page inboxes</h4>
-        </div>
-        
-        <div className="space-y-3">
-          <div className="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg">
-            <Avatar
-              src=""
-              alt="User"
-              size="sm"
-            />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
-                Prateek Yadav, FRM
-              </p>
-              <p className="text-xs text-gray-500">Aug 24</p>
-            </div>
+        {suggestedConnections.length > 0 ? (
+          <div className="space-y-3">
+            {suggestedConnections.map((connection) => (
+              <div key={connection.id} className="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all duration-200">
+                <Avatar
+                  src={connection.avatar_url}
+                  alt={connection.full_name || 'User'}
+                  size="sm"
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    {connection.full_name || 'Unknown User'}
+                  </p>
+                  <p className="text-xs text-gray-500 truncate">
+                    {connection.headline || 'Healthcare Professional'}
+                  </p>
+                </div>
+                <button className="text-xs font-medium text-azure-500 hover:text-azure-600 bg-white px-2 py-1 rounded-lg border border-azure-200 hover:border-azure-300 transition-all duration-200">
+                  Connect
+                </button>
+              </div>
+            ))}
           </div>
-          
-          <div className="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg">
-            <Avatar
-              src=""
-              alt="User"
-              size="sm"
-            />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
-                Vikrant Gupta
-              </p>
-              <p className="text-xs text-gray-500">Aug 22 • Sponsored</p>
+        ) : (
+          <div className="text-center py-4">
+            <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+              <UserCircleIcon className="w-4 h-4 text-gray-400" />
             </div>
+            <p className="text-xs text-gray-500">No suggestions available</p>
+            <p className="text-xs text-gray-400 mt-1">Expand your network</p>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
