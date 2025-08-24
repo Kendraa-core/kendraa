@@ -1,20 +1,42 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Optimize images
+  // Optimize images with remotePatterns (replaces deprecated domains)
   images: {
-    domains: [
-      'localhost', 
-      '127.0.0.1',
-      'via.placeholder.com',
-      'images.unsplash.com',
-      'picsum.photos',
-      'ui-avatars.com',
-      'gravatar.com',
-      'lh3.googleusercontent.com',
-      'platform-lookaside.fbsbx.com',
-      'graph.facebook.com',
-      'avatars.githubusercontent.com',
-      'camo.githubusercontent.com'
+    remotePatterns: [
+      // Supabase storage
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/public/**',
+      },
+      // Supabase direct URLs (if using custom domains)
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
+        port: '',
+        pathname: '/**',
+      },
+      // Local development
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '3000',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: '127.0.0.1',
+        port: '3000',
+        pathname: '/**',
+      },
+      // Fallback for any other HTTPS images (if needed)
+      {
+        protocol: 'https',
+        hostname: '**',
+        port: '',
+        pathname: '/**',
+      },
     ],
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],

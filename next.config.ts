@@ -7,9 +7,32 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: [
+      // Supabase storage
       {
         protocol: 'https',
-        hostname: '**',
+        hostname: '*.supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/public/**',
+      },
+      // Supabase direct URLs (if using custom domains)
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
+        port: '',
+        pathname: '/**',
+      },
+      // Local development
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '3000',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: '127.0.0.1',
+        port: '3000',
+        pathname: '/**',
       },
     ],
     dangerouslyAllowSVG: true,

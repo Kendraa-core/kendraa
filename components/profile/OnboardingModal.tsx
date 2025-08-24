@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import EditProfileModal from './EditProfileModal';
+import { uploadToSupabaseStorage, validateFile, generateFilePath } from '@/lib/utils';
 import {
   UserIcon,
   CheckCircleIcon,
@@ -98,7 +99,7 @@ const ONBOARDING_STEPS = [
 ];
 
 export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
-  const { profile, updateProfile } = useAuth();
+  const { user, profile, updateProfile } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState({
     full_name: profile?.full_name || '',
@@ -167,13 +168,10 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error('File size must be less than 5MB');
-        return;
-      }
-
-      if (!file.type.startsWith('image/')) {
-        toast.error('Please select a valid image file');
+      // Validate file using utility function
+      const validation = validateFile(file, 5);
+      if (!validation.valid) {
+        toast.error(validation.error || 'Invalid file');
         return;
       }
 
@@ -195,35 +193,40 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
       return;
     }
 
-    // If this is the last step, save the data
-    if (currentStep === ONBOARDING_STEPS.length - 2) {
-      setLoading(true);
-      try {
-        let avatarUrl = formData.avatar_url;
+          // If this is the last step, save the data
+      if (currentStep === ONBOARDING_STEPS.length - 2) {
+        setLoading(true);
+        try {
+          let avatarUrl = formData.avatar_url;
 
-        // Upload avatar if changed
-        if (avatarFile) {
-          // TODO: Implement actual file upload to Supabase
-          // For now, we'll just use the preview
-          avatarUrl = avatarPreview || '';
+          // Upload avatar if changed
+          if (avatarFile && user?.id) {
+            const filePath = generateFilePath(user.id, avatarFile.name, 'avatars');
+            const { url, error } = await uploadToSupabaseStorage('public', filePath, avatarFile);
+            
+            if (error) {
+              throw new Error(error);
+            }
+            
+            avatarUrl = url;
+          }
+
+          await updateProfile({
+            ...formData,
+            avatar_url: avatarUrl,
+          });
+
+          setCurrentStep(currentStep + 1);
+          toast.success('Profile updated successfully!');
+        } catch (error: any) {
+          console.error('Error updating profile:', error);
+          toast.error(error.message || 'Failed to update profile');
+        } finally {
+          setLoading(false);
         }
-
-        await updateProfile({
-          ...formData,
-          avatar_url: avatarUrl,
-        });
-
+      } else {
         setCurrentStep(currentStep + 1);
-        toast.success('Profile updated successfully!');
-      } catch (error: any) {
-        console.error('Error updating profile:', error);
-        toast.error(error.message || 'Failed to update profile');
-      } finally {
-        setLoading(false);
       }
-    } else {
-      setCurrentStep(currentStep + 1);
-    }
   };
 
   const handlePrevious = () => {
