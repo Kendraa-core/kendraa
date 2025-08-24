@@ -9,41 +9,45 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getConnectionCount } from '@/lib/queries';
 import {
   UserIcon,
-  BellIcon,
   BookmarkIcon,
   Cog6ToothIcon,
   AcademicCapIcon,
   StarIcon,
   XMarkIcon,
   PlusIcon,
-  CalendarIcon,
-  BriefcaseIcon,
-  UserGroupIcon,
-  ChartBarIcon,
   DocumentTextIcon,
   HeartIcon,
   ClockIcon,
   CheckCircleIcon,
+  UserGroupIcon,
+  BriefcaseIcon,
+  ChartBarIcon,
+  BellIcon,
+  PhotoIcon,
+  GlobeAltIcon,
+  PhoneIcon,
 } from '@heroicons/react/24/outline';
 import {
   UserIcon as UserSolidIcon,
-  BellIcon as BellSolidIcon,
   BookmarkIcon as BookmarkSolidIcon,
   Cog6ToothIcon as Cog6ToothSolidIcon,
   AcademicCapIcon as AcademicCapSolidIcon,
   StarIcon as StarSolidIcon,
   PlusIcon as PlusSolidIcon,
-  CalendarIcon as CalendarSolidIcon,
-  BriefcaseIcon as BriefcaseSolidIcon,
-  UserGroupIcon as UserGroupSolidIcon,
-  ChartBarIcon as ChartBarSolidIcon,
   DocumentTextIcon as DocumentTextSolidIcon,
   HeartIcon as HeartSolidIcon,
   ClockIcon as ClockSolidIcon,
   CheckCircleIcon as CheckCircleSolidIcon,
+  UserGroupIcon as UserGroupSolidIcon,
+  BriefcaseIcon as BriefcaseSolidIcon,
+  ChartBarIcon as ChartBarSolidIcon,
+  BellIcon as BellSolidIcon,
+  PhotoIcon as PhotoSolidIcon,
+  GlobeAltIcon as GlobeAltSolidIcon,
+  PhoneIcon as PhoneSolidIcon,
 } from '@heroicons/react/24/solid';
 
-// Removed redundant navigation items that are already in the main nav
+// Quick Actions - User-specific actions
 const quickActions = [
   {
     name: 'Post a Job',
@@ -51,13 +55,15 @@ const quickActions = [
     icon: PlusIcon,
     iconActive: PlusSolidIcon,
     description: 'Hire healthcare professionals',
+    color: 'blue'
   },
   {
     name: 'Create Event',
     href: '/events/create',
-    icon: CalendarIcon,
-    iconActive: CalendarSolidIcon,
+    icon: DocumentTextIcon,
+    iconActive: DocumentTextSolidIcon,
     description: 'Organize medical events',
+    color: 'green'
   },
   {
     name: 'Write Post',
@@ -65,54 +71,96 @@ const quickActions = [
     icon: DocumentTextIcon,
     iconActive: DocumentTextSolidIcon,
     description: 'Share your insights',
+    color: 'purple'
   },
 ];
 
+// Personal Items - User's own content and data
 const personalItems = [
   {
     name: 'My Applications',
     href: '/applications',
     icon: BriefcaseIcon,
     iconActive: BriefcaseSolidIcon,
+    description: 'Track your job applications'
   },
   {
     name: 'Saved Items',
     href: '/saved-items',
     icon: BookmarkIcon,
     iconActive: BookmarkSolidIcon,
+    description: 'Your bookmarked content'
   },
   {
     name: 'My Reviews',
     href: '/reviews',
     icon: StarIcon,
     iconActive: StarSolidIcon,
+    description: 'Reviews and ratings'
   },
   {
     name: 'My Network',
     href: '/network',
     icon: UserGroupIcon,
     iconActive: UserGroupSolidIcon,
+    description: 'Your connections'
   },
 ];
 
+// Professional Tools - Career and networking features
 const professionalTools = [
   {
     name: 'Specializations',
     href: '/specializations',
     icon: AcademicCapIcon,
     iconActive: AcademicCapSolidIcon,
+    description: 'Manage your expertise'
   },
   {
     name: 'Analytics',
     href: '/dashboard',
     icon: ChartBarIcon,
     iconActive: ChartBarSolidIcon,
+    description: 'Profile insights'
   },
   {
     name: 'Notifications',
     href: '/notifications',
     icon: BellIcon,
     iconActive: BellSolidIcon,
+    description: 'System notifications'
+  },
+];
+
+// Profile Management - Profile editing and settings
+const profileManagement = [
+  {
+    name: 'Edit Profile',
+    href: '/profile/setup',
+    icon: UserIcon,
+    iconActive: UserSolidIcon,
+    description: 'Update your information'
+  },
+  {
+    name: 'Profile Photo',
+    href: '/profile/setup',
+    icon: PhotoIcon,
+    iconActive: PhotoSolidIcon,
+    description: 'Change your avatar'
+  },
+  {
+    name: 'Contact Info',
+    href: '/settings',
+    icon: PhoneIcon,
+    iconActive: PhoneSolidIcon,
+    description: 'Manage contact details'
+  },
+  {
+    name: 'Privacy Settings',
+    href: '/settings',
+    icon: GlobeAltIcon,
+    iconActive: GlobeAltSolidIcon,
+    description: 'Control your privacy'
   },
 ];
 
@@ -123,9 +171,6 @@ interface LeftSidebarProps {
 export default function LeftSidebar({ onClose }: LeftSidebarProps) {
   const { user, profile } = useAuth();
   const pathname = usePathname();
-  const [showQuickActions, setShowQuickActions] = useState(true);
-  const [showPersonal, setShowPersonal] = useState(true);
-  const [showTools, setShowTools] = useState(true);
   const [connectionCount, setConnectionCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
@@ -151,6 +196,47 @@ export default function LeftSidebar({ onClose }: LeftSidebarProps) {
   if (!user) return null;
 
   const isMobile = onClose !== undefined;
+
+  const renderSection = (title: string, items: any[], showDescriptions = false) => (
+    <div className="mb-6">
+      <div className="px-3 mb-3">
+        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{title}</h3>
+      </div>
+      <div className="space-y-1">
+        {items.map((item) => {
+          const isActive = pathname === item.href;
+          const Icon = isActive ? item.iconActive : item.icon;
+
+          return (
+            <Link key={item.name} href={item.href} onClick={onClose}>
+              <motion.div
+                whileHover={{ x: 2 }}
+                className={cn(
+                  'group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200',
+                  isActive
+                    ? 'bg-primary-50 text-primary-700'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                )}
+              >
+                <Icon 
+                  className={cn(
+                    'mr-3 h-5 w-5 flex-shrink-0',
+                    isActive ? 'text-primary-600' : 'text-gray-400 group-hover:text-gray-500'
+                  )} 
+                />
+                <div className="flex-1">
+                  <span className="truncate">{item.name}</span>
+                  {showDescriptions && (
+                    <p className="text-xs text-gray-500 truncate">{item.description}</p>
+                  )}
+                </div>
+              </motion.div>
+            </Link>
+          );
+        })}
+      </div>
+    </div>
+  );
 
   return (
     <div className={cn(
@@ -299,74 +385,13 @@ export default function LeftSidebar({ onClose }: LeftSidebarProps) {
             </div>
 
             {/* Personal Items */}
-            <div>
-              <div className="px-3 mb-3">
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Personal</h3>
-              </div>
-              <div className="space-y-1">
-                {personalItems.map((item) => {
-                  const isActive = pathname === item.href;
-                  const Icon = isActive ? item.iconActive : item.icon;
-
-                  return (
-                    <Link key={item.name} href={item.href} onClick={onClose}>
-                      <motion.div
-                        whileHover={{ x: 2 }}
-                        className={cn(
-                          'group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200',
-                          isActive
-                            ? 'bg-primary-50 text-primary-700'
-                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                        )}
-                      >
-                        <Icon 
-                          className={cn(
-                            'mr-3 h-5 w-5 flex-shrink-0',
-                            isActive ? 'text-primary-600' : 'text-gray-400 group-hover:text-gray-500'
-                          )} 
-                        />
-                        <span className="truncate">{item.name}</span>
-                      </motion.div>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
+            {renderSection('Personal', personalItems, true)}
 
             {/* Professional Tools */}
-            <div>
-              <div className="px-3 mb-3">
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Tools</h3>
-              </div>
-              <div className="space-y-1">
-                {professionalTools.map((item) => {
-                  const isActive = pathname === item.href;
-                  const Icon = isActive ? item.iconActive : item.icon;
+            {renderSection('Tools', professionalTools, true)}
 
-                  return (
-                    <Link key={item.name} href={item.href} onClick={onClose}>
-                      <motion.div
-                        whileHover={{ x: 2 }}
-                        className={cn(
-                          'group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200',
-                          isActive
-                            ? 'bg-primary-50 text-primary-700'
-                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                        )}
-                      >
-                        <Icon 
-                          className={cn(
-                            'mr-3 h-5 w-5 flex-shrink-0',
-                            isActive ? 'text-primary-600' : 'text-gray-400 group-hover:text-gray-500'
-                          )} 
-                        />
-                        <span className="truncate">{item.name}</span>
-                      </motion.div>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
+            {/* Profile Management */}
+            {renderSection('Profile', profileManagement, true)}
 
           </div>
 

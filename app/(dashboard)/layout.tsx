@@ -27,6 +27,7 @@ export default function DashboardLayout({
   const [profileLoading, setProfileLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -43,6 +44,15 @@ export default function DashboardLayout({
         try {
           const profile = await getProfile(user.id);
           setUserProfile(profile);
+          
+          // Check if profile is incomplete and show onboarding
+          const isIncomplete = !profile?.full_name || !profile?.headline || !profile?.specialization?.length;
+          if (isIncomplete) {
+            // Delay showing onboarding to avoid immediate popup
+            setTimeout(() => {
+              setShowOnboarding(true);
+            }, 2000);
+          }
         } catch (error) {
           console.error('Error loading user profile:', error);
         } finally {
@@ -209,7 +219,10 @@ export default function DashboardLayout({
       )}
 
       {/* Onboarding Modal */}
-      <OnboardingModal />
+      <OnboardingModal 
+        isOpen={showOnboarding} 
+        onClose={() => setShowOnboarding(false)} 
+      />
     </div>
   );
 } 
