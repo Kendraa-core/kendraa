@@ -120,11 +120,9 @@ export default function DashboardLayout({
 
       {/* Main Layout Container */}
       <div className="flex pt-16">
-        {/* Left Sidebar - Desktop */}
-        <div className="hidden lg:block lg:w-64 lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:flex-col">
-          <div className="flex-1 flex flex-col min-h-0 bg-white border-r border-gray-200">
-            <LeftSidebar />
-          </div>
+        {/* Left Sidebar - Desktop (Floating) */}
+        <div className="hidden lg:block">
+          <LeftSidebar />
         </div>
 
         {/* Left Sidebar - Mobile Overlay */}
@@ -141,7 +139,7 @@ export default function DashboardLayout({
         )}
 
         {/* Main Content Area */}
-        <div className="flex-1 lg:ml-64">
+        <div className="flex-1 lg:ml-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
             {/* Mobile Content Layout */}
             <div className="lg:hidden">
