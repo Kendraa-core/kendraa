@@ -12,7 +12,7 @@ import EditProfileModal from '@/components/profile/EditProfileModal';
 
 import PostCard from '@/components/post/PostCard';
 import SimilarPeople from '@/components/profile/SimilarPeople';
-import { cn, formatDate } from '@/lib/utils';
+import { cn, formatDate, formatNumber } from '@/lib/utils';
 import {
   ArrowLeftIcon,
   PencilIcon,
@@ -28,6 +28,7 @@ import {
   ShareIcon,
   UserGroupIcon,
   BookmarkIcon,
+  CalendarDaysIcon,
 } from '@heroicons/react/24/outline';
 import { CheckBadgeIcon, BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
@@ -42,6 +43,8 @@ import {
   followUser,
   unfollowUser,
   isFollowing,
+  getConnectionCount,
+  getEventsByOrganizer,
   type Profile,
   type Experience,
   type Education,
@@ -61,12 +64,10 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
   const { user } = useAuth();
   const router = useRouter();
 
-
-
   return (
-    <div className="relative">
+    <Card className="bg-white shadow-sm border border-gray-200 rounded-2xl overflow-hidden">
       {/* Banner */}
-      <div className="h-48 bg-gradient-to-br from-primary-600 via-secondary-600 to-accent-600 rounded-t-xl overflow-hidden">
+      <div className="h-48 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 relative overflow-hidden">
         {profile.banner_url ? (
           <Image
             src={profile.banner_url}
@@ -75,8 +76,19 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
             className="object-cover"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-primary-600 via-secondary-600 to-accent-600" />
+          <div className="w-full h-full bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800" />
         )}
+        {/* Overlay pattern for visual interest */}
+        <div className="absolute inset-0 opacity-10">
+          <svg width="100%" height="100%" viewBox="0 0 100 100">
+            <defs>
+              <pattern id="banner-pattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                <circle cx="10" cy="10" r="1" fill="white" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#banner-pattern)" />
+          </svg>
+        </div>
       </div>
 
       {/* Profile Info */}
@@ -87,9 +99,8 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
             src={profile.avatar_url}
             alt={profile.full_name || 'User'}
             size="2xl"
-            className="ring-4 ring-white shadow-xl bg-white"
+            className="ring-4 ring-white shadow-lg bg-white"
           />
-
         </div>
 
         {/* Action Buttons */}
@@ -110,7 +121,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
                 followStatus === 'following' ? (
                   <Button
                     onClick={onUnfollow}
-                    className="bg-gray-200 hover:bg-gray-300 text-gray-700 shadow-lg"
+                    className="bg-gray-200 hover:bg-gray-300 text-gray-700 shadow-sm"
                     size="sm"
                   >
                     <UserPlusIcon className="w-4 h-4 mr-2" />
@@ -119,7 +130,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
                 ) : (
                   <Button
                     onClick={onConnect}
-                    className="bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white shadow-lg"
+                    className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
                     size="sm"
                   >
                     <UserPlusIcon className="w-4 h-4 mr-2" />
@@ -131,7 +142,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
                 <Button
                   onClick={onConnect}
                   disabled={connectionStatus === 'pending' || connectionStatus === 'connected'}
-                  className="bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white shadow-lg"
+                  className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
                   size="sm"
                 >
                   <UserPlusIcon className="w-4 h-4 mr-2" />
@@ -145,7 +156,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
           {isOwnProfile && (
             <Button 
               onClick={onEditProfile}
-              className="bg-linkedin-primary hover:bg-linkedin-secondary text-white shadow-lg" 
+              className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm" 
               size="sm"
             >
               <PencilIcon className="w-4 h-4 mr-2" />
@@ -160,7 +171,6 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
             <h1 className="text-2xl font-bold text-gray-900">
               {profile.full_name || 'Anonymous User'}
             </h1>
-
           </div>
           
           {profile.headline && (
@@ -174,7 +184,18 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
                 {profile.location}
               </div>
             )}
-
+            {profile.phone && (
+              <div className="flex items-center">
+                <PhoneIcon className="w-4 h-4 mr-1" />
+                {profile.phone}
+              </div>
+            )}
+            {profile.email && (
+              <div className="flex items-center">
+                <EnvelopeIcon className="w-4 h-4 mr-1" />
+                {profile.email}
+              </div>
+            )}
           </div>
 
           {profile.bio && (
@@ -182,11 +203,9 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
           )}
         </div>
       </div>
-    </div>
+    </Card>
   );
 });
-
-
 
 export default function ProfilePage() {
   const params = useParams();
@@ -201,7 +220,8 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState('about');
   const [showEditModal, setShowEditModal] = useState(false);
-
+  const [connectionCount, setConnectionCount] = useState(0);
+  const [userEvents, setUserEvents] = useState<any[]>([]);
 
   const profileId = params.id as string;
   const isOwnProfile = user?.id === profileId;
@@ -238,7 +258,23 @@ export default function ProfilePage() {
       setEducation(educationData);
       setPosts(postsData);
 
-      // Profile views functionality removed - no longer tracking views
+      // Get connection count
+      try {
+        const connections = await getConnectionCount(profileId);
+        setConnectionCount(connections);
+      } catch (error) {
+        console.error('Error fetching connection count:', error);
+      }
+
+      // Get user events if it's their own profile
+      if (isOwnProfile) {
+        try {
+          const events = await getEventsByOrganizer(profileId);
+          setUserEvents(events);
+        } catch (error) {
+          console.error('Error fetching user events:', error);
+        }
+      }
 
       // Get connection/follow status if not own profile
       if (!isOwnProfile && user?.id) {
@@ -348,36 +384,27 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-secondary-50 to-accent-50">
+      <div className="min-h-screen bg-gray-50">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="animate-pulse">
-            <div className="h-48 bg-gradient-to-r from-primary-200 to-secondary-200 rounded-t-xl mb-4"></div>
+          <div className="animate-pulse space-y-6">
+            <div className="h-48 bg-gray-200 rounded-2xl mb-4"></div>
             <div className="space-y-4">
-              <div className="h-8 bg-gradient-to-r from-primary-200 to-secondary-200 rounded w-1/3"></div>
-              <div className="h-6 bg-gradient-to-r from-primary-200 to-secondary-200 rounded w-1/2"></div>
-              <div className="h-20 bg-gradient-to-r from-primary-200 to-secondary-200 rounded"></div>
-                      </div>
+              <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+              <div className="h-6 bg-gray-200 rounded w-1/2"></div>
+              <div className="h-20 bg-gray-200 rounded"></div>
+            </div>
+          </div>
         </div>
       </div>
-
-      {/* Edit Profile Modal */}
-      {showEditModal && profile && (
-        <EditProfileModal
-          profile={profile}
-          onClose={() => setShowEditModal(false)}
-          onUpdate={handleProfileUpdate}
-        />
-      )}
-    </div>
-  );
-}
+    );
+  }
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-secondary-50 to-accent-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Profile not found</h1>
-          <Button onClick={() => router.push('/feed')} className="bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white">
+          <Button onClick={() => router.push('/feed')} className="bg-blue-600 hover:bg-blue-700 text-white">
             <ArrowLeftIcon className="w-4 h-4 mr-2" />
             Back to Home
           </Button>
@@ -387,14 +414,10 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-secondary-50 to-accent-50">
+    <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumb Navigation */}
-        <div
-          
-          
-          className="mb-6"
-        >
+        <div className="mb-6">
           <Breadcrumb 
             items={[
               { label: 'Profiles', href: '/network' },
@@ -403,93 +426,68 @@ export default function ProfilePage() {
           />
         </div>
 
-
-
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Main Profile Column */}
           <div className="lg:col-span-8 space-y-6">
             {/* Profile Header */}
-            <div
-              
-              
-              className="bg-white shadow-lg rounded-xl overflow-hidden"
-            >
-              <ProfileHeader
-                profile={profile}
-                isOwnProfile={isOwnProfile}
-                connectionStatus={connectionStatus}
-                followStatus={followStatus}
-                onConnect={handleConnect}
-                onUnfollow={handleUnfollow}
-                onEditProfile={() => setShowEditModal(true)}
-              />
-            </div>
+            <ProfileHeader
+              profile={profile}
+              isOwnProfile={isOwnProfile}
+              connectionStatus={connectionStatus}
+              followStatus={followStatus}
+              onConnect={handleConnect}
+              onUnfollow={handleUnfollow}
+              onEditProfile={() => setShowEditModal(true)}
+            />
 
             {/* Specializations */}
             {profile.specialization && profile.specialization.length > 0 && (
-              <div
-                
-                
-                
-              >
-                <Card className="bg-white shadow-lg border-0">
-                  <CardHeader>
-                    <CardTitle className="text-lg text-gray-900">Specialization</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap gap-2">
-                      {profile.specialization.map((spec, index) => (
-                        <span
-                          key={index}
-                          className="px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm font-medium"
-                        >
-                          {spec}
-                        </span>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-
-            {/* Section Navigation */}
-            <div
-              
-              
-              
-            >
-              <Card className="bg-white shadow-lg border-0">
-                <CardContent className="p-0">
-                  <div className="flex border-b border-gray-200">
-                    {sections.map((section) => (
-                      <button
-                        key={section.id}
-                        onClick={() => setActiveSection(section.id)}
-                        className={cn(
-                          'flex-1 px-6 py-4 text-sm font-medium transition-colors flex items-center justify-center space-x-2',
-                          activeSection === section.id
-                            ? 'text-primary-600 border-b-2 border-primary-600 bg-primary-50'
-                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                        )}
+              <Card className="bg-white shadow-sm border border-gray-200 rounded-2xl">
+                <CardHeader>
+                  <CardTitle className="text-lg text-gray-900">Specialization</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {profile.specialization.map((spec, index) => (
+                      <span
+                        key={index}
+                        className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
                       >
-                        <section.icon className="w-4 h-4" />
-                        <span>{section.label}</span>
-                      </button>
+                        {spec}
+                      </span>
                     ))}
                   </div>
                 </CardContent>
               </Card>
-            </div>
+            )}
+
+            {/* Section Navigation */}
+            <Card className="bg-white shadow-sm border border-gray-200 rounded-2xl">
+              <CardContent className="p-0">
+                <div className="flex border-b border-gray-200">
+                  {sections.map((section) => (
+                    <button
+                      key={section.id}
+                      onClick={() => setActiveSection(section.id)}
+                      className={cn(
+                        'flex-1 px-6 py-4 text-sm font-medium transition-colors flex items-center justify-center space-x-2',
+                        activeSection === section.id
+                          ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      )}
+                    >
+                      <section.icon className="w-4 h-4" />
+                      <span>{section.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Section Content */}
-            <div
-              key={activeSection}
-              
-              
-              
-            >
+            <div key={activeSection}>
               {activeSection === 'about' && (
-                <Card className="bg-white shadow-lg border-0">
+                <Card className="bg-white shadow-sm border border-gray-200 rounded-2xl">
                   <CardHeader>
                     <CardTitle className="text-lg text-gray-900">About</CardTitle>
                   </CardHeader>
@@ -510,15 +508,15 @@ export default function ProfilePage() {
                   <h3 className="text-lg font-semibold text-gray-900">Experience</h3>
                   {experiences.length > 0 ? (
                     experiences.map((exp) => (
-                      <Card key={exp.id} className="bg-white shadow-lg border-0">
+                      <Card key={exp.id} className="bg-white shadow-sm border border-gray-200 rounded-2xl">
                         <CardContent className="p-6">
                           <div className="flex items-start space-x-4">
-                            <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                            <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
                               <BriefcaseIcon className="w-6 h-6 text-gray-500" />
                             </div>
                             <div className="flex-1">
                               <h4 className="font-semibold text-gray-900">{exp.title}</h4>
-                              <p className="text-primary-600 font-medium">{exp.company}</p>
+                              <p className="text-blue-600 font-medium">{exp.company}</p>
                               {exp.location && (
                                 <p className="text-sm text-gray-500">{exp.location}</p>
                               )}
@@ -546,7 +544,7 @@ export default function ProfilePage() {
                       </Card>
                     ))
                   ) : (
-                    <Card className="bg-white shadow-lg border-0">
+                    <Card className="bg-white shadow-sm border border-gray-200 rounded-2xl">
                       <CardContent className="p-6 text-center text-gray-500">
                         No experience added yet
                       </CardContent>
@@ -560,15 +558,15 @@ export default function ProfilePage() {
                   <h3 className="text-lg font-semibold text-gray-900">Education</h3>
                   {education.length > 0 ? (
                     education.map((edu) => (
-                      <Card key={edu.id} className="bg-white shadow-lg border-0">
+                      <Card key={edu.id} className="bg-white shadow-sm border border-gray-200 rounded-2xl">
                         <CardContent className="p-6">
                           <div className="flex items-start space-x-4">
-                            <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                            <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
                               <AcademicCapIcon className="w-6 h-6 text-gray-500" />
                             </div>
                             <div className="flex-1">
                               <h4 className="font-semibold text-gray-900">{edu.degree}</h4>
-                              <p className="text-primary-600 font-medium">{edu.school}</p>
+                              <p className="text-blue-600 font-medium">{edu.school}</p>
                               {edu.field && (
                                 <p className="text-sm text-gray-600">{edu.field}</p>
                               )}
@@ -586,7 +584,7 @@ export default function ProfilePage() {
                                   {edu.honors.map((honor, index) => (
                                     <span
                                       key={index}
-                                      className="px-2 py-1 bg-secondary-100 text-secondary-700 rounded text-xs"
+                                      className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs"
                                     >
                                       {honor}
                                     </span>
@@ -599,7 +597,7 @@ export default function ProfilePage() {
                       </Card>
                     ))
                   ) : (
-                    <Card className="bg-white shadow-lg border-0">
+                    <Card className="bg-white shadow-sm border border-gray-200 rounded-2xl">
                       <CardContent className="p-6 text-center text-gray-500">
                         No education added yet
                       </CardContent>
@@ -618,7 +616,7 @@ export default function ProfilePage() {
                       ))}
                     </div>
                   ) : (
-                    <Card className="bg-white shadow-lg border-0">
+                    <Card className="bg-white shadow-sm border border-gray-200 rounded-2xl">
                       <CardContent className="p-6 text-center text-gray-500">
                         No recent activity
                       </CardContent>
@@ -635,32 +633,39 @@ export default function ProfilePage() {
             <SimilarPeople />
 
             {/* Navigation Links */}
-            <div
-              
-              
-              
-            >
-              <Card className="bg-white shadow-lg border-0">
-                <CardContent className="p-4">
-                  <div className="space-y-3">
-                    <Link
-                      href="/network"
-                      className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 hover:text-gray-900"
-                    >
-                      <UserGroupIcon className="h-5 w-5" />
-                      <span className="text-sm font-medium">My network</span>
-                    </Link>
-                    <Link
-                      href="/saved"
-                      className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 hover:text-gray-900"
-                    >
-                      <BookmarkSolidIcon className="h-5 w-5" />
-                      <span className="text-sm font-medium">Saved items</span>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            <Card className="bg-white shadow-sm border border-gray-200 rounded-2xl">
+              <CardContent className="p-4">
+                <div className="space-y-3">
+                  <Link
+                    href="/network"
+                    className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 hover:text-gray-900"
+                  >
+                    <UserGroupIcon className="h-5 w-5" />
+                    <span className="text-sm font-medium">My Network</span>
+                    {connectionCount > 0 && (
+                      <span className="ml-auto text-xs text-gray-500">{formatNumber(connectionCount)}</span>
+                    )}
+                  </Link>
+                  <Link
+                    href="/events"
+                    className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 hover:text-gray-900"
+                  >
+                    <CalendarDaysIcon className="h-5 w-5" />
+                    <span className="text-sm font-medium">My Events</span>
+                    {userEvents.length > 0 && (
+                      <span className="ml-auto text-xs text-gray-500">{formatNumber(userEvents.length)}</span>
+                    )}
+                  </Link>
+                  <Link
+                    href="/saved-items"
+                    className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 hover:text-gray-900"
+                  >
+                    <BookmarkSolidIcon className="h-5 w-5" />
+                    <span className="text-sm font-medium">Saved Items</span>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
