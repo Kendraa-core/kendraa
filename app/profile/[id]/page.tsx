@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import Avatar from '@/components/common/Avatar';
 import Breadcrumb from '@/components/common/Breadcrumb';
 import EditProfileModal from '@/components/profile/EditProfileModal';
+import ProfileImageEditor from '@/components/profile/ProfileImageEditor';
 
 import PostCard from '@/components/post/PostCard';
 import SimilarPeople from '@/components/profile/SimilarPeople';
@@ -29,6 +30,7 @@ import {
   UserGroupIcon,
   BookmarkIcon,
   CalendarDaysIcon,
+  CameraIcon,
 } from '@heroicons/react/24/outline';
 import { CheckBadgeIcon, BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
@@ -52,7 +54,7 @@ import {
 } from '@/lib/queries';
 
 // Memoized components for better performance
-const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile, connectionStatus, followStatus, onConnect, onUnfollow, onEditProfile }: {
+const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile, connectionStatus, followStatus, onConnect, onUnfollow, onEditProfile, onEditImages }: {
   profile: Profile;
   isOwnProfile: boolean;
   connectionStatus: string;
@@ -60,6 +62,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
   onConnect: () => void;
   onUnfollow: () => void;
   onEditProfile: () => void;
+  onEditImages: () => void;
 }) {
   const { user } = useAuth();
   const router = useRouter();
@@ -67,7 +70,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
   return (
     <Card className="bg-white shadow-sm border border-gray-200 rounded-2xl overflow-hidden">
       {/* Banner */}
-      <div className="h-48 bg-gradient-to-br from-azure-500 via-azure-600 to-azure-700 relative overflow-hidden">
+      <div className="h-48 bg-gradient-to-br from-azure-500 via-azure-600 to-azure-700 relative overflow-hidden group">
         {profile.banner_url ? (
           <Image
             src={profile.banner_url}
@@ -89,18 +92,38 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
             <rect width="100%" height="100%" fill="url(#banner-pattern)" />
           </svg>
         </div>
+        
+        {/* Edit banner button for own profile */}
+        {isOwnProfile && (
+          <button
+            onClick={onEditImages}
+            className="absolute top-4 right-4 bg-black bg-opacity-50 text-white p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-opacity-70"
+          >
+            <CameraIcon className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
       {/* Profile Info */}
       <div className="relative px-6 pb-6">
         {/* Avatar */}
-        <div className="absolute -top-16 left-6">
+        <div className="absolute -top-16 left-6 group">
           <Avatar
             src={profile.avatar_url}
             alt={profile.full_name || 'User'}
             size="2xl"
             className="ring-4 ring-white shadow-lg bg-white"
           />
+          
+          {/* Edit avatar button for own profile */}
+          {isOwnProfile && (
+            <button
+              onClick={onEditImages}
+              className="absolute inset-0 bg-black bg-opacity-50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center hover:bg-opacity-70"
+            >
+              <CameraIcon className="w-6 h-6" />
+            </button>
+          )}
         </div>
 
         {/* Action Buttons */}
@@ -154,14 +177,25 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
           )}
           
           {isOwnProfile && (
-            <Button 
-              onClick={onEditProfile}
-              className="bg-azure-500 hover:bg-azure-600 text-white shadow-sm" 
-              size="sm"
-            >
-              <PencilIcon className="w-4 h-4 mr-2" />
-              Edit Profile
-            </Button>
+            <div className="flex space-x-3">
+              <Button 
+                onClick={onEditImages}
+                variant="outline"
+                className="bg-white/90 backdrop-blur-sm border-gray-200 hover:bg-white shadow-sm" 
+                size="sm"
+              >
+                <CameraIcon className="w-4 h-4 mr-2" />
+                Edit Photos
+              </Button>
+              <Button 
+                onClick={onEditProfile}
+                className="bg-azure-500 hover:bg-azure-600 text-white shadow-sm" 
+                size="sm"
+              >
+                <PencilIcon className="w-4 h-4 mr-2" />
+                Edit Profile
+              </Button>
+            </div>
           )}
         </div>
 
@@ -220,6 +254,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState('about');
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showImageEditor, setShowImageEditor] = useState(false);
   const [connectionCount, setConnectionCount] = useState(0);
   const [userEvents, setUserEvents] = useState<any[]>([]);
 
@@ -438,6 +473,7 @@ export default function ProfilePage() {
               onConnect={handleConnect}
               onUnfollow={handleUnfollow}
               onEditProfile={() => setShowEditModal(true)}
+              onEditImages={() => setShowImageEditor(true)}
             />
 
             {/* Specializations */}
@@ -676,6 +712,17 @@ export default function ProfilePage() {
           profile={profile}
           onClose={() => setShowEditModal(false)}
           onUpdate={handleProfileUpdate}
+        />
+      )}
+
+      {/* Profile Image Editor */}
+      {showImageEditor && (
+        <ProfileImageEditor
+          isOpen={showImageEditor}
+          onClose={() => setShowImageEditor(false)}
+          onUpdate={handleProfileUpdate}
+          currentAvatar={profile.avatar_url}
+          currentBanner={profile.banner_url}
         />
       )}
     </div>
