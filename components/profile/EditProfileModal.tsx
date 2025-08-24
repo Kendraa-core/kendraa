@@ -223,9 +223,9 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
 
       // Update profile
       await updateProfile({
-        ...formData,
-        avatar_url: avatarUrl,
-        banner_url: coverUrl,
+          ...formData,
+          avatar_url: avatarUrl,
+          banner_url: coverUrl,
       });
 
       // TODO: Save experiences and education
@@ -257,7 +257,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
   const renderStep = () => {
     switch (currentStep) {
       case 0: // Basic Info
-        return (
+  return (
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -486,14 +486,14 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
                   <div key={index} className="border border-gray-200 rounded-lg p-4">
                     <div className="flex justify-between items-start mb-4">
                       <h4 className="font-medium text-gray-900">Education {index + 1}</h4>
-                      <button
+            <button
                         type="button"
                         onClick={() => removeEducation(index)}
                         className="text-red-500 hover:text-red-700"
-                      >
+            >
                         <TrashIcon className="w-4 h-4" />
-                      </button>
-                    </div>
+            </button>
+          </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
@@ -659,8 +659,8 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
                   Upload
                 </div>
               </div>
+              </div>
             </div>
-          </div>
         );
 
       default:
@@ -684,17 +684,17 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
         <div className="p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <div>
+              <div>
               <h2 className="text-2xl font-bold text-gray-900">Edit Profile</h2>
               <p className="text-sm text-gray-600">Step {currentStep + 1} of {STEPS.length}</p>
-            </div>
+              </div>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-500 transition-colors"
             >
               <XMarkIcon className="w-6 h-6" />
             </button>
-          </div>
+              </div>
 
           {/* Progress Steps */}
           <div className="flex items-center justify-between mb-8">
@@ -708,7 +708,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
                   ) : (
                     <span className="text-sm font-medium">{index + 1}</span>
                   )}
-                </div>
+              </div>
                 <span className={`ml-2 text-sm font-medium ${
                   index <= currentStep ? 'text-azure-500' : 'text-gray-500'
                 }`}>
@@ -721,7 +721,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
                 )}
               </div>
             ))}
-          </div>
+            </div>
 
           {/* Form Content */}
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -740,13 +740,13 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
               </button>
 
               <div className="flex space-x-3">
-                <button
-                  type="button"
-                  onClick={onClose}
+              <button
+                type="button"
+                onClick={onClose}
                   className="px-6 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-                >
-                  Cancel
-                </button>
+              >
+                Cancel
+              </button>
                 
                 {currentStep < STEPS.length - 1 ? (
                   <button
@@ -758,13 +758,13 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
                     <ChevronRightIcon className="w-4 h-4 ml-2 inline" />
                   </button>
                 ) : (
-                  <button
-                    type="submit"
-                    disabled={loading}
+              <button
+                type="submit"
+                disabled={loading}
                     className="px-6 py-2 bg-azure-500 text-white rounded-lg hover:bg-azure-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    {loading ? 'Saving...' : 'Save Changes'}
-                  </button>
+              >
+                {loading ? 'Saving...' : 'Save Changes'}
+              </button>
                 )}
               </div>
             </div>
