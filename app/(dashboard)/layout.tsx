@@ -97,7 +97,7 @@ export default function DashboardLayout({
       {/* Main Content */}
       <div className="flex pt-16">
         {/* Left Sidebar - Desktop */}
-        <div className="hidden lg:block lg:w-80 lg:fixed lg:left-0 lg:top-16 lg:bottom-0 lg:overflow-y-auto lg:bg-gray-50 lg:border-r lg:border-gray-200">
+        <div className="hidden lg:block lg:w-80 lg:fixed lg:left-0 lg:top-16 lg:bottom-0 lg:overflow-y-auto lg:bg-gray-50">
           <div className="p-6">
             <LeftSidebar />
           </div>

@@ -100,11 +100,11 @@ export default function LeftSidebar() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Profile Widget */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
         <div className="text-center">
-          <div className="relative mb-4">
+          <div className="relative mb-5">
             <Avatar
               src={profile?.avatar_url}
               alt={profile?.full_name || 'User'}
@@ -115,10 +115,10 @@ export default function LeftSidebar() {
               <div className="w-full h-full bg-green-400 rounded-full animate-pulse"></div>
             </div>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
             {profile?.full_name || 'Your Name'}
           </h3>
-          <p className="text-sm text-gray-600 mb-2">
+          <p className="text-sm text-gray-600 mb-3">
             {profile?.headline || 'Professional Headline'}
           </p>
           {profile?.location && (
@@ -127,13 +127,13 @@ export default function LeftSidebar() {
               {profile.location}
             </div>
           )}
-          <div className="flex items-center justify-center text-xs text-gray-500 mb-4">
+          <div className="flex items-center justify-center text-xs text-gray-500 mb-5">
             <UserGroupIcon className="w-3 h-3 mr-1" />
             {formatNumber(connectionCount)} connections
           </div>
           <Link 
             href={`/profile/${user?.id}`}
-            className="inline-block bg-azure-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-azure-600 transition-colors"
+            className="inline-block bg-azure-500 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-azure-600 transition-colors"
           >
             View Profile
           </Link>
@@ -142,7 +142,7 @@ export default function LeftSidebar() {
 
       {/* My Events Card */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-5">
           <h3 className="text-sm font-semibold text-gray-900">My Events ({userEvents.length})</h3>
           <Link href="/events" className="text-xs text-azure-500 hover:text-azure-600 font-medium">
             See all
@@ -152,7 +152,7 @@ export default function LeftSidebar() {
         {userEvents.length > 0 ? (
           <div className="space-y-3">
             {userEvents.slice(0, 2).map((event) => (
-              <div key={event.id} className="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg">
+              <div key={event.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
                 <div className="w-8 h-8 bg-azure-100 rounded-lg flex items-center justify-center">
                   <CalendarDaysIcon className="w-4 h-4 text-azure-500" />
                 </div>
@@ -169,12 +169,12 @@ export default function LeftSidebar() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-4">
-            <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+          <div className="text-center py-6">
+            <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-3">
               <CalendarDaysIcon className="w-4 h-4 text-gray-400" />
             </div>
-            <p className="text-xs text-gray-500">No events created yet</p>
-            <Link href="/events/create" className="text-xs text-azure-500 hover:text-azure-600 font-medium mt-1 inline-block">
+            <p className="text-xs text-gray-500 mb-2">No events created yet</p>
+            <Link href="/events/create" className="text-xs text-azure-500 hover:text-azure-600 font-medium inline-block">
               Create your first event
             </Link>
           </div>
@@ -183,20 +183,20 @@ export default function LeftSidebar() {
 
       {/* Quick Links Card */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-        <div className="space-y-3">
-          <Link href="/saved-items" className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+        <div className="space-y-2">
+          <Link href="/saved-items" className="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
             <BookmarkIcon className="w-5 h-5 text-gray-600" />
             <span className="text-sm text-gray-700">Saved items</span>
           </Link>
-          <Link href="/network" className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+          <Link href="/network" className="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
             <UserGroupIcon className="w-5 h-5 text-gray-600" />
             <span className="text-sm text-gray-700">Groups</span>
           </Link>
-          <Link href="/newsletters" className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+          <Link href="/newsletters" className="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
             <UserCircleIcon className="w-5 h-5 text-gray-600" />
             <span className="text-sm text-gray-700">Newsletters</span>
           </Link>
-          <Link href="/events" className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+          <Link href="/events" className="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
             <CalendarDaysIcon className="w-5 h-5 text-gray-600" />
             <span className="text-sm text-gray-700">Events</span>
           </Link>
