@@ -106,6 +106,13 @@ const ONBOARDING_STEPS = [
     required: true
   },
   {
+    id: 'contact',
+    title: 'Contact Information',
+    subtitle: 'How can other professionals reach you?',
+    type: 'contact',
+    required: false
+  },
+  {
     id: 'experience',
     title: 'Add your work experience',
     subtitle: 'Share your professional experience to build credibility',
@@ -118,6 +125,27 @@ const ONBOARDING_STEPS = [
     subtitle: 'Include your academic background and qualifications',
     type: 'education',
     required: true
+  },
+  {
+    id: 'certifications',
+    title: 'Professional Certifications',
+    subtitle: 'Add your medical licenses and certifications',
+    type: 'certifications',
+    required: false
+  },
+  {
+    id: 'skills',
+    title: 'Professional Skills',
+    subtitle: 'What are your key skills and expertise areas?',
+    type: 'skills',
+    required: false
+  },
+  {
+    id: 'languages',
+    title: 'Languages Spoken',
+    subtitle: 'What languages do you speak?',
+    type: 'languages',
+    required: false
   },
   {
     id: 'avatar',
@@ -145,6 +173,24 @@ export default function OnboardingPage() {
     bio: profile?.bio || '',
     location: profile?.location || '',
     avatar_url: profile?.avatar_url || '',
+    // Contact Information
+    phone: profile?.phone || '',
+    email: profile?.email || '',
+    website: profile?.website || '',
+    // Professional Details
+    certifications: profile?.certifications || [],
+    skills: profile?.skills || [],
+    languages: profile?.languages || [],
+    years_of_experience: typeof profile?.years_of_experience === 'number' ? profile.years_of_experience : 0,
+    current_position: profile?.current_position || '',
+    current_institution: profile?.current_institution || '',
+    npi_number: profile?.npi_number || '',
+    dea_number: profile?.dea_number || '',
+    // Research and Interests
+    research_interests: profile?.research_interests || [],
+    clinical_interests: profile?.clinical_interests || [],
+    teaching_experience: profile?.teaching_experience || false,
+    mentoring_availability: profile?.mentoring_availability || false,
   });
   const [experiences, setExperiences] = useState<any[]>([]);
   const [educations, setEducations] = useState<any[]>([]);
@@ -209,6 +255,24 @@ export default function OnboardingPage() {
         bio: profile.bio || '',
         location: profile.location || '',
         avatar_url: profile.avatar_url || '',
+        // Contact Information
+        phone: profile.phone || '',
+        email: profile.email || '',
+        website: profile.website || '',
+        // Professional Details
+        certifications: profile.certifications || [],
+        skills: profile.skills || [],
+        languages: profile.languages || [],
+        years_of_experience: typeof profile.years_of_experience === 'number' ? profile.years_of_experience : 0,
+        current_position: profile.current_position || '',
+        current_institution: profile.current_institution || '',
+        npi_number: profile.npi_number || '',
+        dea_number: profile.dea_number || '',
+        // Research and Interests
+        research_interests: profile.research_interests || [],
+        clinical_interests: profile.clinical_interests || [],
+        teaching_experience: profile.teaching_experience || false,
+        mentoring_availability: profile.mentoring_availability || false,
       });
       setAvatarPreview(profile.avatar_url || null);
     }
@@ -857,6 +921,185 @@ export default function OnboardingPage() {
               <p className="text-sm text-gray-500 mt-2 flex items-center">
                 <ExclamationTriangleIcon className="w-4 h-4 mr-1" />
                 Please add at least one education entry
+              </p>
+            )}
+          </div>
+        );
+
+      case 'contact':
+        return (
+          <div className="max-w-2xl mx-auto">
+            <div className="flex items-center mb-6">
+              <HomeIcon className="w-8 h-8 text-azure-500 mr-3" />
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">{step.title}</h2>
+                <p className="text-lg text-gray-600 mt-2">{step.subtitle}</p>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <input
+                type="tel"
+                placeholder="Phone Number"
+                value={formData.phone}
+                onChange={(e) => handleInputChange('phone', e.target.value)}
+                className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-azure-500 focus:border-azure-500 text-lg transition-all duration-200"
+                autoFocus
+              />
+              <input
+                type="email"
+                placeholder="Email Address"
+                value={formData.email}
+                onChange={(e) => handleInputChange('email', e.target.value)}
+                className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-azure-500 focus:border-azure-500 text-lg transition-all duration-200"
+              />
+              <input
+                type="url"
+                placeholder="Website (optional)"
+                value={formData.website}
+                onChange={(e) => handleInputChange('website', e.target.value)}
+                className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-azure-500 focus:border-azure-500 text-lg transition-all duration-200"
+              />
+            </div>
+            
+            {!step.required && (
+              <p className="text-sm text-gray-500 mt-2 flex items-center">
+                <ExclamationTriangleIcon className="w-4 h-4 mr-1" />
+                This step is optional - you can skip it
+              </p>
+            )}
+          </div>
+        );
+
+      case 'certifications':
+        return (
+          <div className="max-w-2xl mx-auto">
+            <div className="flex items-center mb-6">
+              <DocumentTextIcon className="w-8 h-8 text-azure-500 mr-3" />
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">{step.title}</h2>
+                <p className="text-lg text-gray-600 mt-2">{step.subtitle}</p>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input
+                  type="text"
+                  placeholder="NPI Number (US)"
+                  value={formData.npi_number}
+                  onChange={(e) => handleInputChange('npi_number', e.target.value)}
+                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent"
+                />
+                <input
+                  type="text"
+                  placeholder="DEA Number (US)"
+                  value={formData.dea_number}
+                  onChange={(e) => handleInputChange('dea_number', e.target.value)}
+                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent"
+                />
+                <input
+                  type="text"
+                  placeholder="Current Position"
+                  value={formData.current_position}
+                  onChange={(e) => handleInputChange('current_position', e.target.value)}
+                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent"
+                />
+                <input
+                  type="text"
+                  placeholder="Current Institution"
+                  value={formData.current_institution}
+                  onChange={(e) => handleInputChange('current_institution', e.target.value)}
+                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent"
+                />
+                <input
+                  type="number"
+                  placeholder="Years of Experience"
+                  value={formData.years_of_experience}
+                  onChange={(e) => handleInputChange('years_of_experience', parseInt(e.target.value) || 0)}
+                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+            
+            {!step.required && (
+              <p className="text-sm text-gray-500 mt-2 flex items-center">
+                <ExclamationTriangleIcon className="w-4 h-4 mr-1" />
+                This step is optional - you can skip it
+              </p>
+            )}
+          </div>
+        );
+
+      case 'skills':
+        return (
+          <div className="max-w-2xl mx-auto">
+            <div className="flex items-center mb-6">
+              <StarIcon className="w-8 h-8 text-azure-500 mr-3" />
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">{step.title}</h2>
+                <p className="text-lg text-gray-600 mt-2">{step.subtitle}</p>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <textarea
+                placeholder="Enter your skills (comma-separated)"
+                value={Array.isArray(formData.skills) ? formData.skills.join(', ') : ''}
+                onChange={(e) => handleInputChange('skills', e.target.value.split(',').map(s => s.trim()).filter(s => s))}
+                rows={4}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent resize-none"
+              />
+              <div className="flex flex-wrap gap-2">
+                {Array.isArray(formData.skills) && formData.skills.map((skill, index) => (
+                  <span key={index} className="px-3 py-1 bg-azure-100 text-azure-700 rounded-full text-sm">
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+            
+            {!step.required && (
+              <p className="text-sm text-gray-500 mt-2 flex items-center">
+                <ExclamationTriangleIcon className="w-4 h-4 mr-1" />
+                This step is optional - you can skip it
+              </p>
+            )}
+          </div>
+        );
+
+      case 'languages':
+        return (
+          <div className="max-w-2xl mx-auto">
+            <div className="flex items-center mb-6">
+              <MapPinIcon className="w-8 h-8 text-azure-500 mr-3" />
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">{step.title}</h2>
+                <p className="text-lg text-gray-600 mt-2">{step.subtitle}</p>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <textarea
+                placeholder="Enter languages you speak (comma-separated)"
+                value={Array.isArray(formData.languages) ? formData.languages.join(', ') : ''}
+                onChange={(e) => handleInputChange('languages', e.target.value.split(',').map(s => s.trim()).filter(s => s))}
+                rows={4}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent resize-none"
+              />
+              <div className="flex flex-wrap gap-2">
+                {Array.isArray(formData.languages) && formData.languages.map((language, index) => (
+                  <span key={index} className="px-3 py-1 bg-azure-100 text-azure-700 rounded-full text-sm">
+                    {language}
+                  </span>
+                ))}
+              </div>
+            </div>
+            
+            {!step.required && (
+              <p className="text-sm text-gray-500 mt-2 flex items-center">
+                <ExclamationTriangleIcon className="w-4 h-4 mr-1" />
+                This step is optional - you can skip it
               </p>
             )}
           </div>

@@ -132,6 +132,8 @@ export interface Profile {
     is_first_author: boolean;
   }[];
   languages_spoken?: string[];
+  languages?: string[];
+  skills?: string[];
   years_of_experience?: number;
   current_position?: string;
   current_institution?: string;

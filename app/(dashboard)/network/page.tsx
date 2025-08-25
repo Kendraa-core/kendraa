@@ -21,8 +21,7 @@ import {
   BellIcon,
   XMarkIcon,
   ClockIcon,
-  ChevronRightIcon,
-  PuzzlePieceIcon
+  ChevronRightIcon
 } from '@heroicons/react/24/outline';
 import { 
   getSuggestedConnectionsWithMutualCounts,
@@ -368,23 +367,7 @@ export default function NetworkPage() {
             </div>
           )}
 
-          {/* Puzzle Game Section */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <PuzzlePieceIcon className="w-6 h-6 text-orange-600" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-semibold text-gray-900">Zip - a quick brain teaser</h4>
-                  <p className="text-xs text-gray-600">Solve in 60s or less!</p>
-                </div>
-              </div>
-              <button className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium">
-                Solve now
-              </button>
-            </div>
-          </div>
+
 
           {/* People you may know Section */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
