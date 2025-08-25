@@ -145,18 +145,28 @@ export default function EventsPage() {
 
   const getEventTypeColor = (type: string) => {
     switch (type) {
-      case 'conference': return 'bg-primary-100 text-primary-800';
-      case 'webinar': return 'bg-green-100 text-green-800';
-      case 'workshop': return 'bg-purple-100 text-purple-800';
-      case 'seminar': return 'bg-blue-100 text-blue-800';
-      case 'networking': return 'bg-orange-100 text-orange-800';
-      case 'training': return 'bg-indigo-100 text-indigo-800';
+      case 'conference': return 'bg-azure-100 text-azure-800';
+      case 'webinar': return 'bg-azure-100 text-azure-800';
+      case 'workshop': return 'bg-azure-100 text-azure-800';
+      case 'seminar': return 'bg-azure-100 text-azure-800';
+      case 'networking': return 'bg-azure-100 text-azure-800';
+      case 'training': return 'bg-azure-100 text-azure-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const upcomingEvents = events.filter(event => !event.isRegistered);
   const registeredEvents = events.filter(event => event.isRegistered);
+
+  // Debug logging
+  console.log('[EventsPage] Current state:', {
+    loading,
+    eventsCount: events.length,
+    activeTab,
+    userId: user?.id,
+    upcomingEventsCount: upcomingEvents.length,
+    registeredEventsCount: registeredEvents.length
+  });
 
   if (!user) {
     return (
@@ -181,7 +191,7 @@ export default function EventsPage() {
             </div>
             <Link
               href="/events/create"
-              className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+              className="inline-flex items-center px-4 py-2 bg-azure-600 text-white rounded-lg hover:bg-azure-700 transition-colors"
             >
               <PlusIcon className="w-5 h-5 mr-2" />
               Create Event
@@ -198,7 +208,7 @@ export default function EventsPage() {
             onClick={() => setActiveTab('upcoming')}
             className={`pb-2 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'upcoming'
-                ? 'border-primary-500 text-primary-600'
+                ? 'border-azure-500 text-azure-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
@@ -208,7 +218,7 @@ export default function EventsPage() {
             onClick={() => setActiveTab('registered')}
             className={`pb-2 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'registered'
-                ? 'border-primary-500 text-primary-600'
+                ? 'border-azure-500 text-azure-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
@@ -218,7 +228,7 @@ export default function EventsPage() {
             onClick={() => setActiveTab('my-events')}
             className={`pb-2 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'my-events'
-                ? 'border-primary-500 text-primary-600'
+                ? 'border-azure-500 text-azure-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
@@ -232,19 +242,19 @@ export default function EventsPage() {
             <div className="text-center">
               <div className="relative">
                 {/* Main spinner */}
-                <div className="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
+                <div className="w-12 h-12 border-4 border-azure-200 border-t-azure-600 rounded-full animate-spin"></div>
                 
                 {/* Pulse effect */}
-                <div className="absolute inset-0 w-12 h-12 border-4 border-transparent border-t-primary-400 rounded-full animate-ping opacity-20"></div>
+                <div className="absolute inset-0 w-12 h-12 border-4 border-transparent border-t-azure-400 rounded-full animate-ping opacity-20"></div>
               </div>
               
               <p className="text-gray-600 mt-4 text-sm font-medium">Loading events...</p>
               
               {/* Progress dots */}
               <div className="flex justify-center mt-2 space-x-1">
-                <div className="w-2 h-2 bg-primary-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                <div className="w-2 h-2 bg-primary-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                <div className="w-2 h-2 bg-primary-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                <div className="w-2 h-2 bg-azure-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                <div className="w-2 h-2 bg-azure-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                <div className="w-2 h-2 bg-azure-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
               </div>
             </div>
           </div>
@@ -265,7 +275,7 @@ export default function EventsPage() {
                     {event.event_type.charAt(0).toUpperCase() + event.event_type.slice(1)}
                   </span>
                   {event.is_virtual && (
-                    <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                    <span className="px-2 py-1 text-xs font-medium bg-azure-100 text-azure-800 rounded-full">
                       Virtual
                     </span>
                   )}
@@ -334,7 +344,7 @@ export default function EventsPage() {
                     ) : (
                       <button
                         onClick={() => handleRegister(event.id)}
-                        className="px-3 py-1 text-sm font-medium bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                        className="px-3 py-1 text-sm font-medium bg-azure-600 text-white rounded-lg hover:bg-azure-700 transition-colors"
                       >
                         Register
                       </button>

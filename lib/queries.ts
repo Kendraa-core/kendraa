@@ -2715,3 +2715,89 @@ export async function getUserRegisteredEvents(userId: string): Promise<Event[]> 
   }
 }
 
+// Test function to create sample events
+export async function createSampleEvents(userId: string): Promise<void> {
+  try {
+    console.log('[Queries] Creating sample events for user:', userId);
+    
+    const sampleEvents = [
+      {
+        title: 'Healthcare Innovation Summit 2024',
+        description: 'Join us for a comprehensive discussion on the latest innovations in healthcare technology and patient care.',
+        start_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
+        end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000 + 4 * 60 * 60 * 1000).toISOString(), // 4 hours later
+        location: 'San Francisco, CA',
+        venue: 'Moscone Center',
+        event_type: 'conference' as const,
+        specializations: ['technology', 'innovation'],
+        organizer_id: userId,
+        organizer_type: 'individual' as const,
+        max_attendees: 500,
+        registration_fee: 299,
+        currency: 'USD',
+        status: 'upcoming' as const,
+        is_virtual: false,
+        meeting_link: null,
+        banner_url: null,
+        attendees_count: 0
+      },
+      {
+        title: 'Medical AI Workshop',
+        description: 'Hands-on workshop on implementing AI solutions in medical practice.',
+        start_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(), // 14 days from now
+        end_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000 + 6 * 60 * 60 * 1000).toISOString(), // 6 hours later
+        location: null,
+        venue: null,
+        event_type: 'workshop' as const,
+        specializations: ['AI', 'technology'],
+        organizer_id: userId,
+        organizer_type: 'individual' as const,
+        max_attendees: 50,
+        registration_fee: 149,
+        currency: 'USD',
+        status: 'upcoming' as const,
+        is_virtual: true,
+        meeting_link: 'https://zoom.us/j/123456789',
+        banner_url: null,
+        attendees_count: 0
+      },
+      {
+        title: 'Healthcare Networking Mixer',
+        description: 'Connect with fellow healthcare professionals in a relaxed networking environment.',
+        start_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days from now
+        end_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000).toISOString(), // 3 hours later
+        location: 'New York, NY',
+        venue: 'The Grand Hyatt',
+        event_type: 'networking' as const,
+        specializations: ['networking', 'professional development'],
+        organizer_id: userId,
+        organizer_type: 'individual' as const,
+        max_attendees: 200,
+        registration_fee: 0,
+        currency: null,
+        status: 'upcoming' as const,
+        is_virtual: false,
+        meeting_link: null,
+        banner_url: null,
+        attendees_count: 0
+      }
+    ];
+
+    for (const eventData of sampleEvents) {
+      const { error } = await getSupabase()
+        .from('events')
+        .insert(eventData);
+
+      if (error) {
+        console.error('[Queries] Error creating sample event:', error);
+      } else {
+        console.log('[Queries] Sample event created successfully:', eventData.title);
+      }
+    }
+
+    console.log('[Queries] Sample events creation completed');
+  } catch (error) {
+    console.error('[Queries] Error creating sample events:', error);
+  }
+}
+
