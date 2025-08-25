@@ -227,12 +227,22 @@ export default function OnboardingPage() {
     const currentStepData = ONBOARDING_STEPS[currentStep];
     
     // Validate required fields
-    if (currentStepData.required && !formData[currentStepData.field as keyof typeof formData]) {
-      toast.error('This field is required');
-      return;
+    if (currentStepData.required) {
+      if (currentStepData.type === 'image') {
+        if (!avatarPreview) {
+          toast.error('Please upload a profile picture');
+          return;
+        }
+      } else {
+        const fieldValue = formData[currentStepData.field as keyof typeof formData];
+        if (!fieldValue || String(fieldValue).trim().length === 0) {
+          toast.error('This field is required');
+          return;
+        }
+      }
     }
 
-    // If this is the last step, save the data
+    // If this is the second to last step (before the complete step), save the data
     if (currentStep === ONBOARDING_STEPS.length - 2) {
       setLoading(true);
       try {
@@ -276,7 +286,18 @@ export default function OnboardingPage() {
 
   const canProceed = () => {
     const currentStepData = ONBOARDING_STEPS[currentStep];
+    
+    // Welcome step should always allow proceeding
+    if (currentStepData.type === 'welcome') {
+      return true;
+    }
+    
     if (!currentStepData.required) return true;
+    
+    // Special handling for image step
+    if (currentStepData.type === 'image') {
+      return avatarPreview !== null;
+    }
     
     const fieldValue = formData[currentStepData.field as keyof typeof formData];
     if (currentStepData.type === 'select') {
