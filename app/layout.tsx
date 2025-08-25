@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { Toaster } from 'react-hot-toast';
@@ -13,7 +13,13 @@ export const metadata: Metadata = {
   description: 'Connect, collaborate, and grow with healthcare professionals worldwide',
   keywords: 'healthcare, medical, professionals, network, collaboration',
   authors: [{ name: 'Kendraa Team' }],
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=5, user-scalable=true',
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
   themeColor: '#007FFF',
 };
 
@@ -23,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full">
+    <html lang="en" className="h-full" data-scroll-behavior="smooth">
       <head>
         <meta name="theme-color" content="#007FFF" />
         <meta name="msapplication-TileColor" content="#007FFF" />
