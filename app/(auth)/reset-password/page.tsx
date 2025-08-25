@@ -133,7 +133,7 @@ export default function ResetPassword() {
               Validating reset link...
             </h2>
             <div className="mt-4">
-              <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+              <div className="w-8 h-8 border-2 border-azure-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
             </div>
           </div>
         </div>
@@ -157,8 +157,8 @@ export default function ResetPassword() {
 
           <div className="bg-white py-8 px-6 shadow-sm rounded-xl border border-gray-200">
             <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-16 h-16 bg-azure-100 rounded-full flex items-center justify-center mx-auto">
+                <svg className="w-8 h-8 text-azure-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
@@ -170,7 +170,7 @@ export default function ResetPassword() {
             <div className="mt-6 pt-6 border-t border-gray-200">
               <Link
                 href="/signin"
-                className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-azure-500 transition-colors"
               >
                 Sign in now
               </Link>
@@ -209,7 +209,7 @@ export default function ResetPassword() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors placeholder:text-gray-400"
+                  className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500 transition-colors placeholder:text-gray-400"
                   placeholder="Enter your new password"
                   disabled={loading}
                 />
@@ -243,7 +243,7 @@ export default function ResetPassword() {
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors placeholder:text-gray-400"
+                  className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500 transition-colors placeholder:text-gray-400"
                   placeholder="Confirm your new password"
                   disabled={loading}
                 />
@@ -265,7 +265,7 @@ export default function ResetPassword() {
               <button
                 type="submit"
                 disabled={loading || !password || !confirmPassword}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-azure-600 hover:bg-azure-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-azure-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {loading ? (
                   <div className="flex items-center space-x-2">
@@ -292,7 +292,7 @@ export default function ResetPassword() {
             <div className="mt-6">
               <Link
                 href="/signin"
-                className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-azure-500 transition-colors"
               >
                 Back to sign in
               </Link>

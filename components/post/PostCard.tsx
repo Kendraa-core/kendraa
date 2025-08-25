@@ -426,7 +426,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
                   <button
                     onClick={submitComment}
                     disabled={isCommenting || !newComment.trim()}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="bg-azure-600 text-white px-4 py-2 rounded-lg hover:bg-azure-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     {isCommenting ? 'Posting...' : 'Post'}
                   </button>

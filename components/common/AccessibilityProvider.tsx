@@ -400,7 +400,7 @@ export function AccessibilitySettingsPanel({ isOpen, onClose }: { isOpen: boolea
             </button>
             <button
               onClick={onClose}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-6 py-2 bg-azure-600 text-white rounded-lg hover:bg-azure-700 font-medium focus:outline-none focus:ring-2 focus:ring-azure-500"
             >
               Save Settings
             </button>

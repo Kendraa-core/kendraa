@@ -33,7 +33,7 @@ export default function Error({
         <div className="space-y-3">
           <button
             onClick={reset}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center justify-center space-x-2"
+            className="w-full bg-azure-600 hover:bg-azure-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center justify-center space-x-2"
           >
             <ArrowPathIcon className="h-4 w-4" />
             <span>Try again</span>

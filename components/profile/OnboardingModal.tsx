@@ -303,24 +303,24 @@ export default function OnboardingPage() {
             </div>
             <h2 className="text-4xl font-bold text-gray-900 mb-6">{step.title}</h2>
             <p className="text-xl text-gray-600 mb-10 leading-relaxed">{step.subtitle}</p>
-            <div className="bg-blue-50 rounded-xl p-6 mb-10">
-              <h3 className="font-semibold text-blue-900 mb-4 text-lg">Why complete your profile?</h3>
-              <ul className="text-blue-800 space-y-3 text-left">
-                <li className="flex items-center">
-                  <CheckCircleIcon className="w-5 h-5 text-blue-600 mr-3 flex-shrink-0" />
-                  Get 10x more connection requests
+            <div className="bg-azure-50 rounded-xl p-6 mb-10">
+              <h3 className="font-semibold text-azure-900 mb-4 text-lg">Why complete your profile?</h3>
+              <ul className="text-azure-800 space-y-3 text-left">
+                <li className="flex items-start">
+                  <CheckCircleIcon className="w-5 h-5 text-azure-600 mr-3 flex-shrink-0" />
+                  <span>Build trust with other healthcare professionals</span>
                 </li>
-                <li className="flex items-center">
-                  <CheckCircleIcon className="w-5 h-5 text-blue-600 mr-3 flex-shrink-0" />
-                  Appear in relevant search results
+                <li className="flex items-start">
+                  <CheckCircleIcon className="w-5 h-5 text-azure-600 mr-3 flex-shrink-0" />
+                  <span>Get personalized job recommendations</span>
                 </li>
-                <li className="flex items-center">
-                  <CheckCircleIcon className="w-5 h-5 text-blue-600 mr-3 flex-shrink-0" />
-                  Build professional credibility
+                <li className="flex items-start">
+                  <CheckCircleIcon className="w-5 h-5 text-azure-600 mr-3 flex-shrink-0" />
+                  <span>Connect with relevant industry events</span>
                 </li>
-                <li className="flex items-center">
-                  <CheckCircleIcon className="w-5 h-5 text-blue-600 mr-3 flex-shrink-0" />
-                  Access exclusive networking opportunities
+                <li className="flex items-start">
+                  <CheckCircleIcon className="w-5 h-5 text-azure-600 mr-3 flex-shrink-0" />
+                  <span>Access exclusive healthcare content</span>
                 </li>
               </ul>
             </div>
@@ -331,9 +331,9 @@ export default function OnboardingPage() {
         return (
           <div className="max-w-2xl mx-auto">
             <div className="flex items-center mb-6">
-              {step.field === 'full_name' && <UserIcon className="w-8 h-8 text-blue-500 mr-3" />}
-              {step.field === 'headline' && <BriefcaseIcon className="w-8 h-8 text-blue-500 mr-3" />}
-              {step.field === 'location' && <MapPinIcon className="w-8 h-8 text-blue-500 mr-3" />}
+              {step.field === 'full_name' && <UserIcon className="w-8 h-8 text-azure-500 mr-3" />}
+              {step.field === 'headline' && <BriefcaseIcon className="w-8 h-8 text-azure-500 mr-3" />}
+              {step.field === 'location' && <MapPinIcon className="w-8 h-8 text-azure-500 mr-3" />}
               <div>
                 <h2 className="text-3xl font-bold text-gray-900">{step.title}</h2>
                 <p className="text-lg text-gray-600 mt-2">{step.subtitle}</p>
@@ -344,7 +344,7 @@ export default function OnboardingPage() {
               value={formData[step.field as keyof typeof formData] as string}
               onChange={(e) => handleInputChange(step.field!, e.target.value)}
               placeholder={step.placeholder}
-              className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-500 focus:border-blue-500 text-xl transition-all duration-200"
+              className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-azure-500 focus:border-azure-500 text-xl transition-all duration-200"
               autoFocus
             />
             {step.required && (
@@ -360,7 +360,7 @@ export default function OnboardingPage() {
         return (
           <div className="max-w-2xl mx-auto">
             <div className="flex items-center mb-6">
-              <DocumentTextIcon className="w-8 h-8 text-blue-500 mr-3" />
+              <DocumentTextIcon className="w-8 h-8 text-azure-500 mr-3" />
               <div>
                 <h2 className="text-3xl font-bold text-gray-900">{step.title}</h2>
                 <p className="text-lg text-gray-600 mt-2">{step.subtitle}</p>
@@ -371,7 +371,7 @@ export default function OnboardingPage() {
               onChange={(e) => handleInputChange(step.field!, e.target.value)}
               placeholder={step.placeholder}
               rows={6}
-              className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-500 focus:border-blue-500 text-lg resize-none transition-all duration-200"
+              className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-azure-500 focus:border-azure-500 text-lg resize-none transition-all duration-200"
               autoFocus
             />
             {step.required && (
@@ -387,7 +387,7 @@ export default function OnboardingPage() {
         return (
           <div className="max-w-2xl mx-auto">
             <div className="flex items-center mb-6">
-              <StarIcon className="w-8 h-8 text-blue-500 mr-3" />
+              <StarIcon className="w-8 h-8 text-azure-500 mr-3" />
               <div>
                 <h2 className="text-3xl font-bold text-gray-900">{step.title}</h2>
                 <p className="text-lg text-gray-600 mt-2">{step.subtitle}</p>
@@ -401,7 +401,7 @@ export default function OnboardingPage() {
                   onClick={() => handleInputChange(step.field!, [option])}
                   className={`p-4 text-left rounded-xl border-2 transition-all duration-200 ${
                     (formData[step.field as keyof typeof formData] as string[])?.includes(option)
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      ? 'border-azure-500 bg-azure-50 text-azure-700'
                       : 'border-gray-300 hover:border-gray-400 text-gray-700'
                   }`}
                 >
@@ -422,7 +422,7 @@ export default function OnboardingPage() {
         return (
           <div className="max-w-2xl mx-auto">
             <div className="flex items-center mb-6">
-              <PhotoIcon className="w-8 h-8 text-blue-500 mr-3" />
+              <PhotoIcon className="w-8 h-8 text-azure-500 mr-3" />
               <div>
                 <h2 className="text-3xl font-bold text-gray-900">{step.title}</h2>
                 <p className="text-lg text-gray-600 mt-2">{step.subtitle}</p>
@@ -431,7 +431,7 @@ export default function OnboardingPage() {
             <div className="space-y-6">
               {avatarPreview ? (
                 <div className="relative">
-                  <div className="w-32 h-32 rounded-full mx-auto overflow-hidden border-4 border-blue-500">
+                  <div className="w-32 h-32 rounded-full mx-auto overflow-hidden border-4 border-azure-500">
                     <img
                       src={avatarPreview}
                       alt="Profile preview"
@@ -462,7 +462,7 @@ export default function OnboardingPage() {
               />
               <label
                 htmlFor="avatar-upload"
-                className="block w-full px-6 py-4 bg-blue-500 text-white text-center rounded-xl hover:bg-blue-600 transition-colors cursor-pointer"
+                className="block w-full px-6 py-4 bg-azure-500 text-white text-center rounded-xl hover:bg-azure-600 transition-colors cursor-pointer"
               >
                 {avatarPreview ? 'Change Photo' : 'Upload Photo'}
               </label>
@@ -484,11 +484,11 @@ export default function OnboardingPage() {
             </div>
             <h2 className="text-4xl font-bold text-gray-900 mb-6">{step.title}</h2>
             <p className="text-xl text-gray-600 mb-10">{step.subtitle}</p>
-            <div className="bg-green-50 rounded-xl p-6">
-              <h3 className="font-semibold text-green-900 mb-4">Profile Completion: {getCompletionPercentage()}%</h3>
+            <div className="bg-azure-50 rounded-xl p-6">
+              <h3 className="font-semibold text-azure-900 mb-4">Profile Completion: {getCompletionPercentage()}%</h3>
               <div className="w-full bg-gray-200 rounded-full h-3">
                 <div
-                  className="bg-green-500 h-3 rounded-full transition-all duration-500"
+                  className="bg-azure-500 h-3 rounded-full transition-all duration-500"
                   style={{ width: `${getCompletionPercentage()}%` }}
                 ></div>
               </div>
@@ -540,7 +540,7 @@ export default function OnboardingPage() {
         {/* Progress Bar */}
         <div className="w-full bg-gray-200 h-1">
           <div
-            className="bg-blue-500 h-1 transition-all duration-300"
+            className="bg-azure-500 h-1 transition-all duration-300"
             style={{ width: `${((currentStep + 1) / ONBOARDING_STEPS.length) * 100}%` }}
           ></div>
         </div>
@@ -594,7 +594,7 @@ export default function OnboardingPage() {
                     disabled={!canProceed() || loading}
                     className={`flex-1 sm:flex-none px-6 sm:px-8 py-3 rounded-xl font-medium transition-colors flex items-center justify-center space-x-2 ${
                       canProceed() && !loading
-                        ? 'bg-blue-500 text-white hover:bg-blue-600'
+                        ? 'bg-azure-500 text-white hover:bg-azure-600'
                         : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                     }`}
                   >

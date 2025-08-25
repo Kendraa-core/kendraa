@@ -157,18 +157,18 @@ export default function MedicalFeed() {
       <div className="flex items-start space-x-4">
         {item.image_url && (
           <div className="w-20 h-20 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden">
-            <div className="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
-              <HeartIconSolid className="w-8 h-8 text-blue-600" />
+            <div className="w-full h-full bg-gradient-to-br from-azure-100 to-azure-200 flex items-center justify-center">
+              <HeartIconSolid className="w-8 h-8 text-azure-600" />
             </div>
           </div>
         )}
         <div className="flex-1">
           <div className="flex items-center space-x-2 mb-2">
             <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-              item.category === 'research' ? 'bg-purple-100 text-purple-700' :
-              item.category === 'drug_approval' ? 'bg-green-100 text-green-700' :
-              item.category === 'guidelines' ? 'bg-blue-100 text-blue-700' :
-              item.category === 'technology' ? 'bg-orange-100 text-orange-700' :
+              item.category === 'research' ? 'bg-azure-100 text-azure-700' :
+              item.category === 'drug_approval' ? 'bg-azure-100 text-azure-700' :
+              item.category === 'guidelines' ? 'bg-azure-100 text-azure-700' :
+              item.category === 'technology' ? 'bg-azure-100 text-azure-700' :
               'bg-gray-100 text-gray-700'
             }`}>
               {item.category.replace('_', ' ').toUpperCase()}
@@ -196,14 +196,14 @@ export default function MedicalFeed() {
     <div key={item.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center space-x-2">
-          <BeakerIconSolid className="w-5 h-5 text-purple-600" />
-          <span className="text-sm font-medium text-purple-700">{item.study_type.replace('_', ' ').toUpperCase()}</span>
+          <BeakerIconSolid className="w-5 h-5 text-azure-600" />
+          <span className="text-sm font-medium text-azure-700">{item.study_type.replace('_', ' ').toUpperCase()}</span>
           <div className="flex items-center space-x-1">
             {[...Array(5)].map((_, i) => (
               <div
                 key={i}
                 className={`w-2 h-2 rounded-full ${
-                  i < Math.round(item.significance_score / 2) ? 'bg-yellow-400' : 'bg-gray-200'
+                  i < Math.round(item.significance_score / 2) ? 'bg-azure-400' : 'bg-gray-200'
                 }`}
               />
             ))}
@@ -223,7 +223,7 @@ export default function MedicalFeed() {
           <span className="font-medium">{item.journal}</span> • {new Date(item.publication_date).toLocaleDateString()}
         </div>
         {item.doi && (
-          <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+          <button className="text-azure-600 hover:text-azure-700 text-sm font-medium">
             View Paper
           </button>
         )}
@@ -235,10 +235,10 @@ export default function MedicalFeed() {
     <div key={item.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center space-x-2">
-          <AcademicCapIcon className="w-5 h-5 text-blue-600" />
-          <span className="text-sm font-medium text-blue-700">{item.credit_hours} CME Credits</span>
+          <AcademicCapIcon className="w-5 h-5 text-azure-600" />
+          <span className="text-sm font-medium text-azure-700">{item.credit_hours} CME Credits</span>
           {item.is_free && (
-            <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">FREE</span>
+            <span className="px-2 py-1 bg-azure-100 text-azure-700 text-xs font-medium rounded">FREE</span>
           )}
         </div>
         <div className="flex items-center space-x-1 text-sm text-gray-500">
@@ -259,7 +259,7 @@ export default function MedicalFeed() {
             <span> • Deadline: {new Date(item.deadline).toLocaleDateString()}</span>
           )}
         </div>
-        <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+        <button className="bg-azure-600 hover:bg-azure-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
           Enroll Now
         </button>
       </div>
@@ -284,7 +284,7 @@ export default function MedicalFeed() {
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center space-x-2 px-6 py-4 border-b-2 transition-colors whitespace-nowrap ${
                   activeTab === tab.id
-                    ? 'border-blue-600 text-blue-600 bg-blue-50'
+                    ? 'border-azure-600 text-azure-600 bg-azure-50'
                     : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
               >

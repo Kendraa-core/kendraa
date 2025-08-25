@@ -104,84 +104,52 @@ export default function ProfileCompletionPrompt() {
 
               {/* Header */}
               <div className="text-center mb-6">
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <ExclamationTriangleIcon className="w-8 h-8 text-blue-600" />
+                <div className="w-16 h-16 bg-azure-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <ExclamationTriangleIcon className="w-8 h-8 text-azure-600" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                  Complete Your Profile
-                </h2>
-                <p className="text-gray-600">
-                  A complete profile helps you make better connections and opportunities.
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Complete Your Profile</h3>
+                <p className="text-gray-600 mb-4 text-center">
+                  Your profile is only <span className="font-semibold text-azure-600">{completionPercentage}%</span> complete. 
+                  Complete it to unlock all features and connect with other healthcare professionals.
                 </p>
-              </div>
 
-              {/* Progress Section */}
-              <div className="mb-6">
-                <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
-                  <span>Profile Completion</span>
-                  <span className="font-semibold text-blue-600">{completionPercentage}%</span>
+                <div className="flex items-center justify-center space-x-4 mb-6">
+                  <div className="flex items-center space-x-2">
+                    <UserIcon className="w-4 h-4 text-azure-500" />
+                    <span className="text-sm text-gray-600">Basic Info</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <UserIcon className="w-4 h-4 text-azure-500" />
+                    <span className="text-sm text-gray-600">Experience</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <UserIcon className="w-4 h-4 text-azure-500" />
+                    <span className="text-sm text-gray-600">Education</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <UserIcon className="w-4 h-4 text-yellow-500" />
+                    <span className="text-sm text-gray-600">Skills</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <UserIcon className="w-4 h-4 text-yellow-500" />
+                    <span className="text-sm text-gray-600">Photo</span>
+                  </div>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-3">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${completionPercentage}%` }}
-                    transition={{ duration: 0.5 }}
-                    className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full"
-                  />
-                </div>
-              </div>
 
-              {/* Missing Fields */}
-              <div className="mb-6">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">Missing Information:</h3>
-                <div className="space-y-2">
-                  {!profile?.full_name && (
-                    <div className="flex items-center space-x-2 text-sm text-gray-600">
-                      <UserIcon className="w-4 h-4 text-red-500" />
-                      <span>Full name</span>
-                    </div>
-                  )}
-                  {!profile?.headline && (
-                    <div className="flex items-center space-x-2 text-sm text-gray-600">
-                      <UserIcon className="w-4 h-4 text-red-500" />
-                      <span>Professional headline</span>
-                    </div>
-                  )}
-                  {(!profile?.specialization || profile.specialization.length === 0) && (
-                    <div className="flex items-center space-x-2 text-sm text-gray-600">
-                      <UserIcon className="w-4 h-4 text-red-500" />
-                      <span>Specializations</span>
-                    </div>
-                  )}
-                  {!profile?.bio && (
-                    <div className="flex items-center space-x-2 text-sm text-gray-600">
-                      <UserIcon className="w-4 h-4 text-yellow-500" />
-                      <span>Bio (optional but recommended)</span>
-                    </div>
-                  )}
-                  {!profile?.location && (
-                    <div className="flex items-center space-x-2 text-sm text-gray-600">
-                      <UserIcon className="w-4 h-4 text-yellow-500" />
-                      <span>Location (optional)</span>
-                    </div>
-                  )}
+                <div className="flex items-center space-x-3">
+                  <button
+                    onClick={handleCompleteProfile}
+                    className="w-full bg-azure-600 text-white py-3 px-4 rounded-lg hover:bg-azure-700 transition-colors font-medium"
+                  >
+                    Complete Profile
+                  </button>
+                  <button
+                    onClick={handleClose}
+                    className="px-4 py-3 text-gray-500 hover:text-gray-700 transition-colors"
+                  >
+                    I&apos;ll do this later
+                  </button>
                 </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="space-y-3">
-                <button
-                  onClick={handleCompleteProfile}
-                  className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                >
-                  Complete Profile Now
-                </button>
-                <button
-                  onClick={handleClose}
-                  className="w-full text-gray-600 py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors text-sm"
-                >
-                  I&apos;ll do this later
-                </button>
               </div>
 
               {/* Benefits */}

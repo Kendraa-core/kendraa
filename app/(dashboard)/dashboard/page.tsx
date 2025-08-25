@@ -28,10 +28,13 @@ import {
   EnvelopeIcon,
   PhoneIcon,
   MapPinIcon,
+  UserPlusIcon,
+  CalendarDaysIcon,
 } from '@heroicons/react/24/outline';
 import { formatRelativeTime } from '@/lib/utils';
 import { getConnectionStats, getPostStats, getNotifications } from '@/lib/queries';
 import ShareButton from '@/components/common/ShareButton';
+import Link from 'next/link';
 
 
 interface DashboardStats {
@@ -133,11 +136,31 @@ export default function UserDashboard() {
 
   const getActivityColor = (type: string) => {
     switch (type) {
-      case 'connection_request': return 'text-green-600 bg-green-100';
-      case 'post_like': return 'text-red-600 bg-red-100';
-      case 'comment': return 'text-purple-600 bg-purple-100';
-      case 'job_application': return 'text-orange-600 bg-orange-100';
+      case 'connection_request': return 'text-azure-600 bg-azure-100';
+      case 'post_like': return 'text-azure-600 bg-azure-100';
+      case 'comment': return 'text-azure-600 bg-azure-100';
+      case 'job_application': return 'text-azure-600 bg-azure-100';
       default: return 'text-gray-600 bg-gray-100';
+    }
+  };
+
+  const getStatusColor = (type: string) => {
+    switch (type) {
+      case 'connection_request': return 'text-azure-600 bg-azure-100';
+      case 'post_like': return 'text-azure-600 bg-azure-100';
+      case 'comment': return 'text-azure-600 bg-azure-100';
+      case 'job_application': return 'text-azure-600 bg-azure-100';
+      default: return 'text-gray-600 bg-gray-100';
+    }
+  };
+
+  const getStatusIcon = (type: string) => {
+    switch (type) {
+      case 'connection_request': return UserPlusIcon;
+      case 'post_like': return HeartIcon;
+      case 'comment': return ChatBubbleLeftIcon;
+      case 'job_application': return BriefcaseIcon;
+      default: return BellIcon;
     }
   };
 
@@ -183,7 +206,7 @@ export default function UserDashboard() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center space-x-2 px-6 py-4 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
                   activeTab === tab.id
-                    ? 'border-blue-600 text-blue-600 bg-blue-50'
+                    ? 'border-azure-600 text-azure-600 bg-azure-50'
                     : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
               >
@@ -197,79 +220,166 @@ export default function UserDashboard() {
         {/* Tab Content */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           {activeTab === 'overview' && (
-            <div className="space-y-8">
-              {/* Stats Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-green-100 text-sm">Connections</p>
-                      <p className="text-3xl font-bold">{stats?.connections || 0}</p>
-                      <p className="text-green-100 text-sm mt-1">Professional network</p>
-                    </div>
-                    <UserGroupIcon className="w-8 h-8 text-green-200" />
+            <div className="space-y-6">
+              {/* Welcome Section */}
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h1 className="text-2xl font-bold text-gray-900">
+                      Welcome back, {profile?.full_name || user?.email}!
+                    </h1>
+                    <p className="text-gray-600 mt-1">
+                      Here&apos;s what&apos;s happening in your professional network today.
+                    </p>
                   </div>
-                </div>
-
-                <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-6 text-white">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-purple-100 text-sm">Posts</p>
-                      <p className="text-3xl font-bold">{stats?.posts || 0}</p>
-                      <p className="text-purple-100 text-sm mt-1">Published content</p>
+                  <div className="hidden sm:block">
+                    <div className="text-right">
+                      <p className="text-sm text-gray-500">Today</p>
+                      <p className="text-lg font-semibold text-gray-900">
+                        {new Date().toLocaleDateString('en-US', { 
+                          weekday: 'long', 
+                          month: 'short', 
+                          day: 'numeric' 
+                        })}
+                      </p>
                     </div>
-                    <DocumentTextIcon className="w-8 h-8 text-purple-200" />
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-6 text-white">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-orange-100 text-sm">Engagement</p>
-                      <p className="text-3xl font-bold">{stats?.likes || 0}</p>
-                      <p className="text-orange-100 text-sm mt-1">Likes & comments</p>
-                    </div>
-                    <HeartIcon className="w-8 h-8 text-orange-200" />
                   </div>
                 </div>
               </div>
 
-              {/* Recent Activity */}
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
-                <div className="space-y-4">
-                  {recentActivity.map((activity) => (
-                    <div key={activity.id} className="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg">
-                      <div className={`p-2 rounded-lg ${getActivityColor(activity.type)}`}>
-                        <activity.icon className="w-5 h-5" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium text-gray-900">{activity.title}</p>
-                        <p className="text-sm text-gray-600">{activity.description}</p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {formatRelativeTime(activity.timestamp)}
-                        </p>
-                      </div>
+              {/* Stats Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {/* Connections Card */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-azure-100 text-sm">Connections</p>
+                      <p className="text-2xl font-bold text-gray-900">{stats?.connections || 0}</p>
+                      <p className="text-azure-100 text-sm mt-1">Professional network</p>
                     </div>
-                  ))}
+                    <div className="w-12 h-12 bg-azure-100 rounded-lg flex items-center justify-center">
+                      <UserGroupIcon className="w-8 h-8 text-azure-200" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Posts Card */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-azure-100 text-sm">Posts</p>
+                      <p className="text-2xl font-bold text-gray-900">{stats?.posts || 0}</p>
+                      <p className="text-azure-100 text-sm mt-1">Published content</p>
+                    </div>
+                    <div className="w-12 h-12 bg-azure-100 rounded-lg flex items-center justify-center">
+                      <DocumentTextIcon className="w-8 h-8 text-azure-200" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Events Card */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-azure-100 text-sm">Events</p>
+                      <p className="text-2xl font-bold text-gray-900">0</p>
+                      <p className="text-azure-100 text-sm mt-1">Upcoming events</p>
+                    </div>
+                    <div className="w-12 h-12 bg-azure-100 rounded-lg flex items-center justify-center">
+                      <CalendarDaysIcon className="w-8 h-8 text-azure-200" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Applications Card */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-azure-100 text-sm">Applications</p>
+                      <p className="text-2xl font-bold text-gray-900">0</p>
+                      <p className="text-azure-100 text-sm mt-1">Job applications</p>
+                    </div>
+                    <div className="w-12 h-12 bg-azure-100 rounded-lg flex items-center justify-center">
+                      <BriefcaseIcon className="w-8 h-8 text-azure-200" />
+                    </div>
+                  </div>
                 </div>
               </div>
 
               {/* Quick Actions */}
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <button className="flex items-center space-x-3 p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
-                    <DocumentTextIcon className="w-6 h-6 text-blue-600" />
-                    <span className="font-medium text-blue-900">Create Post</span>
-                  </button>
-                  <button className="flex items-center space-x-3 p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
-                    <UserGroupIcon className="w-6 h-6 text-green-600" />
-                    <span className="font-medium text-green-900">Find Connections</span>
-                  </button>
-                  <button className="flex items-center space-x-3 p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
-                    <BriefcaseIcon className="w-6 h-6 text-purple-600" />
-                    <span className="font-medium text-purple-900">Browse Jobs</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <button className="flex items-center space-x-3 p-4 bg-azure-50 rounded-lg hover:bg-azure-100 transition-colors">
+                  <DocumentTextIcon className="w-6 h-6 text-azure-600" />
+                  <span className="font-medium text-azure-900">Create Post</span>
+                </button>
+                
+                <button className="flex items-center space-x-3 p-4 bg-azure-50 rounded-lg hover:bg-azure-100 transition-colors">
+                  <UserGroupIcon className="w-6 h-6 text-azure-600" />
+                  <span className="font-medium text-azure-900">Find Connections</span>
+                </button>
+              </div>
+
+              {/* Recent Activity */}
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-semibold text-gray-900">Recent Activity</h2>
+                  <Link href="/notifications" className="text-azure-600 hover:text-azure-700 text-sm font-medium">
+                    View all
+                  </Link>
+                </div>
+
+                {loading ? (
+                  <div className="space-y-4">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="animate-pulse">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+                          <div className="flex-1">
+                            <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                            <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : recentActivity.length > 0 ? (
+                  <div className="space-y-4">
+                    {recentActivity.map((activity, index) => {
+                      const IconComponent = getActivityIcon(activity.type);
+                      return (
+                        <div key={index} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getActivityColor(activity.type)}`}>
+                            <IconComponent className="w-5 h-5" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900">{activity.title}</p>
+                            <p className="text-sm text-gray-600">{activity.description}</p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {formatRelativeTime(activity.timestamp)}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <BellIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600">No recent activity</p>
+                    <p className="text-sm text-gray-500 mt-1">Start connecting and posting to see activity here</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Delete Account Section */}
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Account Management</h3>
+                    <p className="text-gray-600 mt-1">Manage your account settings and data</p>
+                  </div>
+                  <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                    Delete Account
                   </button>
                 </div>
               </div>
@@ -285,7 +395,7 @@ export default function UserDashboard() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Profile Visibility
                     </label>
-                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-azure-500">
                       <option>Public - Anyone can view</option>
                       <option>Connections only</option>
                       <option>Private - Only you</option>
@@ -295,7 +405,7 @@ export default function UserDashboard() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Contact Information
                     </label>
-                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-azure-500">
                       <option>Show to connections</option>
                       <option>Show to everyone</option>
                       <option>Hide contact info</option>
@@ -307,7 +417,7 @@ export default function UserDashboard() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Activity Status
                     </label>
-                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-azure-500">
                       <option>Show when active</option>
                       <option>Hide activity status</option>
                     </select>
@@ -316,7 +426,7 @@ export default function UserDashboard() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Profile Language
                     </label>
-                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-azure-500">
                       <option>English</option>
                       <option>Spanish</option>
                       <option>French</option>
@@ -337,7 +447,7 @@ export default function UserDashboard() {
                     <h4 className="font-medium text-gray-900">Two-Factor Authentication</h4>
                     <p className="text-sm text-gray-600">Add an extra layer of security</p>
                   </div>
-                  <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                  <button className="px-4 py-2 bg-azure-600 text-white rounded-lg hover:bg-azure-700">
                     Enable
                   </button>
                 </div>
@@ -391,7 +501,7 @@ export default function UserDashboard() {
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" defaultChecked />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-azure-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-azure-600"></div>
                     </label>
                   </div>
                 ))}
@@ -414,7 +524,7 @@ export default function UserDashboard() {
                     <input
                       type="text"
                       defaultValue={profile?.full_name || ''}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
                     />
                   </div>
                   <div>
@@ -424,7 +534,7 @@ export default function UserDashboard() {
                     <input
                       type="email"
                       defaultValue={user?.email || ''}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
                     />
                   </div>
                   <div>
@@ -434,7 +544,7 @@ export default function UserDashboard() {
                     <input
                       type="tel"
                       defaultValue={profile?.phone || ''}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
                     />
                   </div>
                   <div>
@@ -444,7 +554,7 @@ export default function UserDashboard() {
                     <input
                       type="text"
                       defaultValue={profile?.location || ''}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
                     />
                   </div>
                 </div>
@@ -460,7 +570,7 @@ export default function UserDashboard() {
                     </label>
                     <input
                       type="password"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
                     />
                   </div>
                   <div>
@@ -469,11 +579,11 @@ export default function UserDashboard() {
                     </label>
                     <input
                       type="password"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
                     />
                   </div>
                 </div>
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <button className="px-4 py-2 bg-azure-600 text-white rounded-lg hover:bg-azure-700">
                   Update Password
                 </button>
               </div>

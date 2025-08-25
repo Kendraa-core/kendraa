@@ -80,9 +80,9 @@ export default function ForgotPassword() {
 
           <div className="bg-white py-8 px-6 shadow-sm rounded-xl border border-gray-200">
             <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <div className="w-16 h-16 bg-azure-100 rounded-full flex items-center justify-center mx-auto">
+                <svg className="w-8 h-8 text-azure-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
               </div>
               <p className="text-sm text-gray-600">
@@ -90,7 +90,7 @@ export default function ForgotPassword() {
               </p>
               <button
                 onClick={() => setSent(false)}
-                className="text-blue-600 hover:text-blue-500 text-sm font-medium transition-colors"
+                className="text-azure-600 hover:text-azure-500 text-sm font-medium transition-colors"
               >
                 Try again
               </button>
@@ -137,7 +137,7 @@ export default function ForgotPassword() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors placeholder:text-gray-400"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500 transition-colors placeholder:text-gray-400"
                 placeholder="Enter your email"
                 disabled={loading}
               />
@@ -147,7 +147,7 @@ export default function ForgotPassword() {
               <button
                 type="submit"
                 disabled={loading || !email.trim()}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-azure-600 hover:bg-azure-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-azure-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {loading ? (
                   <div className="flex items-center space-x-2">
