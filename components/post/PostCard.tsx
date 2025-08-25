@@ -75,9 +75,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
         ]);
         setIsBookmarked(saved);
         setUserReaction(reactionType);
-        debugLog('Post state initialized', { postId: post.id, saved, reactionType });
       } catch (error) {
-        debugLog('Error initializing post state', error);
         setIsBookmarked(false);
         setUserReaction(null);
       }
@@ -121,7 +119,6 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
     if (isReacting) return;
 
     setIsReacting(true);
-    debugLog('Handling reaction', { postId: post.id, reactionType, currentReaction: userReaction });
 
     try {
       let success = false;
@@ -173,8 +170,6 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
       return;
     }
 
-    debugLog('Handling bookmark', { postId: post.id, currentBookmarked: isBookmarked });
-
     try {
       if (isBookmarked) {
         const success = await unsavePost(post.id, user.id);
@@ -211,14 +206,12 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
     if (!post?.id) return;
 
     setIsLoadingComments(true);
-    debugLog('Loading comments', { postId: post.id });
     
     try {
       const fetchedComments = await getPostComments(post.id, 5);
       
       if (Array.isArray(fetchedComments)) {
         setComments(fetchedComments);
-        debugLog('Comments loaded', { count: fetchedComments.length });
       } else {
         setComments([]);
         toast.error('Invalid comments data received');
@@ -251,7 +244,6 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
     }
 
     setIsCommenting(true);
-    debugLog('Submitting comment', { postId: post.id, comment: newComment });
 
     try {
       const commentData = {
@@ -263,7 +255,6 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
       const result = await createComment(commentData);
       
       if (result) {
-        debugLog('Comment created successfully', result);
         setNewComment('');
         setShowCommentBox(false);
         setCommentsCount(prev => prev + 1);

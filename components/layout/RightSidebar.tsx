@@ -54,13 +54,20 @@ export default function RightSidebar() {
 
   const fetchTopHealthcareNews = async (): Promise<NewsItem[]> => {
     try {
+      // Check if we have a valid API key
+      const apiKey = process.env.NEXT_PUBLIC_NEWS_API_KEY;
+      if (!apiKey || apiKey === 'demo' || apiKey === 'your_news_api_key_here') {
+        // Use demo data if no valid API key
+        return getDemoHealthcareNews();
+      }
+
       // Using NewsAPI.org for healthcare news
       const response = await fetch(
-        `https://newsapi.org/v2/everything?q=healthcare+medical&language=en&sortBy=publishedAt&pageSize=5&apiKey=${process.env.NEXT_PUBLIC_NEWS_API_KEY || 'demo'}`
+        `https://newsapi.org/v2/everything?q=healthcare+medical&language=en&sortBy=publishedAt&pageSize=5&apiKey=${apiKey}`
       );
       
       if (!response.ok) {
-        // Fallback to demo data if API key is not available
+        console.warn('NewsAPI request failed, using demo data');
         return getDemoHealthcareNews();
       }
       
@@ -79,7 +86,7 @@ export default function RightSidebar() {
       
       return getDemoHealthcareNews();
     } catch (error) {
-      console.error('Error fetching news:', error);
+      console.warn('Error fetching news, using demo data:', error);
       return getDemoHealthcareNews();
     }
   };

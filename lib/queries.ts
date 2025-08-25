@@ -30,10 +30,8 @@ export type {
 // No caching - direct database calls only
 
 // Profile queries - No caching
-export async function getProfile(userId: string): Promise<Profile> {
+export async function getProfile(userId: string): Promise<Profile | null> {
   try {
-    console.log('[Queries] Getting profile for user:', userId);
-    
     const { data, error } = await getSupabase()
       .from('profiles')
       .select('*')
@@ -41,26 +39,21 @@ export async function getProfile(userId: string): Promise<Profile> {
       .single();
 
     if (error) {
-      console.error('[Queries] Error fetching profile:', error);
+      if (error.code === 'PGRST116') {
+        return null;
+      }
       throw error;
     }
 
-    if (!data) {
-      throw new Error('Profile not found');
-    }
-
-    console.log('[Queries] Profile fetched successfully');
-    return data as Profile;
+    return data;
   } catch (error) {
-    console.error('[Queries] Error in getProfile:', error);
+    console.error('Error fetching profile:', error);
     throw error;
   }
 }
 
-export async function updateProfile(userId: string, updates: Partial<Profile>): Promise<Profile | null> {
+export async function updateProfile(userId: string, updates: Partial<Profile>): Promise<Profile> {
   try {
-    console.log('[Queries] Updating profile', { userId, updates });
-    
     const { data, error } = await getSupabase()
       .from('profiles')
       .update(updates)
@@ -69,15 +62,13 @@ export async function updateProfile(userId: string, updates: Partial<Profile>): 
       .single();
 
     if (error) {
-      console.error('[Queries] Error updating profile', error);
       throw error;
     }
-    
-    console.log('[Queries] Profile updated successfully', data);
-    return data;
+
+    return data as Profile;
   } catch (error) {
-    console.error('[Queries] Error updating profile', error);
-    return null;
+    console.error('Error updating profile:', error);
+    throw error;
   }
 }
 
