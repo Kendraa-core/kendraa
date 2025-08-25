@@ -2439,7 +2439,7 @@ export async function getEvents(): Promise<Event[]> {
       .from('events')
       .select(`
         *,
-        organizer:profiles(
+        organizer:profiles!organizer_id(
           id,
           full_name,
           avatar_url,
@@ -2451,6 +2451,12 @@ export async function getEvents(): Promise<Event[]> {
 
     if (error) {
       console.error('[Queries] Error fetching events:', error);
+      console.error('[Queries] Error details:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      });
       return [];
     }
     
@@ -2466,11 +2472,26 @@ export async function getEventsByOrganizer(organizerId: string): Promise<Event[]
   try {
     console.log('[Queries] Getting events by organizer:', organizerId);
     
+    // First, let's check if the organizer exists in profiles
+    const { data: organizerProfile, error: profileError } = await getSupabase()
+      .from('profiles')
+      .select('id, full_name')
+      .eq('id', organizerId)
+      .single();
+
+    if (profileError) {
+      console.error('[Queries] Organizer profile not found:', profileError);
+      return [];
+    }
+
+    console.log('[Queries] Found organizer profile:', organizerProfile);
+    
+    // Now get events by this organizer
     const { data, error } = await getSupabase()
       .from('events')
       .select(`
         *,
-        organizer:profiles(
+        organizer:profiles!organizer_id(
           id,
           full_name,
           avatar_url,
@@ -2483,6 +2504,12 @@ export async function getEventsByOrganizer(organizerId: string): Promise<Event[]
 
     if (error) {
       console.error('[Queries] Error fetching events by organizer:', error);
+      console.error('[Queries] Error details:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      });
       return [];
     }
     
@@ -2656,7 +2683,7 @@ export async function getUserRegisteredEvents(userId: string): Promise<Event[]> 
         event_id,
         events (
           *,
-          organizer:profiles(
+          organizer:profiles!organizer_id(
             id,
             full_name,
             avatar_url,
@@ -2670,6 +2697,12 @@ export async function getUserRegisteredEvents(userId: string): Promise<Event[]> 
 
     if (error) {
       console.error('[Queries] Error fetching user registered events:', error);
+      console.error('[Queries] Error details:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      });
       return [];
     }
     
