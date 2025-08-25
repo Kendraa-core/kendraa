@@ -29,7 +29,7 @@ const ONBOARDING_STEPS = [
     title: 'Welcome to Kendraa',
     subtitle: 'Let\'s set up your professional profile to connect with healthcare professionals',
     type: 'welcome',
-    required: true
+    required: false
   },
   {
     id: 'name',
@@ -225,6 +225,12 @@ export default function OnboardingPage() {
 
   const handleNext = async () => {
     const currentStepData = ONBOARDING_STEPS[currentStep];
+    
+    // Skip validation for welcome step since it has no fields
+    if (currentStepData.type === 'welcome') {
+      setCurrentStep(currentStep + 1);
+      return;
+    }
     
     // Validate required fields
     if (currentStepData.required) {
