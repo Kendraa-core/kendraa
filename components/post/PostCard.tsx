@@ -7,6 +7,7 @@ import Avatar from '@/components/common/Avatar';
 import ClickableProfileName from '@/components/common/ClickableProfileName';
 import ShareButton from '@/components/common/ShareButton';
 import PostReactions from '@/components/post/PostReactions';
+import Comment from '@/components/post/Comment';
 import {
   ChatBubbleOvalLeftIcon,
   BookmarkIcon,
@@ -55,6 +56,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
   const [showCommentBox, setShowCommentBox] = useState(false);
   const [isCommenting, setIsCommenting] = useState(false);
   const [isLoadingComments, setIsLoadingComments] = useState(false);
+  const [showAllComments, setShowAllComments] = useState(false);
   const [userReaction, setUserReaction] = useState<string | null>(null);
   const [isReacting, setIsReacting] = useState(false);
 
@@ -208,10 +210,13 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
     setIsLoadingComments(true);
     
     try {
-      const fetchedComments = await getPostComments(post.id, 5);
+      // Load all comments (no limit) to support "show more" functionality
+      const fetchedComments = await getPostComments(post.id);
       
       if (Array.isArray(fetchedComments)) {
-        setComments(fetchedComments);
+        // Filter to only show top-level comments (not replies)
+        const topLevelComments = fetchedComments.filter(comment => comment.parent_id === null);
+        setComments(topLevelComments);
       } else {
         setComments([]);
         toast.error('Invalid comments data received');
@@ -442,49 +447,30 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-azure-500 mx-auto"></div>
               </div>
             ) : comments.length > 0 ? (
-              comments.map((comment) => {
-                if (!comment || !comment.id || !comment.author_id) {
-                  return null;
-                }
-
-                const authorName = comment.author && 'full_name' in comment.author 
-                  ? comment.author.full_name || 'Unknown User'
-                  : 'Unknown User';
-
-                const authorAvatar = comment.author && 'avatar_url' in comment.author 
-                  ? comment.author.avatar_url || ''
-                  : '';
-
-                const authorType = comment.author && 'user_type' in comment.author 
-                  ? comment.author.user_type 
-                  : 'individual';
-
-                return (
-                  <div key={comment.id} className="flex items-start space-x-3">
-                    <Avatar
-                      src={authorAvatar}
-                      alt={authorName}
-                      size="sm"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="bg-gray-50 rounded-lg p-3">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <ClickableProfileName
-                            userId={comment.author_id}
-                            name={authorName}
-                            userType={authorType}
-                            className="text-sm"
-                          />
-                          <span className="text-xs text-gray-500">
-                            {comment.created_at ? formatRelativeTime(comment.created_at) : 'Just now'}
-                          </span>
-                        </div>
-                        <p className="text-sm text-gray-700 break-words">{comment.content || 'Comment content unavailable'}</p>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
+              <>
+                {/* Show top 2 comments by default, or all if showAllComments is true */}
+                {(showAllComments ? comments : comments.slice(0, 2)).map((comment) => (
+                  <Comment
+                    key={comment.id}
+                    comment={comment}
+                    onReplyAdded={loadComments}
+                    onReactionChange={loadComments}
+                  />
+                ))}
+                
+                {/* Show More/Less Button */}
+                {comments.length > 2 && (
+                  <button
+                    onClick={() => setShowAllComments(!showAllComments)}
+                    className="text-sm text-azure-600 hover:text-azure-700 font-medium transition-colors"
+                  >
+                    {showAllComments 
+                      ? `Show less` 
+                      : `Show ${comments.length - 2} more ${comments.length - 2 === 1 ? 'comment' : 'comments'}`
+                    }
+                  </button>
+                )}
+              </>
             ) : (
               <p className="text-center text-gray-500 text-sm py-4">
                 No comments yet. Be the first to comment!

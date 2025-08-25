@@ -2948,3 +2948,198 @@ export async function createTestRegistrations(eventId: string): Promise<void> {
   }
 }
 
+// Comment reaction functions
+export async function likeComment(commentId: string, userId: string, reactionType: string = 'like'): Promise<boolean> {
+  try {
+    console.log('[Queries] Adding reaction to comment:', commentId, 'by user:', userId, 'reaction:', reactionType);
+    
+    // Check if already reacted
+    const { data: existingReaction } = await getSupabase()
+      .from('comment_likes')
+      .select('id, reaction_type')
+      .eq('user_id', userId)
+      .eq('comment_id', commentId)
+      .single();
+
+    if (existingReaction) {
+      console.log('[Queries] User already reacted to comment, updating reaction');
+      
+      // Update existing reaction
+      const { error: updateError } = await getSupabase()
+        .from('comment_likes')
+        .update({ 
+          reaction_type: reactionType,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', existingReaction.id);
+
+      if (updateError) {
+        console.error('[Queries] Error updating comment reaction:', updateError);
+        return false;
+      }
+    } else {
+      console.log('[Queries] Creating new comment reaction');
+      
+      // Create new reaction
+      const { error: insertError } = await getSupabase()
+        .from('comment_likes')
+        .insert({
+          comment_id: commentId,
+          user_id: userId,
+          reaction_type: reactionType,
+          user_type: 'individual' // Default to individual for now
+        });
+
+      if (insertError) {
+        console.error('[Queries] Error creating comment reaction:', insertError);
+        return false;
+      }
+    }
+
+    // Update comment likes count
+    const { error: updateCountError } = await getSupabase()
+      .rpc('increment_comment_likes', { comment_id: commentId });
+
+    if (updateCountError) {
+      console.error('[Queries] Error updating comment likes count:', updateCountError);
+    }
+
+    console.log('[Queries] Comment reaction added successfully');
+    return true;
+  } catch (error) {
+    console.error('[Queries] Error in likeComment:', error);
+    return false;
+  }
+}
+
+export async function unlikeComment(commentId: string, userId: string): Promise<boolean> {
+  try {
+    console.log('[Queries] Removing reaction from comment:', commentId, 'by user:', userId);
+    
+    // Delete the reaction
+    const { error: deleteError } = await getSupabase()
+      .from('comment_likes')
+      .delete()
+      .eq('comment_id', commentId)
+      .eq('user_id', userId);
+
+    if (deleteError) {
+      console.error('[Queries] Error removing comment reaction:', deleteError);
+      return false;
+    }
+
+    // Update comment likes count
+    const { error: updateCountError } = await getSupabase()
+      .rpc('decrement_comment_likes', { comment_id: commentId });
+
+    if (updateCountError) {
+      console.error('[Queries] Error updating comment likes count:', updateCountError);
+    }
+
+    console.log('[Queries] Comment reaction removed successfully');
+    return true;
+  } catch (error) {
+    console.error('[Queries] Error in unlikeComment:', error);
+    return false;
+  }
+}
+
+export async function isCommentLiked(commentId: string, userId: string): Promise<string | null> {
+  try {
+    console.log('[Queries] Checking if comment is liked by user:', commentId, userId);
+    
+    const { data, error } = await getSupabase()
+      .from('comment_likes')
+      .select('reaction_type')
+      .eq('comment_id', commentId)
+      .eq('user_id', userId)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        console.log('[Queries] User has not reacted to comment');
+        return null;
+      }
+      console.error('[Queries] Error checking comment reaction:', error);
+      return null;
+    }
+
+    console.log('[Queries] User reaction found:', data.reaction_type);
+    return data.reaction_type;
+  } catch (error) {
+    console.error('[Queries] Error in isCommentLiked:', error);
+    return null;
+  }
+}
+
+// Create nested comment (reply to comment)
+export async function createReply(parentCommentId: string, content: string, authorId: string): Promise<any> {
+  try {
+    console.log('[Queries] Creating reply to comment:', parentCommentId);
+    
+    // Get the parent comment to get the post_id
+    const { data: parentComment, error: parentError } = await getSupabase()
+      .from('post_comments')
+      .select('post_id, author_type')
+      .eq('id', parentCommentId)
+      .single();
+
+    if (parentError || !parentComment) {
+      console.error('[Queries] Error fetching parent comment:', parentError);
+      return null;
+    }
+
+    // Create the reply
+    const { data: reply, error: insertError } = await getSupabase()
+      .from('post_comments')
+      .insert({
+        post_id: parentComment.post_id,
+        author_id: authorId,
+        author_type: 'individual', // Default to individual for now
+        content: content,
+        parent_id: parentCommentId,
+        likes_count: 0
+      })
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error('[Queries] Error creating reply:', insertError);
+      return null;
+    }
+
+    console.log('[Queries] Reply created successfully:', reply.id);
+    return reply;
+  } catch (error) {
+    console.error('[Queries] Error in createReply:', error);
+    return null;
+  }
+}
+
+// Get nested comments (replies)
+export async function getCommentReplies(commentId: string): Promise<CommentWithAuthor[]> {
+  try {
+    console.log('[Queries] Getting replies for comment:', commentId);
+    
+    const { data, error } = await getSupabase()
+      .from('post_comments')
+      .select(`
+        *,
+        author:profiles(id, full_name, avatar_url, headline, user_type)
+      `)
+      .eq('parent_id', commentId)
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      console.error('[Queries] Error fetching comment replies:', error);
+      return [];
+    }
+
+    console.log('[Queries] Comment replies fetched successfully:', data?.length || 0);
+    return data || [];
+  } catch (error) {
+    console.error('[Queries] Error in getCommentReplies:', error);
+    return [];
+  }
+}
+
