@@ -105,18 +105,20 @@ export default function DashboardLayout({
 
         {/* Main Content Area */}
         <div className="flex-1 lg:ml-80">
-          <div className="flex max-w-7xl mx-auto">
-            {/* Center Content */}
-            <div className="flex-1 min-w-0 max-w-4xl mx-auto">
-              <main className="p-4 sm:p-6 lg:p-8">
-                {children}
-              </main>
-            </div>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex gap-8">
+              {/* Center Content */}
+              <div className="flex-1 min-w-0 max-w-2xl mx-auto">
+                <main className="py-8">
+                  {children}
+                </main>
+              </div>
 
-            {/* Right Sidebar - Desktop */}
-            <div className="hidden xl:block xl:w-80 xl:flex-shrink-0">
-              <div className="p-6">
-                <RightSidebar />
+              {/* Right Sidebar - Desktop */}
+              <div className="hidden xl:block xl:w-80 xl:flex-shrink-0">
+                <div className="py-8">
+                  <RightSidebar />
+                </div>
               </div>
             </div>
           </div>
