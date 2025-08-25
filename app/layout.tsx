@@ -35,7 +35,7 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#007FFF" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
-      <body className={`${inter.className} h-full bg-white`}>
+      <body className={`${inter.className} h-full bg-white`} suppressHydrationWarning={true}>
         <ClientOnly>
           <AuthProvider>
             <NotificationProvider>

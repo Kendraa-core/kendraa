@@ -2954,12 +2954,18 @@ export async function likeComment(commentId: string, userId: string, reactionTyp
     console.log('[Queries] Adding reaction to comment:', commentId, 'by user:', userId, 'reaction:', reactionType);
     
     // Check if already reacted
-    const { data: existingReaction } = await getSupabase()
+    const { data: existingReaction, error: checkError } = await getSupabase()
       .from('comment_likes')
       .select('id, reaction_type')
       .eq('user_id', userId)
       .eq('comment_id', commentId)
       .single();
+
+    // Handle case where table doesn't exist yet
+    if (checkError && checkError.code === '42P01') {
+      console.log('[Queries] Comment likes table does not exist yet');
+      return false;
+    }
 
     if (existingReaction) {
       console.log('[Queries] User already reacted to comment, updating reaction');
@@ -2969,7 +2975,7 @@ export async function likeComment(commentId: string, userId: string, reactionTyp
         .from('comment_likes')
         .update({ 
           reaction_type: reactionType,
-          updated_at: new Date().toISOString()
+          created_at: new Date().toISOString()
         })
         .eq('id', existingReaction.id);
 
@@ -2986,22 +2992,13 @@ export async function likeComment(commentId: string, userId: string, reactionTyp
         .insert({
           comment_id: commentId,
           user_id: userId,
-          reaction_type: reactionType,
-          user_type: 'individual' // Default to individual for now
+          reaction_type: reactionType
         });
 
       if (insertError) {
         console.error('[Queries] Error creating comment reaction:', insertError);
         return false;
       }
-    }
-
-    // Update comment likes count
-    const { error: updateCountError } = await getSupabase()
-      .rpc('increment_comment_likes', { comment_id: commentId });
-
-    if (updateCountError) {
-      console.error('[Queries] Error updating comment likes count:', updateCountError);
     }
 
     console.log('[Queries] Comment reaction added successfully');
@@ -3024,16 +3021,13 @@ export async function unlikeComment(commentId: string, userId: string): Promise<
       .eq('user_id', userId);
 
     if (deleteError) {
+      // Handle case where table doesn't exist yet
+      if (deleteError.code === '42P01') {
+        console.log('[Queries] Comment likes table does not exist yet');
+        return false;
+      }
       console.error('[Queries] Error removing comment reaction:', deleteError);
       return false;
-    }
-
-    // Update comment likes count
-    const { error: updateCountError } = await getSupabase()
-      .rpc('decrement_comment_likes', { comment_id: commentId });
-
-    if (updateCountError) {
-      console.error('[Queries] Error updating comment likes count:', updateCountError);
     }
 
     console.log('[Queries] Comment reaction removed successfully');
@@ -3058,6 +3052,11 @@ export async function isCommentLiked(commentId: string, userId: string): Promise
     if (error) {
       if (error.code === 'PGRST116') {
         console.log('[Queries] User has not reacted to comment');
+        return null;
+      }
+      // Handle case where table doesn't exist yet
+      if (error.code === '42P01') {
+        console.log('[Queries] Comment likes table does not exist yet');
         return null;
       }
       console.error('[Queries] Error checking comment reaction:', error);
