@@ -208,141 +208,100 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
               <div className="relative" ref={profileDropdownRef}>
                 <button
                   onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                  className="flex items-center space-x-2 p-2 text-gray-600 hover:text-azure-500 hover:bg-gray-50 rounded-lg transition-all duration-200"
+                  className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   <Avatar
                     src={profile?.avatar_url}
-                    alt={profile?.full_name || 'User'}
+                    alt={profile?.full_name || user?.email || 'User'}
                     size="sm"
                   />
-                  <ChevronDownIcon className="w-4 h-4 hidden sm:block" />
+                  <ChevronDownIcon className="w-4 h-4 text-gray-500" />
                 </button>
 
                 {/* Profile Dropdown */}
                 {isProfileMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-72 max-w-[90vw] bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
-                    {/* User Info Section */}
-                    <div className="px-4 py-4 border-b border-gray-100">
+                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
+                    {/* User Info */}
+                    <div className="px-4 py-3 border-b border-gray-100">
                       <div className="flex items-center space-x-3">
                         <Avatar
                           src={profile?.avatar_url}
-                          alt={profile?.full_name || 'User'}
+                          alt={profile?.full_name || user?.email || 'User'}
                           size="md"
                         />
                         <div className="flex-1 min-w-0">
-                          <div className="text-sm font-bold text-gray-900 truncate">
-                            {profile?.full_name || 'User'}
-                          </div>
-                          <div className="text-xs text-gray-500 truncate">
-                            {profile?.headline || 'Healthcare Professional'}
-                          </div>
+                          <h3 className="text-sm font-bold text-gray-900 truncate">
+                            {profile?.full_name || user?.email || 'User'}
+                          </h3>
+                          <p className="text-xs text-gray-500 truncate">
+                            {profile?.headline || 'Professional Headline'}
+                          </p>
                         </div>
                       </div>
                       
-                      {/* Profile Completion */}
-                      {profileCompletion < 100 && (
-                        <div className="mt-3">
-                          <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
-                            <span>Profile Completion</span>
-                            <span className="font-medium">{profileCompletion}%</span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-1.5">
-                            <div
-                              className="bg-azure-500 h-1.5 rounded-full transition-all duration-300"
-                              style={{ width: `${profileCompletion}%` }}
-                            />
-                          </div>
+                      {/* Profile Completion Bar */}
+                      <div className="mt-3">
+                        <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                          <span>Profile completion</span>
+                          <span>{profileCompletion}%</span>
                         </div>
-                      )}
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-azure-500 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${profileCompletion}%` }}
+                          ></div>
+                        </div>
+                      </div>
                     </div>
 
                     {/* Quick Actions */}
-                    <div className="py-2">
-                      <div className="px-3 py-1">
-                        <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Quick Actions</span>
-                      </div>
-                      
+                    <div className="px-2 py-1">
                       <Link
                         href={`/profile/${user?.id}`}
-                        className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                        onClick={() => setIsProfileMenuOpen(false)}
+                        className="flex items-center space-x-3 px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
                       >
                         <UserIcon className="w-4 h-4" />
                         <span>View Profile</span>
                       </Link>
-
-                      <Link
-                        href="/jobs/create"
-                        className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                        onClick={() => setIsProfileMenuOpen(false)}
+                      <button
+                        onClick={() => setShowProfileWizard(true)}
+                        className="flex items-center space-x-3 w-full px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
                       >
                         <PlusIcon className="w-4 h-4" />
-                        <span>Post a Job</span>
-                      </Link>
-
-                      <Link
-                        href="/events/create"
-                        className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                        onClick={() => setIsProfileMenuOpen(false)}
-                      >
-                        <CalendarDaysIcon className="w-4 h-4" />
-                        <span>Create Event</span>
-                      </Link>
+                        <span>Edit Profile</span>
+                      </button>
                     </div>
 
                     {/* Account Management */}
-                    <div className="py-2 border-t border-gray-100">
-                      <div className="px-3 py-1">
-                        <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Account</span>
-                      </div>
-                      
-                      <Link
-                        href="/saved-items"
-                        className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                        onClick={() => setIsProfileMenuOpen(false)}
-                      >
-                        <BookmarkIcon className="w-4 h-4" />
-                        <span>Saved Items</span>
-                      </Link>
-
-                      <Link
-                        href="/applications"
-                        className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                        onClick={() => setIsProfileMenuOpen(false)}
-                      >
-                        <BriefcaseIcon className="w-4 h-4" />
-                        <span>My Applications</span>
-                      </Link>
-
+                    <div className="px-2 py-1 border-t border-gray-100">
                       <Link
                         href="/settings"
-                        className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                        onClick={() => setIsProfileMenuOpen(false)}
+                        className="flex items-center space-x-3 px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
                       >
                         <Cog6ToothIcon className="w-4 h-4" />
                         <span>Settings</span>
                       </Link>
+                      <Link
+                        href="/saved-items"
+                        className="flex items-center space-x-3 px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                      >
+                        <BookmarkIcon className="w-4 h-4" />
+                        <span>Saved Items</span>
+                      </Link>
                     </div>
 
                     {/* Help & Support */}
-                    <div className="py-2 border-t border-gray-100">
-                      <div className="px-3 py-1">
-                        <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Support</span>
-                      </div>
-                      
+                    <div className="px-2 py-1 border-t border-gray-100">
                       <Link
                         href="/help"
-                        className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                        onClick={() => setIsProfileMenuOpen(false)}
+                        className="flex items-center space-x-3 px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
                       >
                         <QuestionMarkCircleIcon className="w-4 h-4" />
-                        <span>Help Center</span>
+                        <span>Help & Support</span>
                       </Link>
-
                       <Link
                         href="/privacy"
-                        className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                        onClick={() => setIsProfileMenuOpen(false)}
+                        className="flex items-center space-x-3 px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
                       >
                         <ShieldCheckIcon className="w-4 h-4" />
                         <span>Privacy Policy</span>
@@ -350,13 +309,10 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
                     </div>
 
                     {/* Sign Out */}
-                    <div className="border-t border-gray-100 pt-2">
+                    <div className="px-2 py-1 border-t border-gray-100">
                       <button
-                        onClick={async () => {
-                          await signOut();
-                          router.push('/signin');
-                        }}
-                        className="flex items-center space-x-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                        onClick={signOut}
+                        className="flex items-center space-x-3 w-full px-2 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                       >
                         <ArrowRightOnRectangleIcon className="w-4 h-4" />
                         <span>Sign Out</span>
@@ -365,25 +321,23 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
                   </div>
                 )}
               </div>
-
-              {/* Mobile Right Sidebar Toggle */}
-              <button
-                onClick={onRightSidebarToggle}
-                className="lg:hidden p-2 text-azure-500 hover:text-azure-600 hover:bg-gray-50 rounded-lg transition-all duration-200"
-              >
-                <Squares2X2Icon className="w-5 h-5" />
-              </button>
             </div>
           </div>
         </div>
       </header>
-    
-      {/* Profile Wizard */}
-      <ProfileWizard
-        isOpen={showProfileWizard}
-        onClose={() => setShowProfileWizard(false)}
-        onComplete={() => setShowProfileWizard(false)}
-      />
+
+      {/* Profile Wizard Modal */}
+      {showProfileWizard && (
+        <ProfileWizard
+          isOpen={showProfileWizard}
+          onClose={() => setShowProfileWizard(false)}
+          onComplete={() => {
+            setShowProfileWizard(false);
+            // Refresh the page to update profile data
+            window.location.reload();
+          }}
+        />
+      )}
     </>
   );
 } 

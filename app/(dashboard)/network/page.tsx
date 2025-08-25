@@ -17,7 +17,10 @@ import {
   CheckIcon,
   XCircleIcon,
   MapPinIcon,
-  PlusIcon
+  PlusIcon,
+  BellIcon,
+  XMarkIcon,
+  ClockIcon
 } from '@heroicons/react/24/outline';
 import { 
   getSuggestedConnectionsWithMutualCounts,
@@ -48,6 +51,7 @@ export default function NetworkPage() {
   const [connections, setConnections] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState('suggestions'); // 'suggestions', 'connections', 'requests'
 
   const debugLog = (message: string, data?: unknown) => {
     if (process.env.NODE_ENV === 'development') {
@@ -238,6 +242,11 @@ export default function NetworkPage() {
     suggestion.headline?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const filteredConnections = connections.filter(connection =>
+    connection.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    connection.headline?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -250,282 +259,321 @@ export default function NetworkPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+        <div className="text-center sm:text-left">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Network</h1>
+          <p className="text-gray-600 mb-4">
+            Connect with healthcare professionals and discover new opportunities
+          </p>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">My Network</h1>
-              <p className="text-gray-600 mt-1">Grow and manage your professional network</p>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <UserGroupIcon className="w-5 h-5" />
-              <span>{formatNumber(connections.length)} connections</span>
+            <div className="flex items-center justify-center sm:justify-start space-x-6 text-sm text-gray-600">
+              <span className="flex items-center">
+                <UserGroupIcon className="w-4 h-4 mr-2" />
+                {suggestions.length} suggestions
+              </span>
+              <span className="flex items-center">
+                <UserIcon className="w-4 h-4 mr-2" />
+                {connections.length} connections
+              </span>
               {connectionRequests.length > 0 && (
-                <>
-                  <span>•</span>
-                  <span className="text-azure-600 font-medium">{connectionRequests.length} pending requests</span>
-                </>
+                <span className="flex items-center text-azure-600">
+                  <BellIcon className="w-4 h-4 mr-2" />
+                  {connectionRequests.length} requests
+                </span>
               )}
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Search Bar */}
-        <div className="mb-8">
-          <div className="relative max-w-md">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search people and institutions..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-azure-500 transition-colors"
-            />
-          </div>
+      {/* Search Bar */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
+        <div className="relative max-w-md mx-auto">
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search people, institutions, or specialties..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-azure-500 focus:border-transparent text-gray-700 placeholder-gray-500"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              <XMarkIcon className="w-5 h-5" />
+            </button>
+          )}
         </div>
+      </div>
 
-        <div className="flex gap-8">
-          {/* Left Sidebar - Manage my network */}
-          <div className="hidden lg:block lg:w-80 lg:flex-shrink-0">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-8">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">Manage my network</h2>
-              
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">
-                  <div className="flex items-center space-x-3">
-                    <UserGroupIcon className="w-5 h-5 text-gray-600" />
-                    <span className="text-sm font-medium text-gray-900">Connections</span>
-                  </div>
-                  <span className="text-sm text-gray-500">{formatNumber(connections.length)}</span>
-                </div>
+      {/* Tab Navigation */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-1">
+        <div className="flex">
+          <button
+            onClick={() => setActiveTab('suggestions')}
+            className={`flex-1 px-4 py-3 text-sm font-medium rounded-xl transition-colors ${
+              activeTab === 'suggestions'
+                ? 'bg-azure-500 text-white shadow-sm'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            }`}
+          >
+            Suggestions ({suggestions.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('connections')}
+            className={`flex-1 px-4 py-3 text-sm font-medium rounded-xl transition-colors ${
+              activeTab === 'connections'
+                ? 'bg-azure-500 text-white shadow-sm'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            }`}
+          >
+            Connections ({connections.length})
+          </button>
+          {connectionRequests.length > 0 && (
+            <button
+              onClick={() => setActiveTab('requests')}
+              className={`flex-1 px-4 py-3 text-sm font-medium rounded-xl transition-colors ${
+                activeTab === 'requests'
+                  ? 'bg-azure-500 text-white shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
+            >
+              Requests ({connectionRequests.length})
+            </button>
+          )}
+        </div>
+      </div>
 
-                <div className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">
-                  <div className="flex items-center space-x-3">
-                    <UserIcon className="w-5 h-5 text-gray-600" />
-                    <span className="text-sm font-medium text-gray-900">Following & followers</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">
-                  <div className="flex items-center space-x-3">
-                    <UserGroupIcon className="w-5 h-5 text-gray-600" />
-                    <span className="text-sm font-medium text-gray-900">Groups</span>
-                  </div>
-                  <span className="text-sm text-gray-500">5</span>
-                </div>
-
-                <div className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">
-                  <div className="flex items-center space-x-3">
-                    <CalendarDaysIcon className="w-5 h-5 text-gray-600" />
-                    <span className="text-sm font-medium text-gray-900">Events</span>
-                  </div>
-                  <span className="text-sm text-gray-500">2</span>
-                </div>
-
-                <div className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">
-                  <div className="flex items-center space-x-3">
-                    <DocumentTextIcon className="w-5 h-5 text-gray-600" />
-                    <span className="text-sm font-medium text-gray-900">Pages</span>
-                  </div>
-                  <span className="text-sm text-gray-500">267</span>
-                </div>
-
-                <div className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">
-                  <div className="flex items-center space-x-3">
-                    <NewspaperIcon className="w-5 h-5 text-gray-600" />
-                    <span className="text-sm font-medium text-gray-900">Newsletters</span>
-                  </div>
-                  <span className="text-sm text-gray-500">34</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Main Content */}
-          <div className="flex-1 space-y-8">
-            {/* Invitations Section */}
-            {connectionRequests.length > 0 && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold text-gray-900">Invitations ({connectionRequests.length})</h2>
-                  <button className="text-sm text-azure-600 hover:text-azure-700 font-medium">
-                    Show all
-                  </button>
-                </div>
-
-                <div className="space-y-4">
-                  {connectionRequests.slice(0, 3).map((request) => (
-                    <motion.div
-                      key={request.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg hover:shadow-sm transition-shadow"
-                    >
-                      <Avatar
-                        src={request.requester.avatar_url}
-                        alt={request.requester.full_name || 'User'}
-                        size="lg"
-                        className="flex-shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <ClickableProfileName
-                            userId={request.requester.id}
-                            name={request.requester.full_name || 'Unknown User'}
-                            userType={request.requester.user_type || 'individual'}
-                            className="text-lg font-semibold text-gray-900"
-                          />
-                          <CheckIcon className="w-4 h-4 text-azure-500" />
-                        </div>
-                        <p className="text-sm text-gray-600 mb-2">
-                          follows you and is inviting you to connect
-                        </p>
-                        <p className="text-sm text-gray-700 mb-2">
-                          {request.requester.headline || 'Healthcare Professional'}
-                        </p>
-                        {request.requester.location && (
-                          <div className="flex items-center text-xs text-gray-500 mb-2">
-                            <MapPinIcon className="w-3 h-3 mr-1" />
-                            {request.requester.location}
-                          </div>
-                        )}
-                        <p className="text-xs text-gray-500">
-                          {Math.floor(Math.random() * 200) + 50} mutual connections
-                        </p>
+      {/* Content */}
+      <div>
+        {activeTab === 'suggestions' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredSuggestions.length > 0 ? (
+              filteredSuggestions.map((profile) => (
+                <motion.div
+                  key={profile.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+                >
+                  <div className="text-center">
+                    <Avatar
+                      src={profile.avatar_url}
+                      alt={profile.full_name || 'User'}
+                      size="lg"
+                      className="mx-auto mb-4"
+                    />
+                    <ClickableProfileName
+                      userId={profile.id}
+                      name={profile.full_name || 'Anonymous User'}
+                      userType={profile.profile_type}
+                      className="text-lg font-semibold text-gray-900 mb-1"
+                    />
+                    <p className="text-sm text-gray-600 mb-2">
+                      {profile.headline || 'Healthcare Professional'}
+                    </p>
+                    {profile.location && (
+                      <div className="flex items-center justify-center text-xs text-gray-500 mb-3">
+                        <MapPinIcon className="w-3 h-3 mr-1" />
+                        {profile.location}
                       </div>
-                      <div className="flex flex-col space-y-2">
+                    )}
+                    {profile.mutual_connections && profile.mutual_connections > 0 && (
+                      <p className="text-xs text-azure-600 mb-4">
+                        {profile.mutual_connections} mutual connection{profile.mutual_connections !== 1 ? 's' : ''}
+                      </p>
+                    )}
+                    <div className="flex justify-center">
+                      {profile.profile_type === 'institution' ? (
+                        // Institution - Show Follow/Unfollow
+                        profile.follow_status === 'following' ? (
+                          <button
+                            onClick={() => handleUnfollow(profile.id)}
+                            className="flex items-center space-x-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium"
+                          >
+                            <CheckIcon className="w-4 h-4" />
+                            <span>Following</span>
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleConnect(profile.id, 'institution')}
+                            className="flex items-center space-x-2 px-4 py-2 bg-azure-500 text-white rounded-lg hover:bg-azure-600 transition-colors text-sm font-medium"
+                          >
+                            <PlusIcon className="w-4 h-4" />
+                            <span>Follow</span>
+                          </button>
+                        )
+                      ) : (
+                        // Individual - Show Connect
                         <button
-                          onClick={() => handleAcceptRequest(request.id)}
-                          className="px-4 py-2 text-sm font-medium bg-azure-500 text-white rounded-lg hover:bg-azure-600 transition-colors"
+                          onClick={() => handleConnect(profile.id, 'individual')}
+                          disabled={profile.connection_status === 'pending' || profile.connection_status === 'connected'}
+                          className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors text-sm font-medium ${
+                            profile.connection_status === 'connected'
+                              ? 'bg-green-100 text-green-700'
+                              : profile.connection_status === 'pending'
+                              ? 'bg-yellow-100 text-yellow-700'
+                              : 'bg-azure-500 text-white hover:bg-azure-600'
+                          }`}
                         >
-                          Accept
+                          {profile.connection_status === 'connected' ? (
+                            <>
+                              <CheckIcon className="w-4 h-4" />
+                              <span>Connected</span>
+                            </>
+                          ) : profile.connection_status === 'pending' ? (
+                            <>
+                              <ClockIcon className="w-4 h-4" />
+                              <span>Pending</span>
+                            </>
+                          ) : (
+                            <>
+                              <PlusIcon className="w-4 h-4" />
+                              <span>Connect</span>
+                            </>
+                          )}
                         </button>
-                        <button
-                          onClick={() => handleRejectRequest(request.id)}
-                          className="px-4 py-2 text-sm font-medium bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                        >
-                          Ignore
-                        </button>
-                      </div>
-                    </motion.div>
-                  ))}
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              ))
+            ) : (
+              <div className="col-span-full">
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
+                  <div className="max-w-md mx-auto">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <UserGroupIcon className="w-8 h-8 text-gray-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No suggestions found</h3>
+                    <p className="text-gray-600">
+                      Try adjusting your search or check back later for new connections.
+                    </p>
+                  </div>
                 </div>
               </div>
             )}
-
-            {/* People You May Know Section */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  People you may know from healthcare industry
-                </h2>
-                <button className="text-sm text-azure-600 hover:text-azure-700 font-medium">
-                  Show all
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredSuggestions.slice(0, 6).map((suggestion) => (
-                  <motion.div
-                    key={suggestion.id}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="relative p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200"
-                  >
-                    {/* Dismiss button */}
-                    <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 transition-colors">
-                      <XCircleIcon className="w-5 h-5" />
-                    </button>
-
-                    <div className="text-center">
-                      <Avatar
-                        src={suggestion.avatar_url}
-                        alt={suggestion.full_name || 'User'}
-                        size="lg"
-                        className="mx-auto mb-3"
-                      />
-                      
-                      <div className="flex items-center justify-center space-x-1 mb-1">
-                        <ClickableProfileName
-                          userId={suggestion.id}
-                          name={suggestion.full_name || 'Unknown User'}
-                          userType={suggestion.user_type || 'individual'}
-                          className="text-sm font-semibold text-gray-900"
-                        />
-                        <CheckIcon className="w-3 h-3 text-azure-500" />
-                        {suggestion.profile_type === 'institution' && (
-                          <BuildingOfficeIcon className="w-3 h-3 text-azure-500" />
-                        )}
-                      </div>
-
-                      <p className="text-xs text-gray-600 mb-2 line-clamp-2">
-                        {suggestion.headline || 'Healthcare Professional'}
-                      </p>
-
-                      {suggestion.mutual_connections && suggestion.mutual_connections > 0 && (
-                        <p className="text-xs text-gray-500 mb-3">
-                          {suggestion.mutual_connections} mutual connection{suggestion.mutual_connections !== 1 ? 's' : ''}
-                        </p>
-                      )}
-
-                      <div className="mt-3">
-                        {suggestion.profile_type === 'institution' ? (
-                          // Institution - Show Follow/Unfollow
-                          suggestion.follow_status === 'following' ? (
-                            <button
-                              onClick={() => handleUnfollow(suggestion.id)}
-                              className="w-full px-3 py-2 text-sm font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center gap-1"
-                            >
-                              <CheckIcon className="w-3 h-3" />
-                              Following
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => handleConnect(suggestion.id, 'institution')}
-                              className="w-full px-3 py-2 text-sm font-medium bg-azure-500 text-white rounded-lg hover:bg-azure-600 transition-colors flex items-center justify-center gap-1"
-                            >
-                              <PlusIcon className="w-3 h-3" />
-                              Follow
-                            </button>
-                          )
-                        ) : (
-                          // Individual - Show Connect
-                          suggestion.connection_status === 'none' && (
-                            <button
-                              onClick={() => handleConnect(suggestion.id, 'individual')}
-                              className="w-full px-3 py-2 text-sm font-medium bg-azure-500 text-white rounded-lg hover:bg-azure-600 transition-colors flex items-center justify-center gap-1"
-                            >
-                              <PlusIcon className="w-3 h-3" />
-                              Connect
-                            </button>
-                          )
-                        )}
-                        {suggestion.connection_status === 'pending' && (
-                          <button
-                            disabled
-                            className="w-full px-3 py-2 text-sm font-medium bg-gray-100 text-gray-500 rounded-lg cursor-not-allowed"
-                          >
-                            Request Sent
-                          </button>
-                        )}
-                        {suggestion.connection_status === 'connected' && (
-                          <button
-                            disabled
-                            className="w-full px-3 py-2 text-sm font-medium bg-azure-100 text-azure-700 rounded-lg cursor-not-allowed"
-                          >
-                            Connected
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
           </div>
-        </div>
+        )}
+
+        {activeTab === 'connections' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredConnections.length > 0 ? (
+              filteredConnections.map((profile) => (
+                <motion.div
+                  key={profile.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+                >
+                  <div className="text-center">
+                    <Avatar
+                      src={profile.avatar_url}
+                      alt={profile.full_name || 'User'}
+                      size="lg"
+                      className="mx-auto mb-4"
+                    />
+                    <ClickableProfileName
+                      userId={profile.id}
+                      name={profile.full_name || 'Anonymous User'}
+                      userType={profile.profile_type}
+                      className="text-lg font-semibold text-gray-900 mb-1"
+                    />
+                    <p className="text-sm text-gray-600 mb-2">
+                      {profile.headline || 'Healthcare Professional'}
+                    </p>
+                    {profile.location && (
+                      <div className="flex items-center justify-center text-xs text-gray-500">
+                        <MapPinIcon className="w-3 h-3 mr-1" />
+                        {profile.location}
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              ))
+            ) : (
+              <div className="col-span-full">
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
+                  <div className="max-w-md mx-auto">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <UserGroupIcon className="w-8 h-8 text-gray-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No connections yet</h3>
+                    <p className="text-gray-600 mb-6">
+                      Start connecting with healthcare professionals to build your network.
+                    </p>
+                    <button
+                      onClick={() => setActiveTab('suggestions')}
+                      className="bg-azure-500 text-white px-6 py-3 rounded-xl hover:bg-azure-600 transition-colors font-medium"
+                    >
+                      View suggestions
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'requests' && connectionRequests.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {connectionRequests.map((request) => (
+              <motion.div
+                key={request.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+              >
+                <div className="text-center">
+                  <Avatar
+                    src={request.requester.avatar_url}
+                    alt={request.requester.full_name || 'User'}
+                    size="lg"
+                    className="mx-auto mb-4"
+                  />
+                  <ClickableProfileName
+                    userId={request.requester.id}
+                    name={request.requester.full_name || 'Anonymous User'}
+                    userType={request.requester.profile_type}
+                    className="text-lg font-semibold text-gray-900 mb-1"
+                  />
+                  <p className="text-sm text-gray-600 mb-2">
+                    {request.requester.headline || 'Healthcare Professional'}
+                  </p>
+                  {request.requester.location && (
+                    <div className="flex items-center justify-center text-xs text-gray-500 mb-4">
+                      <MapPinIcon className="w-3 h-3 mr-1" />
+                      {request.requester.location}
+                    </div>
+                  )}
+                  <div className="flex justify-center space-x-3">
+                    <button
+                      onClick={() => handleAcceptRequest(request.id)}
+                      className="flex items-center space-x-2 px-4 py-2 bg-azure-500 text-white rounded-lg hover:bg-azure-600 transition-colors text-sm font-medium"
+                    >
+                      <CheckIcon className="w-4 h-4" />
+                      <span>Accept</span>
+                    </button>
+                    <button
+                      onClick={() => handleRejectRequest(request.id)}
+                      className="flex items-center space-x-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-medium"
+                    >
+                      <XCircleIcon className="w-4 h-4" />
+                      <span>Decline</span>
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -105,10 +105,10 @@ export default function DashboardLayout({
 
         {/* Main Content Area */}
         <div className="flex-1 lg:ml-80">
-          <div className="flex">
+          <div className="flex max-w-7xl mx-auto">
             {/* Center Content */}
-            <div className="flex-1 min-w-0">
-              <main className="p-6">
+            <div className="flex-1 min-w-0 max-w-4xl mx-auto">
+              <main className="p-4 sm:p-6 lg:p-8">
                 {children}
               </main>
             </div>
