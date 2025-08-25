@@ -115,14 +115,14 @@ const ONBOARDING_STEPS = [
   {
     id: 'experience',
     title: 'Add your work experience',
-    subtitle: 'Share your professional experience to build credibility',
+    subtitle: 'Share your professional experience to build credibility (minimum 1 experience required)',
     type: 'experience',
     required: true
   },
   {
     id: 'education',
     title: 'Add your education',
-    subtitle: 'Include your academic background and qualifications',
+    subtitle: 'Include your academic background and qualifications (minimum 1 education required)',
     type: 'education',
     required: true
   },
@@ -204,38 +204,36 @@ export default function OnboardingPage() {
   const isProfileComplete = () => {
     if (!profile) return false;
     
-    const fields = [
+    const requiredFields = [
       profile.full_name,
       profile.headline,
       profile.specialization && profile.specialization.length > 0,
       profile.bio,
       profile.location,
-      experiences.length > 0, // At least one experience entry
-      educations.length > 0, // At least one education entry
-      // profile.avatar_url, // Removed from required fields since it's optional
+      experiences.length > 0, // At least one experience entry - REQUIRED
+      educations.length > 0, // At least one education entry - REQUIRED
     ];
     
-    const completed = fields.filter(field => field).length;
-    const percentage = (completed / fields.length) * 100;
+    const completed = requiredFields.filter(field => field).length;
+    const percentage = (completed / requiredFields.length) * 100;
     return percentage >= 80;
   };
 
   const getCompletionPercentage = () => {
     if (!profile) return 0;
     
-    const fields = [
+    const requiredFields = [
       profile.full_name,
       profile.headline,
+      profile.specialization && profile.specialization.length > 0,
       profile.bio,
       profile.location,
-      experiences.length > 0, // At least one experience entry
-      educations.length > 0, // At least one education entry
-      // profile.avatar_url, // Removed from required fields since it's optional
-      profile.specialization && profile.specialization.length > 0,
+      experiences.length > 0, // At least one experience entry - REQUIRED
+      educations.length > 0, // At least one education entry - REQUIRED
     ];
     
-    const completed = fields.filter(field => field).length;
-    return Math.round((completed / fields.length) * 100);
+    const completed = requiredFields.filter(field => field).length;
+    return Math.round((completed / requiredFields.length) * 100);
   };
 
   // Redirect if profile is already complete
@@ -816,7 +814,7 @@ export default function OnboardingPage() {
             {step.required && (
               <p className="text-sm text-gray-500 mt-2 flex items-center">
                 <ExclamationTriangleIcon className="w-4 h-4 mr-1" />
-                Please add at least one work experience
+                Please add at least one work experience with title, company, and start date
               </p>
             )}
           </div>
@@ -920,7 +918,7 @@ export default function OnboardingPage() {
             {step.required && (
               <p className="text-sm text-gray-500 mt-2 flex items-center">
                 <ExclamationTriangleIcon className="w-4 h-4 mr-1" />
-                Please add at least one education entry
+                Please add at least one education entry with degree, institution, and start date
               </p>
             )}
           </div>
