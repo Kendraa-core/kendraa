@@ -107,10 +107,10 @@ const ONBOARDING_STEPS = [
   {
     id: 'avatar',
     title: 'Add a profile picture',
-    subtitle: 'A professional photo helps build trust with connections',
+    subtitle: 'A professional photo helps build trust with connections (optional)',
     type: 'image',
     field: 'avatar_url',
-    required: true
+    required: false
   },
   {
     id: 'complete',
@@ -147,7 +147,7 @@ export default function OnboardingPage() {
       profile.specialization && profile.specialization.length > 0,
       profile.bio,
       profile.location,
-      profile.avatar_url,
+      // profile.avatar_url, // Removed from required fields since it's optional
     ];
     
     const completed = fields.filter(field => field).length;
@@ -163,7 +163,7 @@ export default function OnboardingPage() {
       profile.headline,
       profile.bio,
       profile.location,
-      profile.avatar_url,
+      // profile.avatar_url, // Removed from required fields since it's optional
       profile.specialization && profile.specialization.length > 0,
     ];
     
@@ -247,6 +247,11 @@ export default function OnboardingPage() {
         }
       }
     }
+    
+    // For optional image step, allow proceeding even without image
+    if (currentStepData.type === 'image' && !currentStepData.required) {
+      // Allow proceeding without image upload
+    }
 
     // If this is the second to last step (before the complete step), save the data
     if (currentStep === ONBOARDING_STEPS.length - 2) {
@@ -300,9 +305,9 @@ export default function OnboardingPage() {
     
     if (!currentStepData.required) return true;
     
-    // Special handling for image step
+    // Special handling for image step - allow proceeding if optional
     if (currentStepData.type === 'image') {
-      return avatarPreview !== null;
+      return !currentStepData.required || avatarPreview !== null;
     }
     
     const fieldValue = formData[currentStepData.field as keyof typeof formData];
@@ -494,10 +499,10 @@ export default function OnboardingPage() {
                 {avatarPreview ? 'Change Photo' : 'Upload Photo'}
               </label>
             </div>
-            {step.required && (
+            {!step.required && (
               <p className="text-sm text-gray-500 mt-2 flex items-center justify-center">
                 <ExclamationTriangleIcon className="w-4 h-4 mr-1" />
-                A profile photo is required
+                This step is optional - you can skip it
               </p>
             )}
           </div>
