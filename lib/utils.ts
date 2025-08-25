@@ -22,6 +22,21 @@ export async function uploadToSupabaseStorage(
   try {
     const supabase = getSupabase();
     
+    // Check if bucket exists first
+    const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+    
+    if (bucketsError) {
+      return { url: '', error: `Failed to check buckets: ${bucketsError.message}` };
+    }
+    
+    const bucketExists = buckets?.some(b => b.name === bucket);
+    if (!bucketExists) {
+      return { 
+        url: '', 
+        error: `Bucket '${bucket}' not found. Please create the '${bucket}' bucket in your Supabase dashboard. See SUPABASE_STORAGE_SETUP.md for instructions.` 
+      };
+    }
+    
     // Upload the file
     const { error: uploadError } = await supabase.storage
       .from(bucket)
