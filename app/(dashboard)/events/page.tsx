@@ -307,89 +307,99 @@ export default function EventsPage() {
               }
               return displayEvents;
             })().map((event) => (
-              <div key={event.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                <div className="flex items-start justify-between mb-4">
-                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${getEventTypeColor(event.event_type)}`}>
-                    {event.event_type.charAt(0).toUpperCase() + event.event_type.slice(1)}
-                  </span>
-                  {event.is_virtual && (
-                    <span className="px-2 py-1 text-xs font-medium bg-azure-100 text-azure-800 rounded-full">
-                      Virtual
+              <Link key={event.id} href={`/events/${event.id}`}>
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                  <div className="flex items-start justify-between mb-4">
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getEventTypeColor(event.event_type)}`}>
+                      {event.event_type.charAt(0).toUpperCase() + event.event_type.slice(1)}
                     </span>
-                  )}
-                </div>
-
-                <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">{event.title}</h3>
-                <p className="text-gray-600 text-sm mb-4 line-clamp-3">{event.description}</p>
-
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center text-sm text-gray-500">
-                    <CalendarIcon className="w-4 h-4 mr-2" />
-                    {formatDate(event.start_date)}
+                    {event.is_virtual && (
+                      <span className="px-2 py-1 text-xs font-medium bg-azure-100 text-azure-800 rounded-full">
+                        Virtual
+                      </span>
+                    )}
                   </div>
-                  <div className="flex items-center text-sm text-gray-500">
-                    <ClockIcon className="w-4 h-4 mr-2" />
-                    {formatTime(event.start_date)} - {formatTime(event.end_date)}
-                  </div>
-                  {event.location && (
+
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">{event.title}</h3>
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-3">{event.description}</p>
+
+                  <div className="space-y-2 mb-4">
                     <div className="flex items-center text-sm text-gray-500">
-                      <MapPinIcon className="w-4 h-4 mr-2" />
-                      {event.location}
+                      <CalendarIcon className="w-4 h-4 mr-2" />
+                      {formatDate(event.start_date)}
                     </div>
-                  )}
-                  <div className="flex items-center text-sm text-gray-500">
-                    <UsersIcon className="w-4 h-4 mr-2" />
-                    {event.attendees_count || 0} / {event.max_attendees || '∞'} attendees
+                    <div className="flex items-center text-sm text-gray-500">
+                      <ClockIcon className="w-4 h-4 mr-2" />
+                      {formatTime(event.start_date)} - {formatTime(event.end_date)}
+                    </div>
+                    {event.location && (
+                      <div className="flex items-center text-sm text-gray-500">
+                        <MapPinIcon className="w-4 h-4 mr-2" />
+                        {event.location}
+                      </div>
+                    )}
+                    <div className="flex items-center text-sm text-gray-500">
+                      <UsersIcon className="w-4 h-4 mr-2" />
+                      {event.attendees_count || 0} / {event.max_attendees || '∞'} attendees
+                    </div>
                   </div>
-                </div>
 
-                {/* Organizer Information */}
-                <div className="flex items-center space-x-2 mb-4 p-3 bg-gray-50 rounded-lg">
-                  <Avatar
-                    src={event.organizer?.avatar_url}
-                    alt={event.organizer?.full_name || 'Organizer'}
-                    size="sm"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
-                      {event.organizer?.full_name || 'Unknown Organizer'}
-                    </p>
-                    <p className="text-xs text-gray-500 truncate">
-                      {event.organizer?.headline || 'Healthcare Professional'}
-                    </p>
+                  {/* Organizer Information */}
+                  <div className="flex items-center space-x-2 mb-4 p-3 bg-gray-50 rounded-lg">
+                    <Avatar
+                      src={event.organizer?.avatar_url}
+                      alt={event.organizer?.full_name || 'Organizer'}
+                      size="sm"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {event.organizer?.full_name || 'Unknown Organizer'}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {event.organizer?.headline || 'Healthcare Professional'}
+                      </p>
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex justify-between items-center">
-                  {activeTab === 'my-events' ? (
-                    <span className="text-xs text-gray-500">
-                      You created this event
-                    </span>
-                  ) : (
-                    <span className="text-xs text-gray-500">
-                      by {event.organizer?.full_name || 'Unknown Organizer'}
-                    </span>
-                  )}
-                  
-                  {activeTab !== 'my-events' && (
-                    event.isRegistered ? (
-                      <button
-                        onClick={() => handleUnregister(event.id)}
-                        className="px-3 py-1 text-sm font-medium bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-                      >
-                        Unregister
-                      </button>
+                  <div className="flex justify-between items-center">
+                    {activeTab === 'my-events' ? (
+                      <span className="text-xs text-gray-500">
+                        You created this event
+                      </span>
                     ) : (
-                      <button
-                        onClick={() => handleRegister(event.id)}
-                        className="px-3 py-1 text-sm font-medium bg-azure-600 text-white rounded-lg hover:bg-azure-700 transition-colors"
-                      >
-                        Register
-                      </button>
-                    )
-                  )}
+                      <span className="text-xs text-gray-500">
+                        by {event.organizer?.full_name || 'Unknown Organizer'}
+                      </span>
+                    )}
+                    
+                    {activeTab !== 'my-events' && (
+                      event.isRegistered ? (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleUnregister(event.id);
+                          }}
+                          className="px-3 py-1 text-sm font-medium bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                        >
+                          Unregister
+                        </button>
+                      ) : (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleRegister(event.id);
+                          }}
+                          className="px-3 py-1 text-sm font-medium bg-azure-600 text-white rounded-lg hover:bg-azure-700 transition-colors"
+                        >
+                          Register
+                        </button>
+                      )
+                    )}
+                  </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}

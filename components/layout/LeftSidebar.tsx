@@ -152,20 +152,22 @@ export default function LeftSidebar() {
         {userEvents.length > 0 ? (
           <div className="space-y-3">
             {userEvents.slice(0, 2).map((event) => (
-              <div key={event.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                <div className="w-8 h-8 bg-azure-100 rounded-lg flex items-center justify-center">
-                  <CalendarDaysIcon className="w-4 h-4 text-azure-500" />
+              <Link key={event.id} href={`/events/${event.id}`}>
+                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="w-8 h-8 bg-azure-100 rounded-lg flex items-center justify-center">
+                    <CalendarDaysIcon className="w-4 h-4 text-azure-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {event.title}
+                    </p>
+                    <p className="text-xs text-gray-500">Activity</p>
+                  </div>
+                  <span className="text-xs text-azure-500 font-medium">
+                    {formatNumber(event.attendees_count || 0)}
+                  </span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    {event.title}
-                  </p>
-                  <p className="text-xs text-gray-500">Activity</p>
-                </div>
-                <span className="text-xs text-azure-500 font-medium">
-                  {formatNumber(event.attendees_count || 0)}
-                </span>
-              </div>
+              </Link>
             ))}
           </div>
         ) : (

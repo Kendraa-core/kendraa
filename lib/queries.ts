@@ -2797,3 +2797,66 @@ export async function createSampleEvents(userId: string): Promise<void> {
   }
 }
 
+// Get event by ID
+export async function getEventById(eventId: string): Promise<Event | null> {
+  try {
+    console.log('[Queries] Getting event by ID:', eventId);
+    
+    const { data, error } = await getSupabase()
+      .from('events')
+      .select('*')
+      .eq('id', eventId)
+      .single();
+
+    if (error) {
+      console.error('[Queries] Error fetching event by ID:', error);
+      return null;
+    }
+    
+    console.log('[Queries] Event fetched successfully');
+    return data;
+  } catch (error) {
+    console.error('[Queries] Error in getEventById:', error);
+    return null;
+  }
+}
+
+// Get event registrations for organizers
+export async function getEventRegistrations(eventId: string): Promise<any[]> {
+  try {
+    console.log('[Queries] Getting event registrations:', eventId);
+    
+    const { data, error } = await getSupabase()
+      .from('event_attendees')
+      .select(`
+        id,
+        event_id,
+        attendee_id,
+        attendee_type,
+        status,
+        registration_date,
+        attendee:profiles!attendee_id(
+          id,
+          full_name,
+          avatar_url,
+          user_type,
+          headline
+        )
+      `)
+      .eq('event_id', eventId)
+      .eq('status', 'registered')
+      .order('registration_date', { ascending: false });
+
+    if (error) {
+      console.error('[Queries] Error fetching event registrations:', error);
+      return [];
+    }
+    
+    console.log('[Queries] Event registrations fetched successfully:', data?.length || 0);
+    return data || [];
+  } catch (error) {
+    console.error('[Queries] Error in getEventRegistrations:', error);
+    return [];
+  }
+}
+
