@@ -256,324 +256,277 @@ export default function NetworkPage() {
   }
 
   return (
-    <div className="flex gap-8">
-      {/* Left Sidebar - Manage my network */}
-      <div className="w-80 flex-shrink-0">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sticky top-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Manage my network</h2>
-          
-          <div className="space-y-1">
-            <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
-              <div className="flex items-center space-x-3">
-                <UserGroupIcon className="w-5 h-5 text-gray-600" />
-                <span className="text-sm text-gray-700">Connections</span>
-              </div>
-              <span className="text-sm font-medium text-gray-900">{formatNumber(connections.length)}</span>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+        <div className="text-center sm:text-left">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Network</h1>
+          <p className="text-gray-600 mb-4">
+            Connect with healthcare professionals and discover new opportunities
+          </p>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center justify-center sm:justify-start space-x-6 text-sm text-gray-600">
+              <span className="flex items-center">
+                <UserGroupIcon className="w-4 h-4 mr-2" />
+                {suggestions.length} suggestions
+              </span>
+              <span className="flex items-center">
+                <UserIcon className="w-4 h-4 mr-2" />
+                {connections.length} connections
+              </span>
+              {connectionRequests.length > 0 && (
+                <span className="flex items-center text-azure-600">
+                  <BellIcon className="w-4 h-4 mr-2" />
+                  {connectionRequests.length} requests
+                </span>
+              )}
             </div>
-            
-            <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
-              <div className="flex items-center space-x-3">
-                <UserIcon className="w-5 h-5 text-gray-600" />
-                <span className="text-sm text-gray-700">Following & followers</span>
-              </div>
-            </div>
-            
-            <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
-              <div className="flex items-center space-x-3">
-                <BuildingOfficeIcon className="w-5 h-5 text-gray-600" />
-                <span className="text-sm text-gray-700">Groups</span>
-              </div>
-              <span className="text-sm font-medium text-gray-900">5</span>
-            </div>
-            
-            <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
-              <div className="flex items-center space-x-3">
-                <CalendarDaysIcon className="w-5 h-5 text-gray-600" />
-                <span className="text-sm text-gray-700">Events</span>
-              </div>
-              <span className="text-sm font-medium text-gray-900">2</span>
-            </div>
-            
-            <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
-              <div className="flex items-center space-x-3">
-                <DocumentTextIcon className="w-5 h-5 text-gray-600" />
-                <span className="text-sm text-gray-700">Pages</span>
-              </div>
-              <span className="text-sm font-medium text-gray-900">267</span>
-            </div>
-            
-            <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
-              <div className="flex items-center space-x-3">
-                <NewspaperIcon className="w-5 h-5 text-gray-600" />
-                <span className="text-sm text-gray-700">Newsletters</span>
-              </div>
-              <span className="text-sm font-medium text-gray-900">34</span>
-            </div>
-          </div>
-          
-          {/* Footer Links */}
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
-              <a href="#" className="hover:text-gray-700">About</a>
-              <a href="#" className="hover:text-gray-700">Accessibility</a>
-              <a href="#" className="hover:text-gray-700">Help Center</a>
-              <a href="#" className="hover:text-gray-700">Privacy & Terms</a>
-              <a href="#" className="hover:text-gray-700">Ad Choices</a>
-              <a href="#" className="hover:text-gray-700">Advertising</a>
-              <a href="#" className="hover:text-gray-700">Business Services</a>
-              <a href="#" className="hover:text-gray-700">Get the App</a>
-              <a href="#" className="hover:text-gray-700">More</a>
-            </div>
-            <p className="text-xs text-gray-400 mt-4">Kendraa Corporation © 2025</p>
           </div>
         </div>
       </div>
 
-      {/* Main Content Area */}
-      <div className="flex-1 space-y-6">
-        {/* Tab Navigation */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-1">
-          <div className="flex">
-            <button
-              onClick={() => setActiveTab('grow')}
-              className={`flex-1 px-6 py-3 text-sm font-medium rounded-xl transition-colors ${
-                activeTab === 'grow'
-                  ? 'bg-azure-500 text-white shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
-            >
-              Grow
-            </button>
-            <button
-              onClick={() => setActiveTab('catch-up')}
-              className={`flex-1 px-6 py-3 text-sm font-medium rounded-xl transition-colors ${
-                activeTab === 'catch-up'
-                  ? 'bg-azure-500 text-white shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
-            >
-              Catch up
-            </button>
-          </div>
+      {/* Tab Navigation */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-1">
+        <div className="flex">
+          <button
+            onClick={() => setActiveTab('grow')}
+            className={`flex-1 px-6 py-3 text-sm font-medium rounded-xl transition-colors ${
+              activeTab === 'grow'
+                ? 'bg-azure-500 text-white shadow-sm'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            }`}
+          >
+            Grow
+          </button>
+          <button
+            onClick={() => setActiveTab('catch-up')}
+            className={`flex-1 px-6 py-3 text-sm font-medium rounded-xl transition-colors ${
+              activeTab === 'catch-up'
+                ? 'bg-azure-500 text-white shadow-sm'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            }`}
+          >
+            Catch up
+          </button>
         </div>
+      </div>
 
-        {/* Content */}
-        {activeTab === 'grow' && (
-          <div className="space-y-6">
-            {/* Invitations Section */}
-            {connectionRequests.length > 0 && (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Invitations ({connectionRequests.length})</h3>
-                  <button className="text-sm text-azure-600 hover:text-azure-700 font-medium">
-                    Show all
-                  </button>
-                </div>
-                
-                <div className="space-y-4">
-                  {connectionRequests.slice(0, 3).map((request) => (
-                    <div key={request.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-xl">
-                      <div className="flex items-center space-x-3">
-                        <Avatar
-                          src={request.requester.avatar_url}
-                          alt={request.requester.full_name || 'User'}
-                          size="md"
+      {/* Content */}
+      {activeTab === 'grow' && (
+        <div className="space-y-6">
+          {/* Invitations Section */}
+          {connectionRequests.length > 0 && (
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Invitations ({connectionRequests.length})</h3>
+                <button className="text-sm text-azure-600 hover:text-azure-700 font-medium">
+                  Show all
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                {connectionRequests.slice(0, 3).map((request) => (
+                  <div key={request.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-xl">
+                    <div className="flex items-center space-x-3">
+                      <Avatar
+                        src={request.requester.avatar_url}
+                        alt={request.requester.full_name || 'User'}
+                        size="md"
+                      />
+                      <div>
+                        <ClickableProfileName
+                          userId={request.requester.id}
+                          name={request.requester.full_name || 'Anonymous User'}
+                          userType={request.requester.profile_type}
+                          className="text-sm font-semibold text-gray-900"
                         />
-                        <div>
-                          <ClickableProfileName
-                            userId={request.requester.id}
-                            name={request.requester.full_name || 'Anonymous User'}
-                            userType={request.requester.profile_type}
-                            className="text-sm font-semibold text-gray-900"
-                          />
-                          <p className="text-xs text-gray-600">
-                            {request.requester.headline || 'Healthcare Professional'}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            Follows you and is inviting you to connect
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleRejectRequest(request.id)}
-                          className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 font-medium"
-                        >
-                          Ignore
-                        </button>
-                        <button
-                          onClick={() => handleAcceptRequest(request.id)}
-                          className="px-4 py-2 bg-azure-500 text-white rounded-lg hover:bg-azure-600 transition-colors text-sm font-medium"
-                        >
-                          Accept
-                        </button>
+                        <p className="text-xs text-gray-600">
+                          {request.requester.headline || 'Healthcare Professional'}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Follows you and is inviting you to connect
+                        </p>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Puzzle Game Section */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                    <PuzzlePieceIcon className="w-6 h-6 text-orange-600" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-gray-900">Zip - a quick brain teaser</h4>
-                    <p className="text-xs text-gray-600">Solve in 60s or less!</p>
-                  </div>
-                </div>
-                <button className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium">
-                  Solve now
-                </button>
-              </div>
-            </div>
-
-            {/* People you may know Section */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  People in the Healthcare industry you may know
-                </h3>
-                <button className="text-sm text-azure-600 hover:text-azure-700 font-medium">
-                  Show all
-                </button>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {filteredSuggestions.slice(0, 8).map((profile) => (
-                  <div key={profile.id} className="relative bg-gray-50 rounded-xl p-4 border border-gray-200">
-                    <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
-                      <XMarkIcon className="w-4 h-4" />
-                    </button>
-                    
-                    <div className="text-center">
-                      <Avatar
-                        src={profile.avatar_url}
-                        alt={profile.full_name || 'User'}
-                        size="md"
-                        className="mx-auto mb-3"
-                      />
-                      <ClickableProfileName
-                        userId={profile.id}
-                        name={profile.full_name || 'Anonymous User'}
-                        userType={profile.profile_type}
-                        className="text-sm font-semibold text-gray-900 mb-1"
-                      />
-                      <p className="text-xs text-gray-600 mb-2 line-clamp-2">
-                        {profile.headline || 'Healthcare Professional'}
-                      </p>
-                      
-                      {profile.mutual_connections && profile.mutual_connections > 0 ? (
-                        <p className="text-xs text-gray-500 mb-3">
-                          {`${profile.mutual_connections} mutual connection${profile.mutual_connections !== 1 ? 's' : ''}`}
-                        </p>
-                      ) : (
-                        <p className="text-xs text-gray-500 mb-3">Based on your profile</p>
-                      )}
-                      
+                    <div className="flex space-x-2">
                       <button
-                        onClick={() => handleConnect(profile.id, profile.profile_type as 'individual' | 'institution')}
-                        disabled={profile.connection_status === 'pending' || profile.connection_status === 'connected'}
-                        className={`w-full py-2 rounded-lg transition-colors text-sm font-medium ${
-                          profile.connection_status === 'connected'
-                            ? 'bg-green-100 text-green-700'
-                            : profile.connection_status === 'pending'
-                            ? 'bg-yellow-100 text-yellow-700'
-                            : 'bg-azure-500 text-white hover:bg-azure-600'
-                        }`}
+                        onClick={() => handleRejectRequest(request.id)}
+                        className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 font-medium"
                       >
-                        {profile.connection_status === 'connected' ? 'Connected' : 
-                         profile.connection_status === 'pending' ? 'Pending' : 'Connect'}
+                        Ignore
+                      </button>
+                      <button
+                        onClick={() => handleAcceptRequest(request.id)}
+                        className="px-4 py-2 bg-azure-500 text-white rounded-lg hover:bg-azure-600 transition-colors text-sm font-medium"
+                      >
+                        Accept
                       </button>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
+          )}
 
-            {/* Institution-specific Section */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  People you may know from Healthcare Institutions
-                </h3>
-                <button className="text-sm text-azure-600 hover:text-azure-700 font-medium">
-                  Show all
-                </button>
+          {/* Puzzle Game Section */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                  <PuzzlePieceIcon className="w-6 h-6 text-orange-600" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-900">Zip - a quick brain teaser</h4>
+                  <p className="text-xs text-gray-600">Solve in 60s or less!</p>
+                </div>
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {filteredSuggestions
-                  .filter(p => p.profile_type === 'institution')
-                  .slice(0, 4)
-                  .map((profile) => (
-                  <div key={profile.id} className="relative bg-gray-50 rounded-xl p-4 border border-gray-200">
-                    <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
-                      <XMarkIcon className="w-4 h-4" />
-                    </button>
+              <button className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium">
+                Solve now
+              </button>
+            </div>
+          </div>
+
+          {/* People you may know Section */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">
+                People in the Healthcare industry you may know
+              </h3>
+              <button className="text-sm text-azure-600 hover:text-azure-700 font-medium">
+                Show all
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {filteredSuggestions.slice(0, 8).map((profile) => (
+                <div key={profile.id} className="relative bg-gray-50 rounded-xl p-4 border border-gray-200">
+                  <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
+                    <XMarkIcon className="w-4 h-4" />
+                  </button>
+                  
+                  <div className="text-center">
+                    <Avatar
+                      src={profile.avatar_url}
+                      alt={profile.full_name || 'User'}
+                      size="md"
+                      className="mx-auto mb-3"
+                    />
+                    <ClickableProfileName
+                      userId={profile.id}
+                      name={profile.full_name || 'Anonymous User'}
+                      userType={profile.profile_type}
+                      className="text-sm font-semibold text-gray-900 mb-1"
+                    />
+                    <p className="text-xs text-gray-600 mb-2 line-clamp-2">
+                      {profile.headline || 'Healthcare Professional'}
+                    </p>
                     
-                    <div className="text-center">
-                      <Avatar
-                        src={profile.avatar_url}
-                        alt={profile.full_name || 'Institution'}
-                        size="md"
-                        className="mx-auto mb-3"
-                      />
-                      <ClickableProfileName
-                        userId={profile.id}
-                        name={profile.full_name || 'Healthcare Institution'}
-                        userType={profile.profile_type}
-                        className="text-sm font-semibold text-gray-900 mb-1"
-                      />
-                      <p className="text-xs text-gray-600 mb-2 line-clamp-2">
-                        {profile.headline || 'Healthcare Institution'}
+                    {profile.mutual_connections && profile.mutual_connections > 0 ? (
+                      <p className="text-xs text-gray-500 mb-3">
+                        {`${profile.mutual_connections} mutual connection${profile.mutual_connections !== 1 ? 's' : ''}`}
                       </p>
-                      
-                      {profile.mutual_connections && profile.mutual_connections > 0 ? (
-                        <p className="text-xs text-gray-500 mb-3">
-                          {`${profile.mutual_connections} mutual connection${profile.mutual_connections !== 1 ? 's' : ''}`}
-                        </p>
-                      ) : (
-                        <p className="text-xs text-gray-500 mb-3">Based on your profile</p>
-                      )}
-                      
-                      <button
-                        onClick={() => handleConnect(profile.id, 'institution')}
-                        disabled={profile.follow_status === 'following'}
-                        className={`w-full py-2 rounded-lg transition-colors text-sm font-medium ${
-                          profile.follow_status === 'following'
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-azure-500 text-white hover:bg-azure-600'
-                        }`}
-                      >
-                        {profile.follow_status === 'following' ? 'Following' : 'Follow'}
-                      </button>
-                    </div>
+                    ) : (
+                      <p className="text-xs text-gray-500 mb-3">Based on your profile</p>
+                    )}
+                    
+                    <button
+                      onClick={() => handleConnect(profile.id, profile.profile_type as 'individual' | 'institution')}
+                      disabled={profile.connection_status === 'pending' || profile.connection_status === 'connected'}
+                      className={`w-full py-2 rounded-lg transition-colors text-sm font-medium ${
+                        profile.connection_status === 'connected'
+                          ? 'bg-green-100 text-green-700'
+                          : profile.connection_status === 'pending'
+                          ? 'bg-yellow-100 text-yellow-700'
+                          : 'bg-azure-500 text-white hover:bg-azure-600'
+                      }`}
+                    >
+                      {profile.connection_status === 'connected' ? 'Connected' : 
+                       profile.connection_status === 'pending' ? 'Pending' : 'Connect'}
+                    </button>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
           </div>
-        )}
 
-        {activeTab === 'catch-up' && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
-            <div className="max-w-md mx-auto">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <ClockIcon className="w-8 h-8 text-gray-400" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Catch up with your network</h3>
-              <p className="text-gray-600">
-                Stay updated with your connections&apos; activities and recent posts.
-              </p>
+          {/* Institution-specific Section */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">
+                People you may know from Healthcare Institutions
+              </h3>
+              <button className="text-sm text-azure-600 hover:text-azure-700 font-medium">
+                Show all
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {filteredSuggestions
+                .filter(p => p.profile_type === 'institution')
+                .slice(0, 4)
+                .map((profile) => (
+                <div key={profile.id} className="relative bg-gray-50 rounded-xl p-4 border border-gray-200">
+                  <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
+                    <XMarkIcon className="w-4 h-4" />
+                  </button>
+                  
+                  <div className="text-center">
+                    <Avatar
+                      src={profile.avatar_url}
+                      alt={profile.full_name || 'Institution'}
+                      size="md"
+                      className="mx-auto mb-3"
+                    />
+                    <ClickableProfileName
+                      userId={profile.id}
+                      name={profile.full_name || 'Healthcare Institution'}
+                      userType={profile.profile_type}
+                      className="text-sm font-semibold text-gray-900 mb-1"
+                    />
+                    <p className="text-xs text-gray-600 mb-2 line-clamp-2">
+                      {profile.headline || 'Healthcare Institution'}
+                    </p>
+                    
+                    {profile.mutual_connections && profile.mutual_connections > 0 ? (
+                      <p className="text-xs text-gray-500 mb-3">
+                        {`${profile.mutual_connections} mutual connection${profile.mutual_connections !== 1 ? 's' : ''}`}
+                      </p>
+                    ) : (
+                      <p className="text-xs text-gray-500 mb-3">Based on your profile</p>
+                    )}
+                    
+                    <button
+                      onClick={() => handleConnect(profile.id, 'institution')}
+                      disabled={profile.follow_status === 'following'}
+                      className={`w-full py-2 rounded-lg transition-colors text-sm font-medium ${
+                        profile.follow_status === 'following'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-azure-500 text-white hover:bg-azure-600'
+                      }`}
+                    >
+                      {profile.follow_status === 'following' ? 'Following' : 'Follow'}
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {activeTab === 'catch-up' && (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
+          <div className="max-w-md mx-auto">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <ClockIcon className="w-8 h-8 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Catch up with your network</h3>
+            <p className="text-gray-600">
+              Stay updated with your connections&apos; activities and recent posts.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 
