@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { createSampleEvents, getEvents, getEventsByOrganizer } from '@/lib/queries';
+import { createSampleEvents, getEvents, getEventsByOrganizer, getUserRegisteredEvents } from '@/lib/queries';
 import toast from 'react-hot-toast';
 
 export default function TestEventsPage() {
@@ -34,6 +34,7 @@ export default function TestEventsPage() {
       const allEvents = await getEvents();
       setEvents(allEvents);
       toast.success(`Loaded ${allEvents.length} events`);
+      console.log('Loaded events:', allEvents);
     } catch (error) {
       console.error('Error loading events:', error);
       toast.error('Failed to load events');
@@ -53,9 +54,44 @@ export default function TestEventsPage() {
       const myEvents = await getEventsByOrganizer(user.id);
       setEvents(myEvents);
       toast.success(`Loaded ${myEvents.length} of your events`);
+      console.log('Loaded my events:', myEvents);
     } catch (error) {
       console.error('Error loading my events:', error);
       toast.error('Failed to load your events');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTestQueries = async () => {
+    if (!user?.id) {
+      toast.error('Please log in first');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      console.log('Testing all event queries...');
+      
+      // Test getEvents
+      console.log('Testing getEvents...');
+      const allEvents = await getEvents();
+      console.log('getEvents result:', allEvents);
+      
+      // Test getEventsByOrganizer
+      console.log('Testing getEventsByOrganizer...');
+      const myEvents = await getEventsByOrganizer(user.id);
+      console.log('getEventsByOrganizer result:', myEvents);
+      
+      // Test getUserRegisteredEvents
+      console.log('Testing getUserRegisteredEvents...');
+      const registeredEvents = await getUserRegisteredEvents(user.id);
+      console.log('getUserRegisteredEvents result:', registeredEvents);
+      
+      toast.success('All queries tested successfully! Check console for details.');
+    } catch (error) {
+      console.error('Error testing queries:', error);
+      toast.error('Failed to test queries');
     } finally {
       setLoading(false);
     }
@@ -92,6 +128,14 @@ export default function TestEventsPage() {
               className="px-4 py-2 bg-azure-600 text-white rounded-lg hover:bg-azure-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ml-4"
             >
               {loading ? 'Loading...' : 'Load My Events'}
+            </button>
+
+            <button
+              onClick={handleTestQueries}
+              disabled={loading || !user?.id}
+              className="px-4 py-2 bg-azure-600 text-white rounded-lg hover:bg-azure-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ml-4"
+            >
+              {loading ? 'Testing...' : 'Test All Queries'}
             </button>
           </div>
           
