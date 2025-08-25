@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { createSampleEvents, getEvents, getEventsByOrganizer, getUserRegisteredEvents } from '@/lib/queries';
+import { createSampleEvents, getEvents, getEventsByOrganizer, getUserRegisteredEvents, createTestRegistrations } from '@/lib/queries';
 import toast from 'react-hot-toast';
 
 export default function TestEventsPage() {
@@ -72,26 +72,52 @@ export default function TestEventsPage() {
     setLoading(true);
     try {
       console.log('Testing all event queries...');
-      
+
       // Test getEvents
       console.log('Testing getEvents...');
       const allEvents = await getEvents();
       console.log('getEvents result:', allEvents);
-      
+
       // Test getEventsByOrganizer
       console.log('Testing getEventsByOrganizer...');
       const myEvents = await getEventsByOrganizer(user.id);
       console.log('getEventsByOrganizer result:', myEvents);
-      
+
       // Test getUserRegisteredEvents
       console.log('Testing getUserRegisteredEvents...');
       const registeredEvents = await getUserRegisteredEvents(user.id);
       console.log('getUserRegisteredEvents result:', registeredEvents);
-      
+
       toast.success('All queries tested successfully! Check console for details.');
     } catch (error) {
       console.error('Error testing queries:', error);
       toast.error('Failed to test queries');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateTestRegistrations = async () => {
+    if (!user?.id) {
+      toast.error('Please log in first');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Get the first event to add test registrations to
+      const myEvents = await getEventsByOrganizer(user.id);
+      if (myEvents.length === 0) {
+        toast.error('No events found. Please create events first.');
+        return;
+      }
+
+      const firstEvent = myEvents[0];
+      await createTestRegistrations(firstEvent.id);
+      toast.success(`Test registrations created for event: ${firstEvent.title}`);
+    } catch (error) {
+      console.error('Error creating test registrations:', error);
+      toast.error('Failed to create test registrations');
     } finally {
       setLoading(false);
     }
@@ -136,6 +162,14 @@ export default function TestEventsPage() {
               className="px-4 py-2 bg-azure-600 text-white rounded-lg hover:bg-azure-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ml-4"
             >
               {loading ? 'Testing...' : 'Test All Queries'}
+            </button>
+
+            <button
+              onClick={handleCreateTestRegistrations}
+              disabled={loading || !user?.id}
+              className="px-4 py-2 bg-azure-600 text-white rounded-lg hover:bg-azure-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ml-4"
+            >
+              {loading ? 'Creating...' : 'Create Test Registrations'}
             </button>
           </div>
           

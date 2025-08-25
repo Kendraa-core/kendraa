@@ -2491,21 +2491,41 @@ export async function getEventsByOrganizer(organizerId: string): Promise<Event[]
 // Helper function to get organizer profile for an event
 export async function getEventOrganizer(organizerId: string): Promise<any> {
   try {
+    console.log('[Queries] Getting organizer profile for:', organizerId);
+    
     const { data, error } = await getSupabase()
       .from('profiles')
       .select('id, full_name, avatar_url, user_type, headline')
       .eq('id', organizerId)
-      .single();
+      .maybeSingle(); // Use maybeSingle instead of single to avoid errors
 
     if (error) {
       console.error('[Queries] Error fetching organizer profile:', error);
       return null;
     }
 
+    if (!data) {
+      console.log('[Queries] Organizer profile not found, returning default');
+      return {
+        id: organizerId,
+        full_name: 'Unknown Organizer',
+        avatar_url: null,
+        user_type: 'individual',
+        headline: 'Healthcare Professional'
+      };
+    }
+
+    console.log('[Queries] Organizer profile fetched successfully');
     return data;
   } catch (error) {
     console.error('[Queries] Error in getEventOrganizer:', error);
-    return null;
+    return {
+      id: organizerId,
+      full_name: 'Unknown Organizer',
+      avatar_url: null,
+      user_type: 'individual',
+      headline: 'Healthcare Professional'
+    };
   }
 }
 
@@ -2826,37 +2846,105 @@ export async function getEventRegistrations(eventId: string): Promise<any[]> {
   try {
     console.log('[Queries] Getting event registrations:', eventId);
     
-    const { data, error } = await getSupabase()
+    // First, get the registration records
+    const { data: registrations, error: registrationsError } = await getSupabase()
       .from('event_attendees')
-      .select(`
-        id,
-        event_id,
-        attendee_id,
-        attendee_type,
-        status,
-        registration_date,
-        attendee:profiles!attendee_id(
-          id,
-          full_name,
-          avatar_url,
-          user_type,
-          headline
-        )
-      `)
+      .select('*')
       .eq('event_id', eventId)
       .eq('status', 'registered')
       .order('registration_date', { ascending: false });
 
-    if (error) {
-      console.error('[Queries] Error fetching event registrations:', error);
+    if (registrationsError) {
+      console.error('[Queries] Error fetching event registrations:', registrationsError);
       return [];
     }
-    
-    console.log('[Queries] Event registrations fetched successfully:', data?.length || 0);
-    return data || [];
+
+    if (!registrations || registrations.length === 0) {
+      console.log('[Queries] No registrations found for event');
+      return [];
+    }
+
+    // Get attendee IDs
+    const attendeeIds = registrations.map(reg => reg.attendee_id);
+
+    // Fetch attendee profiles separately
+    const { data: attendees, error: attendeesError } = await getSupabase()
+      .from('profiles')
+      .select('id, full_name, avatar_url, user_type, headline')
+      .in('id', attendeeIds);
+
+    if (attendeesError) {
+      console.error('[Queries] Error fetching attendee profiles:', attendeesError);
+      return [];
+    }
+
+    // Create a map of attendee profiles
+    const attendeeMap = new Map();
+    if (attendees) {
+      attendees.forEach(attendee => {
+        attendeeMap.set(attendee.id, attendee);
+      });
+    }
+
+    // Combine registration data with attendee profiles
+    const registrationsWithProfiles = registrations.map(registration => ({
+      ...registration,
+      attendee: attendeeMap.get(registration.attendee_id) || {
+        id: registration.attendee_id,
+        full_name: 'Unknown User',
+        avatar_url: null,
+        user_type: 'individual',
+        headline: 'Healthcare Professional'
+      }
+    }));
+
+    console.log('[Queries] Event registrations fetched successfully:', registrationsWithProfiles.length);
+    return registrationsWithProfiles;
   } catch (error) {
     console.error('[Queries] Error in getEventRegistrations:', error);
     return [];
+  }
+}
+
+// Create test registrations for an event
+export async function createTestRegistrations(eventId: string): Promise<void> {
+  try {
+    console.log('[Queries] Creating test registrations for event:', eventId);
+
+    // Get some existing users to register for the event
+    const { data: users } = await getSupabase()
+      .from('profiles')
+      .select('id')
+      .limit(3);
+
+    if (!users || users.length === 0) {
+      console.log('[Queries] No users found to create test registrations');
+      return;
+    }
+
+    const testRegistrations = users.map(user => ({
+      event_id: eventId,
+      attendee_id: user.id,
+      attendee_type: 'individual',
+      status: 'registered',
+      registration_date: new Date().toISOString()
+    }));
+
+    for (const registration of testRegistrations) {
+      const { error } = await getSupabase()
+        .from('event_attendees')
+        .insert(registration);
+
+      if (error) {
+        console.error('[Queries] Error creating test registration:', error);
+      } else {
+        console.log('[Queries] Test registration created successfully for user:', registration.attendee_id);
+      }
+    }
+
+    console.log('[Queries] Test registrations creation completed');
+  } catch (error) {
+    console.error('[Queries] Error creating test registrations:', error);
   }
 }
 
