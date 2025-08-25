@@ -92,8 +92,8 @@ export default function ProfileImageEditor({
       // Delete from Supabase storage
       const path = currentUrl.split('/').pop();
       if (path) {
-        const bucket = 'public';
-        const folder = type === 'avatar' ? 'avatars' : 'covers';
+        const bucket = type === 'avatar' ? 'avatars' : 'banners';
+        const folder = type === 'avatar' ? 'avatars' : 'banners';
         const result = await deleteFromSupabaseStorage(bucket, `${folder}/${path}`);
         
         if (result.error) {
@@ -135,11 +135,11 @@ export default function ProfileImageEditor({
     setLoadingState(true);
     try {
       // Generate file path
-      const folder = isAvatar ? 'avatars' : 'covers';
+      const folder = isAvatar ? 'avatars' : 'banners';
       const filePath = generateFilePath(user.id, file.name, folder);
 
       // Upload to Supabase storage
-      const bucket = 'public';
+      const bucket = isAvatar ? 'avatars' : 'banners';
       const result = await uploadToSupabaseStorage(bucket, filePath, file);
 
       if (result.error) {
@@ -179,7 +179,7 @@ export default function ProfileImageEditor({
       // Upload avatar if changed
       if (avatarFile) {
         const filePath = generateFilePath(user.id, avatarFile.name, 'avatars');
-        const result = await uploadToSupabaseStorage('public', filePath, avatarFile);
+        const result = await uploadToSupabaseStorage('avatars', filePath, avatarFile);
         if (result.error) {
           throw new Error(result.error);
         }
@@ -188,8 +188,8 @@ export default function ProfileImageEditor({
 
       // Upload banner if changed
       if (bannerFile) {
-        const filePath = generateFilePath(user.id, bannerFile.name, 'covers');
-        const result = await uploadToSupabaseStorage('public', filePath, bannerFile);
+        const filePath = generateFilePath(user.id, bannerFile.name, 'banners');
+        const result = await uploadToSupabaseStorage('banners', filePath, bannerFile);
         if (result.error) {
           throw new Error(result.error);
         }

@@ -241,7 +241,7 @@ export default function OnboardingPage() {
         // Upload avatar if changed
         if (avatarFile && user?.id) {
           const filePath = generateFilePath(user.id, avatarFile.name, 'avatars');
-          const { url, error } = await uploadToSupabaseStorage('public', filePath, avatarFile);
+          const { url, error } = await uploadToSupabaseStorage('avatars', filePath, avatarFile);
           
           if (error) {
             throw new Error(error);
