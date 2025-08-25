@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import EditProfileModal from './EditProfileModal';
 import { uploadToSupabaseStorage, validateFile, generateFilePath } from '@/lib/utils';
+import { supabase } from '@/lib/supabase';
 import {
   UserIcon,
   CheckCircleIcon,
@@ -105,6 +106,20 @@ const ONBOARDING_STEPS = [
     required: true
   },
   {
+    id: 'experience',
+    title: 'Add your work experience',
+    subtitle: 'Share your professional experience to build credibility',
+    type: 'experience',
+    required: true
+  },
+  {
+    id: 'education',
+    title: 'Add your education',
+    subtitle: 'Include your academic background and qualifications',
+    type: 'education',
+    required: true
+  },
+  {
     id: 'avatar',
     title: 'Add a profile picture',
     subtitle: 'A professional photo helps build trust with connections (optional)',
@@ -131,6 +146,8 @@ export default function OnboardingPage() {
     location: profile?.location || '',
     avatar_url: profile?.avatar_url || '',
   });
+  const [experiences, setExperiences] = useState<any[]>([]);
+  const [educations, setEducations] = useState<any[]>([]);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(profile?.avatar_url || null);
   const [loading, setLoading] = useState(false);
@@ -147,6 +164,8 @@ export default function OnboardingPage() {
       profile.specialization && profile.specialization.length > 0,
       profile.bio,
       profile.location,
+      experiences.length > 0, // At least one experience entry
+      educations.length > 0, // At least one education entry
       // profile.avatar_url, // Removed from required fields since it's optional
     ];
     
@@ -163,6 +182,8 @@ export default function OnboardingPage() {
       profile.headline,
       profile.bio,
       profile.location,
+      experiences.length > 0, // At least one experience entry
+      educations.length > 0, // At least one education entry
       // profile.avatar_url, // Removed from required fields since it's optional
       profile.specialization && profile.specialization.length > 0,
     ];
@@ -195,6 +216,52 @@ export default function OnboardingPage() {
 
   const handleCompleteProfile = () => {
     setShowEditModal(true);
+  };
+
+  const addExperience = () => {
+    setExperiences(prev => [...prev, {
+      id: Date.now(),
+      title: '',
+      company: '',
+      location: '',
+      start_date: '',
+      end_date: '',
+      current: false,
+      description: ''
+    }]);
+  };
+
+  const updateExperience = (index: number, field: string, value: any) => {
+    setExperiences(prev => prev.map((exp, i) => 
+      i === index ? { ...exp, [field]: value } : exp
+    ));
+  };
+
+  const removeExperience = (index: number) => {
+    setExperiences(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const addEducation = () => {
+    setEducations(prev => [...prev, {
+      id: Date.now(),
+      degree: '',
+      institution: '',
+      field_of_study: '',
+      start_date: '',
+      end_date: '',
+      current: false,
+      description: ''
+    }]);
+  };
+
+  const updateEducation = (index: number, field: string, value: any) => {
+    setEducations(prev => prev.map((edu, i) => 
+      i === index ? { ...edu, [field]: value } : edu
+    ));
+  };
+
+  const removeEducation = (index: number) => {
+    setEducations(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleInputChange = (field: string, value: any) => {
@@ -239,6 +306,32 @@ export default function OnboardingPage() {
           toast.error('Please upload a profile picture');
           return;
         }
+      } else if (currentStepData.type === 'experience') {
+        if (experiences.length === 0) {
+          toast.error('Please add at least one work experience');
+          return;
+        }
+        // Validate that all experience entries have required fields
+        const hasValidExperience = experiences.some(exp => 
+          exp.title.trim() && exp.company.trim() && exp.start_date
+        );
+        if (!hasValidExperience) {
+          toast.error('Please fill in all required fields for at least one experience');
+          return;
+        }
+      } else if (currentStepData.type === 'education') {
+        if (educations.length === 0) {
+          toast.error('Please add at least one education entry');
+          return;
+        }
+        // Validate that all education entries have required fields
+        const hasValidEducation = educations.some(edu => 
+          edu.degree.trim() && edu.institution.trim() && edu.start_date
+        );
+        if (!hasValidEducation) {
+          toast.error('Please fill in all required fields for at least one education');
+          return;
+        }
       } else {
         const fieldValue = formData[currentStepData.field as keyof typeof formData];
         if (!fieldValue || String(fieldValue).trim().length === 0) {
@@ -269,6 +362,45 @@ export default function OnboardingPage() {
           }
           
           avatarUrl = url;
+        }
+
+        // Save experience and education data
+        if (user?.id && supabase) {
+          // Save experiences
+          for (const experience of experiences) {
+            if (experience.title && experience.company && experience.start_date) {
+              await supabase
+                .from('experiences')
+                .upsert({
+                  user_id: user.id,
+                  title: experience.title,
+                  company: experience.company,
+                  location: experience.location || null,
+                  start_date: experience.start_date,
+                  end_date: experience.current ? null : (experience.end_date || null),
+                  current: experience.current,
+                  description: experience.description || null
+                });
+            }
+          }
+
+          // Save educations
+          for (const education of educations) {
+            if (education.degree && education.institution && education.start_date) {
+              await supabase
+                .from('education')
+                .upsert({
+                  user_id: user.id,
+                  degree: education.degree,
+                  institution: education.institution,
+                  field_of_study: education.field_of_study || null,
+                  start_date: education.start_date,
+                  end_date: education.current ? null : (education.end_date || null),
+                  current: education.current,
+                  description: education.description || null
+                });
+            }
+          }
         }
 
         await updateProfile({
@@ -308,6 +440,20 @@ export default function OnboardingPage() {
     // Special handling for image step - allow proceeding if optional
     if (currentStepData.type === 'image') {
       return !currentStepData.required || avatarPreview !== null;
+    }
+    
+    // Special handling for experience step
+    if (currentStepData.type === 'experience') {
+      return experiences.length > 0 && experiences.some(exp => 
+        exp.title.trim() && exp.company.trim() && exp.start_date
+      );
+    }
+    
+    // Special handling for education step
+    if (currentStepData.type === 'education') {
+      return educations.length > 0 && educations.some(edu => 
+        edu.degree.trim() && edu.institution.trim() && edu.start_date
+      );
     }
     
     const fieldValue = formData[currentStepData.field as keyof typeof formData];
@@ -503,6 +649,214 @@ export default function OnboardingPage() {
               <p className="text-sm text-gray-500 mt-2 flex items-center justify-center">
                 <ExclamationTriangleIcon className="w-4 h-4 mr-1" />
                 This step is optional - you can skip it
+              </p>
+            )}
+          </div>
+        );
+
+      case 'experience':
+        return (
+          <div className="max-w-2xl mx-auto">
+            <div className="flex items-center mb-6">
+              <BriefcaseIcon className="w-8 h-8 text-azure-500 mr-3" />
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">{step.title}</h2>
+                <p className="text-lg text-gray-600 mt-2">{step.subtitle}</p>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              {experiences.map((experience, index) => (
+                <div key={experience.id} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                  <div className="flex justify-between items-start mb-3">
+                    <h3 className="font-semibold text-gray-900">Experience {index + 1}</h3>
+                    <button
+                      onClick={() => removeExperience(index)}
+                      className="text-red-500 hover:text-red-700 text-sm"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <input
+                      type="text"
+                      placeholder="Job Title *"
+                      value={experience.title}
+                      onChange={(e) => updateExperience(index, 'title', e.target.value)}
+                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Company *"
+                      value={experience.company}
+                      onChange={(e) => updateExperience(index, 'company', e.target.value)}
+                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Location"
+                      value={experience.location}
+                      onChange={(e) => updateExperience(index, 'location', e.target.value)}
+                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent"
+                    />
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="date"
+                        placeholder="Start Date *"
+                        value={experience.start_date}
+                        onChange={(e) => updateExperience(index, 'start_date', e.target.value)}
+                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent"
+                      />
+                      <input
+                        type="date"
+                        placeholder="End Date"
+                        value={experience.end_date}
+                        onChange={(e) => updateExperience(index, 'end_date', e.target.value)}
+                        disabled={experience.current}
+                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent disabled:bg-gray-100"
+                      />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id={`current-${index}`}
+                        checked={experience.current}
+                        onChange={(e) => updateExperience(index, 'current', e.target.checked)}
+                        className="rounded border-gray-300 text-azure-600 focus:ring-azure-500"
+                      />
+                      <label htmlFor={`current-${index}`} className="text-sm text-gray-600">
+                        I currently work here
+                      </label>
+                    </div>
+                  </div>
+                  
+                  <textarea
+                    placeholder="Description (optional)"
+                    value={experience.description}
+                    onChange={(e) => updateExperience(index, 'description', e.target.value)}
+                    rows={3}
+                    className="w-full mt-3 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent resize-none"
+                  />
+                </div>
+              ))}
+              
+              <button
+                onClick={addExperience}
+                className="w-full py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-gray-400 hover:text-gray-600 transition-colors"
+              >
+                + Add Experience
+              </button>
+            </div>
+            
+            {step.required && (
+              <p className="text-sm text-gray-500 mt-2 flex items-center">
+                <ExclamationTriangleIcon className="w-4 h-4 mr-1" />
+                Please add at least one work experience
+              </p>
+            )}
+          </div>
+        );
+
+      case 'education':
+        return (
+          <div className="max-w-2xl mx-auto">
+            <div className="flex items-center mb-6">
+              <DocumentTextIcon className="w-8 h-8 text-azure-500 mr-3" />
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">{step.title}</h2>
+                <p className="text-lg text-gray-600 mt-2">{step.subtitle}</p>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              {educations.map((education, index) => (
+                <div key={education.id} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                  <div className="flex justify-between items-start mb-3">
+                    <h3 className="font-semibold text-gray-900">Education {index + 1}</h3>
+                    <button
+                      onClick={() => removeEducation(index)}
+                      className="text-red-500 hover:text-red-700 text-sm"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <input
+                      type="text"
+                      placeholder="Degree *"
+                      value={education.degree}
+                      onChange={(e) => updateEducation(index, 'degree', e.target.value)}
+                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Institution *"
+                      value={education.institution}
+                      onChange={(e) => updateEducation(index, 'institution', e.target.value)}
+                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Field of Study"
+                      value={education.field_of_study}
+                      onChange={(e) => updateEducation(index, 'field_of_study', e.target.value)}
+                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent"
+                    />
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="date"
+                        placeholder="Start Date *"
+                        value={education.start_date}
+                        onChange={(e) => updateEducation(index, 'start_date', e.target.value)}
+                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent"
+                      />
+                      <input
+                        type="date"
+                        placeholder="End Date"
+                        value={education.end_date}
+                        onChange={(e) => updateEducation(index, 'end_date', e.target.value)}
+                        disabled={education.current}
+                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent disabled:bg-gray-100"
+                      />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id={`current-edu-${index}`}
+                        checked={education.current}
+                        onChange={(e) => updateEducation(index, 'current', e.target.checked)}
+                        className="rounded border-gray-300 text-azure-600 focus:ring-azure-500"
+                      />
+                      <label htmlFor={`current-edu-${index}`} className="text-sm text-gray-600">
+                        I am currently studying here
+                      </label>
+                    </div>
+                  </div>
+                  
+                  <textarea
+                    placeholder="Description (optional)"
+                    value={education.description}
+                    onChange={(e) => updateEducation(index, 'description', e.target.value)}
+                    rows={3}
+                    className="w-full mt-3 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent resize-none"
+                  />
+                </div>
+              ))}
+              
+              <button
+                onClick={addEducation}
+                className="w-full py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-gray-400 hover:text-gray-600 transition-colors"
+              >
+                + Add Education
+              </button>
+            </div>
+            
+            {step.required && (
+              <p className="text-sm text-gray-500 mt-2 flex items-center">
+                <ExclamationTriangleIcon className="w-4 h-4 mr-1" />
+                Please add at least one education entry
               </p>
             )}
           </div>
