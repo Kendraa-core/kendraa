@@ -2437,16 +2437,7 @@ export async function getEvents(): Promise<Event[]> {
     
     const { data, error } = await getSupabase()
       .from('events')
-      .select(`
-        *,
-        organizer:profiles!organizer_id(
-          id,
-          full_name,
-          avatar_url,
-          user_type,
-          headline
-        )
-      `)
+      .select('*')
       .order('start_date', { ascending: true });
 
     if (error) {
@@ -2472,33 +2463,9 @@ export async function getEventsByOrganizer(organizerId: string): Promise<Event[]
   try {
     console.log('[Queries] Getting events by organizer:', organizerId);
     
-    // First, let's check if the organizer exists in profiles
-    const { data: organizerProfile, error: profileError } = await getSupabase()
-      .from('profiles')
-      .select('id, full_name')
-      .eq('id', organizerId)
-      .single();
-
-    if (profileError) {
-      console.error('[Queries] Organizer profile not found:', profileError);
-      return [];
-    }
-
-    console.log('[Queries] Found organizer profile:', organizerProfile);
-    
-    // Now get events by this organizer
     const { data, error } = await getSupabase()
       .from('events')
-      .select(`
-        *,
-        organizer:profiles!organizer_id(
-          id,
-          full_name,
-          avatar_url,
-          user_type,
-          headline
-        )
-      `)
+      .select('*')
       .eq('organizer_id', organizerId)
       .order('start_date', { ascending: true });
 
@@ -2518,6 +2485,27 @@ export async function getEventsByOrganizer(organizerId: string): Promise<Event[]
   } catch (error) {
     console.error('[Queries] Error in getEventsByOrganizer:', error);
     return [];
+  }
+}
+
+// Helper function to get organizer profile for an event
+export async function getEventOrganizer(organizerId: string): Promise<any> {
+  try {
+    const { data, error } = await getSupabase()
+      .from('profiles')
+      .select('id, full_name, avatar_url, user_type, headline')
+      .eq('id', organizerId)
+      .single();
+
+    if (error) {
+      console.error('[Queries] Error fetching organizer profile:', error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('[Queries] Error in getEventOrganizer:', error);
+    return null;
   }
 }
 
@@ -2679,18 +2667,7 @@ export async function getUserRegisteredEvents(userId: string): Promise<Event[]> 
     
     const { data, error } = await getSupabase()
       .from('event_attendees')
-      .select(`
-        event_id,
-        events (
-          *,
-          organizer:profiles!organizer_id(
-            id,
-            full_name,
-            avatar_url,
-            user_type
-          )
-        )
-      `)
+      .select('event_id')
       .eq('attendee_id', userId)
       .eq('status', 'registered')
       .order('registration_date', { ascending: false });
@@ -2706,9 +2683,28 @@ export async function getUserRegisteredEvents(userId: string): Promise<Event[]> 
       return [];
     }
     
-    const events = data?.map(item => item.events).filter(Boolean) || [];
-    console.log('[Queries] User registered events fetched:', events.length);
-    return events as unknown as Event[];
+    if (!data || data.length === 0) {
+      console.log('[Queries] No registered events found for user');
+      return [];
+    }
+
+    // Get the event IDs
+    const eventIds = data.map(item => item.event_id);
+    
+    // Fetch the actual events
+    const { data: events, error: eventsError } = await getSupabase()
+      .from('events')
+      .select('*')
+      .in('id', eventIds)
+      .order('start_date', { ascending: true });
+
+    if (eventsError) {
+      console.error('[Queries] Error fetching events for registered events:', eventsError);
+      return [];
+    }
+    
+    console.log('[Queries] User registered events fetched:', events?.length || 0);
+    return events || [];
   } catch (error) {
     console.error('[Queries] Error in getUserRegisteredEvents:', error);
     return [];

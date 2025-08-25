@@ -8,7 +8,8 @@ import {
   registerForEvent, 
   unregisterFromEvent, 
   isRegisteredForEvent,
-  getUserRegisteredEvents 
+  getUserRegisteredEvents,
+  getEventOrganizer
 } from '@/lib/queries';
 import { CalendarIcon, MapPinIcon, ClockIcon, UsersIcon, PlusIcon } from '@heroicons/react/24/outline';
 import Avatar from '@/components/common/Avatar';
@@ -33,6 +34,40 @@ export default function EventsPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'upcoming' | 'registered' | 'my-events'>('upcoming');
 
+  // Function to fetch organizer information for events
+  const fetchOrganizerInfo = async (events: Event[]): Promise<EventWithRegistration[]> => {
+    const eventsWithOrganizers = await Promise.all(
+      events.map(async (event) => {
+        try {
+          const organizer = await getEventOrganizer(event.organizer_id);
+          return {
+            ...event,
+            organizer: organizer || {
+              id: event.organizer_id,
+              full_name: 'Unknown Organizer',
+              avatar_url: null,
+              user_type: 'individual',
+              headline: 'Healthcare Professional'
+            }
+          };
+        } catch (error) {
+          console.error('Error fetching organizer for event:', event.id, error);
+          return {
+            ...event,
+            organizer: {
+              id: event.organizer_id,
+              full_name: 'Unknown Organizer',
+              avatar_url: null,
+              user_type: 'individual',
+              headline: 'Healthcare Professional'
+            }
+          };
+        }
+      })
+    );
+    return eventsWithOrganizers;
+  };
+
   useEffect(() => {
     const fetchEvents = async () => {
       if (!user?.id) return;
@@ -40,7 +75,7 @@ export default function EventsPage() {
       try {
         setLoading(true);
         
-        let allEvents: EventWithRegistration[] = [];
+        let allEvents: Event[] = [];
         
         if (activeTab === 'my-events') {
           // Fetch events created by the current user
@@ -53,17 +88,20 @@ export default function EventsPage() {
           allEvents = await getEvents();
         }
         
+        // Fetch organizer information for all events
+        const eventsWithOrganizers = await fetchOrganizerInfo(allEvents);
+        
         // Check registration status for each event (except for my-events tab)
         if (activeTab !== 'my-events') {
           const eventsWithRegistration = await Promise.all(
-            allEvents.map(async (event) => {
+            eventsWithOrganizers.map(async (event) => {
               const isRegistered = await isRegisteredForEvent(event.id, user.id);
               return { ...event, isRegistered };
             })
           );
           setEvents(eventsWithRegistration);
         } else {
-          setEvents(allEvents);
+          setEvents(eventsWithOrganizers);
         }
       } catch (error) {
         console.error('Error fetching events:', error);

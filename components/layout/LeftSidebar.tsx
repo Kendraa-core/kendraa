@@ -11,7 +11,11 @@ import {
 } from '@heroicons/react/24/outline';
 import Avatar from '@/components/common/Avatar';
 import { useAuth } from '@/contexts/AuthContext';
-import { getConnectionCount, getEventsByOrganizer } from '@/lib/queries';
+import { 
+  getConnectionCount, 
+  getEventsByOrganizer,
+  getEventOrganizer
+} from '@/lib/queries';
 import { formatNumber } from '@/lib/utils';
 
 export default function LeftSidebar() {
@@ -33,8 +37,39 @@ export default function LeftSidebar() {
           getEventsByOrganizer(user.id)
         ]);
         
+        // Fetch organizer information for events
+        const eventsWithOrganizers = await Promise.all(
+          events.map(async (event) => {
+            try {
+              const organizer = await getEventOrganizer(event.organizer_id);
+              return {
+                ...event,
+                organizer: organizer || {
+                  id: event.organizer_id,
+                  full_name: 'Unknown Organizer',
+                  avatar_url: null,
+                  user_type: 'individual',
+                  headline: 'Healthcare Professional'
+                }
+              };
+            } catch (error) {
+              console.error('Error fetching organizer for event:', event.id, error);
+              return {
+                ...event,
+                organizer: {
+                  id: event.organizer_id,
+                  full_name: 'Unknown Organizer',
+                  avatar_url: null,
+                  user_type: 'individual',
+                  headline: 'Healthcare Professional'
+                }
+              };
+            }
+          })
+        );
+        
         setConnectionCount(connectionsCount);
-        setUserEvents(events);
+        setUserEvents(eventsWithOrganizers);
       } catch (error) {
         console.error('Error loading left sidebar data:', error);
       } finally {
