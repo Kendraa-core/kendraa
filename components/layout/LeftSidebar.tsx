@@ -7,11 +7,7 @@ import {
   BookmarkIcon, 
   UserGroupIcon, 
   CalendarDaysIcon,
-  MapPinIcon,
-  BuildingOfficeIcon,
-  DocumentTextIcon,
-  NewspaperIcon,
-  UserIcon
+  MapPinIcon
 } from '@heroicons/react/24/outline';
 import Avatar from '@/components/common/Avatar';
 import { useAuth } from '@/contexts/AuthContext';
@@ -87,7 +83,7 @@ export default function LeftSidebar() {
   if (loading) {
     return (
       <div className="space-y-6">
-        {[1, 2, 3, 4].map((i) => (
+        {[1, 2, 3].map((i) => (
           <div key={i} className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
             <div className="animate-pulse">
               <div className="h-6 bg-gray-200 rounded mb-4"></div>
@@ -141,76 +137,6 @@ export default function LeftSidebar() {
           >
             View Profile
           </Link>
-        </div>
-      </div>
-
-      {/* Manage my network Section */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Manage my network</h2>
-        
-        <div className="space-y-1">
-          <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
-            <div className="flex items-center space-x-3">
-              <UserGroupIcon className="w-5 h-5 text-gray-600" />
-              <span className="text-sm text-gray-700">Connections</span>
-            </div>
-            <span className="text-sm font-medium text-gray-900">{formatNumber(connectionCount)}</span>
-          </div>
-          
-          <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
-            <div className="flex items-center space-x-3">
-              <UserIcon className="w-5 h-5 text-gray-600" />
-              <span className="text-sm text-gray-700">Following & followers</span>
-            </div>
-          </div>
-          
-          <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
-            <div className="flex items-center space-x-3">
-              <BuildingOfficeIcon className="w-5 h-5 text-gray-600" />
-              <span className="text-sm text-gray-700">Groups</span>
-            </div>
-            <span className="text-sm font-medium text-gray-900">5</span>
-          </div>
-          
-          <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
-            <div className="flex items-center space-x-3">
-              <CalendarDaysIcon className="w-5 h-5 text-gray-600" />
-              <span className="text-sm text-gray-700">Events</span>
-            </div>
-            <span className="text-sm font-medium text-gray-900">2</span>
-          </div>
-          
-          <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
-            <div className="flex items-center space-x-3">
-              <DocumentTextIcon className="w-5 h-5 text-gray-600" />
-              <span className="text-sm text-gray-700">Pages</span>
-            </div>
-            <span className="text-sm font-medium text-gray-900">267</span>
-          </div>
-          
-          <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
-            <div className="flex items-center space-x-3">
-              <NewspaperIcon className="w-5 h-5 text-gray-600" />
-              <span className="text-sm text-gray-700">Newsletters</span>
-            </div>
-            <span className="text-sm font-medium text-gray-900">34</span>
-          </div>
-        </div>
-        
-        {/* Footer Links */}
-        <div className="mt-8 pt-6 border-t border-gray-200">
-          <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
-            <a href="#" className="hover:text-gray-700">About</a>
-            <a href="#" className="hover:text-gray-700">Accessibility</a>
-            <a href="#" className="hover:text-gray-700">Help Center</a>
-            <a href="#" className="hover:text-gray-700">Privacy & Terms</a>
-            <a href="#" className="hover:text-gray-700">Ad Choices</a>
-            <a href="#" className="hover:text-gray-700">Advertising</a>
-            <a href="#" className="hover:text-gray-700">Business Services</a>
-            <a href="#" className="hover:text-gray-700">Get the App</a>
-            <a href="#" className="hover:text-gray-700">More</a>
-          </div>
-          <p className="text-xs text-gray-400 mt-4">Kendraa Corporation © 2025</p>
         </div>
       </div>
 
