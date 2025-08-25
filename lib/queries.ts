@@ -3143,3 +3143,244 @@ export async function getCommentReplies(commentId: string): Promise<CommentWithA
   }
 }
 
+// Institution Profile Queries
+export async function createInstitutionProfile(institutionData: any) {
+  if (!supabase) {
+    throw new Error('Supabase client not initialized');
+  }
+
+  const { data, error } = await supabase
+    .from('institutions')
+    .insert(institutionData)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating institution profile:', error);
+    throw error;
+  }
+
+  return data;
+}
+
+export async function getInstitutionProfile(institutionId: string) {
+  if (!supabase) {
+    console.error('Supabase client not initialized');
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from('institutions')
+    .select('*')
+    .eq('id', institutionId)
+    .single();
+
+  if (error) {
+    console.error('Error fetching institution profile:', error);
+    return null;
+  }
+
+  return data;
+}
+
+export async function getInstitutionByAdmin(adminUserId: string) {
+  if (!supabase) {
+    console.error('Supabase client not initialized');
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from('institutions')
+    .select('*')
+    .eq('admin_user_id', adminUserId)
+    .single();
+
+  if (error) {
+    console.error('Error fetching institution by admin:', error);
+    return null;
+  }
+
+  return data;
+}
+
+export async function updateInstitutionProfile(institutionId: string, updates: any) {
+  if (!supabase) {
+    throw new Error('Supabase client not initialized');
+  }
+
+  const { data, error } = await supabase
+    .from('institutions')
+    .update(updates)
+    .eq('id', institutionId)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating institution profile:', error);
+    throw error;
+  }
+
+  return data;
+}
+
+export async function getAllInstitutions() {
+  if (!supabase) {
+    console.error('Supabase client not initialized');
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from('institutions')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching institutions:', error);
+    return [];
+  }
+
+  return data || [];
+}
+
+export async function searchInstitutions(query: string) {
+  if (!supabase) {
+    console.error('Supabase client not initialized');
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from('institutions')
+    .select('*')
+    .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error searching institutions:', error);
+    return [];
+  }
+
+  return data || [];
+}
+
+// Institution Projects
+export async function createInstitutionProject(projectData: any) {
+  if (!supabase) {
+    throw new Error('Supabase client not initialized');
+  }
+
+  const { data, error } = await supabase
+    .from('institution_projects')
+    .insert(projectData)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating institution project:', error);
+    throw error;
+  }
+
+  return data;
+}
+
+export async function getInstitutionProjects(institutionId: string) {
+  if (!supabase) {
+    console.error('Supabase client not initialized');
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from('institution_projects')
+    .select('*')
+    .eq('institution_id', institutionId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching institution projects:', error);
+    return [];
+  }
+
+  return data || [];
+}
+
+// Institution Talent Requirements
+export async function createTalentRequirement(requirementData: any) {
+  if (!supabase) {
+    throw new Error('Supabase client not initialized');
+  }
+
+  const { data, error } = await supabase
+    .from('talent_requirements')
+    .insert(requirementData)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating talent requirement:', error);
+    throw error;
+  }
+
+  return data;
+}
+
+export async function getTalentRequirements(institutionId: string) {
+  if (!supabase) {
+    console.error('Supabase client not initialized');
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from('talent_requirements')
+    .select('*')
+    .eq('institution_id', institutionId)
+    .eq('is_active', true)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching talent requirements:', error);
+    return [];
+  }
+
+  return data || [];
+}
+
+// Institution Promotions
+export async function createInstitutionPromotion(promotionData: any) {
+  if (!supabase) {
+    throw new Error('Supabase client not initialized');
+  }
+
+  const { data, error } = await supabase
+    .from('institution_promotions')
+    .insert(promotionData)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating institution promotion:', error);
+    throw error;
+  }
+
+  return data;
+}
+
+export async function getInstitutionPromotions(institutionId: string) {
+  if (!supabase) {
+    console.error('Supabase client not initialized');
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from('institution_promotions')
+    .select('*')
+    .eq('institution_id', institutionId)
+    .eq('is_active', true)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching institution promotions:', error);
+    return [];
+  }
+
+  return data || [];
+}
+

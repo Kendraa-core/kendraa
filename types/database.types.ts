@@ -189,6 +189,8 @@ export interface Institution {
   id: string;
   created_at: string;
   updated_at: string;
+  
+  // Basic Information
   name: string;
   type: 'hospital' | 'clinic' | 'research_center' | 'university' | 'pharmaceutical' | 'medical_device' | 'other';
   description: string | null;
@@ -205,6 +207,88 @@ export interface Institution {
   size: 'small' | 'medium' | 'large' | 'enterprise' | null;
   verified: boolean;
   admin_user_id: string; // Foreign key to profiles table
+  
+  // Corporate Profile Fields (from requirements) - Optional for backward compatibility
+  organization_email?: string | null;
+  organization_head_name?: string | null;
+  organization_head_contact?: string | null; // Not for public display
+  employee_email?: string | null;
+  employee_name?: string | null;
+  employee_designation?: string | null;
+  authorized_representative?: string | null;
+  
+  // Company Information - Optional for backward compatibility
+  company_url?: string | null;
+  year_of_establishment?: number | null;
+  partnered_with?: string[] | null; // Links to 3D Association
+  presence_in?: string[] | null; // List of countries
+  focus?: 'pharmaceutical' | 'hospital' | 'research' | 'academics' | null;
+  
+  // Overview - Optional for backward compatibility
+  overview?: string | null;
+  
+  // Projects - Optional for backward compatibility
+  current_projects?: InstitutionProject[] | null;
+  earlier_projects?: InstitutionProject[] | null;
+  
+  // Talent Requirements - Optional for backward compatibility
+  talent_requirements?: TalentRequirement[] | null;
+  
+  // Promotions - Optional for backward compatibility
+  promotions?: InstitutionPromotion[] | null;
+  
+  // Verification Status - Optional for backward compatibility
+  verification_status?: 'pending' | 'verified' | 'rejected';
+  email_verified?: boolean;
+  confirmation_email_sent?: boolean;
+}
+
+export interface InstitutionProject {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  institution_id: string;
+  name: string;
+  brief: string | null;
+  video_links: string[] | null;
+  analytical_view: string | null;
+  marketing_strategies: string | null;
+  branding: string | null;
+  revenue_generation: string | null;
+  year: number | null;
+  is_current: boolean;
+}
+
+export interface TalentRequirement {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  institution_id: string;
+  title: string;
+  description: string | null;
+  experience_level: 'experienced' | 'freshers';
+  requirements: string[] | null;
+  location: string | null;
+  salary_range: {
+    min: number | null;
+    max: number | null;
+    currency: string | null;
+  } | null;
+  is_active: boolean;
+}
+
+export interface InstitutionPromotion {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  institution_id: string;
+  title: string;
+  description: string | null;
+  media_urls: string[] | null; // Images, banners, videos
+  website_link: string | null;
+  is_active: boolean;
+  start_date: string | null;
+  end_date: string | null;
 }
 
 export interface Post {

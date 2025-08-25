@@ -152,7 +152,7 @@ export default function CorporateProfileWizard() {
         admin_email: profileData.employeeEmail,
         website_url: profileData.companyUrl,
         year_established: parseInt(profileData.yearEstablished),
-        partnered_with: profileData.partneredWith,
+        partnered_with: profileData.partneredWith ? [profileData.partneredWith] : null,
         presence_in: profileData.presenceIn,
         focus_area: profileData.focus,
         overview: profileData.overview,
