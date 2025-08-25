@@ -7,7 +7,6 @@ import { getProfile } from '@/lib/queries';
 import Header from '@/components/layout/Header';
 import RightSidebar from '@/components/layout/RightSidebar';
 import LeftSidebar from '@/components/layout/LeftSidebar';
-import MobileNavigation from '@/components/layout/MobileNavigation';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 export default function DashboardLayout({
@@ -123,9 +122,6 @@ export default function DashboardLayout({
           </div>
         </div>
       </div>
-
-      {/* Mobile Navigation */}
-      <MobileNavigation />
     </div>
   );
 } 
