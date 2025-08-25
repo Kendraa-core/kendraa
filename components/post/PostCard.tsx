@@ -290,7 +290,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
       {/* Post Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-3 min-w-0 flex-1">

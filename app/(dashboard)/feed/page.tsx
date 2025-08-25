@@ -57,7 +57,7 @@ export default function FeedPage() {
   }, [fetchPosts]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Create Post */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
         <div className="flex items-start space-x-4">
@@ -126,9 +126,9 @@ export default function FeedPage() {
       {/* Content based on active tab */}
       <div>
         {activeTab === 'posts' ? (
-          <div className="space-y-6">
+          <div className="space-y-8">
             {loading ? (
-              <div className="space-y-4">
+              <div className="space-y-8">
                 {[1, 2, 3].map((i) => (
                   <div key={i} className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                     <div className="animate-pulse">
@@ -149,7 +149,7 @@ export default function FeedPage() {
                 ))}
               </div>
             ) : posts.length > 0 ? (
-              <div className="space-y-6">
+              <div className="space-y-8">
                 {posts.map((post) => (
                   <PostCard key={post.id} post={post} />
                 ))}
