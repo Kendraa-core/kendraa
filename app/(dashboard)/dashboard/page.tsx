@@ -34,6 +34,7 @@ import {
 import { formatRelativeTime } from '@/lib/utils';
 import { getConnectionStats, getPostStats, getNotifications } from '@/lib/queries';
 import ShareButton from '@/components/common/ShareButton';
+import ProfileCompletionPrompt from '@/components/profile/ProfileCompletionPrompt';
 import Link from 'next/link';
 
 
@@ -66,6 +67,27 @@ export default function UserDashboard() {
       loadDashboardData();
     }
   }, [user?.id]);
+
+  const getProfileCompletionPercentage = () => {
+    if (!profile) return 0;
+    
+    const fields = [
+      profile.full_name,
+      profile.headline,
+      profile.bio,
+      profile.location,
+      profile.avatar_url
+    ];
+    
+    const completed = fields.filter(field => {
+      if (typeof field === 'string') {
+        return field && field.trim() !== '';
+      }
+      return field;
+    }).length;
+    
+    return Math.round((completed / fields.length) * 100);
+  };
 
   const loadDashboardData = async () => {
     try {
@@ -183,6 +205,9 @@ export default function UserDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Profile Completion Prompt */}
+      <ProfileCompletionPrompt />
+      
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Elegant Header */}
         <div className="mb-6 flex justify-between items-center">
@@ -249,6 +274,28 @@ export default function UserDashboard() {
 
               {/* Stats Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {/* Profile Completion Card */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-azure-100 text-sm">Profile</p>
+                      <p className="text-2xl font-bold text-gray-900">{getProfileCompletionPercentage()}%</p>
+                      <p className="text-azure-100 text-sm mt-1">Complete</p>
+                    </div>
+                    <div className="w-12 h-12 bg-azure-100 rounded-lg flex items-center justify-center">
+                      <UserIcon className="w-8 h-8 text-azure-200" />
+                    </div>
+                  </div>
+                  {getProfileCompletionPercentage() < 50 && !localStorage.getItem(`onboarding_completed_${user?.id}`) && (
+                    <button
+                      onClick={() => window.location.href = '/onboarding'}
+                      className="w-full mt-3 px-3 py-2 bg-azure-600 text-white text-sm rounded-lg hover:bg-azure-700 transition-colors"
+                    >
+                      Complete Profile
+                    </button>
+                  )}
+
+                </div>
                 {/* Connections Card */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                   <div className="flex items-center justify-between">

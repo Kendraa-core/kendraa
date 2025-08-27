@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import ClickableProfileName from '@/components/common/ClickableProfileName';
@@ -11,9 +10,6 @@ import {
   UserGroupIcon,
   UserIcon,
   BuildingOfficeIcon,
-  CalendarDaysIcon,
-  DocumentTextIcon,
-  NewspaperIcon,
   CheckIcon,
   XCircleIcon,
   MapPinIcon,
@@ -21,7 +17,9 @@ import {
   BellIcon,
   XMarkIcon,
   ClockIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  UsersIcon,
+  SparklesIcon
 } from '@heroicons/react/24/outline';
 import { 
   getSuggestedConnectionsWithMutualCounts,
@@ -245,10 +243,10 @@ export default function NetworkPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex items-center justify-center py-12">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-azure-200 border-t-azure-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading your network...</p>
+          <div className="w-8 h-8 border-2 border-azure-200 border-t-azure-600 rounded-full animate-spin mx-auto"></div>
+          <p className="text-gray-600 mt-4">Loading your network...</p>
         </div>
       </div>
     );
@@ -256,42 +254,14 @@ export default function NetworkPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-        <div className="text-center sm:text-left">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Network</h1>
-          <p className="text-gray-600 mb-4">
-            Connect with healthcare professionals and discover new opportunities
-          </p>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex items-center justify-center sm:justify-start space-x-6 text-sm text-gray-600">
-              <span className="flex items-center">
-                <UserGroupIcon className="w-4 h-4 mr-2" />
-                {suggestions.length} suggestions
-              </span>
-              <span className="flex items-center">
-                <UserIcon className="w-4 h-4 mr-2" />
-                {connections.length} connections
-              </span>
-              {connectionRequests.length > 0 && (
-                <span className="flex items-center text-azure-600">
-                  <BellIcon className="w-4 h-4 mr-2" />
-                  {connectionRequests.length} requests
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Tab Navigation */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-1">
+      <div className="bg-white rounded-lg border border-gray-200 p-1">
         <div className="flex">
           <button
             onClick={() => setActiveTab('grow')}
-            className={`flex-1 px-6 py-3 text-sm font-medium rounded-xl transition-colors ${
+            className={`flex-1 px-6 py-3 text-sm font-medium rounded-lg transition-colors ${
               activeTab === 'grow'
-                ? 'bg-azure-500 text-white shadow-sm'
+                ? 'bg-azure-600 text-white shadow-sm'
                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
             }`}
           >
@@ -299,9 +269,9 @@ export default function NetworkPage() {
           </button>
           <button
             onClick={() => setActiveTab('catch-up')}
-            className={`flex-1 px-6 py-3 text-sm font-medium rounded-xl transition-colors ${
+            className={`flex-1 px-6 py-3 text-sm font-medium rounded-lg transition-colors ${
               activeTab === 'catch-up'
-                ? 'bg-azure-500 text-white shadow-sm'
+                ? 'bg-azure-600 text-white shadow-sm'
                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
             }`}
           >
@@ -315,7 +285,7 @@ export default function NetworkPage() {
         <div className="space-y-6">
           {/* Invitations Section */}
           {connectionRequests.length > 0 && (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">Invitations ({connectionRequests.length})</h3>
                 <button className="text-sm text-azure-600 hover:text-azure-700 font-medium">
@@ -325,7 +295,7 @@ export default function NetworkPage() {
               
               <div className="space-y-4">
                 {connectionRequests.slice(0, 3).map((request) => (
-                  <div key={request.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-xl">
+                  <div key={request.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-lg">
                     <div className="flex items-center space-x-3">
                       <Avatar
                         src={request.requester.avatar_url}
@@ -356,7 +326,7 @@ export default function NetworkPage() {
                       </button>
                       <button
                         onClick={() => handleAcceptRequest(request.id)}
-                        className="px-4 py-2 bg-azure-500 text-white rounded-lg hover:bg-azure-600 transition-colors text-sm font-medium"
+                        className="px-4 py-2 bg-azure-600 text-white rounded-lg hover:bg-azure-700 transition-colors text-sm font-medium"
                       >
                         Accept
                       </button>
@@ -367,10 +337,8 @@ export default function NetworkPage() {
             </div>
           )}
 
-
-
           {/* People you may know Section */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-gray-900">
                 People in the Healthcare industry you may know
@@ -382,7 +350,7 @@ export default function NetworkPage() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {filteredSuggestions.slice(0, 8).map((profile) => (
-                <div key={profile.id} className="relative bg-gray-50 rounded-xl p-4 border border-gray-200">
+                <div key={profile.id} className="relative bg-gray-50 rounded-lg p-4 border border-gray-200">
                   <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
                     <XMarkIcon className="w-4 h-4" />
                   </button>
@@ -420,11 +388,11 @@ export default function NetworkPage() {
                           ? 'bg-green-100 text-green-700'
                           : profile.connection_status === 'pending'
                           ? 'bg-yellow-100 text-yellow-700'
-                          : 'bg-azure-500 text-white hover:bg-azure-600'
+                          : 'bg-azure-600 text-white hover:bg-azure-700'
                       }`}
                     >
                       {profile.connection_status === 'connected' ? 'Connected' : 
-                       profile.connection_status === 'pending' ? 'Pending' : 'Connect'}
+                       profile.connection_status === 'pending' ? 'Pending' : '+ Connect'}
                     </button>
                   </div>
                 </div>
@@ -433,7 +401,7 @@ export default function NetworkPage() {
           </div>
 
           {/* Institution-specific Section */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-gray-900">
                 People you may know from Healthcare Institutions
@@ -448,7 +416,7 @@ export default function NetworkPage() {
                 .filter(p => p.profile_type === 'institution')
                 .slice(0, 4)
                 .map((profile) => (
-                <div key={profile.id} className="relative bg-gray-50 rounded-xl p-4 border border-gray-200">
+                <div key={profile.id} className="relative bg-gray-50 rounded-lg p-4 border border-gray-200">
                   <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
                     <XMarkIcon className="w-4 h-4" />
                   </button>
@@ -484,10 +452,10 @@ export default function NetworkPage() {
                       className={`w-full py-2 rounded-lg transition-colors text-sm font-medium ${
                         profile.follow_status === 'following'
                           ? 'bg-green-100 text-green-700'
-                          : 'bg-azure-500 text-white hover:bg-azure-600'
+                          : 'bg-azure-600 text-white hover:bg-azure-700'
                       }`}
                     >
-                      {profile.follow_status === 'following' ? 'Following' : 'Follow'}
+                      {profile.follow_status === 'following' ? 'Following' : '+ Follow'}
                     </button>
                   </div>
                 </div>
@@ -498,7 +466,7 @@ export default function NetworkPage() {
       )}
 
       {activeTab === 'catch-up' && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
+        <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
           <div className="max-w-md mx-auto">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <ClockIcon className="w-8 h-8 text-gray-400" />

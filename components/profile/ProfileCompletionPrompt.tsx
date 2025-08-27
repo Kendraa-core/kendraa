@@ -12,7 +12,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ProfileCompletionPrompt() {
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const [showWizard, setShowWizard] = useState(false);
   const [showPrompt, setShowPrompt] = useState(false);
 
@@ -37,24 +37,36 @@ export default function ProfileCompletionPrompt() {
       profile.headline,
       profile.bio,
       profile.location,
-      profile.website,
-      profile.phone,
-      profile.avatar_url,
-      profile.specialization && profile.specialization.length > 0,
+      profile.avatar_url
     ];
     
-    const completed = fields.filter(field => field).length;
+    const completed = fields.filter(field => {
+      if (typeof field === 'string') {
+        return field && field.trim() !== '';
+      }
+      return field;
+    }).length;
+    
     return Math.round((completed / fields.length) * 100);
   };
 
-  // Show prompt if profile is incomplete
+  // Show prompt if profile completion is below 50% and onboarding hasn't been completed
   useEffect(() => {
     const checkProfileCompletion = () => {
-      if (!isProfileComplete()) {
+      // Check if user has completed onboarding before
+      const hasCompletedOnboarding = localStorage.getItem(`onboarding_completed_${user?.id}`);
+      
+      if (hasCompletedOnboarding === 'true') {
+        // User has completed onboarding before, don't show prompt
+        return;
+      }
+      
+      const completionPercentage = getCompletionPercentage();
+      if (completionPercentage < 50) {
         // Delay showing the prompt to avoid immediate popup
         const timer = setTimeout(() => {
           setShowPrompt(true);
-        }, 2000);
+        }, 3000); // Increased delay to 3 seconds
         
         return () => clearTimeout(timer);
       }
@@ -70,6 +82,14 @@ export default function ProfileCompletionPrompt() {
   const handleCompleteProfile = () => {
     setShowPrompt(false);
     setShowWizard(true);
+  };
+
+  // For debugging: manually clear onboarding completion flag
+  const clearOnboardingFlag = () => {
+    if (user?.id) {
+      localStorage.removeItem(`onboarding_completed_${user.id}`);
+      console.log('Onboarding completion flag cleared');
+    }
   };
 
   if (isProfileComplete()) {
@@ -109,8 +129,8 @@ export default function ProfileCompletionPrompt() {
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Complete Your Profile</h3>
                 <p className="text-gray-600 mb-4 text-center">
-                  Your profile is only <span className="font-semibold text-azure-600">{completionPercentage}%</span> complete. 
-                  Complete it to unlock all features and connect with other healthcare professionals.
+                  Your profile is <span className="font-semibold text-azure-600">{completionPercentage}%</span> complete. 
+                  Complete your profile to enhance your professional presence and connect better with other healthcare professionals.
                 </p>
 
                 <div className="flex items-center justify-center space-x-4 mb-6">
@@ -147,7 +167,7 @@ export default function ProfileCompletionPrompt() {
                     onClick={handleClose}
                     className="px-4 py-3 text-gray-500 hover:text-gray-700 transition-colors"
                   >
-                    I&apos;ll do this later
+                    Maybe Later
                   </button>
                 </div>
               </div>

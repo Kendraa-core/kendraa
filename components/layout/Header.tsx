@@ -65,7 +65,7 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
 
   const navigationItems = useMemo(() => [
     { name: 'Home', href: '/feed', icon: HomeIcon },
-    { name: 'Network', href: '/network', icon: UserGroupIcon },
+    { name: 'My Network', href: '/network', icon: UserGroupIcon },
     { name: 'Jobs', href: '/jobs', icon: BriefcaseIcon },
     { name: 'Events', href: '/events', icon: CalendarDaysIcon },
   ], []);

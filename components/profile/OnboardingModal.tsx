@@ -21,8 +21,18 @@ import {
   BriefcaseIcon,
   MapPinIcon,
   DocumentTextIcon,
+  AcademicCapIcon,
+  PhoneIcon,
+  EnvelopeIcon,
+  GlobeAltIcon,
+  IdentificationIcon,
+  BeakerIcon,
+  HeartIcon,
+  AcademicCapIcon as AcademicCapIconSolid,
+  InformationCircleIcon
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
+import { getUserExperiences, getUserEducations, isCurrentStudent } from '@/lib/queries';
 
 const ONBOARDING_STEPS = [
   {
@@ -33,13 +43,20 @@ const ONBOARDING_STEPS = [
     required: false
   },
   {
+    id: 'student-status',
+    title: 'Are you currently a student?',
+    subtitle: 'This helps us customize your profile requirements',
+    type: 'student-selection',
+    required: false
+  },
+  {
     id: 'name',
     title: 'What\'s your full name?',
     subtitle: 'This is how other professionals will see you',
     type: 'input',
     field: 'full_name',
     placeholder: 'Enter your full name',
-    required: true
+    required: false
   },
   {
     id: 'headline',
@@ -48,45 +65,9 @@ const ONBOARDING_STEPS = [
     type: 'input',
     field: 'headline',
     placeholder: 'e.g., Cardiologist at Mayo Clinic',
-    required: true
+    required: false
   },
-  {
-    id: 'specialization',
-    title: 'What\'s your medical specialization?',
-    subtitle: 'Select your primary area of expertise',
-    type: 'select',
-    field: 'specialization',
-    options: [
-      'Cardiology',
-      'Neurology',
-      'Oncology',
-      'Pediatrics',
-      'Psychiatry',
-      'Surgery',
-      'Emergency Medicine',
-      'Family Medicine',
-      'Internal Medicine',
-      'Obstetrics & Gynecology',
-      'Orthopedics',
-      'Radiology',
-      'Anesthesiology',
-      'Dermatology',
-      'Endocrinology',
-      'Gastroenterology',
-      'Hematology',
-      'Infectious Disease',
-      'Nephrology',
-      'Ophthalmology',
-      'Otolaryngology',
-      'Pathology',
-      'Physical Medicine',
-      'Pulmonology',
-      'Rheumatology',
-      'Urology',
-      'Other'
-    ],
-    required: true
-  },
+
   {
     id: 'bio',
     title: 'Tell us about yourself',
@@ -94,7 +75,7 @@ const ONBOARDING_STEPS = [
     type: 'textarea',
     field: 'bio',
     placeholder: 'Describe your experience, achievements, and what drives you in healthcare...',
-    required: true
+    required: false
   },
   {
     id: 'location',
@@ -103,7 +84,7 @@ const ONBOARDING_STEPS = [
     type: 'input',
     field: 'location',
     placeholder: 'e.g., San Francisco, CA',
-    required: true
+    required: false
   },
   {
     id: 'contact',
@@ -115,16 +96,16 @@ const ONBOARDING_STEPS = [
   {
     id: 'experience',
     title: 'Add your work experience',
-    subtitle: 'Share your professional experience to build credibility (minimum 1 experience required)',
+    subtitle: 'Share your professional experience to build credibility (optional for testing)',
     type: 'experience',
-    required: true
+    required: false
   },
   {
     id: 'education',
     title: 'Add your education',
-    subtitle: 'Include your academic background and qualifications (minimum 1 education required)',
+    subtitle: 'Include your academic background and qualifications (optional for testing)',
     type: 'education',
-    required: true
+    required: false
   },
   {
     id: 'certifications',
@@ -133,20 +114,7 @@ const ONBOARDING_STEPS = [
     type: 'certifications',
     required: false
   },
-  {
-    id: 'skills',
-    title: 'Professional Skills',
-    subtitle: 'What are your key skills and expertise areas?',
-    type: 'skills',
-    required: false
-  },
-  {
-    id: 'languages',
-    title: 'Languages Spoken',
-    subtitle: 'What languages do you speak?',
-    type: 'languages',
-    required: false
-  },
+
   {
     id: 'avatar',
     title: 'Add a profile picture',
@@ -166,6 +134,18 @@ const ONBOARDING_STEPS = [
 export default function OnboardingPage() {
   const { user, profile, updateProfile } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
+  const [isStudent, setIsStudent] = useState(false);
+  
+  // Filter steps based on student status
+  const getFilteredSteps = () => {
+    if (isStudent) {
+      // Remove experience step for students
+      return ONBOARDING_STEPS.filter(step => step.id !== 'experience');
+    }
+    return ONBOARDING_STEPS;
+  };
+  
+  const filteredSteps = getFilteredSteps();
   const [formData, setFormData] = useState({
     full_name: profile?.full_name || '',
     headline: profile?.headline || '',
@@ -177,32 +157,59 @@ export default function OnboardingPage() {
     phone: profile?.phone || '',
     email: profile?.email || '',
     website: profile?.website || '',
-    // Professional Details
-    certifications: profile?.certifications || [],
-    skills: profile?.skills || [],
-    languages: profile?.languages || [],
-    years_of_experience: typeof profile?.years_of_experience === 'number' ? profile.years_of_experience : 0,
-    current_position: profile?.current_position || '',
-    current_institution: profile?.current_institution || '',
-    npi_number: profile?.npi_number || '',
-    dea_number: profile?.dea_number || '',
-    // Research and Interests
-    research_interests: profile?.research_interests || [],
-    clinical_interests: profile?.clinical_interests || [],
-    teaching_experience: profile?.teaching_experience || false,
-    mentoring_availability: profile?.mentoring_availability || false,
   });
   const [experiences, setExperiences] = useState<any[]>([]);
   const [educations, setEducations] = useState<any[]>([]);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(profile?.avatar_url || null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [completionPercentage, setCompletionPercentage] = useState(0);
   const router = useRouter();
 
+  // Test database connection
+  const testDatabaseConnection = async () => {
+    if (!supabase || !user?.id) return false;
+    
+    try {
+      // Test if we can access the experiences table
+      const { data, error } = await supabase
+        .from('experiences')
+        .select('id')
+        .limit(1);
+      
+      if (error) {
+        console.error('Database connection test failed:', error);
+        return false;
+      }
+      
+      console.log('Database connection test successful');
+      
+      // Test if we can access the education table
+      const { data: eduData, error: eduError } = await supabase
+        .from('education')
+        .select('id')
+        .limit(1);
+      
+      if (eduError) {
+        console.error('Education table access failed:', eduError);
+        return false;
+      }
+      
+      console.log('Education table access successful');
+      return true;
+    } catch (error) {
+      console.error('Database connection test error:', error);
+      return false;
+    }
+  };
+
   // Check if profile is 80% complete
-  const isProfileComplete = () => {
-    if (!profile) return false;
+  const isProfileComplete = async () => {
+    if (!profile || !user?.id) return false;
+    
+    // Check if user is a current student
+    const isStudent = await isCurrentStudent(user.id);
     
     const requiredFields = [
       profile.full_name,
@@ -210,9 +217,13 @@ export default function OnboardingPage() {
       profile.specialization && profile.specialization.length > 0,
       profile.bio,
       profile.location,
-      experiences.length > 0, // At least one experience entry - REQUIRED
       educations.length > 0, // At least one education entry - REQUIRED
     ];
+    
+    // Only require experience if not a current student
+    if (!isStudent) {
+      requiredFields.push(experiences.length > 0); // At least one experience entry - REQUIRED
+    }
     
     const completed = requiredFields.filter(field => field).length;
     const percentage = (completed / requiredFields.length) * 100;
@@ -220,7 +231,7 @@ export default function OnboardingPage() {
   };
 
   const getCompletionPercentage = () => {
-    if (!profile) return 0;
+    if (!profile || !user?.id) return 0;
     
     const requiredFields = [
       profile.full_name,
@@ -228,20 +239,42 @@ export default function OnboardingPage() {
       profile.specialization && profile.specialization.length > 0,
       profile.bio,
       profile.location,
-      experiences.length > 0, // At least one experience entry - REQUIRED
       educations.length > 0, // At least one education entry - REQUIRED
     ];
+    
+    // Only require experience if not a current student
+    if (!isStudent) {
+      requiredFields.push(experiences.length > 0); // At least one experience entry - REQUIRED
+    }
     
     const completed = requiredFields.filter(field => field).length;
     return Math.round((completed / requiredFields.length) * 100);
   };
 
-  // Redirect if profile is already complete
+  // Redirect if profile is already complete or onboarding has been completed before
   useEffect(() => {
-    if (isProfileComplete()) {
-      router.push('/feed');
+    const checkProfileCompletion = async () => {
+      // Check if user has completed onboarding before (stored in localStorage)
+      const hasCompletedOnboarding = localStorage.getItem(`onboarding_completed_${user?.id}`);
+      
+      if (hasCompletedOnboarding === 'true') {
+        // User has completed onboarding before, redirect to feed
+        router.push('/feed');
+        return;
+      }
+      
+      const isComplete = await isProfileComplete();
+      if (isComplete) {
+        // Mark onboarding as completed and redirect
+        localStorage.setItem(`onboarding_completed_${user?.id}`, 'true');
+        router.push('/feed');
+      }
+    };
+    
+    if (profile && user?.id) {
+      checkProfileCompletion();
     }
-  }, [profile, router]);
+  }, [profile, user?.id, router]);
 
   // Initialize form data when profile loads
   useEffect(() => {
@@ -257,24 +290,55 @@ export default function OnboardingPage() {
         phone: profile.phone || '',
         email: profile.email || '',
         website: profile.website || '',
-        // Professional Details
-        certifications: profile.certifications || [],
-        skills: profile.skills || [],
-        languages: profile.languages || [],
-        years_of_experience: typeof profile.years_of_experience === 'number' ? profile.years_of_experience : 0,
-        current_position: profile.current_position || '',
-        current_institution: profile.current_institution || '',
-        npi_number: profile.npi_number || '',
-        dea_number: profile.dea_number || '',
-        // Research and Interests
-        research_interests: profile.research_interests || [],
-        clinical_interests: profile.clinical_interests || [],
-        teaching_experience: profile.teaching_experience || false,
-        mentoring_availability: profile.mentoring_availability || false,
       });
       setAvatarPreview(profile.avatar_url || null);
     }
   }, [profile]);
+
+  // Load experiences and educations from database
+  useEffect(() => {
+    const loadUserData = async () => {
+      if (!user?.id) return;
+
+      try {
+        const [userExperiences, userEducations, studentStatus] = await Promise.all([
+          getUserExperiences(user.id),
+          getUserEducations(user.id),
+          isCurrentStudent(user.id)
+        ]);
+
+        setExperiences(userExperiences);
+        setEducations(userEducations);
+        setIsStudent(studentStatus);
+        
+        // Calculate completion percentage
+        const requiredFields = [
+          profile?.full_name,
+          profile?.headline,
+          profile?.specialization && profile.specialization.length > 0,
+          profile?.bio,
+          profile?.location,
+          userEducations.length > 0, // At least one education entry - REQUIRED
+        ];
+        
+        // Only require experience if not a current student
+        if (!studentStatus) {
+          requiredFields.push(userExperiences.length > 0); // At least one experience entry - REQUIRED
+        }
+        
+        const completed = requiredFields.filter(field => field).length;
+        const percentage = Math.round((completed / requiredFields.length) * 100);
+        setCompletionPercentage(percentage);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error loading user experiences and educations:', error);
+        toast.error('Failed to load your profile data');
+        setLoading(false);
+      }
+    };
+
+    loadUserData();
+  }, [user?.id, profile]);
 
   const handleCompleteProfile = () => {
     setShowEditModal(true);
@@ -307,8 +371,8 @@ export default function OnboardingPage() {
     setEducations(prev => [...prev, {
       id: Date.now(),
       degree: '',
-      institution: '',
-      field_of_study: '',
+      school: '',
+      field: '',
       start_date: '',
       end_date: '',
       current: false,
@@ -353,7 +417,7 @@ export default function OnboardingPage() {
   };
 
   const handleNext = async () => {
-    const currentStepData = ONBOARDING_STEPS[currentStep];
+    const currentStepData = filteredSteps[currentStep];
     
     // Skip validation for welcome step since it has no fields
     if (currentStepData.type === 'welcome') {
@@ -361,55 +425,47 @@ export default function OnboardingPage() {
       return;
     }
     
-    // Validate required fields
-    if (currentStepData.required) {
-      if (currentStepData.type === 'image') {
-        if (!avatarPreview) {
-          toast.error('Please upload a profile picture');
-          return;
-        }
-      } else if (currentStepData.type === 'experience') {
-        if (experiences.length === 0) {
-          toast.error('Please add at least one work experience');
-          return;
-        }
-        // Validate that all experience entries have required fields
-        const hasValidExperience = experiences.some(exp => 
-          exp.title.trim() && exp.company.trim() && exp.start_date
-        );
-        if (!hasValidExperience) {
-          toast.error('Please fill in all required fields for at least one experience');
-          return;
-        }
-      } else if (currentStepData.type === 'education') {
-        if (educations.length === 0) {
-          toast.error('Please add at least one education entry');
-          return;
-        }
-        // Validate that all education entries have required fields
-        const hasValidEducation = educations.some(edu => 
-          edu.degree.trim() && edu.institution.trim() && edu.start_date
-        );
-        if (!hasValidEducation) {
-          toast.error('Please fill in all required fields for at least one education');
-          return;
-        }
-      } else {
-        const fieldValue = formData[currentStepData.field as keyof typeof formData];
-        if (!fieldValue || String(fieldValue).trim().length === 0) {
-          toast.error('This field is required');
-          return;
-        }
-      }
+    // Skip validation for student selection step since selection is handled in button click
+    if (currentStepData.type === 'student-selection') {
+      setCurrentStep(currentStep + 1);
+      return;
     }
+    
+    // Skip all validation for testing - all fields are optional
+    // For testing purposes, allow proceeding through all steps without validation
     
     // For optional image step, allow proceeding even without image
     if (currentStepData.type === 'image' && !currentStepData.required) {
       // Allow proceeding without image upload
     }
 
-    // If this is the second to last step (before the complete step), save the data
-    if (currentStep === ONBOARDING_STEPS.length - 2) {
+    // Save data when completing education step (after experience and education are filled)
+    console.log('Current step:', currentStep, 'Total steps:', filteredSteps.length);
+    console.log('Current step type:', filteredSteps[currentStep]?.type);
+    console.log('Experiences state:', experiences);
+    console.log('Educations state:', educations);
+    console.log('User ID:', user?.id);
+    console.log('Supabase client:', !!supabase);
+    
+    // Save data if we have experience or education data, regardless of current step
+    const hasExperienceData = experiences.some(e => e.title && e.company && e.start_date);
+    const hasEducationData = educations.some(e => e.degree && e.school && e.start_date);
+    
+    console.log('Has experience data:', hasExperienceData);
+    console.log('Has education data:', hasEducationData);
+    
+    if ((hasExperienceData || hasEducationData) && user?.id && supabase) {
+      console.log('Starting to save experience and education data...');
+      
+      // Test database connection first
+      const dbConnectionOk = await testDatabaseConnection();
+      console.log('Database connection test result:', dbConnectionOk);
+      
+      if (!dbConnectionOk) {
+        toast.error('Database connection failed. Please try again.');
+        return;
+      }
+      
       setLoading(true);
       try {
         let avatarUrl = formData.avatar_url;
@@ -428,13 +484,17 @@ export default function OnboardingPage() {
 
         // Save experience and education data
         if (user?.id && supabase) {
+          console.log('Saving experiences:', experiences);
+          console.log('Saving educations:', educations);
+          
           // Save experiences
           for (const experience of experiences) {
             if (experience.title && experience.company && experience.start_date) {
-              await supabase
+              console.log('Saving experience:', experience);
+              const { data, error } = await supabase
                 .from('experiences')
                 .upsert({
-                  user_id: user.id,
+                  profile_id: user.id,
                   title: experience.title,
                   company: experience.company,
                   location: experience.location || null,
@@ -443,26 +503,140 @@ export default function OnboardingPage() {
                   current: experience.current,
                   description: experience.description || null
                 });
+              
+              if (error) {
+                console.error('Error saving experience:', error);
+                throw new Error(`Failed to save experience: ${error.message}`);
+              } else {
+                console.log('Experience saved successfully:', data);
+              }
             }
           }
 
           // Save educations
           for (const education of educations) {
-            if (education.degree && education.institution && education.start_date) {
-              await supabase
+            if (education.degree && education.school && education.start_date) {
+              console.log('Saving education:', education);
+              const { data, error } = await supabase
                 .from('education')
                 .upsert({
-                  user_id: user.id,
+                  profile_id: user.id,
+                  school: education.school,
                   degree: education.degree,
-                  institution: education.institution,
-                  field_of_study: education.field_of_study || null,
+                  field: education.field || null,
                   start_date: education.start_date,
                   end_date: education.current ? null : (education.end_date || null),
                   current: education.current,
                   description: education.description || null
                 });
+              
+              if (error) {
+                console.error('Error saving education:', error);
+                throw new Error(`Failed to save education: ${error.message}`);
+              } else {
+                console.log('Education saved successfully:', data);
+              }
             }
           }
+        }
+
+        // Mark onboarding as completed
+        if (user?.id) {
+          localStorage.setItem(`onboarding_completed_${user.id}`, 'true');
+        }
+
+        await updateProfile({
+          ...formData,
+          avatar_url: avatarUrl,
+        });
+
+        setCurrentStep(currentStep + 1);
+        toast.success('Profile updated successfully!');
+      } catch (error: any) {
+        console.error('Error updating profile:', error);
+        toast.error(error.message || 'Failed to update profile');
+      } finally {
+        setLoading(false);
+      }
+    } else if (filteredSteps[currentStep]?.type === 'complete') {
+      // Also save data on the complete step as a fallback
+      console.log('Saving data on complete step as fallback...');
+      setLoading(true);
+      try {
+        let avatarUrl = formData.avatar_url;
+
+        // Upload avatar if changed
+        if (avatarFile && user?.id) {
+          const filePath = generateFilePath(user.id, avatarFile.name, 'avatars');
+          const { url, error } = await uploadToSupabaseStorage('avatars', filePath, avatarFile);
+          
+          if (error) {
+            throw new Error(error);
+          }
+          
+          avatarUrl = url;
+        }
+        // Save experience and education data
+        if (user?.id && supabase) {
+          console.log('Saving experiences:', experiences);
+          console.log('Saving educations:', educations);
+          
+          // Save experiences
+          for (const experience of experiences) {
+            if (experience.title && experience.company && experience.start_date) {
+              console.log('Saving experience:', experience);
+              const { data, error } = await supabase
+                .from('experiences')
+                .upsert({
+                  profile_id: user.id,
+                  title: experience.title,
+                  company: experience.company,
+                  location: experience.location || null,
+                  start_date: experience.start_date,
+                  end_date: experience.current ? null : (experience.end_date || null),
+                  current: experience.current,
+                  description: experience.description || null
+                });
+              
+              if (error) {
+                console.error('Error saving experience:', error);
+                throw new Error(`Failed to save experience: ${error.message}`);
+              } else {
+                console.log('Experience saved successfully:', data);
+              }
+            }
+          }
+
+          // Save educations
+          for (const education of educations) {
+            if (education.degree && education.school && education.start_date) {
+              console.log('Saving education:', education);
+              const { data, error } = await supabase
+                .from('education')
+                .upsert({
+                  profile_id: user.id,
+                  school: education.school,
+                  degree: education.degree,
+                  field: education.field || null,
+                  start_date: education.start_date,
+                  end_date: education.current ? null : (education.end_date || null),
+                  current: education.current,
+                  description: education.description || null
+                });
+              
+              if (error) {
+                console.error('Error saving education:', error);
+                throw new Error(`Failed to save education: ${error.message}`);
+              } else {
+                console.log('Education saved successfully:', data);
+              }
+            }
+          }
+        }
+
+        // Mark onboarding as completed
+        if (user?.id) {
+          localStorage.setItem(`onboarding_completed_${user.id}`, 'true');
         }
 
         await updateProfile({
@@ -490,49 +664,20 @@ export default function OnboardingPage() {
   };
 
   const canProceed = () => {
-    const currentStepData = ONBOARDING_STEPS[currentStep];
+    const currentStepData = filteredSteps[currentStep];
     
-    // Welcome step should always allow proceeding
-    if (currentStepData.type === 'welcome') {
-      return true;
-    }
-    
-    if (!currentStepData.required) return true;
-    
-    // Special handling for image step - allow proceeding if optional
-    if (currentStepData.type === 'image') {
-      return !currentStepData.required || avatarPreview !== null;
-    }
-    
-    // Special handling for experience step
-    if (currentStepData.type === 'experience') {
-      return experiences.length > 0 && experiences.some(exp => 
-        exp.title.trim() && exp.company.trim() && exp.start_date
-      );
-    }
-    
-    // Special handling for education step
-    if (currentStepData.type === 'education') {
-      return educations.length > 0 && educations.some(edu => 
-        edu.degree.trim() && edu.institution.trim() && edu.start_date
-      );
-    }
-    
-    const fieldValue = formData[currentStepData.field as keyof typeof formData];
-    if (currentStepData.type === 'select') {
-      return Array.isArray(fieldValue) && fieldValue.length > 0;
-    }
-    return fieldValue && String(fieldValue).trim().length > 0;
+    // For testing purposes, always allow proceeding through all steps
+    return true;
   };
 
   const handleSkip = () => {
-    if (currentStep < ONBOARDING_STEPS.length - 1) {
+    if (currentStep < filteredSteps.length - 1) {
       setCurrentStep(currentStep + 1);
     }
   };
 
   const renderStep = () => {
-    const step = ONBOARDING_STEPS[currentStep];
+    const step = filteredSteps[currentStep];
 
     switch (step.type) {
       case 'welcome':
@@ -567,6 +712,66 @@ export default function OnboardingPage() {
           </div>
         );
 
+      case 'student-selection':
+        return (
+          <div className="text-center max-w-2xl mx-auto">
+            <div className="w-24 h-24 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-8">
+              <AcademicCapIcon className="w-12 h-12 text-white" />
+            </div>
+            <h2 className="text-4xl font-bold text-gray-900 mb-6">{step.title}</h2>
+            <p className="text-xl text-gray-600 mb-10 leading-relaxed">{step.subtitle}</p>
+            
+            <div className="space-y-4">
+              <button
+                onClick={() => {
+                  setIsStudent(true);
+                  handleNext();
+                }}
+                className={`w-full p-6 rounded-xl border-2 transition-all duration-200 ${
+                  isStudent 
+                    ? 'border-azure-500 bg-azure-50 text-azure-700' 
+                    : 'border-gray-300 hover:border-azure-300 hover:bg-gray-50'
+                }`}
+              >
+                <div className="flex items-center justify-center space-x-3">
+                  <AcademicCapIcon className="w-8 h-8" />
+                  <div className="text-left">
+                    <h3 className="text-xl font-semibold">Yes, I'm a current student</h3>
+                    <p className="text-gray-600">Medical school, residency, or other healthcare education</p>
+                  </div>
+                </div>
+              </button>
+              
+              <button
+                onClick={() => {
+                  setIsStudent(false);
+                  handleNext();
+                }}
+                className={`w-full p-6 rounded-xl border-2 transition-all duration-200 ${
+                  !isStudent 
+                    ? 'border-azure-500 bg-azure-50 text-azure-700' 
+                    : 'border-gray-300 hover:border-azure-300 hover:bg-gray-50'
+                }`}
+              >
+                <div className="flex items-center justify-center space-x-3">
+                  <BriefcaseIcon className="w-8 h-8" />
+                  <div className="text-left">
+                    <h3 className="text-xl font-semibold">No, I'm a healthcare professional</h3>
+                    <p className="text-gray-600">Doctor, nurse, researcher, or other healthcare worker</p>
+                  </div>
+                </div>
+              </button>
+            </div>
+            
+            <div className="mt-8 bg-blue-50 rounded-xl p-4">
+              <p className="text-sm text-blue-800">
+                <InformationCircleIcon className="w-4 h-4 inline mr-1" />
+                Students will only need to add education information. Professionals will need both education and work experience.
+              </p>
+            </div>
+          </div>
+        );
+
       case 'input':
         return (
           <div className="max-w-2xl mx-auto">
@@ -584,7 +789,7 @@ export default function OnboardingPage() {
               value={formData[step.field as keyof typeof formData] as string}
               onChange={(e) => handleInputChange(step.field!, e.target.value)}
               placeholder={step.placeholder}
-              className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-azure-500 focus:border-azure-500 text-xl transition-all duration-200"
+              className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-gray-400 text-xl transition-all duration-200"
               autoFocus
             />
             {step.required && (
@@ -611,7 +816,7 @@ export default function OnboardingPage() {
               onChange={(e) => handleInputChange(step.field!, e.target.value)}
               placeholder={step.placeholder}
               rows={6}
-              className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-azure-500 focus:border-azure-500 text-lg resize-none transition-all duration-200"
+              className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-gray-400 text-lg resize-none transition-all duration-200"
               autoFocus
             />
             {step.required && (
@@ -623,40 +828,7 @@ export default function OnboardingPage() {
           </div>
         );
 
-      case 'select':
-        return (
-          <div className="max-w-2xl mx-auto">
-            <div className="flex items-center mb-6">
-              <StarIcon className="w-8 h-8 text-azure-500 mr-3" />
-              <div>
-                <h2 className="text-3xl font-bold text-gray-900">{step.title}</h2>
-                <p className="text-lg text-gray-600 mt-2">{step.subtitle}</p>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3 max-h-96 overflow-y-auto">
-              {step.options?.map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => handleInputChange(step.field!, [option])}
-                  className={`p-4 text-left rounded-xl border-2 transition-all duration-200 ${
-                    (formData[step.field as keyof typeof formData] as string[])?.includes(option)
-                      ? 'border-azure-500 bg-azure-50 text-azure-700'
-                      : 'border-gray-300 hover:border-gray-400 text-gray-700'
-                  }`}
-                >
-                  {option}
-                </button>
-              ))}
-            </div>
-            {step.required && (
-              <p className="text-sm text-gray-500 mt-2 flex items-center">
-                <ExclamationTriangleIcon className="w-4 h-4 mr-1" />
-                Please select your specialization
-              </p>
-            )}
-          </div>
-        );
+
 
       case 'image':
         return (
@@ -746,21 +918,21 @@ export default function OnboardingPage() {
                       placeholder="Job Title *"
                       value={experience.title}
                       onChange={(e) => updateExperience(index, 'title', e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent"
+                      className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
                     />
                     <input
                       type="text"
                       placeholder="Company *"
                       value={experience.company}
                       onChange={(e) => updateExperience(index, 'company', e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent"
+                      className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
                     />
                     <input
                       type="text"
                       placeholder="Location"
                       value={experience.location}
                       onChange={(e) => updateExperience(index, 'location', e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent"
+                      className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
                     />
                     <div className="flex items-center space-x-2">
                       <input
@@ -768,7 +940,7 @@ export default function OnboardingPage() {
                         placeholder="Start Date *"
                         value={experience.start_date}
                         onChange={(e) => updateExperience(index, 'start_date', e.target.value)}
-                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent"
+                        className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
                       />
                       <input
                         type="date"
@@ -776,7 +948,7 @@ export default function OnboardingPage() {
                         value={experience.end_date}
                         onChange={(e) => updateExperience(index, 'end_date', e.target.value)}
                         disabled={experience.current}
-                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent disabled:bg-gray-100"
+                        className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 disabled:bg-gray-100"
                       />
                     </div>
                     <div className="flex items-center space-x-2">
@@ -798,7 +970,7 @@ export default function OnboardingPage() {
                     value={experience.description}
                     onChange={(e) => updateExperience(index, 'description', e.target.value)}
                     rows={3}
-                    className="w-full mt-3 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent resize-none"
+                    className="w-full mt-3 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 resize-none"
                   />
                 </div>
               ))}
@@ -850,21 +1022,21 @@ export default function OnboardingPage() {
                       placeholder="Degree *"
                       value={education.degree}
                       onChange={(e) => updateEducation(index, 'degree', e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent"
+                      className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
                     />
                     <input
                       type="text"
-                      placeholder="Institution *"
-                      value={education.institution}
-                      onChange={(e) => updateEducation(index, 'institution', e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent"
+                      placeholder="School *"
+                      value={education.school}
+                      onChange={(e) => updateEducation(index, 'school', e.target.value)}
+                      className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
                     />
                     <input
                       type="text"
                       placeholder="Field of Study"
-                      value={education.field_of_study}
-                      onChange={(e) => updateEducation(index, 'field_of_study', e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent"
+                      value={education.field}
+                      onChange={(e) => updateEducation(index, 'field', e.target.value)}
+                      className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
                     />
                     <div className="flex items-center space-x-2">
                       <input
@@ -872,7 +1044,7 @@ export default function OnboardingPage() {
                         placeholder="Start Date *"
                         value={education.start_date}
                         onChange={(e) => updateEducation(index, 'start_date', e.target.value)}
-                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent"
+                        className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
                       />
                       <input
                         type="date"
@@ -880,7 +1052,7 @@ export default function OnboardingPage() {
                         value={education.end_date}
                         onChange={(e) => updateEducation(index, 'end_date', e.target.value)}
                         disabled={education.current}
-                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent disabled:bg-gray-100"
+                        className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 disabled:bg-gray-100"
                       />
                     </div>
                     <div className="flex items-center space-x-2">
@@ -902,7 +1074,7 @@ export default function OnboardingPage() {
                     value={education.description}
                     onChange={(e) => updateEducation(index, 'description', e.target.value)}
                     rows={3}
-                    className="w-full mt-3 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent resize-none"
+                    className="w-full mt-3 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 resize-none"
                   />
                 </div>
               ))}
@@ -918,7 +1090,7 @@ export default function OnboardingPage() {
             {step.required && (
               <p className="text-sm text-gray-500 mt-2 flex items-center">
                 <ExclamationTriangleIcon className="w-4 h-4 mr-1" />
-                Please add at least one education entry with degree, institution, and start date
+                Please add at least one education entry with degree, school, and start date
               </p>
             )}
           </div>
@@ -941,7 +1113,7 @@ export default function OnboardingPage() {
                 placeholder="Phone Number"
                 value={formData.phone}
                 onChange={(e) => handleInputChange('phone', e.target.value)}
-                className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-azure-500 focus:border-azure-500 text-lg transition-all duration-200"
+                className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-gray-400 text-lg transition-all duration-200"
                 autoFocus
               />
               <input
@@ -949,14 +1121,14 @@ export default function OnboardingPage() {
                 placeholder="Email Address"
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
-                className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-azure-500 focus:border-azure-500 text-lg transition-all duration-200"
+                className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-gray-400 text-lg transition-all duration-200"
               />
               <input
                 type="url"
                 placeholder="Website (optional)"
                 value={formData.website}
                 onChange={(e) => handleInputChange('website', e.target.value)}
-                className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-azure-500 focus:border-azure-500 text-lg transition-all duration-200"
+                className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-gray-400 text-lg transition-all duration-200"
               />
             </div>
             
@@ -981,43 +1153,7 @@ export default function OnboardingPage() {
             </div>
             
             <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input
-                  type="text"
-                  placeholder="NPI Number (US)"
-                  value={formData.npi_number}
-                  onChange={(e) => handleInputChange('npi_number', e.target.value)}
-                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent"
-                />
-                <input
-                  type="text"
-                  placeholder="DEA Number (US)"
-                  value={formData.dea_number}
-                  onChange={(e) => handleInputChange('dea_number', e.target.value)}
-                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent"
-                />
-                <input
-                  type="text"
-                  placeholder="Current Position"
-                  value={formData.current_position}
-                  onChange={(e) => handleInputChange('current_position', e.target.value)}
-                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent"
-                />
-                <input
-                  type="text"
-                  placeholder="Current Institution"
-                  value={formData.current_institution}
-                  onChange={(e) => handleInputChange('current_institution', e.target.value)}
-                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent"
-                />
-                <input
-                  type="number"
-                  placeholder="Years of Experience"
-                  value={formData.years_of_experience}
-                  onChange={(e) => handleInputChange('years_of_experience', parseInt(e.target.value) || 0)}
-                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent"
-                />
-              </div>
+
             </div>
             
             {!step.required && (
@@ -1029,79 +1165,7 @@ export default function OnboardingPage() {
           </div>
         );
 
-      case 'skills':
-        return (
-          <div className="max-w-2xl mx-auto">
-            <div className="flex items-center mb-6">
-              <StarIcon className="w-8 h-8 text-azure-500 mr-3" />
-              <div>
-                <h2 className="text-3xl font-bold text-gray-900">{step.title}</h2>
-                <p className="text-lg text-gray-600 mt-2">{step.subtitle}</p>
-              </div>
-            </div>
-            
-            <div className="space-y-4">
-              <textarea
-                placeholder="Enter your skills (comma-separated)"
-                value={Array.isArray(formData.skills) ? formData.skills.join(', ') : ''}
-                onChange={(e) => handleInputChange('skills', e.target.value.split(',').map(s => s.trim()).filter(s => s))}
-                rows={4}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent resize-none"
-              />
-              <div className="flex flex-wrap gap-2">
-                {Array.isArray(formData.skills) && formData.skills.map((skill, index) => (
-                  <span key={index} className="px-3 py-1 bg-azure-100 text-azure-700 rounded-full text-sm">
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
-            
-            {!step.required && (
-              <p className="text-sm text-gray-500 mt-2 flex items-center">
-                <ExclamationTriangleIcon className="w-4 h-4 mr-1" />
-                This step is optional - you can skip it
-              </p>
-            )}
-          </div>
-        );
 
-      case 'languages':
-        return (
-          <div className="max-w-2xl mx-auto">
-            <div className="flex items-center mb-6">
-              <MapPinIcon className="w-8 h-8 text-azure-500 mr-3" />
-              <div>
-                <h2 className="text-3xl font-bold text-gray-900">{step.title}</h2>
-                <p className="text-lg text-gray-600 mt-2">{step.subtitle}</p>
-              </div>
-            </div>
-            
-            <div className="space-y-4">
-              <textarea
-                placeholder="Enter languages you speak (comma-separated)"
-                value={Array.isArray(formData.languages) ? formData.languages.join(', ') : ''}
-                onChange={(e) => handleInputChange('languages', e.target.value.split(',').map(s => s.trim()).filter(s => s))}
-                rows={4}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent resize-none"
-              />
-              <div className="flex flex-wrap gap-2">
-                {Array.isArray(formData.languages) && formData.languages.map((language, index) => (
-                  <span key={index} className="px-3 py-1 bg-azure-100 text-azure-700 rounded-full text-sm">
-                    {language}
-                  </span>
-                ))}
-              </div>
-            </div>
-            
-            {!step.required && (
-              <p className="text-sm text-gray-500 mt-2 flex items-center">
-                <ExclamationTriangleIcon className="w-4 h-4 mr-1" />
-                This step is optional - you can skip it
-              </p>
-            )}
-          </div>
-        );
 
       case 'complete':
         return (
@@ -1112,14 +1176,16 @@ export default function OnboardingPage() {
             <h2 className="text-4xl font-bold text-gray-900 mb-6">{step.title}</h2>
             <p className="text-xl text-gray-600 mb-10">{step.subtitle}</p>
             <div className="bg-azure-50 rounded-xl p-6">
-              <h3 className="font-semibold text-azure-900 mb-4">Profile Completion: {getCompletionPercentage()}%</h3>
+              <h3 className="font-semibold text-azure-900 mb-4">Profile Completion: {completionPercentage}%</h3>
               <div className="w-full bg-gray-200 rounded-full h-3">
                 <div
                   className="bg-azure-500 h-3 rounded-full transition-all duration-500"
-                  style={{ width: `${getCompletionPercentage()}%` }}
+                  style={{ width: `${completionPercentage}%` }}
                 ></div>
               </div>
             </div>
+            
+
           </div>
         );
 
@@ -1128,9 +1194,16 @@ export default function OnboardingPage() {
     }
   };
 
-  // If profile is complete, redirect to feed
-  if (isProfileComplete()) {
-    return null;
+  // Show loading while checking profile completion
+  if (!profile || !user || loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-azure-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your profile...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -1154,12 +1227,12 @@ export default function OnboardingPage() {
               <div>
                 <h1 className="text-lg sm:text-xl font-semibold text-gray-900">Complete Your Profile</h1>
                 <p className="text-xs sm:text-sm text-gray-500">
-                  Step {currentStep + 1} of {ONBOARDING_STEPS.length}
+                  Step {currentStep + 1} of {filteredSteps.length}
                 </p>
               </div>
             </div>
             <div className="text-xs sm:text-sm text-gray-500">
-              {getCompletionPercentage()}% Complete
+              {completionPercentage}% Complete
             </div>
           </div>
         </div>
@@ -1168,7 +1241,7 @@ export default function OnboardingPage() {
         <div className="w-full bg-gray-200 h-1">
           <div
             className="bg-azure-500 h-1 transition-all duration-300"
-            style={{ width: `${((currentStep + 1) / ONBOARDING_STEPS.length) * 100}%` }}
+            style={{ width: `${((currentStep + 1) / filteredSteps.length) * 100}%` }}
           ></div>
         </div>
       </div>
@@ -1196,14 +1269,14 @@ export default function OnboardingPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
           <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             <div className="text-xs sm:text-sm text-gray-500">
-              {currentStep < ONBOARDING_STEPS.length - 1 && (
+              {currentStep < filteredSteps.length - 1 && (
                 <span>
-                  {getCompletionPercentage()}% Complete
+                  {completionPercentage}% Complete
                 </span>
               )}
             </div>
             <div className="flex space-x-3 sm:space-x-4 w-full sm:w-auto">
-              {currentStep < ONBOARDING_STEPS.length - 1 ? (
+              {currentStep < filteredSteps.length - 1 ? (
                 <>
                   <button
                     onClick={handlePrevious}
@@ -1232,7 +1305,7 @@ export default function OnboardingPage() {
                       </>
                     ) : (
                       <>
-                        <span>{currentStep === ONBOARDING_STEPS.length - 2 ? 'Complete' : 'Next'}</span>
+                        <span>{currentStep === filteredSteps.length - 2 ? 'Complete' : 'Next'}</span>
                         <ArrowRightIcon className="w-4 h-4" />
                       </>
                     )}
@@ -1256,10 +1329,11 @@ export default function OnboardingPage() {
         <EditProfileModal
           profile={profile}
           onClose={() => setShowEditModal(false)}
-          onUpdate={() => {
+          onUpdate={async () => {
             setShowEditModal(false);
             // Check if profile is now complete
-            if (isProfileComplete()) {
+            const isComplete = await isProfileComplete();
+            if (isComplete) {
               router.push('/feed');
             }
           }}

@@ -2906,6 +2906,70 @@ export async function getEventRegistrations(eventId: string): Promise<any[]> {
   }
 }
 
+// Get user's groups count
+export async function getUserGroupsCount(userId: string): Promise<number> {
+  try {
+    console.log('[Queries] Getting user groups count:', userId);
+    
+    // For now, return 0 as groups table doesn't exist yet
+    // This can be updated when groups functionality is implemented
+    return 0;
+  } catch (error) {
+    console.error('[Queries] Error getting user groups count:', error);
+    return 0;
+  }
+}
+
+// Get user's pages count
+export async function getUserPagesCount(userId: string): Promise<number> {
+  try {
+    console.log('[Queries] Getting user pages count:', userId);
+    
+    // For now, return 0 as pages table doesn't exist yet
+    // This can be updated when pages functionality is implemented
+    return 0;
+  } catch (error) {
+    console.error('[Queries] Error getting user pages count:', error);
+    return 0;
+  }
+}
+
+// Get user's newsletters count
+export async function getUserNewslettersCount(userId: string): Promise<number> {
+  try {
+    console.log('[Queries] Getting user newsletters count:', userId);
+    
+    // For now, return 0 as newsletters table doesn't exist yet
+    // This can be updated when newsletters functionality is implemented
+    return 0;
+  } catch (error) {
+    console.error('[Queries] Error getting user newsletters count:', error);
+    return 0;
+  }
+}
+
+// Get user's events count
+export async function getUserEventsCount(userId: string): Promise<number> {
+  try {
+    console.log('[Queries] Getting user events count:', userId);
+    
+    const { data, error } = await getSupabase()
+      .from('events')
+      .select('id')
+      .eq('organizer_id', userId);
+
+    if (error) {
+      console.error('[Queries] Error getting user events count:', error);
+      return 0;
+    }
+    
+    return data?.length || 0;
+  } catch (error) {
+    console.error('[Queries] Error getting user events count:', error);
+    return 0;
+  }
+}
+
 // Create test registrations for an event
 export async function createTestRegistrations(eventId: string): Promise<void> {
   try {
@@ -3381,5 +3445,68 @@ export async function getInstitutionPromotions(institutionId: string) {
   }
 
   return data || [];
+}
+
+// User Experience and Education Functions
+export async function getUserExperiences(userId: string) {
+  if (!supabase) {
+    console.error('Supabase client not initialized');
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from('experiences')
+    .select('*')
+    .eq('profile_id', userId)
+    .order('start_date', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching user experiences:', error);
+    return [];
+  }
+
+  return data || [];
+}
+
+export async function getUserEducations(userId: string) {
+  if (!supabase) {
+    console.error('Supabase client not initialized');
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from('education')
+    .select('*')
+    .eq('profile_id', userId)
+    .order('start_date', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching user educations:', error);
+    return [];
+  }
+
+  return data || [];
+}
+
+export async function isCurrentStudent(userId: string): Promise<boolean> {
+  if (!supabase) {
+    console.error('Supabase client not initialized');
+    return false;
+  }
+
+  // Check if user has any current education entries
+  const { data, error } = await supabase
+    .from('education')
+    .select('current')
+    .eq('profile_id', userId)
+    .eq('current', true)
+    .limit(1);
+
+  if (error) {
+    console.error('Error checking if user is current student:', error);
+    return false;
+  }
+
+  return data && data.length > 0;
 }
 

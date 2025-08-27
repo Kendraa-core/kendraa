@@ -3,7 +3,16 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { getProfile } from '@/lib/queries';
+import { 
+  getProfile, 
+  getConnectionCount,
+  getUserGroupsCount,
+  getUserPagesCount,
+  getUserNewslettersCount,
+  getUserEventsCount,
+  getExperiences,
+  getEducation
+} from '@/lib/queries';
 import Header from '@/components/layout/Header';
 import RightSidebar from '@/components/layout/RightSidebar';
 import LeftSidebar from '@/components/layout/LeftSidebar';
@@ -17,7 +26,6 @@ import {
   NewspaperIcon
 } from '@heroicons/react/24/outline';
 import { formatNumber } from '@/lib/utils';
-import { getConnectionCount } from '@/lib/queries';
 
 export default function DashboardLayout({
   children,
@@ -29,6 +37,10 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const [loading, setLoading] = useState(true);
   const [connectionCount, setConnectionCount] = useState(0);
+  const [groupsCount, setGroupsCount] = useState(0);
+  const [eventsCount, setEventsCount] = useState(0);
+  const [pagesCount, setPagesCount] = useState(0);
+  const [newslettersCount, setNewslettersCount] = useState(0);
 
   useEffect(() => {
     const loadUserProfile = async () => {
@@ -45,10 +57,6 @@ export default function DashboardLayout({
           await updateProfile(userProfile);
         }
 
-        // Load connection count for network sidebar
-        const connectionsCount = await getConnectionCount(user.id);
-        setConnectionCount(connectionsCount);
-
         // Calculate profile completion percentage
         const calculateProfileCompletion = () => {
           if (!userProfile) return 0;
@@ -58,8 +66,7 @@ export default function DashboardLayout({
             userProfile.headline,
             userProfile.bio,
             userProfile.location,
-            userProfile.avatar_url,
-            Array.isArray(userProfile.specialization) ? userProfile.specialization.length > 0 : userProfile.specialization
+            userProfile.avatar_url
           ];
           
           const completedFields = fields.filter(field => {
@@ -73,13 +80,38 @@ export default function DashboardLayout({
 
         const completionPercentage = calculateProfileCompletion();
         
-        // Redirect to onboarding if profile completion is below 80%
-        if (completionPercentage < 80) {
+        // Check if user has completed onboarding before
+        const hasCompletedOnboarding = localStorage.getItem(`onboarding_completed_${user.id}`);
+        
+        // Redirect to onboarding if completion is below 50% and onboarding hasn't been completed
+        if (completionPercentage < 50 && hasCompletedOnboarding !== 'true') {
           router.push('/onboarding');
           return;
         }
+
+        // Load all network data for sidebar
+        const [
+          connectionsCount,
+          groupsCount,
+          eventsCount,
+          pagesCount,
+          newslettersCount
+        ] = await Promise.all([
+          getConnectionCount(user.id),
+          getUserGroupsCount(user.id),
+          getUserEventsCount(user.id),
+          getUserPagesCount(user.id),
+          getUserNewslettersCount(user.id)
+        ]);
+        
+        setConnectionCount(connectionsCount);
+        setGroupsCount(groupsCount);
+        setEventsCount(eventsCount);
+        setPagesCount(pagesCount);
+        setNewslettersCount(newslettersCount);
       } catch (error) {
         console.error('Error loading user profile:', error);
+        // Redirect to onboarding on error for new users
         router.push('/onboarding');
         return;
       } finally {
@@ -144,7 +176,7 @@ export default function DashboardLayout({
                       <BuildingOfficeIcon className="w-5 h-5 text-gray-600" />
                       <span className="text-sm text-gray-700">Groups</span>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">5</span>
+                    <span className="text-sm font-medium text-gray-900">{formatNumber(groupsCount)}</span>
                   </div>
                   
                   <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
@@ -152,7 +184,7 @@ export default function DashboardLayout({
                       <CalendarDaysIcon className="w-5 h-5 text-gray-600" />
                       <span className="text-sm text-gray-700">Events</span>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">2</span>
+                    <span className="text-sm font-medium text-gray-900">{formatNumber(eventsCount)}</span>
                   </div>
                   
                   <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
@@ -160,7 +192,7 @@ export default function DashboardLayout({
                       <DocumentTextIcon className="w-5 h-5 text-gray-600" />
                       <span className="text-sm text-gray-700">Pages</span>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">267</span>
+                    <span className="text-sm font-medium text-gray-900">{formatNumber(pagesCount)}</span>
                   </div>
                   
                   <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
@@ -168,7 +200,7 @@ export default function DashboardLayout({
                       <NewspaperIcon className="w-5 h-5 text-gray-600" />
                       <span className="text-sm text-gray-700">Newsletters</span>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">34</span>
+                    <span className="text-sm font-medium text-gray-900">{formatNumber(newslettersCount)}</span>
                   </div>
                 </div>
                 
