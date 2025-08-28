@@ -112,10 +112,8 @@
     @apply min-h-[44px] min-w-[44px] sm:min-h-[40px] sm:min-w-[40px];
   }
 
-  /* Improved focus states */
-  *:focus {
-    @apply outline-none ring-2 ring-primary-500 ring-offset-2;
-  }
+  /* Improved focus states - removed global focus ring for cleaner UI */
+  /* Individual components can define their own focus states */
 
   /* Smooth transitions */
   * {
