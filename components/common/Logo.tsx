@@ -15,10 +15,10 @@ export default function Logo({
   variant = 'default' 
 }: LogoProps) {
   const sizeClasses = {
-    sm: 'h-12 w-auto',
-    md: 'h-16 w-auto',
-    lg: 'h-20 w-auto',
-    xl: 'h-24 w-auto'
+    sm: 'h-24 w-auto',
+    md: 'h-32 w-auto',
+    lg: 'h-40 w-auto',
+    xl: 'h-48 w-auto'
   };
 
   // If text-only variant, use CSS-based text
@@ -31,8 +31,8 @@ export default function Logo({
       <Image
         src="/Kendraa Logo (1).png"
         alt="Kendraa - Healthcare Professional Networking"
-        width={500}
-        height={120}
+        width={1000}
+        height={240}
         className="h-full w-auto object-contain"
         priority
       />
@@ -47,10 +47,10 @@ export function LogoText({
   variant = 'default' 
 }: LogoProps) {
   const sizeClasses = {
-    sm: 'text-base font-bold',
-    md: 'text-lg font-bold',
-    lg: 'text-xl font-bold',
-    xl: 'text-2xl font-bold'
+    sm: 'text-2xl font-bold',
+    md: 'text-3xl font-bold',
+    lg: 'text-4xl font-bold',
+    xl: 'text-5xl font-bold'
   };
 
   const variantClasses = {
