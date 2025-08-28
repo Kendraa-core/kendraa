@@ -149,10 +149,10 @@ export default function DashboardLayout({
       <div className="flex pt-16">
         {/* Left Sidebar - Desktop */}
         <div className="hidden lg:block lg:w-80 lg:fixed lg:left-0 lg:top-16 lg:bottom-0 lg:overflow-y-auto lg:bg-gray-50">
-          <div className="p-6">
+          <div className="p-6 h-full">
             {isNetworkPage ? (
               // Network-specific sidebar
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sticky top-8">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 h-full overflow-y-auto">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Manage my network</h2>
                 
                 <div className="space-y-1">
@@ -228,7 +228,7 @@ export default function DashboardLayout({
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 lg:ml-80">
+        <div className="flex-1 lg:ml-80 xl:mr-80">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex gap-8">
               {/* Center Content */}
@@ -237,14 +237,14 @@ export default function DashboardLayout({
                   {children}
                 </main>
               </div>
-
-              {/* Right Sidebar - Desktop */}
-              <div className="hidden xl:block xl:w-80 xl:flex-shrink-0">
-                <div className="py-8">
-                  <RightSidebar />
-                </div>
-              </div>
             </div>
+          </div>
+        </div>
+
+        {/* Right Sidebar - Desktop */}
+        <div className="hidden xl:block xl:w-80 xl:fixed xl:right-0 xl:top-16 xl:bottom-0 xl:overflow-y-auto xl:bg-gray-50">
+          <div className="p-6 h-full">
+            <RightSidebar />
           </div>
         </div>
       </div>

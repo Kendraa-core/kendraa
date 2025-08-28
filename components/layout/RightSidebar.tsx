@@ -167,7 +167,7 @@ export default function RightSidebar() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 h-full">
       {/* Top Medical News Card */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-4">

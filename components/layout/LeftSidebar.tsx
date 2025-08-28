@@ -100,7 +100,7 @@ export default function LeftSidebar() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 h-full">
       {/* Profile Widget */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
         <div className="text-center">
