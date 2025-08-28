@@ -119,7 +119,16 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
               
               {/* Search Bar */}
               <div className="hidden sm:block flex-1 max-w-md ml-2">
-                <div className="relative group">
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (searchQuery.trim()) {
+                      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+                      setIsSearchFocused(false);
+                    }
+                  }}
+                  className="relative group"
+                >
                   <input
                     ref={searchInputRef}
                     type="text"
@@ -141,6 +150,7 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
                       <div className="p-2">
                         <div className="text-xs font-medium text-gray-500 px-2 py-1">Quick Search</div>
                         <button 
+                          type="button"
                           onClick={() => router.push(`/search?q=${encodeURIComponent(searchQuery)}`)}
                           className="w-full text-left px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg flex items-center space-x-2"
                         >
@@ -151,6 +161,7 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
                         {['Healthcare Jobs', 'Medical Events', 'Doctors', 'Nurses'].map((suggestion) => (
                           <button 
                             key={suggestion}
+                            type="button"
                             onClick={() => setSearchQuery(suggestion)}
                             className="w-full text-left px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-50 rounded-lg"
                           >
@@ -160,7 +171,7 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
                       </div>
                     </div>
                   )}
-                </div>
+                </form>
               </div>
             </div>
 

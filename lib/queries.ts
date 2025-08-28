@@ -2072,6 +2072,8 @@ export async function searchUsers(query: string): Promise<Array<{
   id: string;
   full_name: string;
   headline?: string;
+  bio?: string;
+  location?: string;
   avatar_url?: string;
   user_type: 'individual' | 'institution';
 }>> {
@@ -2080,8 +2082,8 @@ export async function searchUsers(query: string): Promise<Array<{
     
     const { data, error } = await getSupabase()
       .from('profiles')
-      .select('id, full_name, headline, avatar_url, user_type')
-      .or(`full_name.ilike.%${query}%,headline.ilike.%${query}%`)
+      .select('id, full_name, headline, bio, location, avatar_url, user_type')
+      .or(`full_name.ilike.%${query}%,headline.ilike.%${query}%,bio.ilike.%${query}%`)
       .not('full_name', 'is', null)
       .limit(10);
 
@@ -2094,6 +2096,85 @@ export async function searchUsers(query: string): Promise<Array<{
     return data || [];
   } catch (error) {
     console.error('[Queries] Error in searchUsers:', error);
+    return [];
+  }
+}
+
+// Search jobs
+export async function searchJobs(query: string): Promise<Array<{
+  id: string;
+  title: string;
+  description: string;
+  company: string;
+  location: string;
+  type: string;
+  salary_min?: number;
+  salary_max?: number;
+  created_at: string;
+}>> {
+  try {
+    console.log('[Queries] Searching jobs with query:', query);
+    
+    const { data, error } = await getSupabase()
+      .from('jobs')
+      .select('*')
+      .or(`title.ilike.%${query}%,description.ilike.%${query}%,company.ilike.%${query}%,location.ilike.%${query}%`)
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    if (error) {
+      console.error('[Queries] Error searching jobs:', error);
+      return [];
+    }
+
+    console.log('[Queries] Search results:', data?.length || 0, 'jobs found');
+    return data || [];
+  } catch (error) {
+    console.error('[Queries] Error in searchJobs:', error);
+    return [];
+  }
+}
+
+// Search events
+export async function searchEvents(query: string): Promise<Array<{
+  id: string;
+  title: string;
+  description: string;
+  location: string;
+  date: string;
+  organizer_id: string;
+  organizer_name: string;
+  attendees_count: number;
+  created_at: string;
+}>> {
+  try {
+    console.log('[Queries] Searching events with query:', query);
+    
+    const { data, error } = await getSupabase()
+      .from('events')
+      .select(`
+        *,
+        organizer:profiles!events_organizer_id_fkey(full_name)
+      `)
+      .or(`title.ilike.%${query}%,description.ilike.%${query}%,location.ilike.%${query}%`)
+      .order('date', { ascending: true })
+      .limit(20);
+
+    if (error) {
+      console.error('[Queries] Error searching events:', error);
+      return [];
+    }
+
+    // Transform the data to include organizer name
+    const transformedData = data?.map(event => ({
+      ...event,
+      organizer_name: event.organizer?.full_name || 'Unknown Organizer'
+    })) || [];
+
+    console.log('[Queries] Search results:', transformedData.length, 'events found');
+    return transformedData;
+  } catch (error) {
+    console.error('[Queries] Error in searchEvents:', error);
     return [];
   }
 }
