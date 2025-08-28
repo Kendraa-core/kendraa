@@ -229,7 +229,7 @@ export default function DashboardLayout({
 
         {/* Main Content Area */}
         <div className="flex-1 lg:ml-80 xl:mr-80">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="w-full px-4 sm:px-6 lg:px-8">
             <div className="flex justify-center">
               {/* Center Content */}
               <div className="w-full max-w-2xl">

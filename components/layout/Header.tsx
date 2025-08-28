@@ -92,7 +92,7 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
   return (
     <>
       <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Left Section - Logo and Search */}
             <div className="flex items-center space-x-4 w-80">
@@ -107,7 +107,7 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
             </div>
 
             {/* Center Section - Navigation */}
-            <div className="flex-1 flex justify-center px-4">
+            <div className="flex-1 flex justify-center">
               <nav className="hidden md:flex items-center space-x-16">
                 {navigationItems.map((item) => {
                   const isActive = pathname === item.href;
