@@ -165,7 +165,7 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
             </div>
 
             {/* Center Section - Navigation */}
-            <div className="flex-1 flex justify-center">
+            <div className="flex-1 flex justify-center px-8">
               <nav className="hidden md:flex items-center space-x-16">
                 {navigationItems.map((item) => {
                   const isActive = pathname === item.href;
@@ -192,7 +192,7 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
             </div>
 
             {/* Right Section - User controls */}
-            <div className="flex items-center justify-end space-x-4 w-80">
+            <div className="flex items-center justify-end space-x-4 w-[500px]">
               {/* Notifications */}
               <div className="relative" ref={notificationsDropdownRef}>
                 <button
