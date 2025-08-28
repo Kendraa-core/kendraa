@@ -112,13 +112,13 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Left Section - Logo and Search */}
-            <div className="flex items-center space-x-4 w-80">
+            <div className="flex items-center space-x-4 w-96">
               <Link href="/feed" className="flex items-center">
                 <Logo size="lg" />
               </Link>
               
               {/* Search Bar */}
-              <div className="hidden sm:block flex-1 max-w-xs ml-2">
+              <div className="hidden sm:block flex-1 max-w-sm ml-2">
                 <div className="relative group">
                   <input
                     ref={searchInputRef}
