@@ -540,11 +540,6 @@ export default function OnboardingPage() {
           }
         }
 
-        // Mark onboarding as completed
-        if (user?.id) {
-          localStorage.setItem(`onboarding_completed_${user.id}`, 'true');
-        }
-
         await updateProfile({
           ...formData,
           avatar_url: avatarUrl,
@@ -632,11 +627,6 @@ export default function OnboardingPage() {
               }
             }
           }
-        }
-
-        // Mark onboarding as completed
-        if (user?.id) {
-          localStorage.setItem(`onboarding_completed_${user.id}`, 'true');
         }
 
         await updateProfile({
@@ -1313,7 +1303,13 @@ export default function OnboardingPage() {
                 </>
               ) : (
                 <button
-                  onClick={() => router.push('/feed')}
+                  onClick={async () => {
+                    // Mark onboarding as completed
+                    if (user?.id) {
+                      localStorage.setItem(`onboarding_completed_${user.id}`, 'true');
+                    }
+                    router.push('/feed');
+                  }}
                   className="w-full sm:w-auto px-8 py-3 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 transition-colors"
                 >
                   Get Started
