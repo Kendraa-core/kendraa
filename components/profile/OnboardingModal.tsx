@@ -736,7 +736,7 @@ export default function OnboardingPage() {
                 <div className="flex items-center justify-center space-x-3">
                   <AcademicCapIcon className="w-8 h-8" />
                   <div className="text-left">
-                    <h3 className="text-xl font-semibold">Yes, I'm a current student</h3>
+                    <h3 className="text-xl font-semibold">Yes, I&apos;m a current student</h3>
                     <p className="text-gray-600">Medical school, residency, or other healthcare education</p>
                   </div>
                 </div>
@@ -756,7 +756,7 @@ export default function OnboardingPage() {
                 <div className="flex items-center justify-center space-x-3">
                   <BriefcaseIcon className="w-8 h-8" />
                   <div className="text-left">
-                    <h3 className="text-xl font-semibold">No, I'm a healthcare professional</h3>
+                    <h3 className="text-xl font-semibold">No, I&apos;m a healthcare professional</h3>
                     <p className="text-gray-600">Doctor, nurse, researcher, or other healthcare worker</p>
                   </div>
                 </div>

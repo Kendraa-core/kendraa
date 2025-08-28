@@ -662,7 +662,7 @@ export default function ProfilePage() {
     return (
       <div className="text-center py-12">
         <h2 className="text-xl font-semibold text-gray-900 mb-2">Profile not found</h2>
-        <p className="text-gray-600">The profile you're looking for doesn't exist.</p>
+        <p className="text-gray-600">The profile you&apos;re looking for doesn&apos;t exist.</p>
       </div>
     );
   }
