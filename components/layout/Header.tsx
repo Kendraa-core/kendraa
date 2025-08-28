@@ -95,7 +95,7 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Left Section - Logo and Search */}
-            <div className="flex items-center space-x-4 w-1/3">
+            <div className="flex items-center space-x-4 w-80">
               <Link href="/feed" className="flex items-center">
                 <Logo size="lg" />
               </Link>
@@ -107,8 +107,8 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
             </div>
 
             {/* Center Section - Navigation */}
-            <div className="flex-1 flex justify-center w-1/3">
-              <nav className="hidden md:flex items-center space-x-12">
+            <div className="flex-1 flex justify-center">
+              <nav className="hidden md:flex items-center space-x-16">
                 {navigationItems.map((item) => {
                   const isActive = pathname === item.href;
                   return (
@@ -116,7 +116,7 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
                       key={item.name}
                       href={item.href}
                       className={cn(
-                        'flex flex-col items-center justify-center w-16 h-12 rounded-lg transition-colors relative',
+                        'flex flex-col items-center justify-center w-20 h-12 rounded-lg transition-colors relative',
                         pathname === item.href
                           ? 'text-azure-500'
                           : 'text-gray-600 hover:text-azure-500'
@@ -133,7 +133,7 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
             </div>
 
             {/* Right Section - User controls */}
-            <div className="flex items-center justify-end space-x-3 w-1/3">
+            <div className="flex items-center justify-end space-x-3 w-80">
               {/* Menu/Apps Button */}
               <button className="w-10 h-10 bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-azure-500 rounded-full flex items-center justify-center transition-all duration-200">
                 <Squares2X2Icon className="w-5 h-5" />
