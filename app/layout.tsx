@@ -13,6 +13,11 @@ export const metadata: Metadata = {
   description: 'Connect, collaborate, and grow with healthcare professionals worldwide',
   keywords: 'healthcare, medical, professionals, network, collaboration',
   authors: [{ name: 'Kendraa Team' }],
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/favicon.ico',
+  },
 };
 
 export const viewport: Viewport = {

@@ -29,7 +29,7 @@ export default function Logo({
   return (
     <div className={`${sizeClasses[size]} ${className}`}>
       <Image
-        src="/mainlogo.png"
+        src="/Kendraa Logo (1).png"
         alt="Kendraa - Healthcare Professional Networking"
         width={300}
         height={80}
