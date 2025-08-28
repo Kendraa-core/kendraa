@@ -125,25 +125,25 @@ export default function LandingPage() {
         {/* Header */}
         <header className="relative z-10">
           <div className="max-w-7xl mx-auto px-4">
-            <div className="flex justify-between items-center py-16">
+            <div className="flex justify-between items-center py-8">
               <div className="flex items-center">
                 <Logo size="xl" />
               </div>
 
               <nav className="hidden md:flex items-center space-x-8">
-                <a href="#about" className="text-lg text-gray-600 hover:text-primary-600 transition-colors">About</a>
-                <a href="#features" className="text-lg text-gray-600 hover:text-primary-600 transition-colors">Features</a>
-                <a href="#values" className="text-lg text-gray-600 hover:text-primary-600 transition-colors">Values</a>
-                <a href="#team" className="text-lg text-gray-600 hover:text-primary-600 transition-colors">Team</a>
+                <a href="#about" className="text-base text-gray-600 hover:text-primary-600 transition-colors">About</a>
+                <a href="#features" className="text-base text-gray-600 hover:text-primary-600 transition-colors">Features</a>
+                <a href="#values" className="text-base text-gray-600 hover:text-primary-600 transition-colors">Values</a>
+                <a href="#team" className="text-base text-gray-600 hover:text-primary-600 transition-colors">Team</a>
               </nav>
 
-              <div className="flex items-center space-x-6">
-                <Link href="/signin" className="text-lg text-gray-600 hover:text-primary-600 transition-colors">
+              <div className="flex items-center space-x-4">
+                <Link href="/signin" className="text-base text-gray-600 hover:text-primary-600 transition-colors">
                   Sign In
                 </Link>
                 <Link 
                   href="/signup" 
-                  className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 rounded-lg transition-colors font-medium text-lg"
+                  className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg transition-colors font-medium"
                 >
                   Join Now
                 </Link>
@@ -469,7 +469,7 @@ export default function LandingPage() {
       {/* Header */}
       <header className="relative z-10">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex justify-between items-center py-16">
+          <div className="flex justify-between items-center py-8">
             <div className="flex items-center">
               <Logo size="xl" />
             </div>
