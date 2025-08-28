@@ -112,7 +112,7 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Left Section - Logo and Search */}
-            <div className="flex items-center space-x-4 w-[500px]">
+            <div className="flex items-center space-x-4 w-[450px] justify-start">
               <Link href="/feed" className="flex items-center">
                 <Logo size="lg" />
               </Link>
@@ -192,7 +192,7 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
             </div>
 
             {/* Right Section - User controls */}
-            <div className="flex items-center justify-end space-x-4 w-[500px]">
+            <div className="flex items-center justify-end space-x-4 w-[450px]">
               {/* Notifications */}
               <div className="relative" ref={notificationsDropdownRef}>
                 <button
