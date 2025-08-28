@@ -193,11 +193,6 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
 
             {/* Right Section - User controls */}
             <div className="flex items-center justify-end space-x-4 w-80">
-              {/* Menu/Apps Button */}
-              <button className="w-10 h-10 bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-azure-500 rounded-full flex items-center justify-center transition-all duration-200">
-                <Squares2X2Icon className="w-5 h-5" />
-              </button>
-
               {/* Notifications */}
               <div className="relative" ref={notificationsDropdownRef}>
                 <button
