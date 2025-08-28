@@ -15,10 +15,10 @@ export default function Logo({
   variant = 'default' 
 }: LogoProps) {
   const sizeClasses = {
-    sm: 'h-16 w-auto',
-    md: 'h-20 w-auto',
-    lg: 'h-24 w-auto',
-    xl: 'h-28 w-auto'
+    sm: 'h-32 w-auto',
+    md: 'h-40 w-auto',
+    lg: 'h-48 w-auto',
+    xl: 'h-56 w-auto'
   };
 
   // If text-only variant, use CSS-based text
@@ -47,10 +47,10 @@ export function LogoText({
   variant = 'default' 
 }: LogoProps) {
   const sizeClasses = {
-    sm: 'text-lg font-bold',
-    md: 'text-xl font-bold',
-    lg: 'text-2xl font-bold',
-    xl: 'text-3xl font-bold'
+    sm: 'text-2xl font-bold',
+    md: 'text-3xl font-bold',
+    lg: 'text-4xl font-bold',
+    xl: 'text-5xl font-bold'
   };
 
   const variantClasses = {

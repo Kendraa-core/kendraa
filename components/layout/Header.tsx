@@ -93,16 +93,17 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
     <>
       <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            {/* Left Side */}
-            <div className="flex items-center space-x-6">
-              {/* Logo */}
+          <div className="flex items-center justify-between h-32">
+            {/* Left Side - Logo */}
+            <div className="flex items-center">
               <Link href="/feed" className="flex items-center">
                 <Logo size="xl" />
               </Link>
+            </div>
 
-              {/* Desktop Navigation */}
-              <nav className="hidden md:flex items-center space-x-3">
+            {/* Center - Navigation with padding */}
+            <div className="flex-1 flex justify-center px-8">
+              <nav className="hidden md:flex items-center space-x-8">
                 {navigationItems.map((item) => {
                   const isActive = pathname === item.href;
                   return (
@@ -110,13 +111,13 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
                       key={item.name}
                       href={item.href}
                       className={cn(
-                        'hidden lg:inline-flex items-center px-4 py-2 text-base font-medium rounded-lg transition-colors',
+                        'hidden lg:inline-flex items-center px-6 py-3 text-lg font-medium rounded-xl transition-colors',
                         pathname === item.href
-                          ? 'text-azure-500 bg-azure-50'
+                          ? 'text-azure-500 bg-azure-50 border-b-2 border-azure-500'
                           : 'text-gray-600 hover:text-azure-500 hover:bg-gray-50'
                       )}
                     >
-                      <item.icon className="w-5 h-5 mr-2" />
+                      <item.icon className="w-6 h-6 mr-3" />
                       <span className="hidden lg:inline">{item.name}</span>
                     </Link>
                   );
@@ -124,8 +125,8 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
               </nav>
             </div>
 
-            {/* Right Side */}
-            <div className="flex items-center space-x-4">
+            {/* Right Side - User controls */}
+            <div className="flex items-center space-x-6">
               {/* Search - Hidden on mobile */}
               <div className="hidden sm:block">
                 <UserSearch />
@@ -135,11 +136,11 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
               <div className="relative" ref={notificationsDropdownRef}>
                 <button
                   onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                  className="p-2 text-gray-600 hover:text-azure-500 hover:bg-gray-50 rounded-lg transition-all duration-200 relative"
+                  className="p-3 text-gray-600 hover:text-azure-500 hover:bg-gray-50 rounded-xl transition-all duration-200 relative"
                 >
-                  <BellIcon className="w-6 h-6" />
+                  <BellIcon className="w-8 h-8" />
                   {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center">
                       {unreadCount}
                     </span>
                   )}
@@ -208,14 +209,14 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
               <div className="relative" ref={profileDropdownRef}>
                 <button
                   onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                  className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-50 transition-colors"
                 >
                   <Avatar
                     src={profile?.avatar_url}
                     alt={profile?.full_name || user?.email || 'User'}
-                    size="sm"
+                    size="md"
                   />
-                  <ChevronDownIcon className="w-4 h-4 text-gray-500" />
+                  <ChevronDownIcon className="w-5 h-5 text-gray-500" />
                 </button>
 
                 {/* Profile Dropdown */}

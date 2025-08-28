@@ -146,9 +146,9 @@ export default function DashboardLayout({
       <Header />
       
       {/* Main Content */}
-      <div className="flex pt-16">
+      <div className="flex pt-32">
         {/* Left Sidebar - Desktop */}
-        <div className="hidden lg:block lg:w-80 lg:fixed lg:left-0 lg:top-16 lg:bottom-0 lg:overflow-y-auto lg:bg-gray-50">
+        <div className="hidden lg:block lg:w-80 lg:fixed lg:left-0 lg:top-32 lg:bottom-0 lg:overflow-y-auto lg:bg-gray-50">
           <div className="p-6 h-full">
             {isNetworkPage ? (
               // Network-specific sidebar
@@ -242,7 +242,7 @@ export default function DashboardLayout({
         </div>
 
         {/* Right Sidebar - Desktop */}
-        <div className="hidden xl:block xl:w-80 xl:fixed xl:right-0 xl:top-16 xl:bottom-0 xl:overflow-y-auto xl:bg-gray-50">
+        <div className="hidden xl:block xl:w-80 xl:fixed xl:right-0 xl:top-32 xl:bottom-0 xl:overflow-y-auto xl:bg-gray-50">
           <div className="p-6 h-full">
             <RightSidebar />
           </div>
