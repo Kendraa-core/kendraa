@@ -125,9 +125,9 @@ export default function LandingPage() {
         {/* Header */}
         <header className="relative z-10">
           <div className="max-w-7xl mx-auto px-4">
-            <div className="flex justify-between items-center py-6">
-              <div className="flex items-center space-x-2">
-                <Logo />
+            <div className="flex justify-between items-center py-8">
+              <div className="flex items-center">
+                <Logo size="lg" />
               </div>
 
               <nav className="hidden md:flex items-center space-x-8">
@@ -398,8 +398,8 @@ export default function LandingPage() {
           <div className="max-w-7xl mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               <div>
-                <div className="flex items-center space-x-3 mb-4">
-                  <Logo />
+                <div className="flex items-center mb-6">
+                  <Logo size="lg" />
                 </div>
                 <p className="text-gray-400 mb-4">
                   The world&apos;s premier professional network designed exclusively for healthcare professionals. 
@@ -469,9 +469,9 @@ export default function LandingPage() {
       {/* Header */}
       <header className="relative z-10">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center space-x-2">
-              <Logo />
+          <div className="flex justify-between items-center py-8">
+            <div className="flex items-center">
+              <Logo size="lg" />
             </div>
 
             <nav className="hidden md:flex items-center space-x-8">
@@ -824,8 +824,8 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <div className="flex items-center space-x-3 mb-4">
-                <Logo />
+              <div className="flex items-center mb-6">
+                <Logo size="lg" />
               </div>
               <p className="text-gray-400 mb-4">
                 The world&apos;s premier professional network designed exclusively for healthcare professionals. 
