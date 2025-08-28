@@ -46,8 +46,11 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showProfileWizard, setShowProfileWizard] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
   const notificationsDropdownRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Click outside handler
   useEffect(() => {
@@ -62,6 +65,19 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Keyboard shortcut for search
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+        event.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const navigationItems = useMemo(() => [
@@ -103,13 +119,47 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
               
               {/* Search Bar */}
               <div className="hidden sm:block flex-1 max-w-xs ml-2">
-                <div className="relative">
+                <div className="relative group">
                   <input
+                    ref={searchInputRef}
                     type="text"
-                    placeholder="Search Kendraa..."
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 focus:ring-2 focus:ring-azure-500 focus:border-transparent outline-none text-sm"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => setIsSearchFocused(true)}
+                    onBlur={() => setIsSearchFocused(false)}
+                    placeholder="Search people, jobs, events..."
+                    className="w-full pl-10 pr-16 py-2.5 border border-gray-200 rounded-xl bg-white text-gray-900 focus:ring-2 focus:ring-azure-500 focus:border-azure-500 outline-none text-sm transition-all duration-200 hover:border-gray-300 shadow-sm"
                   />
-                  <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-azure-500 transition-colors duration-200" />
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-xs font-medium text-gray-400 bg-gray-100 rounded border border-gray-200">⌘K</kbd>
+                  </div>
+                  
+                  {/* Search suggestions dropdown */}
+                  {isSearchFocused && searchQuery && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-50 max-h-64 overflow-y-auto">
+                      <div className="p-2">
+                        <div className="text-xs font-medium text-gray-500 px-2 py-1">Quick Search</div>
+                        <button 
+                          onClick={() => router.push(`/search?q=${encodeURIComponent(searchQuery)}`)}
+                          className="w-full text-left px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg flex items-center space-x-2"
+                        >
+                          <MagnifyingGlassIcon className="w-4 h-4 text-gray-400" />
+                          <span>Search for &quot;{searchQuery}&quot;</span>
+                        </button>
+                        <div className="text-xs font-medium text-gray-500 px-2 py-1 mt-2">Popular Searches</div>
+                        {['Healthcare Jobs', 'Medical Events', 'Doctors', 'Nurses'].map((suggestion) => (
+                          <button 
+                            key={suggestion}
+                            onClick={() => setSearchQuery(suggestion)}
+                            className="w-full text-left px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-50 rounded-lg"
+                          >
+                            {suggestion}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
