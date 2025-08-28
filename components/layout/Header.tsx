@@ -94,20 +94,20 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
       <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Left Side - Logo at corner */}
-            <div className="flex items-center space-x-4 pr-16">
+            {/* Left Section - Logo and Search */}
+            <div className="flex items-center space-x-4 w-1/3">
               <Link href="/feed" className="flex items-center">
                 <Logo size="lg" />
               </Link>
               
               {/* Search Bar */}
-              <div className="hidden sm:block">
+              <div className="hidden sm:block flex-1 max-w-xs">
                 <UserSearch />
               </div>
             </div>
 
-            {/* Center - Navigation with padding */}
-            <div className="flex-1 flex justify-center px-16">
+            {/* Center Section - Navigation */}
+            <div className="flex-1 flex justify-center w-1/3">
               <nav className="hidden md:flex items-center space-x-12">
                 {navigationItems.map((item) => {
                   const isActive = pathname === item.href;
@@ -116,29 +116,36 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
                       key={item.name}
                       href={item.href}
                       className={cn(
-                        'hidden lg:inline-flex items-center px-4 py-2 text-base font-medium rounded-lg transition-colors',
+                        'flex flex-col items-center justify-center w-16 h-12 rounded-lg transition-colors relative',
                         pathname === item.href
-                          ? 'text-azure-500 bg-azure-50 border-b-2 border-azure-500'
-                          : 'text-gray-600 hover:text-azure-500 hover:bg-gray-50'
+                          ? 'text-azure-500'
+                          : 'text-gray-600 hover:text-azure-500'
                       )}
                     >
-                      <item.icon className="w-5 h-5 mr-2" />
-                      <span className="hidden lg:inline">{item.name}</span>
+                      <item.icon className="w-6 h-6 mb-1" />
+                      {pathname === item.href && (
+                        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-azure-500 rounded-full"></div>
+                      )}
                     </Link>
                   );
                 })}
               </nav>
             </div>
 
-            {/* Right Side - User controls */}
-            <div className="flex items-center space-x-4 pl-16">
+            {/* Right Section - User controls */}
+            <div className="flex items-center justify-end space-x-3 w-1/3">
+              {/* Menu/Apps Button */}
+              <button className="w-10 h-10 bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-azure-500 rounded-full flex items-center justify-center transition-all duration-200">
+                <Squares2X2Icon className="w-5 h-5" />
+              </button>
+
               {/* Notifications */}
               <div className="relative" ref={notificationsDropdownRef}>
                 <button
                   onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                  className="p-2 text-gray-600 hover:text-azure-500 hover:bg-gray-50 rounded-lg transition-all duration-200 relative"
+                  className="w-10 h-10 bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-azure-500 rounded-full flex items-center justify-center transition-all duration-200 relative"
                 >
-                  <BellIcon className="w-6 h-6" />
+                  <BellIcon className="w-5 h-5" />
                   {unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                       {unreadCount}
@@ -209,7 +216,7 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
               <div className="relative" ref={profileDropdownRef}>
                 <button
                   onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                  className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center space-x-2 p-1 rounded-full hover:bg-gray-100 transition-colors"
                 >
                   <Avatar
                     src={profile?.avatar_url}
