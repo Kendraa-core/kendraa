@@ -101,13 +101,13 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
               </Link>
               
               {/* Search Bar */}
-              <div className="hidden sm:block flex-1 max-w-xs">
+              <div className="hidden sm:block flex-1 max-w-xs ml-2">
                 <UserSearch />
               </div>
             </div>
 
             {/* Center Section - Navigation */}
-            <div className="flex-1 flex justify-center">
+            <div className="flex-1 flex justify-center px-4">
               <nav className="hidden md:flex items-center space-x-16">
                 {navigationItems.map((item) => {
                   const isActive = pathname === item.href;
@@ -133,7 +133,7 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
             </div>
 
             {/* Right Section - User controls */}
-            <div className="flex items-center justify-end space-x-3 w-80">
+            <div className="flex items-center justify-end space-x-4 w-80">
               {/* Menu/Apps Button */}
               <button className="w-10 h-10 bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-azure-500 rounded-full flex items-center justify-center transition-all duration-200">
                 <Squares2X2Icon className="w-5 h-5" />
