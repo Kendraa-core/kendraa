@@ -95,7 +95,7 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Left Side - Logo at corner */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 pr-16">
               <Link href="/feed" className="flex items-center">
                 <Logo size="lg" />
               </Link>
@@ -107,8 +107,8 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
             </div>
 
             {/* Center - Navigation with padding */}
-            <div className="flex-1 flex justify-center px-8">
-              <nav className="hidden md:flex items-center space-x-8">
+            <div className="flex-1 flex justify-center px-16">
+              <nav className="hidden md:flex items-center space-x-12">
                 {navigationItems.map((item) => {
                   const isActive = pathname === item.href;
                   return (
@@ -131,7 +131,7 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
             </div>
 
             {/* Right Side - User controls */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 pl-16">
               {/* Notifications */}
               <div className="relative" ref={notificationsDropdownRef}>
                 <button
