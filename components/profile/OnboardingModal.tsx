@@ -789,7 +789,7 @@ export default function OnboardingPage() {
               value={formData[step.field as keyof typeof formData] as string}
               onChange={(e) => handleInputChange(step.field!, e.target.value)}
               placeholder={step.placeholder}
-              className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-azure-500 text-xl transition-all duration-200"
+              className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:outline-none text-xl transition-all duration-200"
               autoFocus
             />
             {step.required && (
@@ -816,7 +816,7 @@ export default function OnboardingPage() {
               onChange={(e) => handleInputChange(step.field!, e.target.value)}
               placeholder={step.placeholder}
               rows={6}
-              className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-azure-500 text-lg resize-none transition-all duration-200"
+              className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:outline-none text-lg resize-none transition-all duration-200"
               autoFocus
             />
             {step.required && (
@@ -918,21 +918,21 @@ export default function OnboardingPage() {
                       placeholder="Job Title *"
                       value={experience.title}
                       onChange={(e) => updateExperience(index, 'title', e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-azure-500"
+                      className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none"
                     />
                     <input
                       type="text"
                       placeholder="Company *"
                       value={experience.company}
                       onChange={(e) => updateExperience(index, 'company', e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-azure-500"
+                      className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none"
                     />
                     <input
                       type="text"
                       placeholder="Location"
                       value={experience.location}
                       onChange={(e) => updateExperience(index, 'location', e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-azure-500"
+                      className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none"
                     />
                     <div className="flex items-center space-x-2">
                       <input
@@ -940,7 +940,7 @@ export default function OnboardingPage() {
                         placeholder="Start Date *"
                         value={experience.start_date}
                         onChange={(e) => updateExperience(index, 'start_date', e.target.value)}
-                        className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-azure-500"
+                        className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none"
                       />
                       <input
                         type="date"
@@ -948,7 +948,7 @@ export default function OnboardingPage() {
                         value={experience.end_date}
                         onChange={(e) => updateExperience(index, 'end_date', e.target.value)}
                         disabled={experience.current}
-                        className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-azure-500 disabled:bg-gray-100"
+                        className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none disabled:bg-gray-100"
                       />
                     </div>
                     <div className="flex items-center space-x-2">
