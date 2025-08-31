@@ -676,50 +676,50 @@ export default function OnboardingPage() {
       case 'welcome':
         return (
           <div className="text-center max-w-4xl mx-auto px-6">
-            {/* Enlarged Logo Section */}
-            <div className="mb-12">
+            {/* Logo Section */}
+            <div className="mb-6">
               <img 
                 src="/Kendraa Logo (1).png" 
                 alt="Kendraa Logo" 
-                className="h-48 md:h-56 lg:h-64 w-auto mx-auto drop-shadow-lg"
+                className="h-24 md:h-32 w-auto mx-auto drop-shadow-lg"
               />
             </div>
             
-            {/* Enhanced Typography */}
-            <h2 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-gray-900 mb-8 leading-tight tracking-tight">
+            {/* Typography */}
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight">
               {step.title}
             </h2>
-            <p className="text-2xl md:text-3xl text-gray-600 mb-16 leading-relaxed font-light max-w-3xl mx-auto">
+            <p className="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed max-w-2xl mx-auto">
               {step.subtitle}
             </p>
             
-            {/* Redesigned Benefits Card */}
-            <div className="bg-gradient-to-br from-azure-50 to-blue-50 rounded-2xl p-8 md:p-12 mb-12 shadow-lg border border-azure-100">
-              <h3 className="font-bold text-azure-900 mb-8 text-2xl md:text-3xl">Why complete your profile?</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0 w-8 h-8 bg-azure-500 rounded-full flex items-center justify-center">
-                    <CheckCircleIcon className="w-5 h-5 text-white" />
+            {/* Benefits Card */}
+            <div className="bg-gradient-to-br from-azure-50 to-blue-50 rounded-xl p-6 mb-8 shadow-lg border border-azure-100">
+              <h3 className="font-bold text-azure-900 mb-6 text-xl">Why complete your profile?</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0 w-6 h-6 bg-azure-500 rounded-full flex items-center justify-center">
+                    <CheckCircleIcon className="w-4 h-4 text-white" />
                   </div>
-                  <span className="text-azure-800 text-lg font-medium">Build trust with other healthcare professionals</span>
+                  <span className="text-azure-800 text-sm font-medium">Build trust with other healthcare professionals</span>
                 </div>
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0 w-8 h-8 bg-azure-500 rounded-full flex items-center justify-center">
-                    <CheckCircleIcon className="w-5 h-5 text-white" />
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0 w-6 h-6 bg-azure-500 rounded-full flex items-center justify-center">
+                    <CheckCircleIcon className="w-4 h-4 text-white" />
                   </div>
-                  <span className="text-azure-800 text-lg font-medium">Get personalized job recommendations</span>
+                  <span className="text-azure-800 text-sm font-medium">Get personalized job recommendations</span>
                 </div>
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0 w-8 h-8 bg-azure-500 rounded-full flex items-center justify-center">
-                    <CheckCircleIcon className="w-5 h-5 text-white" />
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0 w-6 h-6 bg-azure-500 rounded-full flex items-center justify-center">
+                    <CheckCircleIcon className="w-4 h-4 text-white" />
                   </div>
-                  <span className="text-azure-800 text-lg font-medium">Connect with relevant industry events</span>
+                  <span className="text-azure-800 text-sm font-medium">Connect with relevant industry professionals</span>
                 </div>
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0 w-8 h-8 bg-azure-500 rounded-full flex items-center justify-center">
-                    <CheckCircleIcon className="w-5 h-5 text-white" />
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0 w-6 h-6 bg-azure-500 rounded-full flex items-center justify-center">
+                    <CheckCircleIcon className="w-4 h-4 text-white" />
                   </div>
-                  <span className="text-azure-800 text-lg font-medium">Access exclusive healthcare content</span>
+                  <span className="text-azure-800 text-sm font-medium">Access exclusive healthcare content</span>
                 </div>
               </div>
             </div>
@@ -729,29 +729,29 @@ export default function OnboardingPage() {
       case 'student-selection':
         return (
           <div className="text-center max-w-2xl mx-auto">
-            <div className="w-24 h-24 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-8">
-              <AcademicCapIcon className="w-12 h-12 text-white" />
+            <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AcademicCapIcon className="w-8 h-8 text-white" />
             </div>
-            <h2 className="text-4xl font-bold text-gray-900 mb-6">{step.title}</h2>
-            <p className="text-xl text-gray-600 mb-10 leading-relaxed">{step.subtitle}</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">{step.title}</h2>
+            <p className="text-lg text-gray-600 mb-6 leading-relaxed">{step.subtitle}</p>
             
-            <div className="space-y-4">
+            <div className="space-y-3">
               <button
                 onClick={() => {
                   setIsStudent(true);
                   handleNext();
                 }}
-                className={`w-full p-6 rounded-xl border-2 transition-all duration-200 ${
+                className={`w-full p-4 rounded-xl border-2 transition-all duration-200 ${
                   isStudent 
                     ? 'border-azure-500 bg-azure-50 text-azure-700' 
                     : 'border-gray-300 hover:border-azure-300 hover:bg-gray-50'
                 }`}
               >
                 <div className="flex items-center justify-center space-x-3">
-                  <AcademicCapIcon className="w-8 h-8" />
+                  <AcademicCapIcon className="w-6 h-6" />
                   <div className="text-left">
-                    <h3 className="text-xl font-semibold">Yes, I&apos;m a current student</h3>
-                    <p className="text-gray-600">Medical school, residency, or other healthcare education</p>
+                    <h3 className="text-lg font-semibold">Yes, I&apos;m a current student</h3>
+                    <p className="text-sm text-gray-600">Medical school, residency, or other healthcare education</p>
                   </div>
                 </div>
               </button>
@@ -761,25 +761,25 @@ export default function OnboardingPage() {
                   setIsStudent(false);
                   handleNext();
                 }}
-                className={`w-full p-6 rounded-xl border-2 transition-all duration-200 ${
+                className={`w-full p-4 rounded-xl border-2 transition-all duration-200 ${
                   !isStudent 
                     ? 'border-azure-500 bg-azure-50 text-azure-700' 
                     : 'border-gray-300 hover:border-azure-300 hover:bg-gray-50'
                 }`}
               >
                 <div className="flex items-center justify-center space-x-3">
-                  <BriefcaseIcon className="w-8 h-8" />
+                  <BriefcaseIcon className="w-6 h-6" />
                   <div className="text-left">
-                    <h3 className="text-xl font-semibold">No, I&apos;m a healthcare professional</h3>
-                    <p className="text-gray-600">Doctor, nurse, researcher, or other healthcare worker</p>
+                    <h3 className="text-lg font-semibold">No, I&apos;m a healthcare professional</h3>
+                    <p className="text-sm text-gray-600">Doctor, nurse, researcher, or other healthcare worker</p>
                   </div>
                 </div>
               </button>
             </div>
             
-            <div className="mt-8 bg-blue-50 rounded-xl p-4">
-              <p className="text-sm text-blue-800">
-                <InformationCircleIcon className="w-4 h-4 inline mr-1" />
+            <div className="mt-6 bg-blue-50 rounded-lg p-3">
+              <p className="text-xs text-blue-800">
+                <InformationCircleIcon className="w-3 h-3 inline mr-1" />
                 Students will only need to add education information. Professionals will need both education and work experience.
               </p>
             </div>
@@ -926,44 +926,67 @@ export default function OnboardingPage() {
                     </button>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <input
-                      type="text"
-                      placeholder="Job Title *"
-                      value={experience.title}
-                      onChange={(e) => updateExperience(index, 'title', e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Company *"
-                      value={experience.company}
-                      onChange={(e) => updateExperience(index, 'company', e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Location"
-                      value={experience.location}
-                      onChange={(e) => updateExperience(index, 'location', e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none"
-                    />
-                    <div className="flex items-center space-x-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-2">
+                        Job Title *
+                      </label>
                       <input
-                        type="date"
-                        placeholder="Start Date *"
-                        value={experience.start_date}
-                        onChange={(e) => updateExperience(index, 'start_date', e.target.value)}
-                        className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none"
+                        type="text"
+                        placeholder="e.g., Senior Cardiologist"
+                        value={experience.title}
+                        onChange={(e) => updateExperience(index, 'title', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-transparent bg-white shadow-sm transition-all duration-200 hover:border-gray-300"
                       />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-2">
+                        Company *
+                      </label>
                       <input
-                        type="date"
-                        placeholder="End Date"
-                        value={experience.end_date}
-                        onChange={(e) => updateExperience(index, 'end_date', e.target.value)}
-                        disabled={experience.current}
-                        className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none disabled:bg-gray-100"
+                        type="text"
+                        placeholder="e.g., Mayo Clinic"
+                        value={experience.company}
+                        onChange={(e) => updateExperience(index, 'company', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-transparent bg-white shadow-sm transition-all duration-200 hover:border-gray-300"
                       />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-medium text-gray-700 mb-2">
+                        Location
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g., Rochester, MN"
+                        value={experience.location}
+                        onChange={(e) => updateExperience(index, 'location', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-transparent bg-white shadow-sm transition-all duration-200 hover:border-gray-300"
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-2">
+                          Start Date *
+                        </label>
+                        <input
+                          type="date"
+                          value={experience.start_date}
+                          onChange={(e) => updateExperience(index, 'start_date', e.target.value)}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-transparent bg-white shadow-sm transition-all duration-200 hover:border-gray-300"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-2">
+                          End Date
+                        </label>
+                        <input
+                          type="date"
+                          value={experience.end_date}
+                          onChange={(e) => updateExperience(index, 'end_date', e.target.value)}
+                          disabled={experience.current}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-transparent bg-white shadow-sm transition-all duration-200 hover:border-gray-300 disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed"
+                        />
+                      </div>
                     </div>
                     <div className="flex items-center space-x-2">
                       <input
@@ -1030,44 +1053,67 @@ export default function OnboardingPage() {
                     </button>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <input
-                      type="text"
-                      placeholder="Degree *"
-                      value={education.degree}
-                      onChange={(e) => updateEducation(index, 'degree', e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-azure-500"
-                    />
-                    <input
-                      type="text"
-                      placeholder="School *"
-                      value={education.school}
-                      onChange={(e) => updateEducation(index, 'school', e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-azure-500"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Field of Study"
-                      value={education.field}
-                      onChange={(e) => updateEducation(index, 'field', e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-azure-500"
-                    />
-                    <div className="flex items-center space-x-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-2">
+                        Degree *
+                      </label>
                       <input
-                        type="date"
-                        placeholder="Start Date *"
-                        value={education.start_date}
-                        onChange={(e) => updateEducation(index, 'start_date', e.target.value)}
-                        className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-azure-500"
+                        type="text"
+                        placeholder="e.g., MD, PhD, BSN"
+                        value={education.degree}
+                        onChange={(e) => updateEducation(index, 'degree', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-transparent bg-white shadow-sm transition-all duration-200 hover:border-gray-300"
                       />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-2">
+                        School *
+                      </label>
                       <input
-                        type="date"
-                        placeholder="End Date"
-                        value={education.end_date}
-                        onChange={(e) => updateEducation(index, 'end_date', e.target.value)}
-                        disabled={education.current}
-                        className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-azure-500 disabled:bg-gray-100"
+                        type="text"
+                        placeholder="e.g., Harvard Medical School"
+                        value={education.school}
+                        onChange={(e) => updateEducation(index, 'school', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-transparent bg-white shadow-sm transition-all duration-200 hover:border-gray-300"
                       />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-medium text-gray-700 mb-2">
+                        Field of Study
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g., Internal Medicine, Nursing"
+                        value={education.field}
+                        onChange={(e) => updateEducation(index, 'field', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-transparent bg-white shadow-sm transition-all duration-200 hover:border-gray-300"
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-2">
+                          Start Date *
+                        </label>
+                        <input
+                          type="date"
+                          value={education.start_date}
+                          onChange={(e) => updateEducation(index, 'start_date', e.target.value)}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-transparent bg-white shadow-sm transition-all duration-200 hover:border-gray-300"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-2">
+                          End Date
+                        </label>
+                        <input
+                          type="date"
+                          value={education.end_date}
+                          onChange={(e) => updateEducation(index, 'end_date', e.target.value)}
+                          disabled={education.current}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-transparent bg-white shadow-sm transition-all duration-200 hover:border-gray-300 disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed"
+                        />
+                      </div>
                     </div>
                     <div className="flex items-center space-x-2">
                       <input
@@ -1221,84 +1267,87 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
+      <div className="bg-white/80 backdrop-blur-sm shadow-lg border-b border-gray-200/50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3 sm:space-x-4">
+            <div className="flex items-center space-x-4">
               <button
                 onClick={handlePrevious}
                 disabled={currentStep === 0}
-                className={`p-2 rounded-lg transition-colors ${
+                className={`p-3 rounded-xl transition-all duration-200 ${
                   currentStep === 0
                     ? 'text-gray-400 cursor-not-allowed'
-                    : 'text-gray-600 hover:bg-gray-100'
+                    : 'text-gray-600 hover:bg-azure-50 hover:text-azure-600'
                 }`}
               >
-                <ChevronLeftIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+                <ChevronLeftIcon className="w-6 h-6" />
               </button>
               <div>
-                <h1 className="text-lg sm:text-xl font-semibold text-gray-900">Complete Your Profile</h1>
-                <p className="text-xs sm:text-sm text-gray-500">
+                <h1 className="text-xl font-bold text-gray-900">Complete Your Profile</h1>
+                <p className="text-sm text-gray-600">
                   Step {currentStep + 1} of {filteredSteps.length}
                 </p>
               </div>
             </div>
-            <div className="text-xs sm:text-sm text-gray-500">
+            <div className="text-sm font-medium text-azure-600 bg-azure-50 px-4 py-2 rounded-full">
               {completionPercentage}% Complete
             </div>
           </div>
         </div>
 
         {/* Progress Bar */}
-        <div className="w-full bg-gray-200 h-1">
+        <div className="w-full bg-gray-200/50 h-2">
           <div
-            className="bg-azure-500 h-1 transition-all duration-300"
+            className="bg-gradient-to-r from-azure-500 to-blue-500 h-2 transition-all duration-500 ease-out"
             style={{ width: `${((currentStep + 1) / filteredSteps.length) * 100}%` }}
           ></div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="flex-1 flex items-center justify-center py-8 sm:py-12 px-4 sm:px-6">
-        <div className="w-full max-w-4xl">
+      <div className="flex-1 flex items-center justify-center py-12 px-4 sm:px-6">
+        <div className="w-full max-w-5xl">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentStep}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
-              className="flex items-center justify-center min-h-[400px] sm:min-h-[500px]"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+              className="flex items-center justify-center min-h-[500px]"
             >
-              {renderStep()}
+              <div className="w-full bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8">
+                {renderStep()}
+              </div>
             </motion.div>
           </AnimatePresence>
         </div>
       </div>
 
       {/* Footer */}
-      <div className="bg-white border-t border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+      <div className="bg-white/80 backdrop-blur-sm border-t border-gray-200/50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
           <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-            <div className="text-xs sm:text-sm text-gray-500">
+            <div className="text-sm text-gray-600">
               {currentStep < filteredSteps.length - 1 && (
-                <span>
+                <span className="flex items-center">
+                  <div className="w-2 h-2 bg-azure-500 rounded-full mr-2"></div>
                   {completionPercentage}% Complete
                 </span>
               )}
             </div>
-            <div className="flex space-x-3 sm:space-x-4 w-full sm:w-auto">
+            <div className="flex space-x-4 w-full sm:w-auto">
               {currentStep < filteredSteps.length - 1 ? (
                 <>
                   <button
                     onClick={handlePrevious}
                     disabled={currentStep === 0}
-                    className={`flex-1 sm:flex-none px-4 sm:px-6 py-3 rounded-xl font-medium transition-colors ${
+                    className={`flex-1 sm:flex-none px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
                       currentStep === 0
                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md'
                     }`}
                   >
                     Previous
@@ -1306,9 +1355,9 @@ export default function OnboardingPage() {
                   <button
                     onClick={handleNext}
                     disabled={!canProceed() || loading}
-                    className={`flex-1 sm:flex-none px-6 sm:px-8 py-3 rounded-xl font-medium transition-colors flex items-center justify-center space-x-2 ${
+                    className={`flex-1 sm:flex-none px-8 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg ${
                       canProceed() && !loading
-                        ? 'bg-azure-500 text-white hover:bg-azure-600'
+                        ? 'bg-gradient-to-r from-azure-500 to-blue-500 text-white hover:from-azure-600 hover:to-blue-600 hover:shadow-xl transform hover:scale-105'
                         : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                     }`}
                   >

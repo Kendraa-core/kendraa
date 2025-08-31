@@ -378,14 +378,14 @@ export default function LandingPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link 
                 href="/signup" 
-                className="bg-white text-primary-600 hover:bg-gray-50 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 transform hover:scale-105 flex items-center justify-center space-x-2"
+                className="bg-azure-600 text-white hover:bg-azure-700 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 transform hover:scale-105 flex items-center justify-center space-x-2"
               >
                 <span>Get Started Free</span>
                 <ArrowRightIcon className="w-5 h-5" />
               </Link>
               <Link 
                 href="/signin" 
-                className="border-2 border-white text-white hover:bg-white hover:text-primary-600 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200"
+                className="bg-azure-600 text-white hover:bg-azure-700 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 transform hover:scale-105"
               >
                 Already Have an Account?
               </Link>

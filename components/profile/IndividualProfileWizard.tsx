@@ -219,28 +219,28 @@ export default function IndividualProfileWizard() {
   };
 
   const renderStep1 = () => (
-    <div className="space-y-6">
-      <div className="text-center mb-8">
-        <UserIcon className="w-16 h-16 text-blue-600 mx-auto mb-4" />
-        <h2 className="text-2xl font-bold text-gray-900">Basic Information</h2>
-        <p className="text-gray-600 mt-2">Tell us about yourself</p>
+    <div className="space-y-4">
+      <div className="text-center mb-4">
+        <UserIcon className="w-12 h-12 text-blue-600 mx-auto mb-2" />
+        <h2 className="text-lg font-semibold text-gray-900">Basic Information</h2>
+        <p className="text-sm text-gray-600 mt-1">Tell us about yourself</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-xs font-medium text-gray-700 mb-1">
             Full Name *
           </label>
           <Input
             value={profileData.fullName}
             onChange={(e) => updateProfileData('fullName', e.target.value)}
             placeholder="Dr. John Smith"
-            className="w-full"
+            className="w-full text-sm py-3 px-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-transparent bg-white shadow-sm transition-all duration-200 hover:border-gray-300"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-xs font-medium text-gray-700 mb-1">
             Email Address *
           </label>
           <Input
@@ -248,12 +248,12 @@ export default function IndividualProfileWizard() {
             value={profileData.email}
             onChange={(e) => updateProfileData('email', e.target.value)}
             placeholder="john.smith@hospital.com"
-            className="w-full"
+            className="w-full text-sm py-3 px-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-transparent bg-white shadow-sm transition-all duration-200 hover:border-gray-300"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-xs font-medium text-gray-700 mb-1">
             Phone Number
           </label>
           <Input
@@ -261,24 +261,24 @@ export default function IndividualProfileWizard() {
             value={profileData.phone}
             onChange={(e) => updateProfileData('phone', e.target.value)}
             placeholder="+1 (555) 123-4567"
-            className="w-full"
+            className="w-full text-sm py-3 px-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-transparent bg-white shadow-sm transition-all duration-200 hover:border-gray-300"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-xs font-medium text-gray-700 mb-1">
             Location
           </label>
           <Input
             value={profileData.location}
             onChange={(e) => updateProfileData('location', e.target.value)}
             placeholder="New York, NY, USA"
-            className="w-full"
+            className="w-full text-sm py-3 px-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-transparent bg-white shadow-sm transition-all duration-200 hover:border-gray-300"
           />
         </div>
 
         <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-xs font-medium text-gray-700 mb-1">
             Personal Website
           </label>
           <Input
@@ -286,7 +286,7 @@ export default function IndividualProfileWizard() {
             value={profileData.website}
             onChange={(e) => updateProfileData('website', e.target.value)}
             placeholder="https://www.drjohnsmith.com"
-            className="w-full"
+            className="w-full text-sm py-3 px-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-transparent bg-white shadow-sm transition-all duration-200 hover:border-gray-300"
           />
         </div>
       </div>
