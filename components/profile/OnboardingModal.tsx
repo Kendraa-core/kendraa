@@ -675,36 +675,53 @@ export default function OnboardingPage() {
     switch (step.type) {
       case 'welcome':
         return (
-          <div className="text-center max-w-2xl mx-auto">
-            <div className="mb-8">
+          <div className="text-center max-w-4xl mx-auto px-6">
+            {/* Enlarged Logo Section */}
+            <div className="mb-12">
               <img 
                 src="/Kendraa Logo (1).png" 
                 alt="Kendraa Logo" 
-                className="h-32 w-auto mx-auto"
+                className="h-48 md:h-56 lg:h-64 w-auto mx-auto drop-shadow-lg"
               />
             </div>
-            <h2 className="text-4xl font-bold text-gray-900 mb-6">{step.title}</h2>
-            <p className="text-xl text-gray-600 mb-10 leading-relaxed">{step.subtitle}</p>
-            <div className="bg-azure-50 rounded-xl p-6 mb-10">
-              <h3 className="font-semibold text-azure-900 mb-4 text-lg">Why complete your profile?</h3>
-              <ul className="text-azure-800 space-y-3 text-left">
-                <li className="flex items-start">
-                  <CheckCircleIcon className="w-5 h-5 text-azure-600 mr-3 flex-shrink-0" />
-                  <span>Build trust with other healthcare professionals</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircleIcon className="w-5 h-5 text-azure-600 mr-3 flex-shrink-0" />
-                  <span>Get personalized job recommendations</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircleIcon className="w-5 h-5 text-azure-600 mr-3 flex-shrink-0" />
-                  <span>Connect with relevant industry events</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircleIcon className="w-5 h-5 text-azure-600 mr-3 flex-shrink-0" />
-                  <span>Access exclusive healthcare content</span>
-                </li>
-              </ul>
+            
+            {/* Enhanced Typography */}
+            <h2 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-gray-900 mb-8 leading-tight tracking-tight">
+              {step.title}
+            </h2>
+            <p className="text-2xl md:text-3xl text-gray-600 mb-16 leading-relaxed font-light max-w-3xl mx-auto">
+              {step.subtitle}
+            </p>
+            
+            {/* Redesigned Benefits Card */}
+            <div className="bg-gradient-to-br from-azure-50 to-blue-50 rounded-2xl p-8 md:p-12 mb-12 shadow-lg border border-azure-100">
+              <h3 className="font-bold text-azure-900 mb-8 text-2xl md:text-3xl">Why complete your profile?</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                <div className="flex items-start space-x-4">
+                  <div className="flex-shrink-0 w-8 h-8 bg-azure-500 rounded-full flex items-center justify-center">
+                    <CheckCircleIcon className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="text-azure-800 text-lg font-medium">Build trust with other healthcare professionals</span>
+                </div>
+                <div className="flex items-start space-x-4">
+                  <div className="flex-shrink-0 w-8 h-8 bg-azure-500 rounded-full flex items-center justify-center">
+                    <CheckCircleIcon className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="text-azure-800 text-lg font-medium">Get personalized job recommendations</span>
+                </div>
+                <div className="flex items-start space-x-4">
+                  <div className="flex-shrink-0 w-8 h-8 bg-azure-500 rounded-full flex items-center justify-center">
+                    <CheckCircleIcon className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="text-azure-800 text-lg font-medium">Connect with relevant industry events</span>
+                </div>
+                <div className="flex items-start space-x-4">
+                  <div className="flex-shrink-0 w-8 h-8 bg-azure-500 rounded-full flex items-center justify-center">
+                    <CheckCircleIcon className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="text-azure-800 text-lg font-medium">Access exclusive healthcare content</span>
+                </div>
+              </div>
             </div>
           </div>
         );
