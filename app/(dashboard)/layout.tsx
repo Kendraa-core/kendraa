@@ -83,8 +83,16 @@ export default function DashboardLayout({
         // Check if user has completed onboarding from database
         const hasCompletedOnboarding = userProfile?.onboarding_completed || false;
         
-        // Redirect to onboarding if completion is below 50% and onboarding hasn't been completed
-        if (completionPercentage < 50 && !hasCompletedOnboarding) {
+        // Redirect to onboarding if onboarding hasn't been completed
+        if (!hasCompletedOnboarding) {
+          console.log('[Dashboard] User has not completed onboarding, redirecting...');
+          router.push('/onboarding');
+          return;
+        }
+        
+        // Also redirect if completion is below 50% (additional safety check)
+        if (completionPercentage < 50) {
+          console.log('[Dashboard] Profile completion below 50%, redirecting to onboarding...');
           router.push('/onboarding');
           return;
         }

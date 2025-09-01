@@ -1466,6 +1466,7 @@ export async function getJobs(): Promise<JobWithCompany[]> {
             institution_type: 'hospital',
             accreditations: ['JCAHO', 'AHA'],
             departments: ['Cardiology', 'Emergency Medicine'],
+            onboarding_completed: true,
             contact_info: {
               address: '1 Gustave L. Levy Place, New York, NY 10029',
               phone: '+1-212-241-6500',
@@ -1534,6 +1535,7 @@ export async function getJobs(): Promise<JobWithCompany[]> {
             institution_type: 'hospital',
             accreditations: ['JCAHO', 'AAP'],
             departments: ['Pediatrics', 'Nursing'],
+            onboarding_completed: true,
             contact_info: {
               address: '4650 Sunset Blvd, Los Angeles, CA 90027',
               phone: '+1-323-660-2450',

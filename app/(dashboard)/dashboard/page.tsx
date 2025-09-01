@@ -62,6 +62,13 @@ export default function UserDashboard() {
   const [loading, setLoading] = useState(true);
   const [signOutLoading, setSignOutLoading] = useState(false);
 
+  // Redirect to onboarding if not completed
+  useEffect(() => {
+    if (profile && !profile.onboarding_completed) {
+      window.location.href = '/onboarding';
+    }
+  }, [profile]);
+
   useEffect(() => {
     if (user?.id) {
       loadDashboardData();

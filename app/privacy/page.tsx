@@ -219,7 +219,7 @@ export default function PrivacyPage() {
               <p>
                 We may update this privacy policy from time to time. We will notify you of any 
                 material changes by posting the new policy on this page and updating the 
-                "Last updated" date. We encourage you to review this policy periodically.
+                &ldquo;Last updated&rdquo; date. We encourage you to review this policy periodically.
               </p>
             </div>
           </section>
@@ -237,7 +237,7 @@ export default function PrivacyPage() {
           <h3 className="text-xl font-bold text-black mb-4">Questions About Your Privacy?</h3>
           <p className="text-gray-600 mb-6">
             If you have any questions about this privacy policy or how we handle your data, 
-            please don't hesitate to contact us.
+            please don&apos;t hesitate to contact us.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link 

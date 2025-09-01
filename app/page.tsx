@@ -10,7 +10,7 @@ import { ArrowRightIcon, CheckCircleIcon, UsersIcon, GlobeAltIcon, AcademicCapIc
 export default function LandingPage() {
   const isClient = useIsClient();
   const { user } = useAuth();
-  
+
   // Show loading while checking authentication
   if (!isClient) {
     return (
@@ -27,10 +27,10 @@ export default function LandingPage() {
   if (user) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
+            <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#007fff] mx-auto mb-3"></div>
           <p className="text-sm text-[#007fff]">Redirecting to dashboard...</p>
-        </div>
+          </div>
       </div>
     );
   }
@@ -122,19 +122,19 @@ export default function LandingPage() {
               transition={{ duration: 0.8, delay: 0.4 }}
               className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16"
             >
-              <Link
-                href="/signup"
+                <Link 
+                  href="/signup" 
                 className="inline-flex items-center px-10 py-4 text-xl font-semibold text-white bg-[#007fff] hover:bg-[#007fff]/90 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl"
-              >
-                <span>Get Started Free</span>
+                >
+                  <span>Get Started Free</span>
                 <ArrowRightIcon className="w-6 h-6 ml-3" />
-              </Link>
-              <Link
+                </Link>
+                <Link 
                 href="/signin"
                 className="inline-flex items-center px-10 py-4 text-xl font-semibold text-[#007fff] bg-white border-2 border-[#007fff]/20 hover:border-[#007fff] rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl"
-              >
+                >
                 Sign In
-              </Link>
+                </Link>
             </motion.div>
 
             {/* Stats */}
@@ -151,11 +151,11 @@ export default function LandingPage() {
               <div className="text-center">
                 <div className="text-3xl font-bold text-[#007fff] mb-2">Global</div>
                 <div className="text-gray-600">Network Reach</div>
-              </div>
+                    </div>
               <div className="text-center">
                 <div className="text-3xl font-bold text-[#007fff] mb-2">24/7</div>
                 <div className="text-gray-600">Platform Access</div>
-              </div>
+                  </div>
             </motion.div>
           </div>
         </div>
@@ -208,12 +208,12 @@ export default function LandingPage() {
               <div className="bg-gradient-to-br from-white to-blue-50/30 border-2 border-gray-100 rounded-3xl p-10 hover:border-[#007fff]/30 hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-2">
                 <div className="w-20 h-20 bg-gradient-to-br from-[#007fff] to-blue-600 rounded-3xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300">
                   <AcademicCapIcon className="w-10 h-10 text-white" />
-                </div>
+                  </div>
                 <h3 className="text-2xl font-bold text-black mb-6">SHARE KNOWLEDGE</h3>
                 <p className="text-gray-600 leading-relaxed text-lg">
                   Exchange insights, research findings, and best practices. Contribute to the advancement of medical science through knowledge sharing.
                 </p>
-              </div>
+                  </div>
             </motion.div>
 
             <motion.div
@@ -279,7 +279,7 @@ export default function LandingPage() {
                 <div className="bg-white rounded-2xl p-8 text-center hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-2 border border-gray-100">
                   <div className={`w-16 h-16 bg-gradient-to-br ${industry.color} rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300`}>
                     <industry.icon className="w-8 h-8 text-white" />
-                  </div>
+                </div>
                   <h3 className="text-sm font-bold text-black">{industry.name}</h3>
                 </div>
               </motion.div>
@@ -310,15 +310,15 @@ export default function LandingPage() {
               Connect with thousands of medical science professionals and start building your network today.
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
-              <Link
-                href="/signup"
+              <Link 
+                href="/signup" 
                 className="inline-flex items-center px-10 py-4 text-xl font-semibold text-[#007fff] bg-white hover:bg-gray-50 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl"
               >
                 <span>Get Started Free</span>
                 <ArrowRightIcon className="w-6 h-6 ml-3" />
               </Link>
-              <Link
-                href="/signin"
+              <Link 
+                href="/signin" 
                 className="inline-flex items-center px-10 py-4 text-xl font-semibold text-white border-2 border-white hover:bg-white hover:text-[#007fff] rounded-2xl transition-all duration-300"
               >
                 Sign In

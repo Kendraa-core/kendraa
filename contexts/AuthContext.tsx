@@ -60,6 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           is_premium: false,
           user_type: 'individual',
           profile_type: 'individual',
+          onboarding_completed: false,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         });
@@ -81,6 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           is_premium: false,
           user_type: 'individual',
           profile_type: 'individual',
+          onboarding_completed: false,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         });
