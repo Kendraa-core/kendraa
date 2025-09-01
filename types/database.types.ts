@@ -96,6 +96,7 @@ export interface Profile {
   phone: string | null;
   specialization: string[] | null;
   is_premium: boolean;
+  onboarding_completed: boolean;
 
   user_type: 'individual' | 'institution';
   profile_type: 'individual' | 'institution';

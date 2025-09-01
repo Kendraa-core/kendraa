@@ -68,192 +68,195 @@ export default function SignUp() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-secondary-50 to-accent-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-2xl">
-        <div className="flex justify-center mb-8">
-          <Logo />
+    <div className="min-h-screen bg-white flex items-center justify-center px-4">
+      <div className="w-full max-w-md">
+        {/* Logo */}
+        <div className="flex justify-center items-center mb-12">
+          <Logo size="xl" />
         </div>
-        <h1 className="text-3xl font-bold text-center mb-2 text-gray-900">
-          Join Kendraa
-        </h1>
-        <p className="text-gray-600 text-center mb-8">
-          Connect with healthcare professionals worldwide
-        </p>
 
-        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-2xl">
-          <div className="bg-white py-8 px-6 shadow-lg rounded-xl border border-gray-200 backdrop-blur-sm sm:px-10">
-            <form className="space-y-6" onSubmit={handleSubmit}>
-              {error && (
-                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
-                  {error}
-                </div>
-              )}
-
-              <div>
-                <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name
-                </label>
-                <input
-                  id="fullName"
-                  name="fullName"
-                  type="text"
-                  autoComplete="name"
-                  required
-                  value={formData.fullName}
-                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                  className="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-900 placeholder:text-gray-300 placeholder:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                  placeholder="Enter your full name"
-                />
+        {/* Form Card */}
+        <div className="bg-white rounded-2xl shadow-xl border border-[#007fff]/10 p-8">
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold text-[#007fff] mb-2">
+              Join Kendraa
+            </h1>
+            <p className="text-[#007fff]/70">
+              Connect with healthcare professionals worldwide
+            </p>
+          </div>
+          
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
+                {error}
               </div>
+            )}
 
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Address
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-900 placeholder:text-gray-300 placeholder:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                  placeholder="Enter your email"
-                />
-              </div>
+            <div>
+              <label htmlFor="fullName" className="block text-sm font-medium text-[#007fff] mb-2">
+                Full Name
+              </label>
+              <input
+                id="fullName"
+                name="fullName"
+                type="text"
+                autoComplete="name"
+                required
+                value={formData.fullName}
+                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                className="w-full px-4 py-3 border border-[#007fff]/20 rounded-xl text-[#007fff] focus:outline-none focus:ring-2 focus:ring-[#007fff]/10 focus:border-[#007fff] transition-all duration-200 placeholder:text-[#007fff]/40"
+                placeholder="Enter your full name"
+              />
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-4">
-                  I am a...
-                </label>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  {PROFILE_TYPES.map((type) => {
-                    const IconComponent = type.icon;
-                    return (
-                      <div
-                        key={type.id}
-                        className={`relative p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
-                          profileType === type.id
-                            ? 'border-primary-500 bg-primary-50'
-                            : 'border-gray-300 hover:border-gray-400'
-                        }`}
-                        onClick={() => setProfileType(type.id as typeof profileType)}
-                      >
-                        <div className="flex flex-col items-center text-center">
-                          <IconComponent className={`h-8 w-8 mb-3 ${
-                            profileType === type.id ? 'text-primary-600' : 'text-gray-400'
-                          }`} />
-                          <h3 className="text-sm font-medium text-gray-900 mb-1">
-                            {type.name}
-                          </h3>
-                          <p className="text-xs text-gray-500">
-                            {type.description}
-                          </p>
-                        </div>
-                        {profileType === type.id && (
-                          <div className="absolute top-2 right-2">
-                            <div className="w-4 h-4 bg-primary-600 rounded-full flex items-center justify-center">
-                              <div className="w-2 h-2 bg-white rounded-full"></div>
-                            </div>
-                          </div>
-                        )}
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-[#007fff] mb-2">
+                Email Address
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="w-full px-4 py-3 border border-[#007fff]/20 rounded-xl text-[#007fff] focus:outline-none focus:ring-2 focus:ring-[#007fff]/10 focus:border-[#007fff] transition-all duration-200 placeholder:text-[#007fff]/40"
+                placeholder="Enter your email"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-[#007fff] mb-4">
+                I am a...
+              </label>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {PROFILE_TYPES.map((type) => {
+                  const IconComponent = type.icon;
+                  return (
+                    <div
+                      key={type.id}
+                      className={`relative p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
+                        profileType === type.id
+                          ? 'border-[#007fff] bg-[#007fff]/10'
+                          : 'border-[#007fff]/20 hover:border-[#007fff]/40'
+                      }`}
+                      onClick={() => setProfileType(type.id as typeof profileType)}
+                    >
+                      <div className="flex flex-col items-center text-center">
+                        <IconComponent className={`h-8 w-8 mb-3 ${
+                          profileType === type.id ? 'text-[#007fff]' : 'text-[#007fff]/40'
+                        }`} />
+                        <h3 className="text-sm font-medium text-[#007fff] mb-1">
+                          {type.name}
+                        </h3>
+                        <p className="text-xs text-[#007fff]/70">
+                          {type.description}
+                        </p>
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    id="password"
-                    name="password"
-                    type={showPassword ? 'text' : 'password'}
-                    autoComplete="new-password"
-                    required
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="appearance-none block w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-900 placeholder:text-gray-300 placeholder:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                    placeholder="Create a password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer hover:text-primary-600 transition-colors"
-                  >
-                    {showPassword ? (
-                      <EyeSlashIcon className="h-5 w-5 text-gray-500" />
-                    ) : (
-                      <EyeIcon className="h-5 w-5 text-gray-500" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                  Confirm Password
-                </label>
-                <div className="relative">
-                  <input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    autoComplete="new-password"
-                    required
-                    value={formData.confirmPassword}
-                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                    className="appearance-none block w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-900 placeholder:text-gray-300 placeholder:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                    placeholder="Confirm your password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer hover:text-primary-600 transition-colors"
-                  >
-                    {showConfirmPassword ? (
-                      <EyeSlashIcon className="h-5 w-5 text-gray-500" />
-                    ) : (
-                      <EyeIcon className="h-5 w-5 text-gray-500" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 shadow-md"
-                >
-                  {loading ? (
-                    <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span>Creating account...</span>
+                      {profileType === type.id && (
+                        <div className="absolute top-2 right-2">
+                          <div className="w-4 h-4 bg-[#007fff] rounded-full flex items-center justify-center">
+                            <div className="w-2 h-2 bg-white rounded-full"></div>
+                          </div>
+                        </div>
+                      )}
                     </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-[#007fff] mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  required
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="w-full px-4 py-3 pr-12 border border-[#007fff]/20 rounded-xl text-[#007fff] focus:outline-none focus:ring-2 focus:ring-[#007fff]/10 focus:border-[#007fff] transition-all duration-200 placeholder:text-[#007fff]/40"
+                  placeholder="Create a password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer hover:text-[#007fff]/60 transition-colors"
+                >
+                  {showPassword ? (
+                    <EyeSlashIcon className="h-5 w-5 text-[#007fff]/40" />
                   ) : (
-                    'Create Account'
+                    <EyeIcon className="h-5 w-5 text-[#007fff]/40" />
                   )}
                 </button>
               </div>
+            </div>
 
-              <div className="text-center">
-                <p className="text-sm text-gray-600">
-                  Already have an account?{' '}
-                  <Link
-                    href="/signin"
-                    className="font-semibold text-primary-600 hover:text-primary-700 transition-colors"
-                  >
-                    Sign in here
-                  </Link>
-                </p>
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-[#007fff] mb-2">
+                Confirm Password
+              </label>
+              <div className="relative">
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  required
+                  value={formData.confirmPassword}
+                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                  className="w-full px-4 py-3 pr-12 border border-[#007fff]/20 rounded-xl text-[#007fff] focus:outline-none focus:ring-2 focus:ring-[#007fff]/10 focus:border-[#007fff] transition-all duration-200 placeholder:text-[#007fff]/40"
+                  placeholder="Confirm your password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer hover:text-[#007fff]/60 transition-colors"
+                >
+                  {showConfirmPassword ? (
+                    <EyeSlashIcon className="h-5 w-5 text-[#007fff]/40" />
+                  ) : (
+                    <EyeIcon className="h-5 w-5 text-[#007fff]/40" />
+                  )}
+                </button>
               </div>
-            </form>
-          </div>
+            </div>
+
+            <div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 px-4 bg-[#007fff] text-white rounded-xl font-medium hover:bg-[#007fff]/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#007fff] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              >
+                {loading ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Creating account...</span>
+                  </div>
+                ) : (
+                  'Create Account'
+                )}
+              </button>
+            </div>
+
+            <div className="text-center">
+              <p className="text-sm text-[#007fff]/70">
+                Already have an account?{' '}
+                <Link
+                  href="/signin"
+                  className="font-semibold text-[#007fff] hover:text-[#007fff]/80 transition-colors"
+                >
+                  Sign in here
+                </Link>
+              </p>
+            </div>
+          </form>
         </div>
       </div>
     </div>

@@ -80,11 +80,11 @@ export default function DashboardLayout({
 
         const completionPercentage = calculateProfileCompletion();
         
-        // Check if user has completed onboarding before
-        const hasCompletedOnboarding = localStorage.getItem(`onboarding_completed_${user.id}`);
+        // Check if user has completed onboarding from database
+        const hasCompletedOnboarding = userProfile?.onboarding_completed || false;
         
         // Redirect to onboarding if completion is below 50% and onboarding hasn't been completed
-        if (completionPercentage < 50 && hasCompletedOnboarding !== 'true') {
+        if (completionPercentage < 50 && !hasCompletedOnboarding) {
           router.push('/onboarding');
           return;
         }
@@ -127,10 +127,10 @@ export default function DashboardLayout({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-white via-[#007fff]/5 to-[#007fff]/10 flex items-center justify-center">
         <div className="text-center">
           <LoadingSpinner />
-          <p className="mt-4 text-gray-600">Loading your dashboard...</p>
+          <p className="mt-4 text-[#007fff]">Loading your dashboard...</p>
         </div>
       </div>
     );
@@ -141,66 +141,66 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-white via-[#007fff]/5 to-[#007fff]/10 flex flex-col">
       {/* Header */}
       <Header />
       
-      {/* Main Content */}
-      <div className="flex pt-16">
+      {/* Main Content with unified scrolling */}
+      <div className="flex-1 flex overflow-hidden pt-16">
         {/* Left Sidebar - Desktop */}
-        <div className="hidden lg:block lg:w-80 lg:fixed lg:left-0 lg:top-16 lg:bottom-0 lg:overflow-y-auto lg:bg-gray-50">
+        <div className="hidden lg:block lg:w-80 lg:flex-shrink-0">
           <div className="p-6 h-full">
             {isNetworkPage ? (
               // Network-specific sidebar
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 h-full overflow-y-auto">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Manage my network</h2>
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 h-full">
+                <h2 className="text-lg font-semibold text-black mb-4">Manage my network</h2>
                 
                 <div className="space-y-1">
                   <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
                     <div className="flex items-center space-x-3">
-                      <UserGroupIcon className="w-5 h-5 text-gray-600" />
+                      <UserGroupIcon className="w-5 h-5 text-[#007fff]" />
                       <span className="text-sm text-gray-700">Connections</span>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">{formatNumber(connectionCount)}</span>
+                    <span className="text-sm font-medium text-black">{formatNumber(connectionCount)}</span>
                   </div>
                   
                   <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
                     <div className="flex items-center space-x-3">
-                      <UserIcon className="w-5 h-5 text-gray-600" />
+                      <UserIcon className="w-5 h-5 text-[#007fff]" />
                       <span className="text-sm text-gray-700">Following & followers</span>
                     </div>
                   </div>
                   
                   <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
                     <div className="flex items-center space-x-3">
-                      <BuildingOfficeIcon className="w-5 h-5 text-gray-600" />
+                      <BuildingOfficeIcon className="w-5 h-5 text-[#007fff]" />
                       <span className="text-sm text-gray-700">Groups</span>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">{formatNumber(groupsCount)}</span>
+                    <span className="text-sm font-medium text-black">{formatNumber(groupsCount)}</span>
                   </div>
                   
                   <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
                     <div className="flex items-center space-x-3">
-                      <CalendarDaysIcon className="w-5 h-5 text-gray-600" />
+                      <CalendarDaysIcon className="w-5 h-5 text-[#007fff]" />
                       <span className="text-sm text-gray-700">Events</span>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">{formatNumber(eventsCount)}</span>
+                    <span className="text-sm font-medium text-black">{formatNumber(eventsCount)}</span>
                   </div>
                   
                   <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
                     <div className="flex items-center space-x-3">
-                      <DocumentTextIcon className="w-5 h-5 text-gray-600" />
+                      <DocumentTextIcon className="w-5 h-5 text-[#007fff]" />
                       <span className="text-sm text-gray-700">Pages</span>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">{formatNumber(pagesCount)}</span>
+                    <span className="text-sm font-medium text-black">{formatNumber(pagesCount)}</span>
                   </div>
                   
                   <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
                     <div className="flex items-center space-x-3">
-                      <NewspaperIcon className="w-5 h-5 text-gray-600" />
+                      <NewspaperIcon className="w-5 h-5 text-[#007fff]" />
                       <span className="text-sm text-gray-700">Newsletters</span>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">{formatNumber(newslettersCount)}</span>
+                    <span className="text-sm font-medium text-black">{formatNumber(newslettersCount)}</span>
                   </div>
                 </div>
                 
@@ -227,8 +227,8 @@ export default function DashboardLayout({
           </div>
         </div>
 
-        {/* Main Content Area */}
-        <div className="flex-1 lg:ml-80 xl:mr-80">
+        {/* Main Content Area with unified scrolling */}
+        <div className="flex-1 overflow-y-auto">
           <div className="w-full px-4 sm:px-6 lg:px-8">
             <div className="flex justify-center">
               {/* Center Content */}
@@ -242,7 +242,7 @@ export default function DashboardLayout({
         </div>
 
         {/* Right Sidebar - Desktop */}
-        <div className="hidden xl:block xl:w-80 xl:fixed xl:right-0 xl:top-16 xl:bottom-0 xl:overflow-y-auto xl:bg-gray-50">
+        <div className="hidden xl:block xl:w-80 xl:flex-shrink-0">
           <div className="p-6 h-full">
             <RightSidebar />
           </div>

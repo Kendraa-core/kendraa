@@ -8,6 +8,14 @@ import ClientOnly from '@/components/common/ClientOnly';
 
 const inter = Inter({ subsets: ['latin'] });
 
+// Glacial Indifference font
+const glacialIndifference = {
+  className: 'font-glacial',
+  style: {
+    fontFamily: 'Glacial Indifference, sans-serif',
+  },
+};
+
 export const metadata: Metadata = {
   title: 'Kendraa - Healthcare Professional Network',
   description: 'Connect, collaborate, and grow with healthcare professionals worldwide',
@@ -39,6 +47,10 @@ export default function RootLayout({
         <meta name="theme-color" content="#007FFF" />
         <meta name="msapplication-TileColor" content="#007FFF" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.cdnfonts.com/css/glacial-indifference" rel="stylesheet" />
       </head>
       <body className={`${inter.className} h-full bg-white`} suppressHydrationWarning={true}>
         <ClientOnly>

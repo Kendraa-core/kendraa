@@ -114,6 +114,7 @@ module.exports = {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         display: ['Inter', 'system-ui', 'sans-serif'],
+        glacial: ['Glacial Indifference', 'sans-serif'],
       },
       borderRadius: {
         'xl': '1rem',

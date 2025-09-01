@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Glacial Indifference Font - Using CDN Fonts */
+@import url('https://fonts.cdnfonts.com/css/glacial-indifference');
+
 /* CSS Variables for Kendraa's Color Scheme */
 :root {
   /* Primary Colors */
@@ -97,6 +100,11 @@
 
   h3 {
     @apply text-lg sm:text-xl lg:text-2xl font-semibold;
+  }
+
+  /* Custom Font Classes */
+  .font-glacial {
+    font-family: 'Glacial Indifference', sans-serif;
   }
 
   h4 {
