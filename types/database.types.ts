@@ -92,6 +92,7 @@ export interface Profile {
   headline: string | null;
   bio: string | null;
   location: string | null;
+  country: string | null;
   website: string | null;
   phone: string | null;
   specialization: string[] | null;
