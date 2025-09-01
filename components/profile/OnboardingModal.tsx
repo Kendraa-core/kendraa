@@ -696,11 +696,11 @@ export default function OnboardingPage() {
         return (
           <div className="text-center max-w-4xl mx-auto px-6">
             {/* Logo Section */}
-            <div className="mb-6">
+            <div className="mb-8">
               <img 
                 src="/Kendraa Logo (1).png" 
                 alt="Kendraa Logo" 
-                className="h-24 md:h-32 w-auto mx-auto drop-shadow-lg"
+                className="h-32 md:h-48 lg:h-56 w-auto mx-auto drop-shadow-xl"
               />
             </div>
             

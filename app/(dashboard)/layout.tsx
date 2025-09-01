@@ -42,6 +42,14 @@ export default function DashboardLayout({
   const [pagesCount, setPagesCount] = useState(0);
   const [newslettersCount, setNewslettersCount] = useState(0);
 
+  // Immediate redirect check if profile is already loaded and onboarding is not completed
+  useEffect(() => {
+    if (profile && !profile.onboarding_completed) {
+      console.log('[Dashboard] Immediate redirect: Profile loaded but onboarding not completed');
+      router.push('/onboarding');
+    }
+  }, [profile, router]);
+
   useEffect(() => {
     const loadUserProfile = async () => {
       if (!user?.id) {
@@ -83,17 +91,34 @@ export default function DashboardLayout({
         // Check if user has completed onboarding from database
         const hasCompletedOnboarding = userProfile?.onboarding_completed || false;
         
+        console.log('[Dashboard] Profile loaded:', {
+          userId: user.id,
+          onboardingCompleted: hasCompletedOnboarding,
+          completionPercentage,
+          profile: userProfile
+        });
+        
         // Redirect to onboarding if onboarding hasn't been completed
         if (!hasCompletedOnboarding) {
           console.log('[Dashboard] User has not completed onboarding, redirecting...');
-          router.push('/onboarding');
+          try {
+            router.push('/onboarding');
+          } catch (error) {
+            console.error('[Dashboard] Router push failed, using window.location:', error);
+            window.location.href = '/onboarding';
+          }
           return;
         }
         
         // Also redirect if completion is below 50% (additional safety check)
         if (completionPercentage < 50) {
           console.log('[Dashboard] Profile completion below 50%, redirecting to onboarding...');
-          router.push('/onboarding');
+          try {
+            router.push('/onboarding');
+          } catch (error) {
+            console.error('[Dashboard] Router push failed, using window.location:', error);
+            window.location.href = '/onboarding';
+          }
           return;
         }
 
