@@ -50,7 +50,11 @@ export default function DashboardLayout({
         return;
       }
 
-      if (isLoadingProfile) return;
+      // Prevent multiple simultaneous profile loads
+      if (isLoadingProfile) {
+        console.log('[Dashboard] Profile load already in progress, skipping...');
+        return;
+      }
 
       setIsLoadingProfile(true);
 
@@ -200,6 +204,7 @@ export default function DashboardLayout({
           </div>
         </div>
 
+        {/* Main Content Area with unified scrolling */}
         <div className="flex-1 overflow-y-auto">
           <div className="w-full px-4 sm:px-6 lg:px-8">
             <div className="flex justify-center">
@@ -212,6 +217,7 @@ export default function DashboardLayout({
           </div>
         </div>
 
+        {/* Right Sidebar - Desktop */}
         <div className="hidden xl:block xl:w-80 xl:flex-shrink-0">
           <div className="p-6 h-full">
             <RightSidebar />

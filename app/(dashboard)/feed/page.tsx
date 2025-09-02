@@ -71,16 +71,16 @@ export default function FeedPage() {
               placeholder="Share your thoughts, insights, or professional updates..."
               value={postContent}
               onChange={(e) => setPostContent(e.target.value)}
-              className="w-full p-4 border border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-azure-500 focus:border-transparent text-gray-700 placeholder-gray-500 text-base"
+              className="w-full p-4 border border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-[#007fff] focus:border-transparent text-gray-700 placeholder-gray-500 text-base"
               rows={3}
             />
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-4 pt-4 border-t border-gray-100 space-y-3 sm:space-y-0">
               <div className="flex items-center space-x-4">
-                <button className="flex items-center space-x-2 text-gray-500 hover:text-azure-600 transition-colors p-2 rounded-lg hover:bg-azure-50">
+                <button className="flex items-center space-x-2 text-gray-500 hover:text-[#007fff] transition-colors p-2 rounded-lg hover:bg-[#007fff]/5">
                   <PhotoIcon className="w-5 h-5" />
                   <span className="text-sm font-medium">Media</span>
                 </button>
-                <button className="flex items-center space-x-2 text-gray-500 hover:text-azure-600 transition-colors p-2 rounded-lg hover:bg-azure-50">
+                <button className="flex items-center space-x-2 text-gray-500 hover:text-[#007fff] transition-colors p-2 rounded-lg hover:bg-[#007fff]/5">
                   <DocumentIcon className="w-5 h-5" />
                   <span className="text-sm font-medium">Article</span>
                 </button>
@@ -88,7 +88,7 @@ export default function FeedPage() {
               <button 
                 onClick={() => handleCreatePost(postContent)}
                 disabled={!postContent.trim()}
-                className="w-full sm:w-auto bg-azure-500 text-white px-6 py-3 rounded-xl hover:bg-azure-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                className="w-full sm:w-auto bg-[#007fff] text-white px-6 py-3 rounded-xl hover:bg-[#007fff]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
               >
                 Post
               </button>
@@ -104,8 +104,8 @@ export default function FeedPage() {
             onClick={() => setActiveTab('posts')}
             className={`flex-1 px-4 py-3 text-sm font-medium rounded-xl transition-colors ${
               activeTab === 'posts'
-                ? 'bg-azure-500 text-white shadow-sm'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                ? 'bg-[#007fff] text-white shadow-sm'
+                : 'text-gray-600 hover:text-black hover:bg-gray-50'
             }`}
           >
             Posts
@@ -114,8 +114,8 @@ export default function FeedPage() {
             onClick={() => setActiveTab('medical')}
             className={`flex-1 px-4 py-3 text-sm font-medium rounded-xl transition-colors ${
               activeTab === 'medical'
-                ? 'bg-azure-500 text-white shadow-sm'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                ? 'bg-[#007fff] text-white shadow-sm'
+                : 'text-gray-600 hover:text-black hover:bg-gray-50'
             }`}
           >
             Medical Feed
@@ -160,13 +160,13 @@ export default function FeedPage() {
                   <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <PlusIcon className="w-8 h-8 text-gray-400" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No posts yet</h3>
+                  <h3 className="text-lg font-semibold text-black mb-2">No posts yet</h3>
                   <p className="text-gray-600 mb-6">
                     Be the first to share your thoughts and insights with the community.
                   </p>
                   <button
                     onClick={() => setActiveTab('posts')}
-                    className="bg-azure-500 text-white px-6 py-3 rounded-xl hover:bg-azure-600 transition-colors font-medium"
+                    className="bg-[#007fff] text-white px-6 py-3 rounded-xl hover:bg-[#007fff]/90 transition-colors font-medium"
                   >
                     Create your first post
                   </button>

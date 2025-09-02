@@ -92,10 +92,12 @@ export interface Profile {
   headline: string | null;
   bio: string | null;
   location: string | null;
+  country: string | null;
   website: string | null;
   phone: string | null;
   specialization: string[] | null;
   is_premium: boolean;
+  onboarding_completed: boolean;
 
   user_type: 'individual' | 'institution';
   profile_type: 'individual' | 'institution';

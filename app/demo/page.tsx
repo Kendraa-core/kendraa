@@ -16,21 +16,21 @@ export default function DemoPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-white via-[#007fff]/5 to-[#007fff]/10 flex items-center justify-center p-4">
       <div className="max-w-2xl w-full bg-white rounded-xl shadow-lg p-8">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Kendraa Demo</h1>
+                      <h1 className="text-3xl font-bold text-black mb-4"><span className="mulish-semibold">kendraa</span> Demo</h1>
           <p className="text-gray-600">Application Status Check</p>
         </div>
 
         <div className="space-y-6">
           {/* Supabase Configuration Status */}
           <div className="bg-gray-50 rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Database Configuration</h2>
+            <h2 className="text-xl font-semibold text-black mb-4">Database Configuration</h2>
             
             {supabaseStatus === 'checking' && (
               <div className="flex items-center space-x-3">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#007fff]"></div>
                 <span className="text-gray-600">Checking configuration...</span>
               </div>
             )}
@@ -121,11 +121,11 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_actual_supabase_anon_key`}
 
           {/* Current Features Status */}
           <div className="bg-gray-50 rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Feature Status</h2>
+            <h2 className="text-xl font-semibold text-black mb-4">Feature Status</h2>
             
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-gray-700">Follow System</span>
+                <span className="text-black">Follow System</span>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                   supabaseStatus === 'configured' 
                     ? 'bg-green-100 text-green-800' 
@@ -136,7 +136,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_actual_supabase_anon_key`}
               </div>
               
               <div className="flex items-center justify-between">
-                <span className="text-gray-700">Job Applications</span>
+                <span className="text-black">Job Applications</span>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                   supabaseStatus === 'configured' 
                     ? 'bg-green-100 text-green-800' 
@@ -147,7 +147,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_actual_supabase_anon_key`}
               </div>
               
               <div className="flex items-center justify-between">
-                <span className="text-gray-700">User Authentication</span>
+                <span className="text-black">User Authentication</span>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                   supabaseStatus === 'configured' 
                     ? 'bg-green-100 text-green-800' 
@@ -158,7 +158,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_actual_supabase_anon_key`}
               </div>
               
               <div className="flex items-center justify-between">
-                <span className="text-gray-700">Real-time Features</span>
+                <span className="text-black">Real-time Features</span>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                   supabaseStatus === 'configured' 
                     ? 'bg-green-100 text-green-800' 
@@ -172,18 +172,18 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_actual_supabase_anon_key`}
 
           {/* Navigation */}
           <div className="bg-blue-50 rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Try the App</h2>
+            <h2 className="text-xl font-semibold text-black mb-4">Try the App</h2>
             <p className="text-gray-600 mb-4">
               You can still explore the UI and see how the application looks, even without database functionality.
             </p>
             <div className="flex flex-wrap gap-3">
-              <a href="/feed" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              <a href="/feed" className="px-4 py-2 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-colors">
                 View Feed
               </a>
-              <a href="/network" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              <a href="/network" className="px-4 py-2 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-colors">
                 View Network
               </a>
-              <a href="/jobs" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              <a href="/jobs" className="px-4 py-2 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-colors">
                 View Jobs
               </a>
             </div>

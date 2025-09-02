@@ -32,20 +32,20 @@ export default function SignIn() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-white flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         {/* Logo */}
-        <div className="text-center mb-8">
-          <Logo />
+        <div className="flex justify-center items-center mb-12">
+          <Logo size="xl" />
         </div>
 
         {/* Form Card */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
+        <div className="bg-white rounded-2xl shadow-xl border border-[#007fff]/10 p-8">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            <h1 className="text-2xl font-bold text-black mb-2">
               Welcome back
             </h1>
-            <p className="text-gray-500">
+            <p className="text-gray-600">
               Sign in to your account
             </p>
           </div>
@@ -61,7 +61,7 @@ export default function SignIn() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 placeholder:text-gray-400"
+                className="w-full px-4 py-3 border border-[#007fff]/20 rounded-xl text-black focus:outline-none focus:ring-2 focus:ring-[#007fff]/10 focus:border-[#007fff] transition-all duration-200 placeholder:text-gray-400"
                 placeholder="Email"
               />
             </div>
@@ -77,13 +77,13 @@ export default function SignIn() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 placeholder:text-gray-400"
+                  className="w-full px-4 py-3 pr-12 border border-[#007fff]/20 rounded-xl text-black focus:outline-none focus:ring-2 focus:ring-[#007fff]/10 focus:border-[#007fff] transition-all duration-200 placeholder:text-gray-400"
                   placeholder="Password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#007fff]/40 hover:text-[#007fff]/60 transition-colors"
                 >
                   {showPassword ? (
                     <EyeSlashIcon className="h-5 w-5" />
@@ -98,7 +98,7 @@ export default function SignIn() {
             <div className="text-right">
               <Link 
                 href="/forgot-password" 
-                className="text-sm text-blue-600 hover:text-blue-700 transition-colors"
+                className="text-sm text-[#007fff] hover:text-[#007fff]/80 transition-colors"
               >
                 Forgot password?
               </Link>
@@ -108,7 +108,7 @@ export default function SignIn() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              className="w-full py-3 px-4 bg-[#007fff] text-white rounded-xl font-medium hover:bg-[#007fff]/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#007fff] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
               {loading ? (
                 <div className="flex items-center justify-center space-x-2">
@@ -128,7 +128,7 @@ export default function SignIn() {
                 <div className="w-full border-t border-gray-200" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500">New to Kendraa?</span>
+                <span className="px-4 bg-white text-gray-600">New to <span className="mulish-semibold">kendraa</span>?</span>
               </div>
             </div>
 
@@ -136,7 +136,7 @@ export default function SignIn() {
             <div className="mt-6">
               <Link
                 href="/signup"
-                className="w-full flex justify-center py-3 px-4 border border-gray-200 rounded-xl text-gray-700 font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+                className="w-full flex justify-center py-3 px-4 border border-[#007fff]/20 rounded-xl text-[#007fff] font-medium hover:bg-[#007fff]/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#007fff] transition-all duration-200"
               >
                 Create account
               </Link>

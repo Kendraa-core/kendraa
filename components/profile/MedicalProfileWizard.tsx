@@ -317,6 +317,7 @@ export default function MedicalProfileWizard({ onComplete, onCancel }: MedicalPr
                     onChange={(e) => updateProfileData({
                       medical_license: { ...profileData.medical_license, issue_date: e.target.value }
                     })}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-transparent bg-white shadow-sm transition-all duration-200 hover:border-gray-300"
                   />
                 </div>
                 <div>
@@ -329,6 +330,7 @@ export default function MedicalProfileWizard({ onComplete, onCancel }: MedicalPr
                     onChange={(e) => updateProfileData({
                       medical_license: { ...profileData.medical_license, expiry_date: e.target.value }
                     })}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-transparent bg-white shadow-sm transition-all duration-200 hover:border-gray-300"
                   />
                 </div>
               </div>

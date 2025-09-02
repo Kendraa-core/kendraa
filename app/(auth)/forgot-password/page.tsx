@@ -57,6 +57,55 @@ export default function ForgotPassword() {
     }
   };
 
+  if (sent) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
+          <div className="text-center">
+            <Logo />
+            <h2 className="mt-6 text-3xl font-bold text-gray-900">
+              Check your email
+            </h2>
+            <p className="mt-2 text-sm text-gray-600">
+              We&apos;ve sent a password reset link to <strong>{email}</strong>
+            </p>
+            <p className="mt-4 text-sm text-gray-500">
+              Click the link in your email to reset your password. The link will expire in 1 hour.
+            </p>
+          </div>
+
+          <div className="bg-white py-8 px-6 shadow-sm rounded-xl border border-gray-200">
+            <div className="text-center space-y-4">
+              <div className="w-16 h-16 bg-azure-100 rounded-full flex items-center justify-center mx-auto">
+                <svg className="w-8 h-8 text-azure-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <p className="text-sm text-gray-600">
+                Didn&apos;t receive the email? Check your spam folder or try again.
+              </p>
+              <button
+                onClick={() => setSent(false)}
+                className="text-azure-600 hover:text-azure-500 text-sm font-medium transition-colors"
+              >
+                Try again
+              </button>
+            </div>
+
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <Link
+                href="/signin"
+                className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              >
+                Back to sign in
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">

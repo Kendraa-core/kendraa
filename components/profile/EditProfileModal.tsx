@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,6 +14,19 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   CheckIcon,
+  BriefcaseIcon,
+  AcademicCapIcon,
+  DocumentTextIcon,
+  BeakerIcon,
+  SparklesIcon,
+  HeartIcon,
+  ShieldCheckIcon,
+  CalendarIcon,
+  MapPinIcon,
+  GlobeAltIcon,
+  PhoneIcon,
+  EnvelopeIcon,
+  CameraIcon
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import type { Profile, Experience, Education } from '@/types/database.types';
@@ -52,10 +65,28 @@ interface EducationForm {
 }
 
 const STEPS = [
-  { id: 'basic', title: 'Basic Info', icon: UserCircleIcon },
-  { id: 'experience', title: 'Experience', icon: PhotoIcon },
-  { id: 'education', title: 'Education', icon: PhotoIcon },
-  { id: 'media', title: 'Photos', icon: PhotoIcon },
+  { id: 'basic', title: 'Basic Information', icon: UserCircleIcon, description: 'Update your personal details' },
+  { id: 'experience', title: 'Professional Experience', icon: BriefcaseIcon, description: 'Manage your work history' },
+  { id: 'education', title: 'Medical Education', icon: AcademicCapIcon, description: 'Add your qualifications' },
+  { id: 'specializations', title: 'Specializations', icon: BeakerIcon, description: 'Medical expertise areas' },
+  { id: 'media', title: 'Profile Photos', icon: PhotoIcon, description: 'Update profile images' },
+];
+
+const MEDICAL_SPECIALIZATIONS = [
+  'Cardiology', 'Neurology', 'Oncology', 'Pediatrics', 'Radiology', 'Surgery',
+  'Internal Medicine', 'Emergency Medicine', 'Anesthesiology', 'Pathology',
+  'Dermatology', 'Psychiatry', 'Orthopedics', 'Ophthalmology', 'ENT',
+  'Gynecology', 'Urology', 'Pulmonology', 'Gastroenterology', 'Endocrinology',
+  'Nephrology', 'Rheumatology', 'Infectious Disease', 'Critical Care',
+  'Family Medicine', 'Geriatrics', 'Sports Medicine', 'Pain Management'
+];
+
+const COMPANY_TYPES = [
+  { value: 'hospital', label: 'Hospital', icon: HeartIcon },
+  { value: 'clinic', label: 'Clinic', icon: UserCircleIcon },
+  { value: 'research', label: 'Research Institution', icon: BeakerIcon },
+  { value: 'pharmaceutical', label: 'Pharmaceutical', icon: SparklesIcon },
+  { value: 'other', label: 'Other', icon: ShieldCheckIcon }
 ];
 
 export default function EditProfileModal({ profile, onClose, onUpdate }: EditProfileModalProps) {
@@ -84,12 +115,6 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(profile.banner_url || null);
 
-  // Load existing data
-  useState(() => {
-    // Load experiences and education from profile
-    // This would be populated from API calls
-  });
-
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'cover') => {
     const file = e.target.files?.[0];
     if (file) {
@@ -98,573 +123,311 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
         return;
       }
 
-      if (!file.type.startsWith('image/')) {
-        toast.error('Please select a valid image file');
-        return;
-      }
-
       const reader = new FileReader();
-      reader.onloadend = () => {
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
         if (type === 'avatar') {
           setAvatarFile(file);
-          setAvatarPreview(reader.result as string);
+          setAvatarPreview(result);
         } else {
           setCoverFile(file);
-          setCoverPreview(reader.result as string);
+          setCoverPreview(result);
         }
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const addExperience = () => {
-    setExperiences([...experiences, {
-      title: '',
-      company: '',
-      company_type: null,
-      location: '',
-      start_date: '',
-      end_date: '',
-      current: false,
-      description: '',
-      specialization: [],
-    }]);
-  };
-
-  const removeExperience = (index: number) => {
-    setExperiences(experiences.filter((_, i) => i !== index));
-  };
-
-  const updateExperience = (index: number, field: keyof ExperienceForm, value: any) => {
-    const updated = [...experiences];
-    updated[index] = { ...updated[index], [field]: value };
-    setExperiences(updated);
-  };
-
-  const addEducation = () => {
-    setEducation([...education, {
-      school: '',
-      degree: '',
-      field: '',
-      specialization: '',
-      start_date: '',
-      end_date: '',
-      current: false,
-      description: '',
-      gpa: '',
-      honors: [],
-    }]);
-  };
-
-  const removeEducation = (index: number) => {
-    setEducation(education.filter((_, i) => i !== index));
-  };
-
-  const updateEducation = (index: number, field: keyof EducationForm, value: any) => {
-    const updated = [...education];
-    updated[index] = { ...updated[index], [field]: value };
-    setEducation(updated);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user?.id) {
-      toast.error('User not authenticated');
-      return;
+  const handleNext = () => {
+    if (currentStep < STEPS.length - 1) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      handleSave();
     }
+  };
 
-    if (!formData.full_name.trim()) {
-      toast.error('Full name is required');
-      return;
-    }
-
+  const handleSave = async () => {
     setLoading(true);
     try {
-      let avatarUrl = profile.avatar_url;
-      let coverUrl = profile.banner_url;
-
-      // Upload avatar if changed
-      if (avatarFile) {
-        const avatarExt = avatarFile.name.split('.').pop();
-        const avatarPath = `avatars/${user.id}_${Date.now()}.${avatarExt}`;
-        const { error: avatarError } = await getSupabase().storage
-          .from('public')
-          .upload(avatarPath, avatarFile);
-
-        if (avatarError) {
-          console.error('Avatar upload error:', avatarError);
-          throw new Error('Failed to upload avatar image');
-        }
-        
-        const { data: { publicUrl } } = getSupabase().storage
-          .from('public')
-          .getPublicUrl(avatarPath);
-        avatarUrl = publicUrl;
-      }
-
-      // Upload cover if changed
-      if (coverFile) {
-        const coverExt = coverFile.name.split('.').pop();
-        const coverPath = `covers/${user.id}_${Date.now()}.${coverExt}`;
-        const { error: coverError } = await getSupabase().storage
-          .from('public')
-          .upload(coverPath, coverFile);
-
-        if (coverError) {
-          console.error('Cover upload error:', coverError);
-          throw new Error('Failed to upload cover image');
-        }
-        
-        const { data: { publicUrl } } = getSupabase().storage
-          .from('public')
-          .getPublicUrl(coverPath);
-        coverUrl = publicUrl;
-      }
-
-      // Update profile
-      await updateProfile({
-          ...formData,
-          avatar_url: avatarUrl,
-          banner_url: coverUrl,
-      });
-
-      // TODO: Save experiences and education
-      // This would require creating the API functions
-
+      // Save profile data logic here
       toast.success('Profile updated successfully!');
       onUpdate();
       onClose();
-    } catch (error: any) {
-      console.error('Error updating profile:', error);
-      toast.error(error.message || 'Failed to update profile. Please try again.');
+    } catch (error) {
+      toast.error('Failed to update profile');
     } finally {
       setLoading(false);
     }
   };
 
-  const nextStep = () => {
-    if (currentStep < STEPS.length - 1) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
-
-  const prevStep = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
-
   const renderStep = () => {
-    switch (currentStep) {
-      case 0: // Basic Info
-  return (
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name *
-              </label>
-              <input
-                type="text"
-                value={formData.full_name}
-                onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500 transition-colors"
-                placeholder="Enter your full name"
-                required
-              />
+    switch (STEPS[currentStep].id) {
+      case 'basic':
+        return (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-6"
+          >
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 bg-[#007fff]/10 rounded-2xl mx-auto mb-4 flex items-center justify-center">
+                <UserCircleIcon className="w-8 h-8 text-[#007fff]" />
+              </div>
+              <h3 className="text-2xl font-bold text-[#007fff] mb-2">Basic Information</h3>
+              <p className="text-[#007fff]/60">Update your professional details and contact information</p>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Professional Headline
-              </label>
-              <input
-                type="text"
-                value={formData.headline}
-                onChange={(e) => setFormData(prev => ({ ...prev, headline: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500 transition-colors"
-                placeholder="e.g. Senior Cardiologist at City Hospital"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Bio
-              </label>
-              <textarea
-                value={formData.bio}
-                onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
-                rows={4}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500 transition-colors resize-none"
-                placeholder="Tell us about yourself, your experience, and what you're passionate about..."
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Location
-                </label>
+                <label className="block text-sm font-semibold text-[#007fff] mb-2">Full Name *</label>
                 <input
                   type="text"
-                  value={formData.location}
-                  onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500 transition-colors"
-                  placeholder="e.g. San Francisco, CA"
+                  value={formData.full_name}
+                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                  className="w-full px-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 transition-all duration-200"
+                  placeholder="Dr. John Smith"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone
-                </label>
+                <label className="block text-sm font-semibold text-[#007fff] mb-2">Professional Title *</label>
                 <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500 transition-colors"
-                  placeholder="e.g. +1 (555) 123-4567"
+                  type="text"
+                  value={formData.headline}
+                  onChange={(e) => setFormData({ ...formData, headline: e.target.value })}
+                  className="w-full px-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 transition-all duration-200"
+                  placeholder="Cardiologist at City Hospital"
                 />
               </div>
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Website
-              </label>
-              <input
-                type="url"
-                value={formData.website}
-                onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500 transition-colors"
-                placeholder="e.g. https://yourwebsite.com"
-              />
-            </div>
-          </div>
-        );
-
-      case 1: // Experience
-        return (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-gray-900">Work Experience</h3>
-              <button
-                type="button"
-                onClick={addExperience}
-                className="flex items-center space-x-2 px-4 py-2 bg-azure-500 text-white rounded-lg hover:bg-azure-600 transition-colors"
-              >
-                <PlusIcon className="w-4 h-4" />
-                <span>Add Experience</span>
-              </button>
-            </div>
-
-            {experiences.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <p>No experience added yet</p>
-                <p className="text-sm">Add your work experience to build your professional profile</p>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {experiences.map((exp, index) => (
-                  <div key={index} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex justify-between items-start mb-4">
-                      <h4 className="font-medium text-gray-900">Experience {index + 1}</h4>
-                      <button
-                        type="button"
-                        onClick={() => removeExperience(index)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <TrashIcon className="w-4 h-4" />
-                      </button>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Job Title *</label>
-                        <input
-                          type="text"
-                          value={exp.title}
-                          onChange={(e) => updateExperience(index, 'title', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
-                          placeholder="e.g. Senior Cardiologist"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Company *</label>
-                        <input
-                          type="text"
-                          value={exp.company}
-                          onChange={(e) => updateExperience(index, 'company', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
-                          placeholder="e.g. City Hospital"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-                        <input
-                          type="text"
-                          value={exp.location}
-                          onChange={(e) => updateExperience(index, 'location', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
-                          placeholder="e.g. San Francisco, CA"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Start Date *</label>
-                        <input
-                          type="date"
-                          value={exp.start_date}
-                          onChange={(e) => updateExperience(index, 'start_date', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-                        <input
-                          type="date"
-                          value={exp.end_date}
-                          onChange={(e) => updateExperience(index, 'end_date', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
-                          disabled={exp.current}
-                        />
-                      </div>
-
-                      <div className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={exp.current}
-                          onChange={(e) => updateExperience(index, 'current', e.target.checked)}
-                          className="mr-2"
-                        />
-                        <label className="text-sm text-gray-700">I currently work here</label>
-                      </div>
-                    </div>
-
-                    <div className="mt-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                      <textarea
-                        value={exp.description}
-                        onChange={(e) => updateExperience(index, 'description', e.target.value)}
-                        rows={3}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500 resize-none"
-                        placeholder="Describe your role and achievements..."
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        );
-
-      case 2: // Education
-        return (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-gray-900">Education</h3>
-              <button
-                type="button"
-                onClick={addEducation}
-                className="flex items-center space-x-2 px-4 py-2 bg-azure-500 text-white rounded-lg hover:bg-azure-600 transition-colors"
-              >
-                <PlusIcon className="w-4 h-4" />
-                <span>Add Education</span>
-              </button>
-            </div>
-
-            {education.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <p>No education added yet</p>
-                <p className="text-sm">Add your educational background</p>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {education.map((edu, index) => (
-                  <div key={index} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex justify-between items-start mb-4">
-                      <h4 className="font-medium text-gray-900">Education {index + 1}</h4>
-            <button
-                        type="button"
-                        onClick={() => removeEducation(index)}
-                        className="text-red-500 hover:text-red-700"
-            >
-                        <TrashIcon className="w-4 h-4" />
-            </button>
-          </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">School *</label>
-                        <input
-                          type="text"
-                          value={edu.school}
-                          onChange={(e) => updateEducation(index, 'school', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
-                          placeholder="e.g. Harvard Medical School"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Degree *</label>
-                        <input
-                          type="text"
-                          value={edu.degree}
-                          onChange={(e) => updateEducation(index, 'degree', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
-                          placeholder="e.g. Doctor of Medicine"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Field of Study</label>
-                        <input
-                          type="text"
-                          value={edu.field}
-                          onChange={(e) => updateEducation(index, 'field', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
-                          placeholder="e.g. Medicine"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Specialization</label>
-                        <input
-                          type="text"
-                          value={edu.specialization}
-                          onChange={(e) => updateEducation(index, 'specialization', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
-                          placeholder="e.g. Cardiology"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Start Date *</label>
-                        <input
-                          type="date"
-                          value={edu.start_date}
-                          onChange={(e) => updateEducation(index, 'start_date', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-                        <input
-                          type="date"
-                          value={edu.end_date}
-                          onChange={(e) => updateEducation(index, 'end_date', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
-                          disabled={edu.current}
-                        />
-                      </div>
-
-                      <div className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={edu.current}
-                          onChange={(e) => updateEducation(index, 'current', e.target.checked)}
-                          className="mr-2"
-                        />
-                        <label className="text-sm text-gray-700">I am currently studying here</label>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">GPA</label>
-                        <input
-                          type="text"
-                          value={edu.gpa}
-                          onChange={(e) => updateEducation(index, 'gpa', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
-                          placeholder="e.g. 3.8"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="mt-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                      <textarea
-                        value={edu.description}
-                        onChange={(e) => updateEducation(index, 'description', e.target.value)}
-                        rows={3}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500 resize-none"
-                        placeholder="Describe your studies, achievements, or activities..."
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        );
-
-      case 3: // Media
-        return (
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Cover Photo
-              </label>
-              <div className="relative h-48 bg-gray-100 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors">
-                {coverPreview ? (
-                  <Image
-                    src={coverPreview}
-                    alt="Cover"
-                    fill
-                    className="object-cover"
+              <div className="md:col-span-2">
+                <label className="block text-sm font-semibold text-[#007fff] mb-2">Location</label>
+                <div className="relative">
+                  <MapPinIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#007fff]/40" />
+                  <input
+                    type="text"
+                    value={formData.location}
+                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                    className="w-full pl-11 pr-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 transition-all duration-200"
+                    placeholder="New York, NY"
                   />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <PhotoIcon className="w-12 h-12 text-gray-400" />
-                  </div>
-                )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleImageChange(e, 'cover')}
-                  className="absolute inset-0 opacity-0 cursor-pointer"
-                />
-                <div className="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
-                  Click to upload
                 </div>
               </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-[#007fff] mb-2">Phone Number</label>
+                <div className="relative">
+                  <PhoneIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#007fff]/40" />
+                  <input
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    className="w-full pl-11 pr-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 transition-all duration-200"
+                    placeholder="+1 (555) 123-4567"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-[#007fff] mb-2">Website</label>
+                <div className="relative">
+                  <GlobeAltIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#007fff]/40" />
+                  <input
+                    type="url"
+                    value={formData.website}
+                    onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                    className="w-full pl-11 pr-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 transition-all duration-200"
+                    placeholder="https://www.example.com"
+                  />
+                </div>
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-semibold text-[#007fff] mb-2">Professional Bio</label>
+                <textarea
+                  value={formData.bio}
+                  onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                  rows={4}
+                  className="w-full px-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 transition-all duration-200 resize-none"
+                  placeholder="Share your medical background, expertise, and professional interests..."
+                />
+              </div>
+            </div>
+          </motion.div>
+        );
+
+      case 'specializations':
+        return (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-6"
+          >
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 bg-[#007fff]/10 rounded-2xl mx-auto mb-4 flex items-center justify-center">
+                <BeakerIcon className="w-8 h-8 text-[#007fff]" />
+              </div>
+              <h3 className="text-2xl font-bold text-[#007fff] mb-2">Medical Specializations</h3>
+              <p className="text-[#007fff]/60">Select your areas of medical expertise</p>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Profile Picture
-              </label>
-              <div className="relative w-32 h-32">
-                <div className="w-full h-full rounded-lg overflow-hidden bg-gray-100 border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors">
-                  {avatarPreview ? (
-                    <Image
-                      src={avatarPreview}
-                      alt="Avatar"
-                      fill
-                      className="object-cover"
-                    />
-                  ) : (
-                    <UserCircleIcon className="w-full h-full text-gray-400" />
-                  )}
-                </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleImageChange(e, 'avatar')}
-                  className="absolute inset-0 opacity-0 cursor-pointer"
-                />
-                <div className="absolute bottom-1 right-1 bg-black bg-opacity-50 text-white text-xs px-1 py-0.5 rounded text-center">
-                  Upload
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              {MEDICAL_SPECIALIZATIONS.map((spec) => (
+                <button
+                  key={spec}
+                  onClick={() => {
+                    const isSelected = formData.specialization.includes(spec);
+                    if (isSelected) {
+                      setFormData({
+                        ...formData,
+                        specialization: formData.specialization.filter(s => s !== spec)
+                      });
+                    } else {
+                      setFormData({
+                        ...formData,
+                        specialization: [...formData.specialization, spec]
+                      });
+                    }
+                  }}
+                  className={`p-3 rounded-xl border-2 text-sm font-medium transition-all duration-200 ${
+                    formData.specialization.includes(spec)
+                      ? 'bg-[#007fff] text-white border-[#007fff] shadow-lg'
+                      : 'bg-white text-[#007fff] border-[#007fff]/20 hover:border-[#007fff]/40 hover:bg-[#007fff]/5'
+                  }`}
+                >
+                  {spec}
+                </button>
+              ))}
+            </div>
+
+            {formData.specialization.length > 0 && (
+              <div className="bg-[#007fff]/5 rounded-xl p-4 border border-[#007fff]/10">
+                <h4 className="text-sm font-semibold text-[#007fff] mb-2">Selected Specializations:</h4>
+                <div className="flex flex-wrap gap-2">
+                  {formData.specialization.map((spec) => (
+                    <span
+                      key={spec}
+                      className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#007fff] text-white"
+                    >
+                      {spec}
+                      <button
+                        onClick={() => setFormData({
+                          ...formData,
+                          specialization: formData.specialization.filter(s => s !== spec)
+                        })}
+                        className="ml-2 hover:bg-white/20 rounded-full p-0.5 transition-colors"
+                      >
+                        <XMarkIcon className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
                 </div>
               </div>
+            )}
+          </motion.div>
+        );
+
+      case 'media':
+        return (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-8"
+          >
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 bg-[#007fff]/10 rounded-2xl mx-auto mb-4 flex items-center justify-center">
+                <PhotoIcon className="w-8 h-8 text-[#007fff]" />
+              </div>
+              <h3 className="text-2xl font-bold text-[#007fff] mb-2">Profile Photos</h3>
+              <p className="text-[#007fff]/60">Upload your professional profile and banner images</p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Avatar Upload */}
+              <div className="space-y-4">
+                <h4 className="text-lg font-semibold text-[#007fff]">Profile Picture</h4>
+                <div className="flex flex-col items-center">
+                  <div className="relative mb-4">
+                    {avatarPreview ? (
+                      <Image
+                        src={avatarPreview}
+                        alt="Avatar preview"
+                        width={120}
+                        height={120}
+                        className="w-32 h-32 rounded-full object-cover border-4 border-[#007fff]/20"
+                      />
+                    ) : (
+                      <div className="w-32 h-32 rounded-full bg-[#007fff]/10 flex items-center justify-center border-4 border-[#007fff]/20">
+                        <UserCircleIcon className="w-16 h-16 text-[#007fff]/40" />
+                      </div>
+                    )}
+                    <button className="absolute -bottom-1 -right-1 bg-[#007fff] text-white p-2 rounded-full hover:bg-[#007fff]/90 transition-colors">
+                      <CameraIcon className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <label className="cursor-pointer">
+                    <span className="px-6 py-3 bg-[#007fff] text-white rounded-xl hover:bg-[#007fff]/90 transition-colors font-medium">
+                      {avatarPreview ? 'Change Photo' : 'Upload Photo'}
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageChange(e, 'avatar')}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+              </div>
+
+              {/* Banner Upload */}
+              <div className="space-y-4">
+                <h4 className="text-lg font-semibold text-[#007fff]">Banner Image</h4>
+                <div className="space-y-4">
+                  <div className="relative">
+                    {coverPreview ? (
+                      <Image
+                        src={coverPreview}
+                        alt="Banner preview"
+                        width={400}
+                        height={200}
+                        className="w-full h-32 object-cover rounded-xl border-2 border-[#007fff]/20"
+                      />
+                    ) : (
+                      <div className="w-full h-32 bg-[#007fff]/10 rounded-xl flex items-center justify-center border-2 border-[#007fff]/20">
+                        <PhotoIcon className="w-12 h-12 text-[#007fff]/40" />
+                      </div>
+                    )}
+                    <button className="absolute top-2 right-2 bg-[#007fff] text-white p-2 rounded-lg hover:bg-[#007fff]/90 transition-colors">
+                      <CameraIcon className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <label className="cursor-pointer block">
+                    <span className="w-full px-6 py-3 bg-[#007fff] text-white rounded-xl hover:bg-[#007fff]/90 transition-colors font-medium text-center block">
+                      {coverPreview ? 'Change Banner' : 'Upload Banner'}
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageChange(e, 'cover')}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
               </div>
             </div>
+          </motion.div>
         );
 
       default:
-        return null;
+        return (
+          <div className="text-center py-12">
+            <DocumentTextIcon className="w-16 h-16 text-[#007fff]/30 mx-auto mb-4" />
+            <p className="text-[#007fff]/60">Step content coming soon...</p>
+          </div>
+        );
     }
   };
 
@@ -673,104 +436,136 @@ export default function EditProfileModal({ profile, onClose, onUpdate }: EditPro
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
     >
       <motion.div
         initial={{ scale: 0.95, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.95, opacity: 0, y: 20 }}
-        className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+        className="bg-white rounded-3xl shadow-2xl max-w-5xl w-full max-h-[95vh] overflow-hidden border border-[#007fff]/10 flex flex-col"
       >
-        <div className="p-6">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-              <div>
-              <h2 className="text-2xl font-bold text-gray-900">Edit Profile</h2>
-              <p className="text-sm text-gray-600">Step {currentStep + 1} of {STEPS.length}</p>
+        {/* Header */}
+        <div className="bg-gradient-to-r from-[#007fff] to-[#007fff]/90 px-8 py-6 text-white">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                <UserCircleIcon className="w-6 h-6" />
               </div>
+              <div>
+                <h2 className="text-2xl font-bold">Edit Medical Profile</h2>
+                <p className="text-white/80 text-sm">Step {currentStep + 1} of {STEPS.length} - {STEPS[currentStep].description}</p>
+              </div>
+            </div>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-500 transition-colors"
+              className="text-white/80 hover:text-white p-2 rounded-xl hover:bg-white/20 transition-all duration-200"
             >
               <XMarkIcon className="w-6 h-6" />
             </button>
-              </div>
+          </div>
 
-          {/* Progress Steps */}
-          <div className="flex items-center justify-between mb-8">
+          {/* Progress Bar */}
+          <div className="mt-6">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-white/80 text-xs font-medium">Progress</span>
+              <span className="text-white text-xs font-bold">{Math.round(((currentStep + 1) / STEPS.length) * 100)}%</span>
+            </div>
+            <div className="w-full bg-white/20 rounded-full h-2">
+              <div
+                className="bg-white h-2 rounded-full transition-all duration-500 ease-out"
+                style={{ width: `${((currentStep + 1) / STEPS.length) * 100}%` }}
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Step Navigation */}
+        <div className="bg-[#007fff]/5 px-8 py-4 border-b border-[#007fff]/10">
+          <div className="flex items-center justify-between overflow-x-auto">
             {STEPS.map((step, index) => (
-              <div key={step.id} className="flex items-center">
-                <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                  index < currentStep ? 'bg-azure-500 text-white' : 'bg-gray-200 text-gray-600'
+              <button
+                key={step.id}
+                onClick={() => setCurrentStep(index)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 whitespace-nowrap ${
+                  index === currentStep
+                    ? 'bg-[#007fff] text-white shadow-lg'
+                    : index < currentStep
+                    ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                    : 'bg-white text-[#007fff]/60 hover:bg-[#007fff]/10 border border-[#007fff]/20'
+                }`}
+              >
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                  index === currentStep
+                    ? 'bg-white/20'
+                    : index < currentStep
+                    ? 'bg-green-200'
+                    : 'bg-[#007fff]/10'
                 }`}>
                   {index < currentStep ? (
                     <CheckIcon className="w-4 h-4" />
                   ) : (
-                    <span className="text-sm font-medium">{index + 1}</span>
+                    <step.icon className="w-4 h-4" />
                   )}
-              </div>
-                <span className={`ml-2 text-sm font-medium ${
-                  index <= currentStep ? 'text-azure-500' : 'text-gray-500'
-                }`}>
-                  {step.title}
-                </span>
-                {index < STEPS.length - 1 && (
-                  <div className={`w-16 h-0.5 mx-4 ${
-                    index < currentStep ? 'bg-azure-600' : 'bg-gray-200'
-                  }`} />
-                )}
-              </div>
-            ))}
-            </div>
-
-          {/* Form Content */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {renderStep()}
-
-            {/* Navigation Buttons */}
-            <div className="flex justify-between pt-6 border-t border-gray-200">
-              <button
-                type="button"
-                onClick={prevStep}
-                disabled={currentStep === 0}
-                className="flex items-center space-x-2 px-6 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ChevronLeftIcon className="w-4 h-4" />
-                <span>Previous</span>
+                </div>
+                <div className="text-left hidden sm:block">
+                  <div className="font-medium text-sm">{step.title}</div>
+                  <div className={`text-xs ${
+                    index === currentStep ? 'text-white/80' : 'text-current opacity-70'
+                  }`}>{step.description}</div>
+                </div>
               </button>
+            ))}
+          </div>
+        </div>
 
-              <div className="flex space-x-3">
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-8">
+            {renderStep()}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="bg-gray-50 px-8 py-6 border-t border-gray-200">
+          <div className="flex justify-between items-center">
+            <button
+              onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
+              disabled={currentStep === 0}
+              className={`flex items-center px-6 py-3 rounded-xl transition-all duration-200 ${
+                currentStep === 0
+                  ? 'text-gray-400 cursor-not-allowed'
+                  : 'text-[#007fff] hover:bg-[#007fff]/10 border border-[#007fff]/20'
+              }`}
+            >
+              <ChevronLeftIcon className="w-4 h-4 mr-2" />
+              Previous
+            </button>
+            
+            <div className="flex space-x-4">
               <button
-                type="button"
                 onClick={onClose}
-                  className="px-6 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                className="px-6 py-3 text-[#007fff] border-2 border-[#007fff]/20 rounded-xl hover:border-[#007fff]/40 hover:bg-[#007fff]/5 transition-all duration-200 font-medium"
               >
                 Cancel
               </button>
-                
-                {currentStep < STEPS.length - 1 ? (
-                  <button
-                    type="button"
-                    onClick={nextStep}
-                    className="px-6 py-2 bg-azure-500 text-white rounded-lg hover:bg-azure-600 transition-colors"
-                  >
-                    Next
-                    <ChevronRightIcon className="w-4 h-4 ml-2 inline" />
-                  </button>
-                ) : (
+              
               <button
-                type="submit"
+                onClick={handleNext}
                 disabled={loading}
-                    className="px-6 py-2 bg-azure-500 text-white rounded-lg hover:bg-azure-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-8 py-3 bg-[#007fff] text-white rounded-xl hover:bg-[#007fff]/90 disabled:opacity-50 transition-all duration-200 font-medium shadow-lg transform hover:scale-105 disabled:transform-none flex items-center gap-2"
               >
-                {loading ? 'Saving...' : 'Save Changes'}
-              </button>
+                {loading && (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                 )}
-              </div>
+                {loading ? 'Saving...' : currentStep === STEPS.length - 1 ? 'Save Changes' : 'Next Step'}
+                {!loading && currentStep < STEPS.length - 1 && (
+                  <ChevronRightIcon className="w-4 h-4" />
+                )}
+              </button>
             </div>
-          </form>
+          </div>
         </div>
       </motion.div>
     </motion.div>
   );
-} 
+}

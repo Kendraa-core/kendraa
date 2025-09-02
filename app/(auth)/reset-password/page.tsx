@@ -88,8 +88,8 @@ export default function ResetPassword() {
         <div className="max-w-md w-full space-y-8">
           <div className="text-center">
             <Logo />
-            <h2 className="mt-6 text-3xl font-bold text-black">
-              Validating session...
+            <h2 className="mt-6 text-3xl font-bold text-gray-900">
+              Validating reset link...
             </h2>
             <div className="mt-4">
               <div className="w-8 h-8 border-2 border-[#007fff] border-t-transparent rounded-full animate-spin mx-auto"></div>
