@@ -16,7 +16,7 @@ interface ShareButtonProps {
 export default function ShareButton({ 
   url, 
   title = 'Check this out', 
-  description = 'Shared from Kendraa', 
+      description = 'Shared from <span className="mulish-semibold">kendraa</span>', 
   className = '',
   variant = 'icon'
 }: ShareButtonProps) {

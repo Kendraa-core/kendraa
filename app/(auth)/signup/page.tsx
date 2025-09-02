@@ -78,10 +78,10 @@ export default function SignUp() {
         {/* Form Card */}
         <div className="bg-white rounded-2xl shadow-xl border border-[#007fff]/10 p-8">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-[#007fff] mb-2">
-              Join Kendraa
+            <h1 className="text-2xl font-bold text-black mb-2">
+              Join <span className="mulish-semibold">kendraa</span>
             </h1>
-            <p className="text-[#007fff]/70">
+            <p className="text-gray-600">
               Connect with healthcare professionals worldwide
             </p>
           </div>
@@ -105,7 +105,7 @@ export default function SignUp() {
                 required
                 value={formData.fullName}
                 onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                className="w-full px-4 py-3 border border-[#007fff]/20 rounded-xl text-[#007fff] focus:outline-none focus:ring-2 focus:ring-[#007fff]/10 focus:border-[#007fff] transition-all duration-200 placeholder:text-[#007fff]/40"
+                className="w-full px-4 py-3 border border-[#007fff]/20 rounded-xl text-black focus:outline-none focus:ring-2 focus:ring-[#007fff]/10 focus:border-[#007fff] transition-all duration-200 placeholder:text-gray-400"
                 placeholder="Enter your full name"
               />
             </div>
@@ -122,7 +122,7 @@ export default function SignUp() {
                 required
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3 border border-[#007fff]/20 rounded-xl text-[#007fff] focus:outline-none focus:ring-2 focus:ring-[#007fff]/10 focus:border-[#007fff] transition-all duration-200 placeholder:text-[#007fff]/40"
+                className="w-full px-4 py-3 border border-[#007fff]/20 rounded-xl text-black focus:outline-none focus:ring-2 focus:ring-[#007fff]/10 focus:border-[#007fff] transition-all duration-200 placeholder:text-gray-400"
                 placeholder="Enter your email"
               />
             </div>
@@ -148,10 +148,10 @@ export default function SignUp() {
                         <IconComponent className={`h-8 w-8 mb-3 ${
                           profileType === type.id ? 'text-[#007fff]' : 'text-[#007fff]/40'
                         }`} />
-                        <h3 className="text-sm font-medium text-[#007fff] mb-1">
+                        <h3 className="text-sm font-medium text-black mb-1">
                           {type.name}
                         </h3>
-                        <p className="text-xs text-[#007fff]/70">
+                        <p className="text-xs text-gray-600">
                           {type.description}
                         </p>
                       </div>
@@ -181,7 +181,7 @@ export default function SignUp() {
                   required
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full px-4 py-3 pr-12 border border-[#007fff]/20 rounded-xl text-[#007fff] focus:outline-none focus:ring-2 focus:ring-[#007fff]/10 focus:border-[#007fff] transition-all duration-200 placeholder:text-[#007fff]/40"
+                  className="w-full px-4 py-3 pr-12 border border-[#007fff]/20 rounded-xl text-black focus:outline-none focus:ring-2 focus:ring-[#007fff]/10 focus:border-[#007fff] transition-all duration-200 placeholder:text-gray-400"
                   placeholder="Create a password"
                 />
                 <button
@@ -211,7 +211,7 @@ export default function SignUp() {
                   required
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                  className="w-full px-4 py-3 pr-12 border border-[#007fff]/20 rounded-xl text-[#007fff] focus:outline-none focus:ring-2 focus:ring-[#007fff]/10 focus:border-[#007fff] transition-all duration-200 placeholder:text-[#007fff]/40"
+                  className="w-full px-4 py-3 pr-12 border border-[#007fff]/20 rounded-xl text-black focus:outline-none focus:ring-2 focus:ring-[#007fff]/10 focus:border-[#007fff] transition-all duration-200 placeholder:text-gray-400"
                   placeholder="Confirm your password"
                 />
                 <button
@@ -246,7 +246,7 @@ export default function SignUp() {
             </div>
 
             <div className="text-center">
-              <p className="text-sm text-[#007fff]/70">
+              <p className="text-sm text-gray-600">
                 Already have an account?{' '}
                 <Link
                   href="/signin"

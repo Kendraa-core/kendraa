@@ -64,7 +64,7 @@ const faqs = [
   },
   {
     question: 'Can I connect with professionals outside my specialization?',
-    answer: 'Yes! Kendraa encourages interdisciplinary connections. You can connect with any healthcare professional on the platform.'
+            answer: 'Yes! <span className="mulish-semibold">kendraa</span> encourages interdisciplinary connections. You can connect with any healthcare professional on the platform.'
   },
   {
     question: 'Is my personal information secure?',
@@ -93,7 +93,7 @@ export default function HelpPage() {
             How can we help you?
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Find answers to common questions and get the support you need to make the most of your Kendraa experience.
+            Find answers to common questions and get the support you need to make the most of your <span className="mulish-semibold">kendraa</span> experience.
           </p>
         </motion.div>
 

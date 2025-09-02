@@ -95,7 +95,7 @@ export default function AboutPage() {
             className="text-center"
           >
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-              About <span className="text-primary-600">Kendraa</span>
+              About <span className="text-primary-600 mulish-semibold">kendraa</span>
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
               The premier networking platform for healthcare professionals, designed to foster collaboration, 
@@ -146,7 +146,7 @@ export default function AboutPage() {
             >
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Empowering Healthcare Professionals</h3>
               <p className="text-gray-600 mb-6">
-                Kendraa was born from the recognition that healthcare professionals need better tools to connect, 
+                <span className="mulish-semibold">kendraa</span> was born from the recognition that healthcare professionals need better tools to connect, 
                 collaborate, and grow in their careers. We understand the unique challenges faced by doctors, 
                 nurses, researchers, and healthcare administrators.
               </p>
@@ -205,7 +205,7 @@ export default function AboutPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl font-bold text-gray-900 mb-6">Platform Features</h2>
+            <h2 className="text-4xl font-bold text-black mb-6">Platform Features</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Discover the tools and features designed specifically for healthcare professionals
             </p>
@@ -221,8 +221,8 @@ export default function AboutPage() {
                 viewport={{ once: true }}
                 className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow"
               >
-                <feature.icon className="w-12 h-12 text-primary-600 mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">{feature.title}</h3>
+                <feature.icon className="w-12 h-12 text-[#007fff] mb-4" />
+                <h3 className="text-xl font-semibold text-black mb-3">{feature.title}</h3>
                 <p className="text-gray-600">{feature.description}</p>
               </motion.div>
             ))}
@@ -240,9 +240,9 @@ export default function AboutPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl font-bold text-gray-900 mb-6">Our Values</h2>
+            <h2 className="text-4xl font-bold text-black mb-6">Our Values</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              The principles that guide everything we do at Kendraa
+              The principles that guide everything we do at <span className="mulish-semibold">kendraa</span>
             </p>
           </motion.div>
 
@@ -256,10 +256,10 @@ export default function AboutPage() {
                 viewport={{ once: true }}
                 className="text-center"
               >
-                <div className="bg-primary-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                  <value.icon className="w-8 h-8 text-primary-600" />
+                <div className="bg-blue-50 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                  <value.icon className="w-8 h-8 text-[#007fff]" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{value.title}</h3>
+                <h3 className="text-lg font-semibold text-black mb-2">{value.title}</h3>
                 <p className="text-gray-600 text-sm">{value.description}</p>
               </motion.div>
             ))}
@@ -268,7 +268,7 @@ export default function AboutPage() {
       </section>
 
       {/* Team Section */}
-      <section className="py-20 bg-gradient-to-r from-primary-50 to-secondary-50">
+      <section className="py-20 bg-gradient-to-r from-gray-50 to-blue-50/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -277,7 +277,7 @@ export default function AboutPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl font-bold text-gray-900 mb-6">Our Team</h2>
+            <h2 className="text-4xl font-bold text-black mb-6">Our Team</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               A dedicated team of healthcare professionals, technologists, and innovators committed to 
               transforming healthcare collaboration
@@ -292,10 +292,10 @@ export default function AboutPage() {
               viewport={{ once: true }}
               className="bg-white rounded-xl p-6 text-center shadow-sm"
             >
-              <div className="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <BuildingOfficeIcon className="w-10 h-10 text-primary-600" />
+              <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <BuildingOfficeIcon className="w-10 h-10 text-[#007fff]" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Healthcare Experts</h3>
+              <h3 className="text-lg font-semibold text-black mb-2">Healthcare Experts</h3>
               <p className="text-gray-600 text-sm">
                 Medical professionals with decades of experience in clinical practice and healthcare administration
               </p>
@@ -308,10 +308,10 @@ export default function AboutPage() {
               viewport={{ once: true }}
               className="bg-white rounded-xl p-6 text-center shadow-sm"
             >
-              <div className="w-20 h-20 bg-secondary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <SparklesIcon className="w-10 h-10 text-secondary-600" />
+              <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <SparklesIcon className="w-10 h-10 text-[#007fff]" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Technology Innovators</h3>
+              <h3 className="text-lg font-semibold text-black mb-2">Technology Innovators</h3>
               <p className="text-gray-600 text-sm">
                 Engineers and designers creating cutting-edge solutions for healthcare professionals
               </p>
@@ -324,10 +324,10 @@ export default function AboutPage() {
               viewport={{ once: true }}
               className="bg-white rounded-xl p-6 text-center shadow-sm"
             >
-              <div className="w-20 h-20 bg-accent-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <GlobeAltIcon className="w-10 h-10 text-accent-600" />
+              <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <GlobeAltIcon className="w-10 h-10 text-[#007fff]" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Global Community</h3>
+              <h3 className="text-lg font-semibold text-black mb-2">Global Community</h3>
               <p className="text-gray-600 text-sm">
                 Representatives from diverse healthcare systems worldwide ensuring global relevance
               </p>
@@ -337,7 +337,7 @@ export default function AboutPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-primary-600">
+      <section className="py-20 bg-[#007fff]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -346,20 +346,20 @@ export default function AboutPage() {
             viewport={{ once: true }}
           >
             <h2 className="text-4xl font-bold text-white mb-6">Join the Future of Healthcare Networking</h2>
-            <p className="text-xl text-primary-100 mb-8 max-w-3xl mx-auto">
+            <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
               Connect with healthcare professionals worldwide, share knowledge, and advance your career 
               in the medical community
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link 
                 href="/signup"
-                className="inline-flex items-center px-8 py-4 bg-white text-primary-600 font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+                className="inline-flex items-center px-8 py-4 bg-white text-[#007fff] font-semibold rounded-lg hover:bg-gray-100 transition-colors"
               >
                 Get Started Today
               </Link>
               <Link 
                 href="/contact"
-                className="inline-flex items-center px-8 py-4 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-primary-600 transition-colors"
+                className="inline-flex items-center px-8 py-4 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-[#007fff] transition-colors"
               >
                 Contact Us
               </Link>

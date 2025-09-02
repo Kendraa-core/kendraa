@@ -107,7 +107,7 @@ export default function ContactPage() {
             Get in Touch
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Have questions about Kendraa? Need support? We&apos;re here to help healthcare professionals connect and succeed.
+            Have questions about <span className="mulish-semibold">kendraa</span>? Need support? We&apos;re here to help healthcare professionals connect and succeed.
           </p>
         </motion.div>
 

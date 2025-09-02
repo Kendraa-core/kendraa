@@ -41,14 +41,16 @@ export default function DashboardLayout({
   const [eventsCount, setEventsCount] = useState(0);
   const [pagesCount, setPagesCount] = useState(0);
   const [newslettersCount, setNewslettersCount] = useState(0);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
 
   // Immediate redirect check if profile is already loaded and onboarding is not completed
   useEffect(() => {
     if (profile && !profile.onboarding_completed) {
       console.log('[Dashboard] Immediate redirect: Profile loaded but onboarding not completed');
-      router.push('/onboarding');
+      // Use window.location to prevent router conflicts
+      window.location.href = '/onboarding';
     }
-  }, [profile, router]);
+  }, [profile]);
 
   useEffect(() => {
     const loadUserProfile = async () => {
@@ -56,6 +58,14 @@ export default function DashboardLayout({
         router.push('/signin');
         return;
       }
+
+      // Prevent multiple simultaneous profile loads
+      if (isLoadingProfile) {
+        console.log('[Dashboard] Profile load already in progress, skipping...');
+        return;
+      }
+
+      setIsLoadingProfile(true);
 
       try {
         const userProfile = await getProfile(user.id);
@@ -110,17 +120,7 @@ export default function DashboardLayout({
           return;
         }
         
-        // Also redirect if completion is below 50% (additional safety check)
-        if (completionPercentage < 50) {
-          console.log('[Dashboard] Profile completion below 50%, redirecting to onboarding...');
-          try {
-            router.push('/onboarding');
-          } catch (error) {
-            console.error('[Dashboard] Router push failed, using window.location:', error);
-            window.location.href = '/onboarding';
-          }
-          return;
-        }
+        // Note: Do not redirect based on completion percentage; rely solely on onboarding_completed flag.
 
         // Load all network data for sidebar
         const [
@@ -149,11 +149,12 @@ export default function DashboardLayout({
         return;
       } finally {
         setLoading(false);
+        setIsLoadingProfile(false);
       }
     };
 
     loadUserProfile();
-  }, [user?.id, router, updateProfile, profile]);
+  }, [user?.id, router, updateProfile]);
 
   // Check if we're on the network page
   const isNetworkPage = pathname === '/network';
@@ -250,7 +251,7 @@ export default function DashboardLayout({
                     <a href="#" className="hover:text-gray-700">Get the App</a>
                     <a href="#" className="hover:text-gray-700">More</a>
                   </div>
-                  <p className="text-xs text-gray-400 mt-4">Kendraa Corporation © 2025</p>
+                  <p className="text-xs text-gray-400 mt-4"><span className="mulish-semibold">kendraa</span> Corporation © 2025</p>
                 </div>
               </div>
             ) : (

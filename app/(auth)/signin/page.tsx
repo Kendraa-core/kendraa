@@ -128,7 +128,7 @@ export default function SignIn() {
                 <div className="w-full border-t border-gray-200" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-600">New to Kendraa?</span>
+                <span className="px-4 bg-white text-gray-600">New to <span className="mulish-semibold">kendraa</span>?</span>
               </div>
             </div>
 

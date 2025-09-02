@@ -17,7 +17,7 @@ export default function LandingPage() {
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#007fff] mx-auto mb-3"></div>
-          <p className="text-sm text-[#007fff]">Loading Kendraa...</p>
+          <p className="text-sm text-[#007fff]">Loading <span className="mulish-semibold">kendraa</span>...</p>
         </div>
       </div>
     );
@@ -58,7 +58,7 @@ export default function LandingPage() {
             >
               <Link 
                 href="/signin" 
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-[#007fff] transition-colors duration-200"
+                className="px-4 py-2 text-sm font-medium text-[#007fff] border-2 border-[#007fff]/30 hover:border-[#007fff] hover:bg-[#007fff]/5 rounded-lg transition-all duration-200"
               >
                 Sign In
               </Link>
@@ -90,16 +90,12 @@ export default function LandingPage() {
               transition={{ duration: 0.8, ease: "easeOut" }}
               className="mb-12"
             >
-              <div className="inline-flex items-center px-4 py-2 bg-[#007fff]/10 rounded-full text-[#007fff] text-sm font-medium mb-8">
-                <StarIcon className="w-4 h-4 mr-2" />
-                Professional Healthcare Network
-              </div>
-              <h1 className="text-6xl md:text-7xl lg:text-8xl font-black text-[#007fff] leading-tight tracking-tight font-glacial mb-8">
-                KENDRAA
-              </h1>
-              <p className="text-2xl md:text-3xl lg:text-4xl font-bold text-black mb-8 leading-relaxed">
-                Professional Networking for Global Medical Science Professionals
-              </p>
+               <h1 className="text-6xl md:text-7xl lg:text-8xl font-black text-[#007fff] leading-tight tracking-tight mulish-bold mb-8">
+                 kendraa
+               </h1>
+               <p className="text-2xl md:text-3xl lg:text-4xl font-bold text-black mb-8 leading-relaxed">
+                 Professional Networking for Global Medical Science Professionals
+               </p>
             </motion.div>
 
             <motion.div
@@ -131,32 +127,13 @@ export default function LandingPage() {
                 </Link>
                 <Link 
                 href="/signin"
-                className="inline-flex items-center px-10 py-4 text-xl font-semibold text-[#007fff] bg-white border-2 border-[#007fff]/20 hover:border-[#007fff] rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl"
+                className="inline-flex items-center px-10 py-4 text-xl font-semibold text-[#007fff] bg-white border-2 border-[#007fff] hover:border-[#007fff] hover:bg-[#007fff]/5 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl"
                 >
                 Sign In
                 </Link>
             </motion.div>
 
-            {/* Stats */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto"
-            >
-              <div className="text-center">
-                <div className="text-3xl font-bold text-[#007fff] mb-2">10+</div>
-                <div className="text-gray-600">Healthcare Sectors</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-[#007fff] mb-2">Global</div>
-                <div className="text-gray-600">Network Reach</div>
-                    </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-[#007fff] mb-2">24/7</div>
-                <div className="text-gray-600">Platform Access</div>
-                  </div>
-            </motion.div>
+
           </div>
         </div>
       </section>
@@ -175,7 +152,7 @@ export default function LandingPage() {
               COLLABORATE, SHARE KNOWLEDGE, CREATE OPPORTUNITIES
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Kendraa brings professionals, institutions and innovators together to grow their careers and networks while shaping the future of global healthcare.
+              <span className="mulish-semibold">kendraa</span> brings professionals, institutions and innovators together to grow their careers and networks while shaping the future of global healthcare.
             </p>
           </motion.div>
 
@@ -356,7 +333,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-            <p className="text-lg">&copy; 2025 Kendraa. All rights reserved.</p>
+            <p className="text-lg">&copy; 2025 <span className="mulish-semibold">kendraa</span>. All rights reserved.</p>
           </div>
         </div>
       </footer>

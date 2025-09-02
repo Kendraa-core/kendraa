@@ -1128,12 +1128,46 @@ export default function ProfilePage() {
 
         {/* Modals */}
         {showEditModal && profile && (
-          <EditProfileModal
-            profile={profile}
-            onClose={() => setShowEditModal(false)}
-            onUpdate={handleProfileUpdate}
-          />
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg max-w-2xl w-full mx-4">
+              <h3 className="text-lg font-bold mb-4">Edit Profile - Test Modal</h3>
+              <p>Profile: {profile.full_name}</p>
+              <p>Email: {profile.email}</p>
+              <div className="mt-4 flex space-x-2">
+                <button 
+                  onClick={() => setShowEditModal(false)}
+                  className="px-4 py-2 bg-gray-500 text-white rounded"
+                >
+                  Close
+                </button>
+                <button 
+                  onClick={() => {
+                    handleProfileUpdate();
+                    setShowEditModal(false);
+                  }}
+                  className="px-4 py-2 bg-[#007fff] text-white rounded"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
         )}
+        
+        {/* Debug: Show when modal should be visible */}
+        {showEditModal && !profile && (
+          <div className="fixed inset-0 bg-red-500/50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg">
+              <h3>Debug: Modal should be visible but no profile</h3>
+              <p>showEditModal: {showEditModal.toString()}</p>
+              <p>profile: {profile ? 'exists' : 'null'}</p>
+            </div>
+          </div>
+        )}
+        
+
+        
+
 
         {showImageEditor && profile && (
           <ProfileImageEditor

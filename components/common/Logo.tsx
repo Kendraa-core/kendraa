@@ -61,7 +61,7 @@ export function LogoText({
   };
 
   return (
-    <span className={`font-display ${sizeClasses[size]} ${variantClasses[variant]} tracking-tight ${className}`}>
+    <span className={`mulish-bold ${sizeClasses[size]} ${variantClasses[variant]} tracking-tight ${className}`}>
       kendraa
     </span>
   );

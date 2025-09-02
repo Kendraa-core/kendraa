@@ -19,7 +19,6 @@ import {
   ChevronRightIcon,
   HomeIcon,
   BriefcaseIcon,
-
   DocumentTextIcon,
   AcademicCapIcon,
   PhoneIcon,
@@ -28,7 +27,6 @@ import {
   IdentificationIcon,
   BeakerIcon,
   HeartIcon,
-  AcademicCapIcon as AcademicCapIconSolid,
   InformationCircleIcon
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
@@ -40,15 +38,15 @@ import Logo from '@/components/common/Logo';
 const ONBOARDING_STEPS = [
   {
     id: 'welcome',
-    title: 'Welcome to Kendraa',
+    title: 'Welcome to <span class="mulish-semibold text-[#007fff]">kendraa</span>',
     subtitle: 'Let\'s set up your professional profile to connect with healthcare professionals',
     type: 'welcome',
     required: false
   },
   {
     id: 'student-status',
-    title: 'Are you currently a student?',
-    subtitle: 'This helps us customize your profile requirements',
+    title: 'Professional Status',
+    subtitle: 'Select your current professional status to customize your profile requirements',
     type: 'student-selection',
     required: false
   },
@@ -278,7 +276,7 @@ export default function OnboardingPage() {
           if (error) {
             console.error('Error updating onboarding status:', error);
           } else {
-            router.push('/feed');
+        router.push('/feed');
           }
         } catch (error) {
           console.error('Error updating onboarding status:', error);
@@ -294,19 +292,19 @@ export default function OnboardingPage() {
   // Initialize form data when profile loads
   useEffect(() => {
     if (profile) {
-              setFormData({
-          full_name: profile.full_name || '',
-          headline: profile.headline || '',
-          specialization: profile.specialization || [],
-          bio: profile.bio || '',
-          location: profile.location || '',
-          avatar_url: profile.avatar_url || '',
-          // Contact Information
-          phone: profile.phone || '',
-          email: profile.email || '',
-          website: profile.website || '',
+      setFormData({
+        full_name: profile.full_name || '',
+        headline: profile.headline || '',
+        specialization: profile.specialization || [],
+        bio: profile.bio || '',
+        location: profile.location || '',
+        avatar_url: profile.avatar_url || '',
+        // Contact Information
+        phone: profile.phone || '',
+        email: profile.email || '',
+        website: profile.website || '',
           country: profile.country || '',
-        });
+      });
       setAvatarPreview(profile.avatar_url || null);
     }
   }, [profile]);
@@ -409,8 +407,8 @@ export default function OnboardingPage() {
     console.log(`handleInputChange - Field: ${field}, Value:`, value);
     setFormData(prev => {
       const newData = {
-        ...prev,
-        [field]: value
+      ...prev,
+      [field]: value
       };
       console.log('Updated formData:', newData);
       return newData;
@@ -447,11 +445,14 @@ export default function OnboardingPage() {
       const nextStep = Math.min(currentStep + 1, filteredSteps.length - 1);
       setCurrentStep(nextStep);
       
-      // Save data in background without blocking navigation
-      saveDataInBackground();
+      // DISABLED: Only save data in background for non-welcome and non-student-selection steps
+      // This was causing infinite saving loops
+      // if (currentStepData.type !== 'welcome' && currentStepData.type !== 'student-selection') {
+      //   saveDataInBackground();
+      // }
       return;
     }
-
+    
     // If no user/supabase, just advance
     setCurrentStep(Math.min(currentStep + 1, filteredSteps.length - 1));
   };
@@ -462,10 +463,10 @@ export default function OnboardingPage() {
       console.error('User or Supabase not available for background save');
       return;
     }
-
-    // Debouncing: prevent multiple saves within 2 seconds
+    
+    // Debouncing: prevent multiple saves within 3 seconds
     const now = Date.now();
-    if (now - lastSaveTime < 2000) {
+    if (now - lastSaveTime < 3000) {
       console.log('Skipping background save due to debouncing');
       return;
     }
@@ -474,12 +475,12 @@ export default function OnboardingPage() {
     // Prevent multiple simultaneous saves
     if (savingInBackground) {
       console.log('Background save already in progress');
-      return;
-    }
-
+        return;
+      }
+      
     setSavingInBackground(true);
-    try {
-      let avatarUrl = formData.avatar_url;
+      try {
+        let avatarUrl = formData.avatar_url;
 
         // Upload avatar if changed
         if (avatarFile && user?.id) {
@@ -502,7 +503,7 @@ export default function OnboardingPage() {
         if (profileError) throw new Error(`Failed to save profile: ${profileError.message}`);
 
         // Save any valid experiences
-        for (const experience of experiences) {
+          for (const experience of experiences) {
           if (experience.title && experience.company && (experience.start_date || (experience.start_month && experience.start_year))) {
             const startDate = experience.start_month && experience.start_year 
               ? `${experience.start_year}-${experience.start_month}-01`
@@ -512,23 +513,23 @@ export default function OnboardingPage() {
               : experience.end_date;
 
             const { error } = await supabase
-              .from('experiences')
-              .upsert({
-                profile_id: user.id,
-                title: experience.title,
-                company: experience.company,
-                location: experience.location || null,
+                .from('experiences')
+                .upsert({
+                  profile_id: user.id,
+                  title: experience.title,
+                  company: experience.company,
+                  location: experience.location || null,
                 start_date: startDate,
                 end_date: experience.current ? null : (endDate || null),
-                current: experience.current,
-                description: experience.description || null
-              });
+                  current: experience.current,
+                  description: experience.description || null
+                });
             if (error) throw new Error(`Failed to save experience: ${error.message}`);
           }
         }
 
         // Save any valid educations
-        for (const education of educations) {
+          for (const education of educations) {
           if (education.degree && education.school && (education.start_date || (education.start_month && education.start_year))) {
             const startDate = education.start_month && education.start_year 
               ? `${education.start_year}-${education.start_month}-01`
@@ -538,17 +539,17 @@ export default function OnboardingPage() {
               : education.end_date;
 
             const { error } = await supabase
-              .from('education')
-              .upsert({
-                profile_id: user.id,
-                school: education.school,
-                degree: education.degree,
-                field: education.field || null,
+                .from('education')
+                .upsert({
+                  profile_id: user.id,
+                  school: education.school,
+                  degree: education.degree,
+                  field: education.field || null,
                 start_date: startDate,
                 end_date: education.current ? null : (endDate || null),
-                current: education.current,
-                description: education.description || null
-              });
+                  current: education.current,
+                  description: education.description || null
+                });
             if (error) throw new Error(`Failed to save education: ${error.message}`);
           }
         }
@@ -558,6 +559,9 @@ export default function OnboardingPage() {
 
         // Show success toast only if there were no errors
         toast.success('Progress saved successfully!');
+        
+        // Update last save time to prevent immediate re-saves
+        setLastSaveTime(Date.now());
         
       } catch (error: any) {
         console.error('Background save error:', error);
@@ -591,12 +595,14 @@ export default function OnboardingPage() {
     setLoading(true);
     try {
       if (user?.id && supabase) {
+        const sb = supabase; // local non-null alias for TS
+        const uid = user.id; // local non-null alias for TS
         // Save basic profile data
         console.log('handleSave - Saving formData to profiles:', formData);
-        const { error: profileError } = await supabase
+        const { error: profileError } = await sb
           .from('profiles')
           .upsert({
-            id: user.id,
+            id: uid,
             ...formData,
             updated_at: new Date().toISOString()
           });
@@ -605,22 +611,21 @@ export default function OnboardingPage() {
           throw profileError;
         }
 
-        // Save experiences
-        for (const experience of experiences) {
-          if (experience.title && experience.company && (experience.start_month || experience.start_year)) {
-            // Convert month/year to date format for database
+        // Save experiences in parallel
+        const experienceSaves = experiences
+          .filter((experience) => experience.title && experience.company && (experience.start_month || experience.start_year))
+          .map(async (experience) => {
             const startDate = experience.start_month && experience.start_year 
               ? `${experience.start_year}-${experience.start_month}-01`
               : experience.start_date;
-            
             const endDate = experience.end_month && experience.end_year 
               ? `${experience.end_year}-${experience.end_month}-01`
               : experience.end_date;
 
-            const { error: expError } = await supabase
+            const { error: expError } = await sb
               .from('experiences')
               .upsert({
-                profile_id: user.id,
+                profile_id: uid,
                 title: experience.title,
                 company: experience.company,
                 location: experience.location || null,
@@ -629,29 +634,26 @@ export default function OnboardingPage() {
                 current: experience.current,
                 description: experience.description || null
               });
-
             if (expError) {
               console.error('Error saving experience:', expError);
             }
-          }
-        }
+          });
 
-        // Save educations
-        for (const education of educations) {
-          if (education.degree && education.school && (education.start_month || education.start_year)) {
-            // Convert month/year to date format for database
+        // Save educations in parallel
+        const educationSaves = educations
+          .filter((education) => education.degree && education.school && (education.start_month || education.start_year))
+          .map(async (education) => {
             const startDate = education.start_month && education.start_year 
               ? `${education.start_year}-${education.start_month}-01`
               : education.start_date;
-            
             const endDate = education.end_month && education.end_year 
               ? `${education.end_year}-${education.end_month}-01`
               : education.end_date;
 
-            const { error: eduError } = await supabase
+            const { error: eduError } = await sb
               .from('education')
               .upsert({
-                profile_id: user.id,
+                profile_id: uid,
                 degree: education.degree,
                 school: education.school,
                 field: education.field || null,
@@ -660,26 +662,25 @@ export default function OnboardingPage() {
                 current: education.current,
                 description: education.description || null
               });
-
             if (eduError) {
               console.error('Error saving education:', eduError);
             }
-          }
+          });
+
+        await Promise.all([...experienceSaves, ...educationSaves]);
+
+        // Explicit submissions should mark onboarding as completed to prevent redirect loops
+        const { error: onboardingError } = await sb
+          .from('profiles')
+          .update({ onboarding_completed: true, updated_at: new Date().toISOString() })
+          .eq('id', uid);
+        if (onboardingError) {
+          console.error('Error updating onboarding status:', onboardingError);
         }
 
-        // Check if onboarding is now complete and update database
-        const isComplete = await isProfileComplete();
-        if (isComplete) {
-          const { error: onboardingError } = await supabase
-            .from('profiles')
-            .update({ onboarding_completed: true })
-            .eq('id', user.id);
-          
-          if (onboardingError) {
-            console.error('Error updating onboarding status:', onboardingError);
-          }
-        }
-        
+        // Update profile context immediately so UI reflects the change
+        await updateProfile({ ...formData, onboarding_completed: true });
+
         toast.success('Progress saved successfully!');
       }
     } catch (error: any) {
@@ -707,8 +708,8 @@ export default function OnboardingPage() {
             </div>
             
             {/* Typography */}
-            <h2 className="text-3xl md:text-4xl font-bold text-black mb-4 leading-tight">
-              {step.title}
+            <h2 className="text-3xl md:text-4xl font-bold text-black mb-4 leading-tight" 
+                dangerouslySetInnerHTML={{ __html: step.title }}>
             </h2>
             <p className="text-lg md:text-xl text-gray-700 mb-8 leading-relaxed max-w-2xl mx-auto">
               {step.subtitle}
@@ -768,10 +769,12 @@ export default function OnboardingPage() {
                     : 'border-[#007fff]/20 hover:border-[#007fff]/40 hover:bg-[#007fff]/5'
                 }`}
               >
-                <div className="flex items-center justify-center space-x-3">
-                  <AcademicCapIcon className="w-6 h-6" />
-                  <div className="text-left">
-                    <h3 className="text-lg font-semibold text-black">Yes, I&apos;m a current student</h3>
+                <div className="flex items-start space-x-4">
+                  <div className="flex-shrink-0 w-8 h-8 bg-[#007fff]/10 rounded-lg flex items-center justify-center">
+                    <AcademicCapIcon className="w-5 h-5 text-[#007fff]" />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <h3 className="text-lg font-semibold text-black mb-1">Medical Sciences Student</h3>
                     <p className="text-sm text-gray-600">Medical school, residency, or other healthcare education</p>
                   </div>
                 </div>
@@ -788,11 +791,13 @@ export default function OnboardingPage() {
                     : 'border-[#007fff]/20 hover:border-[#007fff]/40 hover:bg-[#007fff]/5'
                 }`}
               >
-                <div className="flex items-center justify-center space-x-3">
-                  <BriefcaseIcon className="w-6 h-6" />
-                  <div className="text-left">
-                    <h3 className="text-lg font-semibold text-black">No, I&apos;m a healthcare professional</h3>
-                    <p className="text-sm text-gray-600">Doctor, nurse, researcher, or other healthcare worker</p>
+                <div className="flex items-start space-x-4">
+                  <div className="flex-shrink-0 w-8 h-8 bg-[#007fff]/10 rounded-lg flex items-center justify-center">
+                    <BriefcaseIcon className="w-5 h-5 text-[#007fff]" />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <h3 className="text-lg font-semibold text-black mb-1">Medical Sciences Professional</h3>
+                    <p className="text-sm text-gray-600">Pharmaceutical, Hospital, Medical Devices, Research Institute, Academia, AI/Robotics, others.</p>
                   </div>
                 </div>
               </button>
@@ -1252,7 +1257,7 @@ export default function OnboardingPage() {
               className="text-center mb-8"
             >
               <div className="w-16 h-16 bg-[#007fff] rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <AcademicCapIconSolid className="w-8 h-8 text-white" />
+                <AcademicCapIcon className="w-8 h-8 text-white" />
               </div>
               <h2 className="text-3xl font-bold text-black mb-2">{step.title}</h2>
               <p className="text-lg text-black/70 max-w-2xl mx-auto">{step.subtitle}</p>
@@ -1759,8 +1764,8 @@ export default function OnboardingPage() {
                       <option value="Zambia">Zambia</option>
                       <option value="Zimbabwe">Zimbabwe</option>
                     </select>
-                  </div>
-                </div>
+              </div>
+            </div>
 
             </div>
             
@@ -1867,7 +1872,7 @@ export default function OnboardingPage() {
               <div className="flex items-center text-sm text-black/60 mb-2">
                 <div className="w-3 h-3 border-2 border-[#007fff]/30 border-t-[#007fff] rounded-full animate-spin mr-2"></div>
                 Saving progress in background...
-              </div>
+            </div>
             )}
 
             <div className="flex justify-center space-x-3 w-full">
@@ -1926,7 +1931,7 @@ export default function OnboardingPage() {
                 </>
               ) : (
                 <button
-                                     onClick={async () => {
+                  onClick={async () => {
                      // Mark onboarding as completed in database
                      if (user?.id && supabase) {
                        try {
@@ -1941,9 +1946,9 @@ export default function OnboardingPage() {
                        } catch (error) {
                          console.error('Error updating onboarding status:', error);
                        }
-                     }
-                     router.push('/feed');
-                   }}
+                    }
+                    router.push('/feed');
+                  }}
                   className="px-8 py-3 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 transition-colors"
                 >
                   Get Started
