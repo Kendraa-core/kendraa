@@ -30,7 +30,6 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  console.log("%c--- DASHBOARD LAYOUT IS RUNNING (Correct Version) ---", "color: #00FFFF; font-weight: bold; font-size: 14px;");
   const { user, profile, loading: authLoading, updateProfile } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -40,6 +39,7 @@ export default function DashboardLayout({
   const [eventsCount, setEventsCount] = useState(0);
   const [pagesCount, setPagesCount] = useState(0);
   const [newslettersCount, setNewslettersCount] = useState(0);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -50,34 +50,30 @@ export default function DashboardLayout({
         return;
       }
 
+      if (isLoadingProfile) return;
+
+      setIsLoadingProfile(true);
+
       try {
         const userProfile = profile || await getProfile(user.id);
         if (userProfile && (!profile || profile.id !== userProfile.id)) {
           updateProfile(userProfile);
         }
 
-        const completionPercentage = userProfile ? (
-          Object.values({
-            full_name: userProfile.full_name,
-            headline: userProfile.headline,
-            bio: userProfile.bio,
-            location: userProfile.location,
-            avatar_url: userProfile.avatar_url,
-          }).filter(Boolean).length / 5
-        ) * 100 : 0;
+        // --- THIS IS THE MERGED AND CORRECTED LOGIC ---
+        // It uses the other developer's preferred check (onboarding_completed flag)
+        // but includes OUR critical exception for the password reset page.
+        const hasCompletedOnboarding = userProfile?.onboarding_completed || false;
         
-        const hasCompletedOnboarding = localStorage.getItem(`onboarding_completed_${user.id}`);
-        
-        // This is the crucial fix: it prevents the onboarding redirect
-        // if the user is on the reset password page.
         if (
-          completionPercentage < 50 &&
-          hasCompletedOnboarding !== 'true' &&
-          pathname !== '/reset-password'
+          !hasCompletedOnboarding && 
+          pathname !== '/reset-password' // <-- THE CRITICAL EXCEPTION
         ) {
+          console.log('[Dashboard] User has not completed onboarding, redirecting...');
           router.push('/onboarding');
-          return;
+          return; // Stop further execution if redirecting
         }
+        // --- END OF FIX ---
 
         const [
           connections, groups, events, pages, newsletters
@@ -94,6 +90,7 @@ export default function DashboardLayout({
         setEventsCount(events);
         setPagesCount(pages);
         setNewslettersCount(newsletters);
+
       } catch (error) {
         console.error('Error loading dashboard layout data:', error);
         if (pathname !== '/reset-password') {
@@ -101,20 +98,24 @@ export default function DashboardLayout({
         }
       } finally {
         setLoading(false);
+        setIsLoadingProfile(false);
       }
     };
 
     if (!authLoading) {
         loadData();
     }
-  }, [user, profile, authLoading, router, updateProfile, pathname]);
+  }, [user, profile, authLoading, router, updateProfile, pathname, isLoadingProfile]);
 
   const isNetworkPage = pathname === '/network';
 
   if (loading || authLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <LoadingSpinner />
+      <div className="min-h-screen bg-gradient-to-br from-white via-[#007fff]/5 to-[#007fff]/10 flex items-center justify-center">
+        <div className="text-center">
+          <LoadingSpinner />
+          <p className="mt-4 text-[#007fff]">Loading your dashboard...</p>
+        </div>
       </div>
     );
   }
@@ -124,56 +125,73 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-white via-[#007fff]/5 to-[#007fff]/10 flex flex-col">
       <Header />
-      <div className="flex pt-16">
-        <div className="hidden lg:block lg:w-80 lg:fixed lg:left-0 lg:top-16 lg:bottom-0">
+      
+      <div className="flex-1 flex overflow-hidden pt-16">
+        <div className="hidden lg:block lg:w-80 lg:flex-shrink-0">
           <div className="p-6 h-full">
             {isNetworkPage ? (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 h-full overflow-y-auto">
-                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Manage my network</h2>
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 h-full">
+                <h2 className="text-lg font-semibold text-black mb-4">Manage my network</h2>
+                
                 <div className="space-y-1">
                   <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
                     <div className="flex items-center space-x-3">
-                      <UserGroupIcon className="w-5 h-5 text-gray-600" />
+                      <UserGroupIcon className="w-5 h-5 text-[#007fff]" />
                       <span className="text-sm text-gray-700">Connections</span>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">{formatNumber(connectionCount)}</span>
+                    <span className="text-sm font-medium text-black">{formatNumber(connectionCount)}</span>
                   </div>
                    <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
                     <div className="flex items-center space-x-3">
-                      <UserIcon className="w-5 h-5 text-gray-600" />
+                      <UserIcon className="w-5 h-5 text-[#007fff]" />
                       <span className="text-sm text-gray-700">Following & followers</span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
                     <div className="flex items-center space-x-3">
-                      <BuildingOfficeIcon className="w-5 h-5 text-gray-600" />
+                      <BuildingOfficeIcon className="w-5 h-5 text-[#007fff]" />
                       <span className="text-sm text-gray-700">Groups</span>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">{formatNumber(groupsCount)}</span>
+                    <span className="text-sm font-medium text-black">{formatNumber(groupsCount)}</span>
                   </div>
                   <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
                     <div className="flex items-center space-x-3">
-                      <CalendarDaysIcon className="w-5 h-5 text-gray-600" />
+                      <CalendarDaysIcon className="w-5 h-5 text-[#007fff]" />
                       <span className="text-sm text-gray-700">Events</span>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">{formatNumber(eventsCount)}</span>
+                    <span className="text-sm font-medium text-black">{formatNumber(eventsCount)}</span>
                   </div>
                   <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
                     <div className="flex items-center space-x-3">
-                      <DocumentTextIcon className="w-5 h-5 text-gray-600" />
+                      <DocumentTextIcon className="w-5 h-5 text-[#007fff]" />
                       <span className="text-sm text-gray-700">Pages</span>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">{formatNumber(pagesCount)}</span>
+                    <span className="text-sm font-medium text-black">{formatNumber(pagesCount)}</span>
                   </div>
                   <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
                     <div className="flex items-center space-x-3">
-                      <NewspaperIcon className="w-5 h-5 text-gray-600" />
+                      <NewspaperIcon className="w-5 h-5 text-[#007fff]" />
                       <span className="text-sm text-gray-700">Newsletters</span>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">{formatNumber(newslettersCount)}</span>
+                    <span className="text-sm font-medium text-black">{formatNumber(newslettersCount)}</span>
                   </div>
+                </div>
+                
+                <div className="mt-8 pt-6 border-t border-gray-200">
+                  <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
+                    <a href="#" className="hover:text-gray-700">About</a>
+                    <a href="#" className="hover:text-gray-700">Accessibility</a>
+                    <a href="#" className="hover:text-gray-700">Help Center</a>
+                    <a href="#" className="hover:text-gray-700">Privacy & Terms</a>
+                    <a href="#" className="hover:text-gray-700">Ad Choices</a>
+                    <a href="#" className="hover:text-gray-700">Advertising</a>
+                    <a href="#" className="hover:text-gray-700">Business Services</a>
+                    <a href="#" className="hover:text-gray-700">Get the App</a>
+                    <a href="#" className="hover:text-gray-700">More</a>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-4"><span className="mulish-semibold">kendraa</span> Corporation © 2025</p>
                 </div>
               </div>
             ) : (
@@ -181,12 +199,20 @@ export default function DashboardLayout({
             )}
           </div>
         </div>
-        <div className="flex-1 lg:ml-80 xl:mr-80">
-            <main className="py-8 px-4 sm:px-6 lg:px-8">
-              {children}
-            </main>
+
+        <div className="flex-1 overflow-y-auto">
+          <div className="w-full px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-center">
+              <div className="w-full max-w-2xl">
+                <main className="py-8">
+                  {children}
+                </main>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="hidden xl:block xl:w-80 xl:fixed xl:right-0 xl:top-16 xl:bottom-0">
+
+        <div className="hidden xl:block xl:w-80 xl:flex-shrink-0">
           <div className="p-6 h-full">
             <RightSidebar />
           </div>
@@ -195,3 +221,4 @@ export default function DashboardLayout({
     </div>
   );
 }
+

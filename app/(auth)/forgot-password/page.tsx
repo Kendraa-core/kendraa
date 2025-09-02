@@ -58,11 +58,11 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <Logo />
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">
+          <h2 className="mt-6 text-3xl font-bold text-black">
             Reset your password
           </h2>
           <p className="mt-2 text-sm text-gray-600">
@@ -73,7 +73,7 @@ export default function ForgotPassword() {
         <div className="bg-white py-8 px-6 shadow-sm rounded-xl border border-gray-200">
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-[#007fff] mb-2">
                 Email address
               </label>
               <input
@@ -84,7 +84,7 @@ export default function ForgotPassword() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-azure-500 transition-colors placeholder:text-gray-400"
+                className="w-full px-3 py-2 border border-[#007fff]/20 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-[#007fff]/10 focus:border-[#007fff] transition-colors placeholder:text-gray-400"
                 placeholder="Enter your email"
                 disabled={loading}
               />
@@ -94,20 +94,31 @@ export default function ForgotPassword() {
               <button
                 type="submit"
                 disabled={loading || !email.trim()}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-azure-600 hover:bg-azure-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-azure-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-[#007fff] hover:bg-[#007fff]/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#007fff] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {loading ? 'Sending Code...' : 'Send Verification Code'}
               </button>
             </div>
           </form>
 
-          <div className="mt-6 text-center">
-            <Link
-              href="/signin"
-              className="font-medium text-azure-600 hover:text-azure-500"
-            >
-              Back to sign in
-            </Link>
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Remember your password?</span>
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <Link
+                href="/signin"
+                className="w-full flex justify-center py-2 px-4 border border-[#007fff]/20 rounded-lg shadow-sm text-sm font-medium text-[#007fff] bg-white hover:bg-[#007fff]/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#007fff] transition-colors"
+              >
+                Back to sign in
+              </Link>
+            </div>
           </div>
         </div>
       </div>
