@@ -68,7 +68,7 @@ export function AccessibilityProvider({ children }: AccessibilityProviderProps) 
 
   useEffect(() => {
     // Load settings from localStorage
-    const savedSettings = localStorage.getItem('kendraa_accessibility_settings');
+    const savedSettings = localStorage.getItem('<span className="mulish-semibold">kendraa</span>_accessibility_settings');
     if (savedSettings) {
       try {
         const parsed = JSON.parse(savedSettings);
@@ -108,7 +108,7 @@ export function AccessibilityProvider({ children }: AccessibilityProviderProps) 
 
   useEffect(() => {
     // Save settings to localStorage
-    localStorage.setItem('kendraa_accessibility_settings', JSON.stringify(settings));
+          localStorage.setItem('<span className="mulish-semibold">kendraa</span>_accessibility_settings', JSON.stringify(settings));
 
     // Apply CSS custom properties for accessibility
     const root = document.documentElement;

@@ -62,6 +62,13 @@ export default function UserDashboard() {
   const [loading, setLoading] = useState(true);
   const [signOutLoading, setSignOutLoading] = useState(false);
 
+  // Redirect to onboarding if not completed
+  useEffect(() => {
+    if (profile && !profile.onboarding_completed) {
+      window.location.href = '/onboarding';
+    }
+  }, [profile]);
+
   useEffect(() => {
     if (user?.id) {
       loadDashboardData();
@@ -158,20 +165,20 @@ export default function UserDashboard() {
 
   const getActivityColor = (type: string) => {
     switch (type) {
-      case 'connection_request': return 'text-azure-600 bg-azure-100';
-      case 'post_like': return 'text-azure-600 bg-azure-100';
-      case 'comment': return 'text-azure-600 bg-azure-100';
-      case 'job_application': return 'text-azure-600 bg-azure-100';
+      case 'connection_request': return 'text-[#007fff] bg-[#007fff]/10';
+      case 'post_like': return 'text-[#007fff] bg-[#007fff]/10';
+      case 'comment': return 'text-[#007fff] bg-[#007fff]/10';
+      case 'job_application': return 'text-[#007fff] bg-[#007fff]/10';
       default: return 'text-gray-600 bg-gray-100';
     }
   };
 
   const getStatusColor = (type: string) => {
     switch (type) {
-      case 'connection_request': return 'text-azure-600 bg-azure-100';
-      case 'post_like': return 'text-azure-600 bg-azure-100';
-      case 'comment': return 'text-azure-600 bg-azure-100';
-      case 'job_application': return 'text-azure-600 bg-azure-100';
+      case 'connection_request': return 'text-[#007fff] bg-[#007fff]/10';
+      case 'post_like': return 'text-[#007fff] bg-[#007fff]/10';
+      case 'comment': return 'text-[#007fff] bg-[#007fff]/10';
+      case 'job_application': return 'text-[#007fff] bg-[#007fff]/10';
       default: return 'text-gray-600 bg-gray-100';
     }
   };
@@ -188,7 +195,7 @@ export default function UserDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-white">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
@@ -204,7 +211,7 @@ export default function UserDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* Profile Completion Prompt */}
       <ProfileCompletionPrompt />
       
@@ -212,12 +219,12 @@ export default function UserDashboard() {
         {/* Elegant Header */}
         <div className="mb-6 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Dashboard & Settings</h1>
+            <h1 className="text-2xl font-semibold text-black">Dashboard & Settings</h1>
             <p className="text-gray-600 text-sm">Welcome back, {profile?.full_name || 'User'}</p>
           </div>
           <ShareButton 
             title={`${profile?.full_name || 'User'}'s Dashboard`}
-            description="Check out my professional dashboard on Kendraa"
+                            description="Check out my professional dashboard on <span className='mulish-semibold'>kendraa</span>"
             variant="button"
           />
         </div>
@@ -231,8 +238,8 @@ export default function UserDashboard() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center space-x-2 px-6 py-4 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
                   activeTab === tab.id
-                    ? 'border-azure-600 text-azure-600 bg-azure-50'
-                    : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    ? 'border-[#007fff] text-[#007fff] bg-[#007fff]/5'
+                    : 'border-transparent text-gray-600 hover:text-black hover:bg-white'
                 }`}
               >
                 <tab.icon className="w-5 h-5" />
@@ -250,7 +257,7 @@ export default function UserDashboard() {
               <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h1 className="text-2xl font-bold text-gray-900">
+                    <h1 className="text-2xl font-bold text-black">
                       Welcome back, {profile?.full_name || user?.email}!
                     </h1>
                     <p className="text-gray-600 mt-1">
@@ -260,7 +267,7 @@ export default function UserDashboard() {
                   <div className="hidden sm:block">
                     <div className="text-right">
                       <p className="text-sm text-gray-500">Today</p>
-                      <p className="text-lg font-semibold text-gray-900">
+                      <p className="text-lg font-semibold text-black">
                         {new Date().toLocaleDateString('en-US', { 
                           weekday: 'long', 
                           month: 'short', 
@@ -278,18 +285,18 @@ export default function UserDashboard() {
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-azure-100 text-sm">Profile</p>
-                      <p className="text-2xl font-bold text-gray-900">{getProfileCompletionPercentage()}%</p>
-                      <p className="text-azure-100 text-sm mt-1">Complete</p>
+                      <p className="text-[#007fff]/10 text-sm">Profile</p>
+                      <p className="text-2xl font-bold text-black">{getProfileCompletionPercentage()}%</p>
+                      <p className="text-[#007fff]/10 text-sm mt-1">Complete</p>
                     </div>
-                    <div className="w-12 h-12 bg-azure-100 rounded-lg flex items-center justify-center">
-                      <UserIcon className="w-8 h-8 text-azure-200" />
+                    <div className="w-12 h-12 bg-[#007fff]/10 rounded-lg flex items-center justify-center">
+                      <UserIcon className="w-8 h-8 text-[#007fff]" />
                     </div>
                   </div>
                   {getProfileCompletionPercentage() < 50 && !localStorage.getItem(`onboarding_completed_${user?.id}`) && (
                     <button
                       onClick={() => window.location.href = '/onboarding'}
-                      className="w-full mt-3 px-3 py-2 bg-azure-600 text-white text-sm rounded-lg hover:bg-azure-700 transition-colors"
+                      className="w-full mt-3 px-3 py-2 bg-[#007fff] text-white text-sm rounded-lg hover:bg-[#007fff]/90 transition-colors"
                     >
                       Complete Profile
                     </button>
@@ -300,12 +307,12 @@ export default function UserDashboard() {
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-azure-100 text-sm">Connections</p>
-                      <p className="text-2xl font-bold text-gray-900">{stats?.connections || 0}</p>
-                      <p className="text-azure-100 text-sm mt-1">Professional network</p>
+                      <p className="text-[#007fff]/10 text-sm">Connections</p>
+                      <p className="text-2xl font-bold text-black">{stats?.connections || 0}</p>
+                      <p className="text-[#007fff]/10 text-sm mt-1">Professional network</p>
                     </div>
-                    <div className="w-12 h-12 bg-azure-100 rounded-lg flex items-center justify-center">
-                      <UserGroupIcon className="w-8 h-8 text-azure-200" />
+                    <div className="w-12 h-12 bg-[#007fff]/10 rounded-lg flex items-center justify-center">
+                      <UserGroupIcon className="w-8 h-8 text-[#007fff]" />
                     </div>
                   </div>
                 </div>
@@ -314,12 +321,12 @@ export default function UserDashboard() {
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-azure-100 text-sm">Posts</p>
-                      <p className="text-2xl font-bold text-gray-900">{stats?.posts || 0}</p>
-                      <p className="text-azure-100 text-sm mt-1">Published content</p>
+                      <p className="text-[#007fff]/10 text-sm">Posts</p>
+                      <p className="text-2xl font-bold text-black">{stats?.posts || 0}</p>
+                      <p className="text-[#007fff]/10 text-sm mt-1">Published content</p>
                     </div>
-                    <div className="w-12 h-12 bg-azure-100 rounded-lg flex items-center justify-center">
-                      <DocumentTextIcon className="w-8 h-8 text-azure-200" />
+                    <div className="w-12 h-12 bg-[#007fff]/10 rounded-lg flex items-center justify-center">
+                      <DocumentTextIcon className="w-8 h-8 text-[#007fff]" />
                     </div>
                   </div>
                 </div>
@@ -328,12 +335,12 @@ export default function UserDashboard() {
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-azure-100 text-sm">Events</p>
-                      <p className="text-2xl font-bold text-gray-900">0</p>
-                      <p className="text-azure-100 text-sm mt-1">Upcoming events</p>
+                      <p className="text-[#007fff]/10 text-sm">Events</p>
+                      <p className="text-2xl font-bold text-black">0</p>
+                      <p className="text-[#007fff]/10 text-sm mt-1">Upcoming events</p>
                     </div>
-                    <div className="w-12 h-12 bg-azure-100 rounded-lg flex items-center justify-center">
-                      <CalendarDaysIcon className="w-8 h-8 text-azure-200" />
+                    <div className="w-12 h-12 bg-[#007fff]/10 rounded-lg flex items-center justify-center">
+                      <CalendarDaysIcon className="w-8 h-8 text-[#007fff]" />
                     </div>
                   </div>
                 </div>
@@ -342,12 +349,12 @@ export default function UserDashboard() {
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-azure-100 text-sm">Applications</p>
-                      <p className="text-2xl font-bold text-gray-900">0</p>
-                      <p className="text-azure-100 text-sm mt-1">Job applications</p>
+                      <p className="text-[#007fff]/10 text-sm">Applications</p>
+                      <p className="text-2xl font-bold text-black">0</p>
+                      <p className="text-[#007fff]/10 text-sm mt-1">Job applications</p>
                     </div>
-                    <div className="w-12 h-12 bg-azure-100 rounded-lg flex items-center justify-center">
-                      <BriefcaseIcon className="w-8 h-8 text-azure-200" />
+                    <div className="w-12 h-12 bg-[#007fff]/10 rounded-lg flex items-center justify-center">
+                      <BriefcaseIcon className="w-8 h-8 text-[#007fff]" />
                     </div>
                   </div>
                 </div>
@@ -355,22 +362,22 @@ export default function UserDashboard() {
 
               {/* Quick Actions */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <button className="flex items-center space-x-3 p-4 bg-azure-50 rounded-lg hover:bg-azure-100 transition-colors">
-                  <DocumentTextIcon className="w-6 h-6 text-azure-600" />
-                  <span className="font-medium text-azure-900">Create Post</span>
+                <button className="flex items-center space-x-3 p-4 bg-[#007fff]/5 rounded-lg hover:bg-[#007fff]/10 transition-colors">
+                  <DocumentTextIcon className="w-6 h-6 text-[#007fff]" />
+                  <span className="font-medium text-black">Create Post</span>
                 </button>
                 
-                <button className="flex items-center space-x-3 p-4 bg-azure-50 rounded-lg hover:bg-azure-100 transition-colors">
-                  <UserGroupIcon className="w-6 h-6 text-azure-600" />
-                  <span className="font-medium text-azure-900">Find Connections</span>
+                <button className="flex items-center space-x-3 p-4 bg-[#007fff]/5 rounded-lg hover:bg-[#007fff]/10 transition-colors">
+                  <UserGroupIcon className="w-6 h-6 text-[#007fff]" />
+                  <span className="font-medium text-black">Find Connections</span>
                 </button>
               </div>
 
               {/* Recent Activity */}
               <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold text-gray-900">Recent Activity</h2>
-                  <Link href="/notifications" className="text-azure-600 hover:text-azure-700 text-sm font-medium">
+                  <h2 className="text-xl font-semibold text-black">Recent Activity</h2>
+                  <Link href="/notifications" className="text-[#007fff] hover:text-[#007fff]/90 text-sm font-medium">
                     View all
                   </Link>
                 </div>
@@ -394,12 +401,12 @@ export default function UserDashboard() {
                     {recentActivity.map((activity, index) => {
                       const IconComponent = getActivityIcon(activity.type);
                       return (
-                        <div key={index} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                        <div key={index} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white transition-colors">
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getActivityColor(activity.type)}`}>
                             <IconComponent className="w-5 h-5" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900">{activity.title}</p>
+                            <p className="text-sm font-medium text-black">{activity.title}</p>
                             <p className="text-sm text-gray-600">{activity.description}</p>
                             <p className="text-xs text-gray-500 mt-1">
                               {formatRelativeTime(activity.timestamp)}
@@ -422,7 +429,7 @@ export default function UserDashboard() {
               <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900">Account Management</h3>
+                    <h3 className="text-lg font-semibold text-black">Account Management</h3>
                     <p className="text-gray-600 mt-1">Manage your account settings and data</p>
                   </div>
                   <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
@@ -435,14 +442,14 @@ export default function UserDashboard() {
 
           {activeTab === 'profile' && (
             <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-gray-900">Profile Settings</h3>
+              <h3 className="text-lg font-semibold text-black">Profile Settings</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Profile Visibility
                     </label>
-                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-azure-500">
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff]/50 focus:border-[#007fff]/50">
                       <option>Public - Anyone can view</option>
                       <option>Connections only</option>
                       <option>Private - Only you</option>
@@ -452,7 +459,7 @@ export default function UserDashboard() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Contact Information
                     </label>
-                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-azure-500">
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff]/50 focus:border-[#007fff]/50">
                       <option>Show to connections</option>
                       <option>Show to everyone</option>
                       <option>Hide contact info</option>
@@ -464,7 +471,7 @@ export default function UserDashboard() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Activity Status
                     </label>
-                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-azure-500">
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff]/50 focus:border-[#007fff]/50">
                       <option>Show when active</option>
                       <option>Hide activity status</option>
                     </select>
@@ -473,7 +480,7 @@ export default function UserDashboard() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Profile Language
                     </label>
-                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-azure-500">
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff]/50 focus:border-[#007fff]/50">
                       <option>English</option>
                       <option>Spanish</option>
                       <option>French</option>
@@ -487,38 +494,38 @@ export default function UserDashboard() {
 
           {activeTab === 'privacy' && (
             <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-gray-900">Privacy & Security</h3>
+              <h3 className="text-lg font-semibold text-black">Privacy & Security</h3>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between p-4 bg-white rounded-lg">
                   <div>
-                    <h4 className="font-medium text-gray-900">Two-Factor Authentication</h4>
+                    <h4 className="font-medium text-black">Two-Factor Authentication</h4>
                     <p className="text-sm text-gray-600">Add an extra layer of security</p>
                   </div>
-                  <button className="px-4 py-2 bg-azure-600 text-white rounded-lg hover:bg-azure-700">
+                  <button className="px-4 py-2 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90">
                     Enable
                   </button>
                 </div>
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between p-4 bg-white rounded-lg">
                   <div>
-                    <h4 className="font-medium text-gray-900">Login Notifications</h4>
+                    <h4 className="font-medium text-black">Login Notifications</h4>
                     <p className="text-sm text-gray-600">Get notified of new logins</p>
                   </div>
                   <button className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
                     Configure
                   </button>
                 </div>
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between p-4 bg-white rounded-lg">
                   <div>
-                    <h4 className="font-medium text-gray-900">Data Export</h4>
+                    <h4 className="font-medium text-black">Data Export</h4>
                     <p className="text-sm text-gray-600">Download your data</p>
                   </div>
                   <button className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
                     Export
                   </button>
                 </div>
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between p-4 bg-white rounded-lg">
                   <div>
-                    <h4 className="font-medium text-gray-900">Account Deletion</h4>
+                    <h4 className="font-medium text-black">Account Deletion</h4>
                     <p className="text-sm text-gray-600">Permanently delete your account</p>
                   </div>
                   <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
@@ -531,7 +538,7 @@ export default function UserDashboard() {
 
           {activeTab === 'notifications' && (
             <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-gray-900">Notification Settings</h3>
+              <h3 className="text-lg font-semibold text-black">Notification Settings</h3>
               <div className="space-y-4">
                 {[
                   { title: 'Connection Requests', description: 'New connection requests' },
@@ -541,14 +548,14 @@ export default function UserDashboard() {
                   { title: 'Event Reminders', description: 'Upcoming events and webinars' },
                   { title: 'Research Updates', description: 'New research in your field' },
                 ].map((setting, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div key={index} className="flex items-center justify-between p-4 bg-white rounded-lg">
                     <div>
-                      <h4 className="font-medium text-gray-900">{setting.title}</h4>
+                      <h4 className="font-medium text-black">{setting.title}</h4>
                       <p className="text-sm text-gray-600">{setting.description}</p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" defaultChecked />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-azure-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-azure-600"></div>
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#007fff]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#007fff]"></div>
                     </label>
                   </div>
                 ))}
@@ -558,11 +565,11 @@ export default function UserDashboard() {
 
           {activeTab === 'account' && (
             <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-gray-900">Account Settings</h3>
+              <h3 className="text-lg font-semibold text-black">Account Settings</h3>
               
               {/* Profile Information */}
               <div className="space-y-4">
-                <h4 className="font-medium text-gray-900">Profile Information</h4>
+                <h4 className="font-medium text-black">Profile Information</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -571,7 +578,7 @@ export default function UserDashboard() {
                     <input
                       type="text"
                       defaultValue={profile?.full_name || ''}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff]/50 focus:border-[#007fff]/50"
                     />
                   </div>
                   <div>
@@ -581,7 +588,7 @@ export default function UserDashboard() {
                     <input
                       type="email"
                       defaultValue={user?.email || ''}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff]/50 focus:border-[#007fff]/50"
                     />
                   </div>
                   <div>
@@ -591,7 +598,7 @@ export default function UserDashboard() {
                     <input
                       type="tel"
                       defaultValue={profile?.phone || ''}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff]/50 focus:border-[#007fff]/50"
                     />
                   </div>
                   <div>
@@ -601,7 +608,7 @@ export default function UserDashboard() {
                     <input
                       type="text"
                       defaultValue={profile?.location || ''}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff]/50 focus:border-[#007fff]/50"
                     />
                   </div>
                 </div>
@@ -609,7 +616,7 @@ export default function UserDashboard() {
 
               {/* Password Change */}
               <div className="space-y-4">
-                <h4 className="font-medium text-gray-900">Change Password</h4>
+                <h4 className="font-medium text-black">Change Password</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -617,7 +624,7 @@ export default function UserDashboard() {
                     </label>
                     <input
                       type="password"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff]/50 focus:border-[#007fff]/50"
                     />
                   </div>
                   <div>
@@ -626,21 +633,21 @@ export default function UserDashboard() {
                     </label>
                     <input
                       type="password"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-azure-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff]/50 focus:border-[#007fff]/50"
                     />
                   </div>
                 </div>
-                <button className="px-4 py-2 bg-azure-600 text-white rounded-lg hover:bg-azure-700">
+                <button className="px-4 py-2 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90">
                   Update Password
                 </button>
               </div>
 
               {/* Account Actions */}
               <div className="space-y-4">
-                <h4 className="font-medium text-gray-900">Account Actions</h4>
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <h4 className="font-medium text-black">Account Actions</h4>
+                <div className="flex items-center justify-between p-4 bg-white rounded-lg">
                   <div>
-                    <h5 className="font-medium text-gray-900">Sign Out</h5>
+                    <h5 className="font-medium text-black">Sign Out</h5>
                     <p className="text-sm text-gray-600">Sign out of your account</p>
                   </div>
                   <button

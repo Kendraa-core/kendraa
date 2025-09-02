@@ -137,9 +137,9 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
                     onFocus={() => setIsSearchFocused(true)}
                     onBlur={() => setIsSearchFocused(false)}
                     placeholder="Search people, jobs, events..."
-                    className="w-full pl-10 pr-16 py-2.5 border border-gray-200 rounded-xl bg-white text-gray-900 focus:ring-2 focus:ring-azure-500 focus:border-azure-500 outline-none text-sm transition-all duration-200 hover:border-gray-300 shadow-sm"
+                    className="w-full pl-10 pr-16 py-2.5 border border-gray-200 rounded-xl bg-white text-gray-900 focus:ring-2 focus:ring-[#007fff] focus:border-[#007fff] outline-none text-sm transition-all duration-200 hover:border-gray-300 shadow-sm"
                   />
-                  <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-azure-500 transition-colors duration-200" />
+                  <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#007fff] transition-colors duration-200" />
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                     <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-xs font-medium text-gray-400 bg-gray-100 rounded border border-gray-200">⌘K</kbd>
                   </div>
@@ -187,14 +187,14 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
                       className={cn(
                         'flex flex-col items-center justify-center w-24 h-16 rounded-lg transition-colors relative',
                         pathname === item.href
-                          ? 'text-azure-500'
-                          : 'text-gray-600 hover:text-azure-500'
+                          ? 'text-[#007fff]'
+                          : 'text-gray-600 hover:text-[#007fff]'
                       )}
                     >
                       <item.icon className="w-6 h-6 mb-1" />
                       <span className="text-xs font-medium">{item.name}</span>
                       {pathname === item.href && (
-                        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-azure-500 rounded-full"></div>
+                        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-[#007fff] rounded-full"></div>
                       )}
                     </Link>
                   );
@@ -208,7 +208,7 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
               <div className="relative" ref={notificationsDropdownRef}>
                 <button
                   onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                  className="w-10 h-10 bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-azure-500 rounded-full flex items-center justify-center transition-all duration-200 relative"
+                  className="w-10 h-10 bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-[#007fff] rounded-full flex items-center justify-center transition-all duration-200 relative"
                 >
                   <BellIcon className="w-5 h-5" />
                   {unreadCount > 0 && (
@@ -222,7 +222,7 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
                 {isNotificationsOpen && (
                   <div className="absolute right-0 mt-2 w-80 max-w-[90vw] bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
                     <div className="px-4 py-3 border-b border-gray-100">
-                      <h3 className="text-sm font-bold text-gray-900">Notifications</h3>
+                      <h3 className="text-sm font-bold text-black">Notifications</h3>
                     </div>
                     <div className="max-h-64 overflow-y-auto">
                       {notifications.length === 0 ? (
@@ -235,7 +235,7 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
                           <div
                             key={notification.id}
                             className={`w-full p-3 hover:bg-gray-50 transition-colors duration-200 ${
-                              !notification.read ? 'bg-azure-50' : ''
+                              !notification.read ? 'bg-[#007fff]/10' : ''
                             }`}
                             onClick={() => {
                               if (!notification.read) {
@@ -244,17 +244,17 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
                             }}
                           >
                             <div className="flex items-start space-x-3">
-                              <div className="w-8 h-8 bg-azure-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                <BellIcon className="w-4 h-4 text-azure-500" />
+                              <div className="w-8 h-8 bg-[#007fff]/20 rounded-full flex items-center justify-center flex-shrink-0">
+                                <BellIcon className="w-4 h-4 text-[#007fff]" />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm text-gray-900">{notification.message}</p>
+                                <p className="text-sm text-black">{notification.message}</p>
                                 <p className="text-xs text-gray-500 mt-1">
                                   {formatRelativeTime(notification.created_at)}
                                 </p>
                                 {!notification.read && (
                                   <div className="mt-1">
-                                    <span className="inline-block w-2 h-2 bg-azure-500 rounded-full"></span>
+                                    <span className="inline-block w-2 h-2 bg-[#007fff] rounded-full"></span>
                                   </div>
                                 )}
                               </div>
@@ -267,7 +267,7 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
                       <div className="px-4 py-3 border-t border-gray-100">
                         <Link
                           href="/notifications"
-                          className="text-sm text-azure-500 hover:text-azure-600 font-medium"
+                          className="text-sm text-[#007fff] hover:text-[#007fff]/90 font-medium"
                         >
                           View all notifications
                         </Link>
@@ -303,7 +303,7 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
                           size="md"
                         />
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-sm font-bold text-gray-900 truncate">
+                          <h3 className="text-sm font-bold text-black truncate">
                             {profile?.full_name || user?.email || 'User'}
                           </h3>
                           <p className="text-xs text-gray-500 truncate">
@@ -320,7 +320,7 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div 
-                            className="bg-azure-500 h-2 rounded-full transition-all duration-300"
+                            className="bg-[#007fff] h-2 rounded-full transition-all duration-300"
                             style={{ width: `${profileCompletion}%` }}
                           ></div>
                         </div>

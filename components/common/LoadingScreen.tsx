@@ -6,7 +6,7 @@ interface LoadingScreenProps {
 }
 
 export default function LoadingScreen({ 
-  text = "Loading Kendraa...", 
+      text = "Loading <span className='mulish-semibold'>kendraa</span>...", 
   className = "" 
 }: LoadingScreenProps) {
   return (

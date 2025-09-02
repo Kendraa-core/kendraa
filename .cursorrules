@@ -1,0 +1,112 @@
+# Kendraa Project Cursor Rules
+
+## Project Overview
+Kendraa is a professional networking platform for global medical science professionals. The platform connects hospitals, academia, pharmaceuticals, medtech, medical devices, research institutions, medical engineering, genetics, healthcare entrepreneurs, universities, and wellness organizations.
+
+## Core Design Principles
+
+### Color Scheme
+- **Primary Colors**: White (#FFFFFF) and Azure Blue (#007fff)
+- **ONLY** use these two colors throughout the application
+- Use Azure Blue (#007fff) for:
+  - Primary text and headings
+  - Buttons and interactive elements
+  - Borders and accent elements
+  - Icons and graphics
+- Use White (#FFFFFF) for:
+  - Backgrounds
+  - Button text on azure backgrounds
+  - Clean, minimal layouts
+
+### Typography
+- **Main Brand Text**: Use Glacial Indifference font for "KENDRAA" branding
+- **Body Text**: Use Inter font for all other content
+- Keep typography clean, modern, and professional
+- Use font weights appropriately (bold for headers, medium for buttons, normal for body)
+
+### Design Aesthetics
+- **Sleek & Modern**: Clean lines, minimal design, professional appearance
+- **Clean Layout**: Generous white space, clear hierarchy
+- **Attractive**: Subtle animations, smooth transitions, hover effects
+- **Professional**: Enterprise-level design standards
+
+### Button Design
+- **All buttons** should use Azure Blue (#007fff) background
+- **White text** on azure blue buttons
+- **Consistent styling**: Rounded corners, proper padding, hover effects
+- **Sign In and Sign Up** buttons should both be azure blue
+
+### Navigation
+- **Ultra-thin navigation bar** (48px height)
+- **Clean borders**: Use azure blue with low opacity
+- **Minimal design**: No unnecessary shadows or gradients
+- **Fixed positioning** for consistent access
+
+### Content Guidelines
+- **Exact Content**: Use only the specified content provided by the user
+- **No additions**: Don't add extra text, features, or content not requested
+- **Clean presentation**: Present content in a clear, readable format
+
+## Technical Standards
+
+### React/Next.js
+- Use TypeScript for type safety
+- Implement proper error handling
+- Use Next.js 15+ features appropriately
+- Ensure responsive design for all screen sizes
+
+### Animations
+- Use Framer Motion for smooth animations
+- Keep animations subtle and professional
+- Implement staggered animations for lists/grids
+- Use appropriate easing and timing
+
+### Performance
+- Optimize images and assets
+- Implement proper loading states
+- Use appropriate caching strategies
+- Ensure fast build times
+
+### Accessibility
+- Ensure proper contrast ratios
+- Implement keyboard navigation
+- Use semantic HTML elements
+- Provide appropriate ARIA labels
+
+## Code Quality
+- Write clean, readable code
+- Use consistent naming conventions
+- Implement proper component structure
+- Add appropriate comments for complex logic
+- Follow React best practices
+- Use proper TypeScript types
+
+## File Organization
+- Keep components organized in logical folders
+- Use proper import/export patterns
+- Maintain consistent file naming
+- Separate concerns appropriately
+
+## Responsive Design
+- Mobile-first approach
+- Ensure functionality on all device sizes
+- Use Tailwind CSS breakpoints consistently
+- Test on various screen resolutions
+
+## Brand Voice
+- Professional and authoritative
+- Focus on medical science excellence
+- Emphasize global connectivity
+- Highlight innovation and collaboration
+
+## Testing
+- Ensure builds pass without errors
+- Test responsive behavior
+- Verify cross-browser compatibility
+- Check for accessibility compliance
+
+## Deployment
+- Optimize for production builds
+- Ensure proper environment configuration
+- Test in production-like environments
+- Monitor performance metrics

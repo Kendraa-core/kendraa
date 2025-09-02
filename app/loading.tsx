@@ -12,7 +12,7 @@ export default function Loading() {
           <div className="absolute inset-0 w-12 h-12 border-4 border-transparent border-t-primary-400 rounded-full animate-ping opacity-20"></div>
         </div>
         
-        <p className="text-gray-600 mt-4 text-sm font-medium">Loading Kendraa...</p>
+        <p className="text-gray-600 mt-4 text-sm font-medium">Loading <span className="mulish-semibold">kendraa</span>...</p>
         
         {/* Progress dots */}
         <div className="flex justify-center mt-2 space-x-1">

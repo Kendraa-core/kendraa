@@ -7,12 +7,26 @@ import { NotificationProvider } from '@/contexts/NotificationContext';
 import ClientOnly from '@/components/common/ClientOnly';
 
 const inter = Inter({ subsets: ['latin'] });
+const mulish = {
+  className: 'font-mulish',
+  style: {
+    fontFamily: 'Mulish, sans-serif',
+  },
+};
+
+// Glacial Indifference font
+const glacialIndifference = {
+  className: 'font-glacial',
+  style: {
+    fontFamily: 'Glacial Indifference, sans-serif',
+  },
+};
 
 export const metadata: Metadata = {
-  title: 'Kendraa - Healthcare Professional Network',
+  title: 'kendraa - Healthcare Professional Network',
   description: 'Connect, collaborate, and grow with healthcare professionals worldwide',
   keywords: 'healthcare, medical, professionals, network, collaboration',
-  authors: [{ name: 'Kendraa Team' }],
+  authors: [{ name: 'kendraa Team' }],
   icons: {
     icon: '/favicon.ico',
     shortcut: '/favicon.ico',
@@ -39,8 +53,13 @@ export default function RootLayout({
         <meta name="theme-color" content="#007FFF" />
         <meta name="msapplication-TileColor" content="#007FFF" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet" />
+        <link href="https://fonts.cdnfonts.com/css/glacial-indifference" rel="stylesheet" />
       </head>
-      <body className={`${inter.className} h-full bg-white`} suppressHydrationWarning={true}>
+      <body className={`${mulish.className} h-full bg-white`} suppressHydrationWarning={true}>
         <ClientOnly>
           <AuthProvider>
             <NotificationProvider>
