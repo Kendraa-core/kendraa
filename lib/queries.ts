@@ -707,6 +707,76 @@ export async function getEducation(profileId: string): Promise<Education[]> {
   }
 }
 
+// Create new experience
+export async function createExperience(experience: Omit<Experience, 'id' | 'created_at' | 'updated_at'>): Promise<Experience> {
+  try {
+    const { data, error } = await getSupabase()
+      .from('experiences')
+      .insert([experience])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error creating experience:', error);
+    throw error;
+  }
+}
+
+// Update existing experience
+export async function updateExperience(experienceId: string, updates: Partial<Experience>): Promise<Experience> {
+  try {
+    const { data, error } = await getSupabase()
+      .from('experiences')
+      .update(updates)
+      .eq('id', experienceId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error updating experience:', error);
+    throw error;
+  }
+}
+
+// Create new education
+export async function createEducation(education: Omit<Education, 'id' | 'created_at' | 'updated_at'>): Promise<Education> {
+  try {
+    const { data, error } = await getSupabase()
+      .from('education')
+      .insert([education])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error creating education:', error);
+    throw error;
+  }
+}
+
+// Update existing education
+export async function updateEducation(educationId: string, updates: Partial<Education>): Promise<Education> {
+  try {
+    const { data, error } = await getSupabase()
+      .from('education')
+      .update(updates)
+      .eq('id', educationId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error updating education:', error);
+    throw error;
+  }
+}
+
 // Notifications - returning mock data for now
 export async function getNotifications(userId: string): Promise<Notification[]> {
   try {
