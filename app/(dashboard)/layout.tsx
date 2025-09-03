@@ -11,6 +11,7 @@ import {
   getUserNewslettersCount,
   getUserEventsCount
 } from '@/lib/queries';
+import { useOnboardingProtection } from '@/hooks/useOnboardingProtection';
 import Header from '@/components/layout/Header';
 import RightSidebar from '@/components/layout/RightSidebar';
 import LeftSidebar from '@/components/layout/LeftSidebar';
@@ -41,6 +42,9 @@ export default function DashboardLayout({
   const [newslettersCount, setNewslettersCount] = useState(0);
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
 
+  // Use the new, cleaner onboarding protection hook
+  const { isProtected, isLoading: isOnboardingLoading } = useOnboardingProtection();
+
   useEffect(() => {
     const loadData = async () => {
       if (!user?.id) {
@@ -50,11 +54,7 @@ export default function DashboardLayout({
         return;
       }
 
-      // Prevent multiple simultaneous profile loads
-      if (isLoadingProfile) {
-        console.log('[Dashboard] Profile load already in progress, skipping...');
-        return;
-      }
+      if (isLoadingProfile) return;
 
       setIsLoadingProfile(true);
 
@@ -64,21 +64,9 @@ export default function DashboardLayout({
           updateProfile(userProfile);
         }
 
-        // --- THIS IS THE MERGED AND CORRECTED LOGIC ---
-        // It uses the other developer's preferred check (onboarding_completed flag)
-        // but includes OUR critical exception for the password reset page.
-        const hasCompletedOnboarding = userProfile?.onboarding_completed || false;
+        // The onboarding check is now handled by the useOnboardingProtection hook.
+        // This useEffect is now only responsible for fetching sidebar data.
         
-        if (
-          !hasCompletedOnboarding && 
-          pathname !== '/reset-password' // <-- THE CRITICAL EXCEPTION
-        ) {
-          console.log('[Dashboard] User has not completed onboarding, redirecting...');
-          router.push('/onboarding');
-          return; // Stop further execution if redirecting
-        }
-        // --- END OF FIX ---
-
         const [
           connections, groups, events, pages, newsletters
         ] = await Promise.all([
@@ -94,12 +82,8 @@ export default function DashboardLayout({
         setEventsCount(events);
         setPagesCount(pages);
         setNewslettersCount(newsletters);
-
       } catch (error) {
         console.error('Error loading dashboard layout data:', error);
-        if (pathname !== '/reset-password') {
-          router.push('/onboarding');
-        }
       } finally {
         setLoading(false);
         setIsLoadingProfile(false);
@@ -109,11 +93,12 @@ export default function DashboardLayout({
     if (!authLoading) {
         loadData();
     }
-  }, [user, profile, authLoading, router, updateProfile, pathname, isLoadingProfile]);
+  }, [user, profile, authLoading, router, updateProfile, isLoadingProfile]);
 
   const isNetworkPage = pathname === '/network';
 
-  if (loading || authLoading) {
+  // Show a loading screen while the hook is checking the user's status
+  if (isOnboardingLoading || loading || authLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-white via-[#007fff]/5 to-[#007fff]/10 flex items-center justify-center">
         <div className="text-center">
@@ -123,7 +108,12 @@ export default function DashboardLayout({
       </div>
     );
   }
-
+  
+  // The hook handles the redirect, so we just return null to prevent rendering the dashboard
+  if (!isProtected) {
+    return null;
+  }
+  
   if (!user) {
     return null;
   }
@@ -204,7 +194,6 @@ export default function DashboardLayout({
           </div>
         </div>
 
-        {/* Main Content Area with unified scrolling */}
         <div className="flex-1 overflow-y-auto">
           <div className="w-full px-4 sm:px-6 lg:px-8">
             <div className="flex justify-center">
@@ -217,7 +206,6 @@ export default function DashboardLayout({
           </div>
         </div>
 
-        {/* Right Sidebar - Desktop */}
         <div className="hidden xl:block xl:w-80 xl:flex-shrink-0">
           <div className="p-6 h-full">
             <RightSidebar />
@@ -227,4 +215,3 @@ export default function DashboardLayout({
     </div>
   );
 }
-

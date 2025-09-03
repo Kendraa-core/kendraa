@@ -9,7 +9,7 @@ export default function AuthLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -18,6 +18,7 @@ export default function AuthLayout({
     // It should ONLY redirect if a user is logged in AND they are trying
     // to access the signin or signup pages.
     if (!loading && user) {
+
       if (pathname === '/signin' || pathname === '/signup') {
         router.push('/feed');
       }
@@ -25,6 +26,7 @@ export default function AuthLayout({
       // allowing that page to load correctly regardless of race conditions.
     }
   }, [user, loading, router, pathname]);
+
 
   if (loading) {
     // Your loading spinner remains the same
