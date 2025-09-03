@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 
 export default function AuthLayout({
@@ -11,26 +11,32 @@ export default function AuthLayout({
 }) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
+    // This logic is now simpler and more targeted.
+    // It should ONLY redirect if a user is logged in AND they are trying
+    // to access the signin or signup pages.
     if (!loading && user) {
-      router.push('/feed');
+      if (pathname === '/signin' || pathname === '/signup') {
+        router.push('/feed');
+      }
+      // It will NOT redirect if the user is on /reset-password,
+      // allowing that page to load correctly regardless of race conditions.
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, pathname]);
 
   if (loading) {
+    // Your loading spinner remains the same
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary-50 via-secondary-50 to-accent-50 flex items-center justify-center">
         <div className="text-center">
           <div className="relative">
-            {/* Main spinner */}
             <div className="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
-            
-            {/* Pulse effect */}
             <div className="absolute inset-0 w-12 h-12 border-4 border-transparent border-t-primary-400 rounded-full animate-ping opacity-20"></div>
           </div>
           
-          <p className="text-gray-600 mt-4 text-sm font-medium">Loading <span className="mulish-semibold">kendraa</span>...</p>
+          <p className="text-gray-600 mt-4 text-sm font-medium">Loading Kendraa...</p>
           
           {/* Progress dots */}
           <div className="flex justify-center mt-2 space-x-1">
@@ -43,9 +49,11 @@ export default function AuthLayout({
     );
   }
 
-  if (user) {
+  // Prevent a flicker for users who are about to be redirected
+  if (user && (pathname === '/signin' || pathname === '/signup')) {
     return null;
   }
 
   return children;
-} 
+}
+

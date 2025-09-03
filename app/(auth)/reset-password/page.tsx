@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Logo from '@/components/common/Logo';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
@@ -17,62 +17,34 @@ export default function ResetPassword() {
   const [success, setSuccess] = useState(false);
   const [isValidSession, setIsValidSession] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
 
-  // Check if user has a valid session for password reset
+  // This hook confirms that a session exists, which should have been
+  // created by the successful OTP verification step.
   useEffect(() => {
     const checkSession = async () => {
-      try {
-        const { data: { session }, error } = await getSupabase().auth.getSession();
-        
-        if (error) {
-          console.error('Session check error:', error);
-          toast.error('Invalid or expired reset link. Please request a new one.');
-          router.push('/forgot-password');
-          return;
-        }
-
-        if (!session) {
-          toast.error('Invalid or expired reset link. Please request a new one.');
-          router.push('/forgot-password');
-          return;
-        }
-
+      const { data: { session } } = await getSupabase().auth.getSession();
+      if (session) {
         setIsValidSession(true);
-      } catch (error) {
-        console.error('Session check error:', error);
-        toast.error('Invalid or expired reset link. Please request a new one.');
+      } else {
+        toast.error('No valid session. Please start the password reset process again.');
         router.push('/forgot-password');
       }
     };
-
+    
     checkSession();
   }, [router]);
 
   const validatePassword = (password: string): string | null => {
-    if (password.length < 8) {
-      return 'Password must be at least 8 characters long';
-    }
-    if (!/(?=.*[a-z])/.test(password)) {
-      return 'Password must contain at least one lowercase letter';
-    }
-    if (!/(?=.*[A-Z])/.test(password)) {
-      return 'Password must contain at least one uppercase letter';
-    }
-    if (!/(?=.*\d)/.test(password)) {
-      return 'Password must contain at least one number';
-    }
+    if (password.length < 8) return 'Password must be at least 8 characters long';
+    if (!/(?=.*[a-z])/.test(password)) return 'Password must contain at least one lowercase letter';
+    if (!/(?=.*[A-Z])/.test(password)) return 'Password must contain at least one uppercase letter';
+    if (!/(?=.*\d)/.test(password)) return 'Password must contain at least one number';
     return null;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!isValidSession) {
-      toast.error('Invalid session. Please request a new reset link.');
-      return;
-    }
-
     if (password !== confirmPassword) {
       toast.error('Passwords do not match');
       return;
@@ -87,37 +59,24 @@ export default function ResetPassword() {
     setLoading(true);
 
     try {
-      const { error } = await getSupabase().auth.updateUser({
-        password: password
-      });
+      // Use the existing session to update the user's password
+      const { error } = await getSupabase().auth.updateUser({ password });
 
-      if (error) {
-        console.error('Password update error:', error);
-        throw error;
-      }
+      if (error) throw error;
 
       setSuccess(true);
       toast.success('Password updated successfully!');
       
-      // Sign out the user after password change
+      // Sign out to invalidate the session for security
       await getSupabase().auth.signOut();
       
-      // Redirect to sign in after 3 seconds
       setTimeout(() => {
         router.push('/signin');
       }, 3000);
+
     } catch (error: any) {
       console.error('Password update error:', error);
-      
-      // Handle specific Supabase errors
-      if (error.message?.includes('Password should be at least')) {
-        toast.error('Password is too weak. Please choose a stronger password.');
-      } else if (error.message?.includes('Invalid JWT')) {
-        toast.error('Invalid or expired reset link. Please request a new one.');
-        router.push('/forgot-password');
-      } else {
-        toast.error(error.message || 'Failed to update password. Please try again.');
-      }
+      toast.error(error.message || 'Failed to update password.');
     } finally {
       setLoading(false);
     }
@@ -129,7 +88,7 @@ export default function ResetPassword() {
         <div className="max-w-md w-full space-y-8">
           <div className="text-center">
             <Logo />
-            <h2 className="mt-6 text-3xl font-bold text-black">
+            <h2 className="mt-6 text-3xl font-bold text-gray-900">
               Validating reset link...
             </h2>
             <div className="mt-4">
@@ -140,7 +99,7 @@ export default function ResetPassword() {
       </div>
     );
   }
-
+  
   if (success) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -151,10 +110,9 @@ export default function ResetPassword() {
               Password updated!
             </h2>
             <p className="mt-2 text-sm text-gray-600">
-              Your password has been successfully updated
+              Your password has been successfully updated.
             </p>
           </div>
-
           <div className="bg-white py-8 px-6 shadow-sm rounded-xl border border-gray-200">
             <div className="text-center space-y-4">
               <div className="w-16 h-16 bg-[#007fff]/10 rounded-full flex items-center justify-center mx-auto">
@@ -166,7 +124,6 @@ export default function ResetPassword() {
                 You will be redirected to the sign in page in a few seconds...
               </p>
             </div>
-
             <div className="mt-6 pt-6 border-t border-gray-200">
               <Link
                 href="/signin"
@@ -189,9 +146,6 @@ export default function ResetPassword() {
           <h2 className="mt-6 text-3xl font-bold text-black">
             Set new password
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Enter your new password below
-          </p>
         </div>
 
         <div className="bg-white py-8 px-6 shadow-sm rounded-xl border border-gray-200">
@@ -205,7 +159,6 @@ export default function ResetPassword() {
                   id="password"
                   name="password"
                   type={showPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -213,7 +166,7 @@ export default function ResetPassword() {
                   placeholder="Enter your new password"
                   disabled={loading}
                 />
-                <button
+                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
@@ -225,9 +178,6 @@ export default function ResetPassword() {
                   )}
                 </button>
               </div>
-              <p className="mt-1 text-xs text-gray-500">
-                Must be at least 8 characters with uppercase, lowercase, and number
-              </p>
             </div>
 
             <div>
@@ -239,7 +189,6 @@ export default function ResetPassword() {
                   id="confirmPassword"
                   name="confirmPassword"
                   type={showConfirmPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
@@ -247,7 +196,7 @@ export default function ResetPassword() {
                   placeholder="Confirm your new password"
                   disabled={loading}
                 />
-                <button
+                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
@@ -260,7 +209,7 @@ export default function ResetPassword() {
                 </button>
               </div>
             </div>
-
+            
             <div>
               <button
                 type="submit"
@@ -303,3 +252,4 @@ export default function ResetPassword() {
     </div>
   );
 }
+
