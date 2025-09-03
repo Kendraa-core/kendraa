@@ -197,7 +197,7 @@ export async function ensureProfileExists(
 // Post queries
 export async function getPosts(limit = 10, offset = 0): Promise<Post[]> {
   try {
-    console.log('[Queries] Getting posts');
+
     
     // First get posts without joins to avoid complex query issues
     const { data: posts, error } = await getSupabase()
@@ -212,7 +212,7 @@ export async function getPosts(limit = 10, offset = 0): Promise<Post[]> {
     }
     
     if (!posts || posts.length === 0) {
-      console.log('[Queries] No posts found');
+
       return [];
     }
     
@@ -238,7 +238,7 @@ export async function getPosts(limit = 10, offset = 0): Promise<Post[]> {
       profiles: authorMap.get(post.author_id) || null
     }));
 
-    console.log('[Queries] Posts fetched successfully:', postsWithAuthors.length);
+    
     return postsWithAuthors;
   } catch (error) {
     console.error('[Queries] Error in getPosts:', error);
@@ -321,7 +321,7 @@ export async function createPost(
   mediaUrl?: string
 ): Promise<Post | null> {
   try {
-    console.log('[Queries] Creating post for user:', authorId);
+
     
     const { data, error } = await getSupabase()
       .from('posts')
@@ -340,7 +340,7 @@ export async function createPost(
       throw error;
     }
     
-    console.log('[Queries] Post created successfully');
+    
     return data as Post;
   } catch (error) {
     console.error('[Queries] Error in createPost:', error);
@@ -1059,7 +1059,7 @@ export async function createComment(postId: string, content: string): Promise<Po
 
 export async function getPostComments(postId: string, limit?: number): Promise<CommentWithAuthor[]> {
   try {
-    console.log('[Queries] Getting comments for post:', postId);
+
     
     // Try to fetch comments with author data
     let query = getSupabase()
@@ -1082,7 +1082,7 @@ export async function getPostComments(postId: string, limit?: number): Promise<C
       console.error('[Queries] Error fetching comments with author data:', error);
       
       // If the join fails, try fetching comments without author data
-      console.log('[Queries] Trying to fetch comments without author data');
+
       let fallbackQuery = getSupabase()
         .from('post_comments')
         .select('*')
@@ -1104,7 +1104,7 @@ export async function getPostComments(postId: string, limit?: number): Promise<C
       // If we got comments without author data, fetch authors separately
       if (commentsOnly && commentsOnly.length > 0) {
         const authorIds = [...new Set(commentsOnly.map(comment => comment.author_id))];
-        console.log('[Queries] Fetching authors for comment IDs:', authorIds);
+
         
         const { data: authors, error: authorsError } = await getSupabase()
           .from('profiles')
@@ -1124,15 +1124,15 @@ export async function getPostComments(postId: string, limit?: number): Promise<C
           author: authorMap.get(comment.author_id) || null
         }));
         
-        console.log('[Queries] Comments fetched successfully with separate author lookup:', commentsWithAuthors.length);
+
         return commentsWithAuthors;
       }
       
-      console.log('[Queries] No comments found for post:', postId);
+
       return [];
     }
     
-    console.log('[Queries] Comments fetched successfully:', data?.length || 0);
+    
     return data || [];
   } catch (error) {
     console.error('[Queries] Error in getPostComments:', error);
@@ -1143,7 +1143,7 @@ export async function getPostComments(postId: string, limit?: number): Promise<C
 // Like functions
 export async function likePost(postId: string, userId: string, reactionType: string = 'like'): Promise<boolean> {
   try {
-    console.log('[Queries] Adding reaction to post:', postId, 'by user:', userId, 'reaction:', reactionType);
+
     
     // Check if already reacted
     const { data: existingReaction } = await getSupabase()
@@ -1154,7 +1154,7 @@ export async function likePost(postId: string, userId: string, reactionType: str
       .single();
 
     if (existingReaction) {
-      console.log('[Queries] User already reacted to this post');
+      
       return false; // Prevent multiple reactions
     }
     
@@ -3217,6 +3217,9 @@ export async function likeComment(commentId: string, userId: string, reactionTyp
         console.error('[Queries] Error updating comment reaction:', updateError);
         return false;
       }
+
+      // Note: No need to change likes_count when updating reaction type
+      // since it's still just one reaction per user
     } else {
       console.log('[Queries] Creating new comment reaction');
       
@@ -3232,6 +3235,26 @@ export async function likeComment(commentId: string, userId: string, reactionTyp
       if (insertError) {
         console.error('[Queries] Error creating comment reaction:', insertError);
         return false;
+      }
+
+      // Increment likes_count in post_comments table
+      const { data: currentComment, error: fetchError } = await getSupabase()
+        .from('post_comments')
+        .select('likes_count')
+        .eq('id', commentId)
+        .single();
+
+      if (!fetchError && currentComment) {
+        const newCount = (currentComment.likes_count || 0) + 1;
+        const { error: updateCountError } = await getSupabase()
+          .from('post_comments')
+          .update({ likes_count: newCount })
+          .eq('id', commentId);
+
+        if (updateCountError) {
+          console.error('[Queries] Error updating comment likes count:', updateCountError);
+          // Don't fail the whole operation if count update fails
+        }
       }
     }
 
@@ -3264,6 +3287,26 @@ export async function unlikeComment(commentId: string, userId: string): Promise<
       return false;
     }
 
+    // Decrement likes_count in post_comments table
+    const { data: currentComment, error: fetchError } = await getSupabase()
+      .from('post_comments')
+      .select('likes_count')
+      .eq('id', commentId)
+      .single();
+
+    if (!fetchError && currentComment) {
+      const newCount = Math.max(0, (currentComment.likes_count || 0) - 1);
+      const { error: updateCountError } = await getSupabase()
+        .from('post_comments')
+        .update({ likes_count: newCount })
+        .eq('id', commentId);
+
+      if (updateCountError) {
+        console.error('[Queries] Error updating comment likes count:', updateCountError);
+        // Don't fail the whole operation if count update fails
+      }
+    }
+
     console.log('[Queries] Comment reaction removed successfully');
     return true;
   } catch (error) {
@@ -3276,12 +3319,13 @@ export async function isCommentLiked(commentId: string, userId: string): Promise
   try {
     console.log('[Queries] Checking if comment is liked by user:', commentId, userId);
     
+    // Use simpler query structure to avoid schema issues
     const { data, error } = await getSupabase()
       .from('comment_likes')
-      .select('reaction_type')
+      .select('*')
       .eq('comment_id', commentId)
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
     if (error) {
       if (error.code === 'PGRST116') {
@@ -3294,6 +3338,11 @@ export async function isCommentLiked(commentId: string, userId: string): Promise
         return null;
       }
       console.error('[Queries] Error checking comment reaction:', error);
+      return null;
+    }
+
+    if (!data) {
+      console.log('[Queries] User has not reacted to comment');
       return null;
     }
 

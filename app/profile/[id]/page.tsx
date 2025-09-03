@@ -254,14 +254,14 @@ const AboutCard = React.memo(function AboutCard({ profile, isOwnProfile, editing
           <h3 className="text-lg font-bold text-gray-900">About</h3>
       </div>
         {isOwnProfile && editingField !== 'bio' && (
-                <button
+          <button
             onClick={() => onStartEdit('bio', profile.bio || '')}
             className="text-[#007fff] hover:text-[#007fff]/80 text-sm font-medium hover:underline transition-colors duration-200"
-                >
+          >
             Edit
-                </button>
-              )}
-            </div>
+          </button>
+        )}
+      </div>
 
       {editingField === 'bio' ? (
         <div className="space-y-6">
@@ -279,21 +279,21 @@ const AboutCard = React.memo(function AboutCard({ profile, isOwnProfile, editing
                 placeholder="Share your medical background, expertise, research interests, and professional journey..."
               />
               <div className="flex gap-3 pt-2">
-                <button 
+                <button
                   onClick={() => onSaveEdit('bio')}
                   className="px-8 py-3 bg-[#007fff] text-white rounded-xl hover:bg-[#007fff]/90 transition-all duration-300 text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
                   Save Changes
                 </button>
-                <button 
+              <button 
                   onClick={onCancelEdit}
                   className="px-8 py-3 bg-white text-[#007fff] border-2 border-[#007fff] rounded-xl hover:bg-[#007fff]/10 transition-all duration-300 text-sm font-semibold"
                 >
                   Cancel
-                </button>
-              </div>
+              </button>
+                </div>
+                </div>
             </div>
-          </div>
         </div>
       ) : (
         <div className="text-gray-700 leading-relaxed">
@@ -304,16 +304,16 @@ const AboutCard = React.memo(function AboutCard({ profile, isOwnProfile, editing
               <DocumentTextIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
             <p className="text-gray-500 italic">Share your medical background and professional interests</p>
             {isOwnProfile && (
-              <button 
+                                          <button
                   onClick={() => onStartEdit('bio', '')}
                   className="mt-3 px-4 py-2 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-colors text-sm font-medium"
-              >
+                    >
                 Add About Section
-              </button>
-            )}
-          </div>
+                    </button>
+              )}
+            </div>
         )}
-      </div>
+          </div>
       )}
     </motion.div>
   );
@@ -346,7 +346,7 @@ const ExperienceCard = React.memo(function ExperienceCard({ experience, isOwnPro
           <div className="flex items-start space-x-3">
             <div className="w-10 h-10 bg-[#007fff]/10 rounded-lg flex items-center justify-center flex-shrink-0">
               <BriefcaseIcon className="w-5 h-5 text-[#007fff]" />
-            </div>
+          </div>
             <div className="flex-1 min-w-0">
                             {isEditing ? (
                 <div className="space-y-6">
@@ -365,7 +365,7 @@ const ExperienceCard = React.memo(function ExperienceCard({ experience, isOwnPro
                             className="w-full p-4 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-4 focus:ring-[#007fff]/10 transition-all duration-300 font-medium text-gray-900 bg-white/80 backdrop-blur-sm"
                             placeholder="e.g., Senior Cardiologist"
                           />
-                        </div>
+        </div>
                         <div className="space-y-3">
                           <label className="text-sm font-semibold text-[#007fff] flex items-center gap-2">
                             <BuildingOfficeIcon className="w-4 h-4" />
@@ -378,7 +378,7 @@ const ExperienceCard = React.memo(function ExperienceCard({ experience, isOwnPro
                             className="w-full p-4 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-4 focus:ring-[#007fff]/10 transition-all duration-300 font-medium text-[#007fff] bg-white/80 backdrop-blur-sm"
                             placeholder="e.g., Mayo Clinic"
                           />
-                        </div>
+      </div>
                         <div className="space-y-3">
                           <label className="text-sm font-semibold text-[#007fff] flex items-center gap-2">
                             <CalendarIcon className="w-4 h-4" />
@@ -405,8 +405,8 @@ const ExperienceCard = React.memo(function ExperienceCard({ experience, isOwnPro
                                 <option key={year} value={year}>{year}</option>
                               ))}
                             </select>
-                          </div>
-                        </div>
+          </div>
+      </div>
                         <div className="space-y-3">
                           <label className="text-sm font-semibold text-[#007fff] flex items-center gap-2">
                             <CalendarIcon className="w-4 h-4" />
@@ -433,8 +433,8 @@ const ExperienceCard = React.memo(function ExperienceCard({ experience, isOwnPro
                                 <option key={year} value={year}>{year}</option>
                               ))}
                             </select>
-                          </div>
-                        </div>
+          </div>
+        </div>
                         <div className="space-y-3">
                           <label className="text-sm font-semibold text-[#007fff] flex items-center gap-2">
                             <MapPinIcon className="w-4 h-4" />
@@ -448,8 +448,8 @@ const ExperienceCard = React.memo(function ExperienceCard({ experience, isOwnPro
                             placeholder="e.g., Rochester, MN"
                           />
                         </div>
-                      </div>
-                      <div className="space-y-3">
+      </div>
+      <div className="space-y-3">
                         <label className="text-sm font-semibold text-[#007fff] flex items-center gap-2">
                           <DocumentTextIcon className="w-4 h-4" />
                           Job Description
@@ -463,21 +463,21 @@ const ExperienceCard = React.memo(function ExperienceCard({ experience, isOwnPro
                         />
                       </div>
                       <div className="flex gap-4 pt-6 border-t-2 border-[#007fff]/20">
-                        <button
+                    <button 
                           onClick={() => onSaveEdit(`experience_${experience.id}`)}
                           className="px-8 py-3 bg-[#007fff] text-white rounded-xl hover:bg-[#007fff]/90 transition-all duration-300 text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
-                        >
+                    >
                           Save Changes
-                        </button>
-                        <button
+                    </button>
+              <button 
                           onClick={onCancelEdit}
                           className="px-8 py-3 bg-white text-[#007fff] border-2 border-[#007fff] rounded-xl hover:bg-[#007fff]/10 transition-all duration-300 text-sm font-semibold"
-                        >
+              >
                           Cancel
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+              </button>
+          </div>
+      </div>
+            </div>
                 </div>
               ) : (
                 <>
@@ -730,8 +730,8 @@ const ActivityCard = React.memo(function ActivityCard({ posts, isOwnProfile, con
             <h3 className="text-lg font-bold text-gray-900">Recent Activity</h3>
             <p className="text-sm text-gray-600">{formatNumber(connectionCount)} followers</p>
           </div>
-        </div>
-
+      </div>
+      
       </div>
 
       {/* Posts */}
@@ -865,10 +865,10 @@ export default function ProfilePage() {
       setEducation(educationData);
       
       // Fetch connection data
-      if (!isOwnProfile) {
+      if (!isOwnProfile && user?.id) {
         const [connectionData, followData, countData] = await Promise.all([
-          getConnectionStatus(user?.id || '', id as string),
-          isFollowing(user?.id || '', id as string),
+          getConnectionStatus(user.id, id as string),
+          isFollowing(user.id, id as string),
           getConnectionCount(id as string)
         ]);
         
@@ -890,11 +890,13 @@ export default function ProfilePage() {
     } finally {
       setLoading(false);
     }
-  }, [id, isOwnProfile]);
+  }, [id, user?.id]);
 
   useEffect(() => {
+    if (id && !profile) {
     fetchProfileData();
-  }, [fetchProfileData]);
+    }
+  }, [id, profile, fetchProfileData]);
 
   const handleConnect = async () => {
     if (!profile || !user) return;
@@ -1702,7 +1704,7 @@ export default function ProfilePage() {
                           <BuildingOfficeIcon className="w-5 h-5 text-[#007fff]" />
                           Experience
                         </h2>
-                        {isOwnProfile && (
+              {isOwnProfile && (
                           <button
                             onClick={() => startEdit('add_experience', {})}
                             className="text-[#007fff] hover:text-[#007fff]/80 text-sm font-medium hover:underline transition-colors duration-200"
@@ -1719,9 +1721,9 @@ export default function ProfilePage() {
                             <div className="flex items-center gap-4 mb-8">
                               <div className="w-12 h-12 bg-[#007fff]/20 rounded-2xl flex items-center justify-center">
                                 <BriefcaseIcon className="w-6 h-6 text-[#007fff]" />
-                              </div>
+                  </div>
                               <h4 className="text-2xl font-bold text-[#007fff]">Add New Experience</h4>
-                            </div>
+                  </div>
                             
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                               <div className="space-y-3">
@@ -1840,12 +1842,12 @@ export default function ProfilePage() {
                             </div>
                             
                             <div className="flex gap-4 mt-8 pt-6 border-t-2 border-[#007fff]/20">
-                              <button
+                   <button
                                 onClick={() => saveEdit('add_experience')}
                                 className="px-8 py-3 bg-[#007fff] text-white rounded-xl hover:bg-[#007fff]/90 transition-all duration-300 text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
-                              >
+                   >
                                 Save Experience
-                              </button>
+                   </button>
                               <button
                                 onClick={cancelEdit}
                                 className="px-8 py-3 bg-white text-[#007fff] border-2 border-[#007fff] rounded-xl hover:bg-[#007fff]/10 transition-all duration-300 text-sm font-semibold"
@@ -1877,7 +1879,7 @@ export default function ProfilePage() {
                               </button>
                     </div>
                   )}
-                        </div>
+                    </div>
                       ) : (
                         <div className="text-center py-8 text-gray-500">
                           <BuildingOfficeIcon className="w-12 h-12 mx-auto text-gray-300 mb-3" />
@@ -1911,8 +1913,8 @@ export default function ProfilePage() {
                             Add Education
                           </button>
                         )}
-                      </div>
-                    </div>
+            </div>
+          </div>
                                         <div className="p-6">
                       {editingField === 'add_education' ? (
                         <div className="space-y-6">
@@ -1922,8 +1924,8 @@ export default function ProfilePage() {
                                 <AcademicCapIcon className="w-6 h-6 text-[#007fff]" />
                               </div>
                               <h4 className="text-2xl font-bold text-[#007fff]">Add New Education</h4>
-                            </div>
-                            
+        </div>
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                               <div className="space-y-3">
                                 <label className="text-sm font-semibold text-[#007fff] flex items-center gap-2">
@@ -2029,20 +2031,20 @@ export default function ProfilePage() {
                             </div>
                             
                             <div className="flex gap-4 mt-8 pt-6 border-t-2 border-[#007fff]/20">
-                              <button
+                <button 
                                 onClick={() => saveEdit('add_education')}
                                 className="px-8 py-3 bg-[#007fff] text-white rounded-xl hover:bg-[#007fff]/90 transition-all duration-300 text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
-                              >
+                >
                                 Save Education
-                              </button>
-                              <button
+                </button>
+                <button 
                                 onClick={cancelEdit}
                                 className="px-8 py-3 bg-white text-[#007fff] border-2 border-[#007fff] rounded-xl hover:bg-[#007fff]/10 transition-all duration-300 text-sm font-semibold"
                               >
                                 Cancel
-                              </button>
-                            </div>
-                          </div>
+                </button>
+              </div>
+            </div>
                         </div>
                       ) : education.length > 0 ? (
                         <div className="space-y-4">
@@ -2064,9 +2066,9 @@ export default function ProfilePage() {
                               <button className="text-[#007fff] hover:text-[#007fff]/80 text-sm font-medium hover:underline transition-colors duration-200">
                                 View all {education.length} education entries
                               </button>
-                            </div>
-                          )}
-                        </div>
+          </div>
+        )}
+            </div>
                       ) : (
                         <div className="text-center py-8 text-gray-500">
                           <AcademicCapIcon className="w-12 h-12 mx-auto text-gray-300 mb-3" />
@@ -2079,8 +2081,8 @@ export default function ProfilePage() {
                               Add your first education
                             </button>
                           )}
-                        </div>
-                      )}
+          </div>
+        )}
                     </div>
           </div>
                   

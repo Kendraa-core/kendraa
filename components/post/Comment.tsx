@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Avatar from '@/components/common/Avatar';
 import ClickableProfileName from '@/components/common/ClickableProfileName';
@@ -25,6 +25,7 @@ export default function Comment({ comment, onReplyAdded, onReactionChange }: Com
   const [showReplies, setShowReplies] = useState(false);
   const [replies, setReplies] = useState<CommentWithAuthor[]>([]);
   const [isLoadingReplies, setIsLoadingReplies] = useState(false);
+  const [repliesCount, setRepliesCount] = useState(0);
 
   const authorName = comment.author && 'full_name' in comment.author 
     ? comment.author.full_name || 'Unknown User'
@@ -37,6 +38,22 @@ export default function Comment({ comment, onReplyAdded, onReactionChange }: Com
   const authorType = comment.author && 'user_type' in comment.author 
     ? comment.author.user_type 
     : 'individual';
+
+  // Load replies count when component mounts (only for top-level comments)
+  useEffect(() => {
+    if (comment.parent_id === null) {
+      loadRepliesCount();
+    }
+  }, [comment.id]);
+
+  const loadRepliesCount = async () => {
+    try {
+      const fetchedReplies = await getCommentReplies(comment.id);
+      setRepliesCount(fetchedReplies.length);
+    } catch (error) {
+      console.error('Error loading replies count:', error);
+    }
+  };
 
   const handleReply = async () => {
     if (!replyContent.trim()) {
@@ -60,9 +77,10 @@ export default function Comment({ comment, onReplyAdded, onReactionChange }: Com
         toast.success('Reply added successfully!');
         onReplyAdded?.();
         
-        // Refresh replies if they're currently shown
+        // Refresh replies count and list if they're currently shown
+        await loadRepliesCount();
         if (showReplies) {
-          loadReplies();
+          await loadReplies();
         }
       } else {
         toast.error('Failed to add reply');
@@ -82,6 +100,7 @@ export default function Comment({ comment, onReplyAdded, onReactionChange }: Com
     try {
       const fetchedReplies = await getCommentReplies(comment.id);
       setReplies(fetchedReplies);
+      setRepliesCount(fetchedReplies.length);
     } catch (error) {
       console.error('Error loading replies:', error);
       toast.error('Failed to load replies');
@@ -90,9 +109,10 @@ export default function Comment({ comment, onReplyAdded, onReactionChange }: Com
     }
   };
 
-  const toggleReplies = () => {
-    if (!showReplies && replies.length === 0) {
-      loadReplies();
+  const toggleReplies = async () => {
+    if (!showReplies) {
+      // If opening replies, load them first
+      await loadReplies();
     }
     setShowReplies(!showReplies);
   };
@@ -138,6 +158,19 @@ export default function Comment({ comment, onReplyAdded, onReactionChange }: Com
                 <ArrowUturnLeftIcon className="w-3 h-3" />
                 <span>Reply</span>
               </button>
+
+              {/* Show Replies Button - Moved inline with actions */}
+              {comment.parent_id === null && repliesCount > 0 && (
+                <button
+                  onClick={toggleReplies}
+                  className="flex items-center space-x-1 text-gray-500 hover:text-gray-700 transition-colors"
+                >
+                  <ChatBubbleLeftIcon className="w-3 h-3" />
+                  <span>
+                    {showReplies ? 'Hide' : 'Show'} {repliesCount} {repliesCount === 1 ? 'reply' : 'replies'}
+                  </span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -179,41 +212,30 @@ export default function Comment({ comment, onReplyAdded, onReactionChange }: Com
         </div>
       </div>
 
-      {/* Replies Section */}
-      {comment.parent_id === null && (
-        <div className="ml-8">
-          {/* Show Replies Button */}
-          {replies.length > 0 && (
-            <button
-              onClick={toggleReplies}
-              className="flex items-center space-x-1 text-xs text-gray-500 hover:text-gray-700 transition-colors mb-2"
-            >
-              <ChatBubbleLeftIcon className="w-3 h-3" />
-              <span>
-                {showReplies ? 'Hide' : 'Show'} {replies.length} {replies.length === 1 ? 'reply' : 'replies'}
-              </span>
-            </button>
-          )}
-
+      {/* Replies Section - Now inline with actions above */}
+      {comment.parent_id === null && showReplies && (
+        <div className="ml-8 mt-3">
           {/* Replies List */}
-          {showReplies && (
-            <div className="space-y-3">
-              {isLoadingReplies ? (
-                <div className="text-center py-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#007fff] mx-auto"></div>
-                </div>
-              ) : (
-                replies.map((reply) => (
-                  <Comment
-                    key={reply.id}
-                    comment={reply}
-                    onReplyAdded={onReplyAdded}
-                    onReactionChange={onReactionChange}
-                  />
-                ))
-              )}
-            </div>
-          )}
+          <div className="space-y-3">
+            {isLoadingReplies ? (
+              <div className="text-center py-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#007fff] mx-auto"></div>
+              </div>
+            ) : replies.length > 0 ? (
+              replies.map((reply) => (
+                <Comment
+                  key={reply.id}
+                  comment={reply}
+                  onReplyAdded={onReplyAdded}
+                  onReactionChange={onReactionChange}
+                />
+              ))
+            ) : (
+              <div className="text-center py-2 text-sm text-gray-500">
+                No replies yet
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
