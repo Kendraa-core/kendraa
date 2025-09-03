@@ -234,98 +234,101 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
       </div>
 
       {/* Profile Content Section */}
-      <div className="px-8 py-10">
-        {/* Top Row: Avatar, Name, and Action Buttons */}
-        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between -mt-32 mb-8 gap-8">
-          {/* Left Side: Avatar and Profile Info */}
-          <div className="flex flex-col sm:flex-row sm:items-start gap-6">
-            {/* Avatar Container */}
-            <div className="relative self-start">
-              <div className="relative">
-                <Avatar
-                  src={profile.avatar_url}
-                  alt={profile.full_name || 'Profile'}
-                  size="2xl"
-                  className="border-4 border-white shadow-2xl ring-4 ring-[#007fff]/20 w-36 h-36"
-                />
-              </div>
-              {/* Edit Avatar Button */}
-              {isOwnProfile && (
-                <button
-                  onClick={onEditImages}
-                  className="absolute -bottom-2 -right-2 bg-[#007fff] text-white p-2 rounded-full hover:bg-[#007fff]/90 transition-all duration-300 shadow-lg transform hover:scale-110"
-                >
-                  <CameraIcon className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-
-            {/* Profile Information */}
-            <div className="flex-1 min-w-0 space-y-4">
-              {/* Name */}
-              <div className="flex items-center gap-3">
-                <h1 className="text-3xl sm:text-4xl font-bold text-[#007fff]">
-                  {profile.full_name || 'Anonymous User'}
-                </h1>
-              </div>
-              
-              {/* Headline */}
-              <p className="text-lg sm:text-xl text-gray-700 font-medium">
-                {profile.headline || 'Healthcare Professional'}
-              </p>
-              
-              {/* Medical Specializations */}
-              {profile.specialization && profile.specialization.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {profile.specialization.slice(0, 3).map((spec, index) => {
-                    const badgeStyle = MEDICAL_SPECIALIZATIONS[spec as keyof typeof MEDICAL_SPECIALIZATIONS] || MEDICAL_SPECIALIZATIONS.Default;
-                    const IconComponent = badgeStyle.icon;
-                    return (
-                      <span key={index} className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium border ${badgeStyle.color} hover:scale-105 transition-transform duration-200`}>
-                        <IconComponent className="w-4 h-4 mr-1.5" />
-                        {spec}
-                      </span>
-                    );
-                  })}
-                  {profile.specialization.length > 3 && (
-                    <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-600 border border-gray-200">
-                      +{profile.specialization.length - 3} more
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
+      <div className="px-8 py-6">
+        {/* Avatar positioned to overlap banner */}
+        <div className="flex justify-start -mt-20 mb-6">
+          <div className="relative">
+            <Avatar
+              src={profile.avatar_url}
+              alt={profile.full_name || 'Profile'}
+              size="2xl"
+              className="border-4 border-white shadow-2xl ring-4 ring-[#007fff]/20 w-32 h-32"
+            />
+            {/* Edit Avatar Button */}
+            {isOwnProfile && (
+              <button
+                onClick={onEditImages}
+                className="absolute -bottom-2 -right-2 bg-[#007fff] text-white p-2 rounded-full hover:bg-[#007fff]/90 transition-all duration-300 shadow-lg transform hover:scale-110"
+              >
+                <CameraIcon className="w-4 h-4" />
+              </button>
+            )}
           </div>
+        </div>
 
-          {/* Right Side: Profile Stats and Action Buttons */}
-          <div className="flex flex-col gap-4 self-start lg:self-start min-w-[240px]">
-            {/* Current Position and Education - LinkedIn Style */}
-            <div className="space-y-3">
+        {/* Profile Information and Actions */}
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+          {/* Left Side: Profile Info */}
+          <div className="flex-1 min-w-0 space-y-4">
+            {/* Name */}
+            <h1 className="text-3xl sm:text-4xl font-bold text-[#007fff]">
+              {profile.full_name || 'Anonymous User'}
+            </h1>
+            
+            {/* Headline */}
+            <p className="text-lg sm:text-xl text-gray-700 font-medium">
+              {profile.headline || 'Healthcare Professional'}
+            </p>
+            
+            {/* Current Position and Education */}
+            <div className="space-y-2">
               {experiences.length > 0 && (
-                <div className="flex items-start gap-3">
-                  <div className="w-5 h-5 bg-gray-200 rounded flex items-center justify-center flex-shrink-0">
-                    <BuildingOfficeIcon className="w-3 h-3 text-gray-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{experiences[0].company}</p>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <BuildingOfficeIcon className="w-4 h-4 text-gray-600" />
+                  <p className="text-sm text-gray-900">{experiences[0].company}</p>
                 </div>
               )}
               
               {education.length > 0 && (
-                <div className="flex items-start gap-3">
-                  <div className="w-5 h-5 bg-gray-200 rounded flex items-center justify-center flex-shrink-0">
-                    <AcademicCapIcon className="w-3 h-3 text-gray-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{education[0].school}</p>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <AcademicCapIcon className="w-4 h-4 text-gray-600" />
+                  <p className="text-sm text-gray-900">{education[0].school}</p>
                 </div>
               )}
             </div>
+            
+            {/* Medical Specializations */}
+            {profile.specialization && profile.specialization.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {profile.specialization.slice(0, 3).map((spec, index) => {
+                  const badgeStyle = MEDICAL_SPECIALIZATIONS[spec as keyof typeof MEDICAL_SPECIALIZATIONS] || MEDICAL_SPECIALIZATIONS.Default;
+                  const IconComponent = badgeStyle.icon;
+                  return (
+                    <span key={index} className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium border ${badgeStyle.color} hover:scale-105 transition-transform duration-200`}>
+                      <IconComponent className="w-4 h-4 mr-1.5" />
+                      {spec}
+                    </span>
+                  );
+                })}
+                {profile.specialization.length > 3 && (
+                  <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-600 border border-gray-200">
+                    +{profile.specialization.length - 3} more
+                  </span>
+                )}
+              </div>
+            )}
 
+            {/* Contact Info Section */}
+            <div className="flex items-center gap-4 pt-2">
+              {profile.location && (
+                <p className="text-gray-600 flex items-center gap-2 text-sm">
+                  <MapPinIcon className="w-4 h-4" />
+                  {profile.location}
+                </p>
+              )}
+              <button 
+                onClick={onViewContactInfo}
+                className="text-[#007fff] hover:underline text-sm font-medium"
+              >
+                Contact info
+              </button>
+            </div>
+          </div>
+
+          {/* Right Side: Stats and Action Buttons */}
+          <div className="flex flex-col gap-4 min-w-[240px]">
             {/* Network Stats */}
-            <div className="flex gap-4">
+            <div className="flex gap-6">
               <button 
                 onClick={() => router.push(`/profile/${profile.id}/connections`)}
                 className="text-center group"
@@ -413,24 +416,6 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
                 </>
               )}
             </div>
-          </div>
-        </div>
-
-        {/* Contact Info Section */}
-        <div className="mb-6">
-          <div className="flex items-center gap-4">
-            {profile.location && (
-              <p className="text-gray-600 flex items-center gap-2 text-sm">
-                <MapPinIcon className="w-4 h-4" />
-                {profile.location}
-              </p>
-            )}
-            <button 
-              onClick={onViewContactInfo}
-              className="text-[#007fff] hover:underline text-sm font-medium"
-            >
-              Contact info
-            </button>
           </div>
         </div>
       </div>

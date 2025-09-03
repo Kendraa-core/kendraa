@@ -61,8 +61,8 @@ export default function VerifyOtp() {
           <h2 className="mt-6 text-3xl font-bold text-gray-900">
             Check your email
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            We've sent a 6-digit verification code to <strong>{email}</strong>
+          <p className="text-sm text-gray-600 mb-6">
+            We&apos;ve sent a verification code to your email address.
           </p>
         </div>
 
