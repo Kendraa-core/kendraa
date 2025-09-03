@@ -95,6 +95,31 @@ const formatDateToMonthYear = (dateString: string | null): string => {
   }
 };
 
+// Helper function to convert month/year to ISO date format
+const convertMonthYearToISO = (month: string, year: string): string => {
+  if (!month || !year) return '';
+  
+  try {
+    // Create a date object for the first day of the month
+    const date = new Date(parseInt(year), getMonthIndex(month), 1);
+    if (isNaN(date.getTime())) return '';
+    
+    // Return ISO date string (YYYY-MM-DD)
+    return date.toISOString().split('T')[0];
+  } catch {
+    return '';
+  }
+};
+
+// Helper function to get month index
+const getMonthIndex = (monthName: string): number => {
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  return months.indexOf(monthName);
+};
+
 // Medical specialization badges mapping
 const MEDICAL_SPECIALIZATIONS = {
   'Cardiology': { color: 'bg-red-100 text-red-700 border-red-200', icon: HeartIcon },
@@ -971,7 +996,7 @@ export default function ProfilePage() {
     
     try {
       const updates: { [key: string]: any } = {};
-      const fieldName = field.replace('_', ''); // Remove underscore for field name
+      const fieldName = field; // Keep the original field name
 
       if (fieldName === 'bio') {
         updates.bio = editValues.bio;
@@ -982,13 +1007,13 @@ export default function ProfilePage() {
         updates.headline = editValues.headline;
       } else if (fieldName === 'full_name') {
         updates.full_name = editValues.full_name;
-      } else if (fieldName.startsWith('experience_')) {
+      } else if (fieldName.startsWith('experience_') && !fieldName.startsWith('add_')) {
         const experienceId = fieldName.split('_')[1];
         const expStartDate = editValues[`experience_${experienceId}_start_month`] && editValues[`experience_${experienceId}_start_year`]
-          ? `${editValues[`experience_${experienceId}_start_month`]} ${editValues[`experience_${experienceId}_start_year`]}`
+          ? convertMonthYearToISO(editValues[`experience_${experienceId}_start_month`], editValues[`experience_${experienceId}_start_year`])
           : '';
         const expEndDate = editValues[`experience_${experienceId}_end_month`] && editValues[`experience_${experienceId}_end_year`]
-          ? `${editValues[`experience_${experienceId}_end_month`]} ${editValues[`experience_${experienceId}_end_year`]}`
+          ? convertMonthYearToISO(editValues[`experience_${experienceId}_end_month`], editValues[`experience_${experienceId}_end_year`])
           : '';
         
         const experienceUpdates = {
@@ -1013,13 +1038,13 @@ export default function ProfilePage() {
         setEditValues({});
         toast.success('Experience updated successfully');
         return; // Don't continue with profile update
-      } else if (fieldName.startsWith('education_')) {
+      } else if (fieldName.startsWith('education_') && !fieldName.startsWith('add_')) {
         const educationId = fieldName.split('_')[1];
         const eduStartDate = editValues[`education_${educationId}_start_month`] && editValues[`education_${educationId}_start_year`]
-          ? `${editValues[`education_${educationId}_start_month`]} ${editValues[`education_${educationId}_start_year`]}`
+          ? convertMonthYearToISO(editValues[`education_${educationId}_start_month`], editValues[`education_${educationId}_start_year`])
           : '';
         const eduEndDate = editValues[`education_${educationId}_end_month`] && editValues[`education_${educationId}_end_year`]
-          ? `${editValues[`education_${educationId}_end_month`]} ${editValues[`education_${educationId}_end_year`]}`
+          ? convertMonthYearToISO(editValues[`education_${educationId}_end_month`], editValues[`education_${educationId}_end_year`])
           : '';
         
         const educationUpdates = {
@@ -1042,24 +1067,31 @@ export default function ProfilePage() {
         setEditingField(null);
         setEditValues({});
         toast.success('Education updated successfully');
-        return; // Don't continue with profile update else if (fieldName === 'add_experience') {
+        return; // Don't continue with profile update
+      } else if (fieldName === 'add_experience') {
          // Handle adding new experience
          const newExpStartDate = editValues.new_experience_start_month && editValues.new_experience_start_year 
-           ? `${editValues.new_experience_start_month} ${editValues.new_experience_start_year}`
+           ? convertMonthYearToISO(editValues.new_experience_start_month, editValues.new_experience_start_year)
            : '';
          const newExpEndDate = editValues.new_experience_end_month && editValues.new_experience_end_year
-           ? `${editValues.new_experience_end_month} ${editValues.new_experience_end_year}`
+           ? convertMonthYearToISO(editValues.new_experience_end_month, editValues.new_experience_end_year)
            : '';
+         
+         // Validate required fields
+         if (!editValues.new_experience_title?.trim() || !editValues.new_experience_company?.trim() || !newExpStartDate) {
+           toast.error('Please fill in all required fields (Title, Company, and Start Date)');
+           return;
+         }
          
          const newExperienceData = {
            profile_id: profile!.id,
-           title: editValues.new_experience_title || '',
-           company: editValues.new_experience_company || '',
+           title: editValues.new_experience_title.trim(),
+           company: editValues.new_experience_company.trim(),
            company_type: 'other' as const,
-           description: editValues.new_experience_description || '',
+           description: editValues.new_experience_description?.trim() || null,
            start_date: newExpStartDate,
-           end_date: newExpEndDate,
-           location: editValues.new_experience_location || '',
+           end_date: newExpEndDate || null,
+           location: editValues.new_experience_location?.trim() || null,
            current: !newExpEndDate,
            specialization: []
          };
@@ -1074,21 +1106,26 @@ export default function ProfilePage() {
        } else if (fieldName === 'add_education') {
          // Handle adding new education
          const newEduStartDate = editValues.new_education_start_month && editValues.new_education_start_year 
-           ? `${editValues.new_education_start_month} ${editValues.new_education_start_year}`
+           ? convertMonthYearToISO(editValues.new_education_start_month, editValues.new_education_start_year)
            : '';
          const newEduEndDate = editValues.new_education_end_month && editValues.new_education_end_year
-           ? `${editValues.new_education_end_month} ${editValues.new_education_end_year}`
+           ? convertMonthYearToISO(editValues.new_education_end_month, editValues.new_education_end_year)
            : '';
+         
+         // Validate required fields
+         if (!editValues.new_education_degree?.trim() || !editValues.new_education_school?.trim() || !newEduStartDate) {
+           toast.error('Please fill in all required fields (Degree, School, and Start Date)');
+           return;
+         }
          
          const newEducationData = {
            profile_id: profile!.id,
-           school: editValues.new_education_school || '',
-           degree: editValues.new_education_degree || '',
-           field: editValues.new_education_field || '',
-
+           school: editValues.new_education_school.trim(),
+           degree: editValues.new_education_degree.trim(),
+           field: editValues.new_education_field?.trim() || null,
            specialization: null,
            start_date: newEduStartDate,
-           end_date: newEduEndDate,
+           end_date: newEduEndDate || null,
            current: !newEduEndDate,
            description: null,
            gpa: null,
@@ -1101,11 +1138,12 @@ export default function ProfilePage() {
          setEditingField(null);
          setEditValues({});
          toast.success('Education added successfully');
-                }
+         return; // Don't continue with profile update
+       }
       
       // Only update profile if we have profile updates
       if (Object.keys(updates).length > 0) {
-        const updatedProfile = await updateProfile(profile.id, updates);
+        const updatedProfile = await updateProfile(profile!.id, updates);
         setProfile(updatedProfile);
         toast.success(`${field.replace('_', ' ')} updated successfully`);
       }
