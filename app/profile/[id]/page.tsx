@@ -258,7 +258,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
 
         {/* Profile Information and Actions */}
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
-          {/* Left Side: Profile Info */}
+          {/* Left Side: Profile Info and Stats */}
           <div className="flex-1 min-w-0 space-y-4">
             {/* Name */}
             <h1 className="text-3xl sm:text-4xl font-bold text-[#007fff]">
@@ -270,22 +270,42 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
               {profile.headline || 'Healthcare Professional'}
             </p>
             
-            {/* Current Position and Education */}
-            <div className="space-y-2">
-              {experiences.length > 0 && (
-                <div className="flex items-center gap-2">
-                  <BuildingOfficeIcon className="w-4 h-4 text-gray-600" />
-                  <p className="text-sm text-gray-900">{experiences[0].company}</p>
+            {/* Network Stats */}
+            <div className="flex gap-6">
+              <button 
+                onClick={() => router.push(`/profile/${profile.id}/connections`)}
+                className="text-center group"
+              >
+                <div className="text-lg font-bold text-[#007fff] group-hover:scale-110 transition-transform duration-200">
+                  {formatNumber(connectionCount)}
                 </div>
-              )}
+                <div className="text-xs font-medium text-gray-600 group-hover:text-[#007fff] transition-colors duration-200">
+                  connections
+                </div>
+              </button>
               
-              {education.length > 0 && (
-                <div className="flex items-center gap-2">
-                  <AcademicCapIcon className="w-4 h-4 text-gray-600" />
-                  <p className="text-sm text-gray-900">{education[0].school}</p>
+              <button 
+                onClick={() => router.push(`/profile/${profile.id}/followers`)}
+                className="text-center group"
+              >
+                <div className="text-lg font-bold text-[#007fff] group-hover:scale-110 transition-transform duration-200">
+                  {formatNumber(connectionCount)}
                 </div>
-              )}
+                <div className="text-xs font-medium text-gray-600 group-hover:text-[#007fff] transition-colors duration-200">
+                  followers
+                </div>
+              </button>
             </div>
+
+            {/* Action Button */}
+            {isOwnProfile && (
+              <button 
+                className="inline-flex items-center justify-center px-4 py-2.5 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-semibold w-fit"
+              >
+                <SparklesIcon className="w-4 h-4 mr-1.5" />
+                Open to work
+              </button>
+            )}
             
             {/* Medical Specializations */}
             {profile.specialization && profile.specialization.length > 0 && (
@@ -325,97 +345,84 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
             </div>
           </div>
 
-          {/* Right Side: Stats and Action Buttons */}
-          <div className="flex flex-col gap-4 min-w-[240px]">
-            {/* Network Stats */}
-            <div className="flex gap-6">
-              <button 
-                onClick={() => router.push(`/profile/${profile.id}/connections`)}
-                className="text-center group"
-              >
-                <div className="text-lg font-bold text-[#007fff] group-hover:scale-110 transition-transform duration-200">
-                  {formatNumber(connectionCount)}
+          {/* Right Side: Education and Experience */}
+          <div className="flex flex-col gap-4 min-w-[280px]">
+            {/* Current Position and Education */}
+            <div className="space-y-3">
+              {experiences.length > 0 && (
+                <div className="flex items-start gap-3">
+                  <div className="w-5 h-5 bg-gray-200 rounded flex items-center justify-center flex-shrink-0">
+                    <BuildingOfficeIcon className="w-3 h-3 text-gray-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-900">{experiences[0].company}</p>
+                  </div>
                 </div>
-                <div className="text-xs font-medium text-gray-600 group-hover:text-[#007fff] transition-colors duration-200">
-                  connections
-                </div>
-              </button>
+              )}
               
-              <button 
-                onClick={() => router.push(`/profile/${profile.id}/followers`)}
-                className="text-center group"
-              >
-                <div className="text-lg font-bold text-[#007fff] group-hover:scale-110 transition-transform duration-200">
-                  {formatNumber(connectionCount)}
+              {education.length > 0 && (
+                <div className="flex items-start gap-3">
+                  <div className="w-5 h-5 bg-gray-200 rounded flex items-center justify-center flex-shrink-0">
+                    <AcademicCapIcon className="w-3 h-3 text-gray-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-900">{education[0].school}</p>
+                  </div>
                 </div>
-                <div className="text-xs font-medium text-gray-600 group-hover:text-[#007fff] transition-colors duration-200">
-                  followers
-                </div>
-              </button>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-col gap-2">
-              {isOwnProfile ? (
-                <>
-                  <button 
-                    className="inline-flex items-center justify-center px-4 py-2.5 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-semibold w-full"
-                  >
-                    <SparklesIcon className="w-4 h-4 mr-1.5" />
-                    Open to work
-                  </button>
-                </>
-              ) : (
-                <>
-                  {profile.profile_type === 'institution' ? (
-                    followStatus === 'following' ? (
-                      <button
-                        onClick={onUnfollow}
-                        className="inline-flex items-center justify-center px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 text-sm font-semibold border border-gray-200 w-full"
-                      >
-                        <CheckIcon className="w-4 h-4 mr-1.5" />
-                        Following
-                      </button>
-                    ) : (
-                      <button
-                        onClick={onConnect}
-                        className="inline-flex items-center justify-center px-4 py-2.5 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-semibold w-full"
-                      >
-                        <PlusIcon className="w-4 h-4 mr-1.5" />
-                        Follow
-                      </button>
-                    )
-                  ) : (
-                    connectionStatus === 'connected' ? (
-                      <span className="inline-flex items-center justify-center px-4 py-2.5 bg-green-100 text-green-700 rounded-lg text-sm font-semibold border border-green-200 w-full">
-                        <CheckIcon className="w-4 h-4 mr-1.5" />
-                        Connected
-                      </span>
-                    ) : connectionStatus === 'pending' ? (
-                      <span className="inline-flex items-center justify-center px-4 py-2.5 bg-yellow-100 text-yellow-700 rounded-lg text-sm font-semibold border border-yellow-200 w-full">
-                        <ClockIcon className="w-4 h-4 mr-1.5" />
-                        Pending
-                      </span>
-                    ) : (
-                      <button
-                        onClick={onConnect}
-                        className="inline-flex items-center justify-center px-4 py-2.5 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-semibold w-full"
-                      >
-                        <UserPlusIcon className="w-4 h-4 mr-1.5" />
-                        Connect
-                      </button>
-                    )
-                  )}
-                  <button 
-                    onClick={() => router.push(`/messages?user=${profile.id}`)}
-                    className="inline-flex items-center justify-center px-4 py-2.5 bg-white text-[#007fff] border border-[#007fff] rounded-lg hover:bg-[#007fff]/5 transition-all duration-200 text-sm font-semibold w-full"
-                  >
-                    <EnvelopeIcon className="w-4 h-4 mr-1.5" />
-                    Message
-                  </button>
-                </>
               )}
             </div>
+
+            {/* Action Buttons for non-own profiles */}
+            {!isOwnProfile && (
+              <div className="flex flex-col gap-2">
+                {profile.profile_type === 'institution' ? (
+                  followStatus === 'following' ? (
+                    <button
+                      onClick={onUnfollow}
+                      className="inline-flex items-center justify-center px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 text-sm font-semibold border border-gray-200 w-full"
+                    >
+                      <CheckIcon className="w-4 h-4 mr-1.5" />
+                      Following
+                    </button>
+                  ) : (
+                    <button
+                      onClick={onConnect}
+                      className="inline-flex items-center justify-center px-4 py-2.5 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-semibold w-full"
+                    >
+                      <PlusIcon className="w-4 h-4 mr-1.5" />
+                      Follow
+                    </button>
+                  )
+                ) : (
+                  connectionStatus === 'connected' ? (
+                    <span className="inline-flex items-center justify-center px-4 py-2.5 bg-green-100 text-green-700 rounded-lg text-sm font-semibold border border-green-200 w-full">
+                      <CheckIcon className="w-4 h-4 mr-1.5" />
+                      Connected
+                    </span>
+                  ) : connectionStatus === 'pending' ? (
+                    <span className="inline-flex items-center justify-center px-4 py-2.5 bg-yellow-100 text-yellow-700 rounded-lg text-sm font-semibold border border-yellow-200 w-full">
+                      <ClockIcon className="w-4 h-4 mr-1.5" />
+                      Pending
+                    </span>
+                  ) : (
+                    <button
+                      onClick={onConnect}
+                      className="inline-flex items-center justify-center px-4 py-2.5 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-semibold w-full"
+                    >
+                      <UserPlusIcon className="w-4 h-4 mr-1.5" />
+                      Connect
+                    </button>
+                  )
+                )}
+                <button 
+                  onClick={() => router.push(`/messages?user=${profile.id}`)}
+                  className="inline-flex items-center justify-center px-4 py-2.5 bg-white text-[#007fff] border border-[#007fff] rounded-lg hover:bg-[#007fff]/5 transition-all duration-200 text-sm font-semibold w-full"
+                >
+                  <EnvelopeIcon className="w-4 h-4 mr-1.5" />
+                  Message
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
