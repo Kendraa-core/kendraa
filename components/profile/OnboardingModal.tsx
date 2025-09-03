@@ -146,6 +146,7 @@ export default function OnboardingPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [completionPercentage, setCompletionPercentage] = useState(0);
   const [hasSavedExperience, setHasSavedExperience] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const router = useRouter();
 
@@ -477,24 +478,26 @@ export default function OnboardingPage() {
     });
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // Validate file using utility function
-      const validation = validateFile(file, 5);
-      if (!validation.valid) {
-        toast.error(validation.error || 'Invalid file');
-        return;
-      }
-
-      setAvatarFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setAvatarPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+  // Handles the preview and state for image selection
+const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (file) {
+    // Validate file using utility function (max 5MB here)
+    const validation = validateFile(file, 5);
+    if (!validation.valid) {
+      toast.error(validation.error || 'Invalid file');
+      return;
     }
-  };
+
+    setAvatarFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setAvatarPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  }
+};
+
 
   const handleNext = async () => {
     // Save ALL data on every Next click
@@ -505,20 +508,57 @@ export default function OnboardingPage() {
     setCurrentStep(nextStep);
   };
 
-  // Unified save function for all data
   const saveAllData = async (markCompleted = false) => {
-    if (!user?.id || !supabase) return;
-    
-    try {
-      const sb = supabase;
-      const uid = user.id;
+  if (!user?.id || !supabase) return;
 
-      // Save profile data
-      await sb.from('profiles').upsert({
-        id: uid,
-        ...formData,
-        updated_at: new Date().toISOString()
-      });
+  try {
+    // --- AVATAR UPLOAD LOGIC ---
+    if (avatarFile) {
+      setUploading(true);
+      toast.loading('Uploading photo...');
+
+      // Use a unique path (user id + timestamp), with upsert
+      const fileExt = avatarFile.name.split('.').pop();
+      const fileName = `${user.id}_${Date.now()}.${fileExt}`;
+      const filePath = `${user.id}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, avatarFile, { upsert: true });
+
+      if (uploadError) {
+        toast.dismiss();
+        setUploading(false);
+        throw uploadError;
+      }
+
+      // Get the public URL of the uploaded file
+      const { data, error: urlError } = supabase
+        .storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      if (urlError || !data?.publicUrl) {
+        toast.dismiss();
+        setUploading(false);
+        throw urlError || new Error("Failed to get public avatar URL.");
+      }
+      // Set in your formData before upserting user profile
+      formData.avatar_url = data.publicUrl;
+
+      toast.dismiss();
+      setUploading(false);
+    }
+
+    const sb = supabase;
+    const uid = user.id;
+
+    // Save profile data
+    await sb.from('profiles').upsert({
+      id: uid,
+      ...formData,
+      updated_at: new Date().toISOString()
+    });
 
       // Save valid experiences - replace all existing ones
       const validExperiences = experiences.filter(exp => 
@@ -624,10 +664,12 @@ export default function OnboardingPage() {
 
       console.log('All data saved successfully');
     } catch (error) {
-      console.error('Save error:', error);
-      throw error;
-    }
-  };
+    toast.dismiss();
+    setUploading(false);
+    console.error('Save error:', error);
+    throw error;
+  }
+};
 
   
 
@@ -661,6 +703,7 @@ export default function OnboardingPage() {
       toast.error('Failed to save progress.');
     } finally {
       setLoading(false);
+      setUploading(false); 
     }
   };
 
@@ -1940,7 +1983,7 @@ export default function OnboardingPage() {
                   </button>
                   <button
                     onClick={handleNext}
-                    disabled={!canProceed() || loading}
+                    disabled={!canProceed() || loading || uploading}
                     className={`px-4 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg ${
                       canProceed() && !loading
                         ? 'bg-gradient-to-r from-azure-500 to-blue-500 text-white hover:from-azure-600 hover:to-blue-600 hover:shadow-xl transform hover:scale-105'
@@ -1997,7 +2040,7 @@ export default function OnboardingPage() {
                   disabled={loading}
                   className="px-8 py-3 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? 'Completing...' : 'Get Started'}
+                   {loading || uploading ? 'Completing...' : 'Get Started'}
                 </button>
               )}
             </div>
