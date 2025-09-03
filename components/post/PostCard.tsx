@@ -61,11 +61,6 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
   const [userReaction, setUserReaction] = useState<string | null>(null);
   const [isReacting, setIsReacting] = useState(false);
 
-  // Debug logging
-  const debugLog = (message: string, data?: unknown) => {
-    console.log(`[PostCard] ${message}`, data);
-  };
-
   // Initialize post state on mount
   useEffect(() => {
     if (!post?.id || !user?.id) return;
@@ -79,8 +74,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
         setIsBookmarked(saved);
         setUserReaction(reactionType);
       } catch (error) {
-        setIsBookmarked(false);
-        setUserReaction(null);
+        // Silently fail, UI will just show default state
       }
     };
 
@@ -120,48 +114,26 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
     }
 
     if (isReacting) return;
-
     setIsReacting(true);
 
+    const originalReaction = userReaction;
+    const originalLikesCount = likesCount;
+
     try {
-      let success = false;
-      
       if (userReaction === reactionType) {
-        // Remove reaction
-        success = await unlikePost(post.id, user.id);
-        if (success) {
-          setUserReaction(null);
-          setLikesCount(prev => Math.max(0, prev - 1));
-          toast.success('Reaction removed');
-        } else {
-          toast.error('Failed to remove reaction');
-        }
-      } else if (userReaction) {
-        // User already has a different reaction
-        toast.error('You can only have one reaction per post. Remove your current reaction first.');
+        setUserReaction(null);
+        setLikesCount(prev => Math.max(0, prev - 1));
+        await unlikePost(post.id, user.id);
       } else {
-        // Add new reaction
-        success = await likePost(post.id, user.id, reactionType);
-        if (success) {
-          setUserReaction(reactionType);
-          setLikesCount(prev => prev + 1);
-          toast.success('Reaction added');
-        } else {
-          toast.error('Failed to add reaction');
-        }
+        setUserReaction(reactionType);
+        setLikesCount(prev => (originalReaction ? prev : prev + 1));
+        await likePost(post.id, user.id, reactionType);
       }
-      
       onInteraction?.();
-    } catch (error: any) {
-      logError('PostCard', error, { 
-        postId: post.id, 
-        action: 'handleReaction',
-        reactionType,
-        userId: user.id
-      });
-      
-      const appError = handleSupabaseError(error);
-      toast.error(getErrorMessage(appError));
+    } catch (error) {
+      setUserReaction(originalReaction);
+      setLikesCount(originalLikesCount);
+      toast.error("Failed to update reaction.");
     } finally {
       setIsReacting(false);
     }
@@ -172,61 +144,31 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
       toast.error('Please log in to save posts');
       return;
     }
+    const originalBookmarkState = isBookmarked;
+    setIsBookmarked(!originalBookmarkState);
 
     try {
-      if (isBookmarked) {
-        const success = await unsavePost(post.id, user.id);
-        if (success) {
-          setIsBookmarked(false);
-          toast.success('Post removed from saved items');
-        } else {
-          toast.error('Failed to remove post from saved items');
-        }
+      if (originalBookmarkState) {
+        await unsavePost(post.id, user.id);
       } else {
-        const success = await savePost(post.id, user.id);
-        if (success) {
-          setIsBookmarked(true);
-          toast.success('Post saved to your collection');
-        } else {
-          toast.error('Failed to save post');
-        }
+        await savePost(post.id, user.id);
       }
-      
       onInteraction?.();
-    } catch (error: any) {
-      logError('PostCard', error, { 
-        postId: post.id, 
-        action: 'handleBookmark',
-        userId: user.id
-      });
-      
-      const appError = handleSupabaseError(error);
-      toast.error(getErrorMessage(appError));
+    } catch (error) {
+      setIsBookmarked(originalBookmarkState);
+      toast.error('Failed to update bookmark.');
     }
   };
 
   const loadComments = async () => {
     if (!post?.id) return;
-
     setIsLoadingComments(true);
-    
     try {
-      // Load all comments (no limit) to support "show more" functionality
       const fetchedComments = await getPostComments(post.id);
-      
-      if (Array.isArray(fetchedComments)) {
-        // Filter to only show top-level comments (not replies)
-        const topLevelComments = fetchedComments.filter(comment => comment.parent_id === null);
-        setComments(topLevelComments);
-      } else {
-        setComments([]);
-        toast.error('Invalid comments data received');
-      }
+      const topLevelComments = fetchedComments.filter(comment => !comment.parent_id);
+      setComments(topLevelComments);
     } catch (error: any) {
-      logError('PostCard', error, { postId: post.id, action: 'loadComments' });
-      const appError = handleSupabaseError(error);
-      toast.error(getErrorMessage(appError));
-      setComments([]);
+      toast.error("Failed to load comments.");
     } finally {
       setIsLoadingComments(false);
     }
@@ -252,13 +194,9 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
     setIsCommenting(true);
 
     try {
-      const commentData = {
-        content: newComment.trim(),
-        post_id: post.id,
-        author_id: user.id,
-      };
-
-      const result = await createComment(commentData);
+      // THE FIX: Call the updated `createComment` function with the new, simpler signature.
+      // We no longer pass the author_id because the function gets it securely itself.
+      const result = await createComment(post.id, newComment.trim());
       
       if (result) {
         setNewComment('');
@@ -266,6 +204,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
         setCommentsCount(prev => prev + 1);
         await loadComments();
         toast.success('Comment added successfully!');
+        onInteraction?.();
       } else {
         toast.error('Failed to add comment');
       }
@@ -331,14 +270,12 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
         <p className="text-gray-900 whitespace-pre-wrap break-words leading-relaxed">{post.content}</p>
         
         {post.image_url && (
-          <div className="mt-3">
+          <div className="mt-3 relative aspect-video">
             <Image
               src={post.image_url}
               alt="Post media"
-              width={600}
-              height={400}
-              className="w-full rounded-lg object-cover"
-              priority={false}
+              layout="fill"
+              className="rounded-lg object-cover"
             />
           </div>
         )}
@@ -346,29 +283,13 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
 
       {/* Post Stats */}
       <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-        <div className="flex items-center space-x-4">
-          {likesCount > 0 && (
-            <span className="text-gray-500">
-              {likesCount} {likesCount === 1 ? 'reaction' : 'reactions'}
-            </span>
-          )}
-          {commentsCount > 0 && (
-            <span className="text-gray-500">
-              {commentsCount} {commentsCount === 1 ? 'comment' : 'comments'}
-            </span>
-          )}
-        </div>
+        <span>{likesCount} {likesCount === 1 ? 'reaction' : 'reactions'}</span>
+        <span>{commentsCount} {commentsCount === 1 ? 'comment' : 'comments'}</span>
       </div>
 
       {/* Post Actions */}
       <div className="flex items-center justify-between border-t border-gray-100 pt-4">
-        <PostReactions
-          postId={post.id}
-          userReaction={userReaction}
-          reactionCounts={{ like: likesCount }}
-          onReact={handleReaction}
-        />
-
+        <PostReactions userReaction={userReaction} onReact={handleReaction} />
         <button
           onClick={() => {
             setShowCommentBox(!showCommentBox);
@@ -377,34 +298,18 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
               loadComments();
             }
           }}
-          className="flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+          className="flex items-center space-x-2 px-3 py-2 rounded-lg text-gray-500 hover:bg-gray-100"
         >
           <ChatBubbleOvalLeftIcon className="w-5 h-5" />
-          <span className="text-sm hidden sm:inline">
-            {showCommentBox ? 'Cancel' : 'Comment'}
-          </span>
+          <span className="text-sm font-medium">Comment</span>
         </button>
-
-        <ShareButton 
-          title={`Post by ${post.profiles?.full_name || 'User'}`}
-          description={post.content}
-          url={`${window.location.origin}/post/${post.id}`}
-        />
-
+        <ShareButton title={`Post by ${getAuthorName()}`} url={`${window.location.origin}/post/${post.id}`} />
         <button
           onClick={handleBookmark}
-          className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
-            isBookmarked
-              ? 'text-[#007fff] hover:bg-[#007fff]/10'
-              : 'text-gray-500 hover:text-[#007fff] hover:bg-[#007fff]/10'
-          }`}
+          className={cn("flex items-center space-x-2 px-3 py-2 rounded-lg", isBookmarked ? "text-blue-600 bg-blue-50" : "text-gray-500 hover:bg-gray-100")}
         >
-          {isBookmarked ? (
-            <BookmarkSolidIcon className="w-5 h-5" />
-          ) : (
-            <BookmarkIcon className="w-5 h-5" />
-          )}
-          <span className="text-sm hidden sm:inline">Save</span>
+          {isBookmarked ? <BookmarkSolidIcon className="w-5 h-5" /> : <BookmarkIcon className="w-5 h-5" />}
+          <span className="text-sm font-medium">Save</span>
         </button>
       </div>
 
@@ -413,26 +318,22 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
         <div className="border-t border-gray-100 pt-4 mt-4">
           {/* Add Comment */}
           {showCommentBox && (
-            <div className="flex items-start space-x-3 mb-4">
-              <Avatar
-                src={user?.user_metadata?.avatar_url}
-                alt={user?.email || 'User'}
-                size="sm"
-              />
+            <div className="flex items-start space-x-3">
+              <Avatar src={user?.user_metadata?.avatar_url} size="sm" />
               <div className="flex-1">
                 <textarea
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
-                  placeholder="Write a comment..."
-                  className="w-full p-3 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  rows={2}
+                  placeholder="Add a comment..."
+                  className="w-full p-2 border border-gray-300 rounded-lg resize-none"
+                  rows={1}
                   autoFocus
                 />
                 <div className="flex justify-end mt-2">
                   <button
                     onClick={submitComment}
                     disabled={isCommenting || !newComment.trim()}
-                    className="bg-[#007fff] text-white px-4 py-2 rounded-lg hover:bg-[#007fff]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="bg-blue-600 text-white px-4 py-1.5 rounded-full text-sm font-semibold disabled:opacity-50"
                   >
                     {isCommenting ? 'Posting...' : 'Post'}
                   </button>
@@ -440,16 +341,10 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
               </div>
             </div>
           )}
-
-          {/* Comments List */}
-          <div className="space-y-4">
-            {isLoadingComments ? (
-              <div className="text-center py-4">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#007fff] mx-auto"></div>
-              </div>
-            ) : comments.length > 0 ? (
-              <>
-                {/* Show top 2 comments by default, or all if showAllComments is true */}
+          
+          {isLoadingComments && <p>Loading comments...</p>}
+          {!isLoadingComments && comments.length > 0 && (
+            <div className="space-y-4">
                 {(showAllComments ? comments : comments.slice(0, 2)).map((comment) => (
                   <Comment
                     key={comment.id}
@@ -459,11 +354,10 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
                   />
                 ))}
                 
-                {/* Show More/Less Button */}
                 {comments.length > 2 && (
                   <button
                     onClick={() => setShowAllComments(!showAllComments)}
-                    className="text-sm text-[#007fff] hover:text-[#007fff]/80 font-medium transition-colors"
+                    className="text-sm text-blue-600 hover:text-blue-700 font-medium"
                   >
                     {showAllComments 
                       ? `Show less` 
@@ -471,15 +365,12 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
                     }
                   </button>
                 )}
-              </>
-            ) : (
-              <p className="text-center text-gray-500 text-sm py-4">
-                No comments yet. Be the first to comment!
-              </p>
-            )}
-          </div>
+            </div>
+          )}
+          {!isLoadingComments && comments.length === 0 && <p className="text-sm text-gray-500">No comments yet.</p>}
         </div>
       )}
     </div>
   );
-} 
+}
+

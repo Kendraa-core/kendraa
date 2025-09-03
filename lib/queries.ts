@@ -917,60 +917,75 @@ export async function markNotificationAsRead(notificationId: string): Promise<bo
 // Profile view recording functionality removed
 
 // Comment functions
-export async function createComment(comment: {
-  content: string;
-  post_id: string;
-  author_id: string;
-}): Promise<PostComment | null> {
+export async function createComment(postId: string, content: string): Promise<PostComment | null> {
   try {
-    console.log('[Queries] Creating comment:', comment);
-    
-    // First check if the table exists
+    // 1. Get the current user
+    const { data: { user } } = await getSupabase().auth.getUser();
+    if (!user) {
+      toast.error('You must be logged in to post a comment.');
+      throw new Error('User not authenticated.');
+    }
+
+    // 2. Ensure table exists
     const tableExists = await ensurePostCommentsTable();
     if (!tableExists) {
-      console.log('[Queries] Post comments table does not exist, cannot create comment');
+      toast.error('Commenting is temporarily unavailable.');
       return null;
     }
-    
+
+    // 3. Prepare comment object
+    const commentToInsert = {
+      post_id: postId, // check if needs Number(postId)
+      content,
+      author_id: user.id,
+    };
+
+    // 4. Insert comment
     const { data, error } = await getSupabase()
       .from('post_comments')
-      .insert({
-        ...comment,
-        created_at: new Date().toISOString(),
-      })
+      .insert([commentToInsert]) // <-- FIXED
       .select()
       .single();
 
     if (error) {
-      console.error('[Queries] Error creating comment:', error);
-      throw error;
-    }
-    
-    // Update post comments count
+  console.error('[Queries] Error creating comment:', {
+    message: error.message,
+    details: error.details,
+    hint: error.hint,
+    code: error.code,
+    full: JSON.stringify(error, null, 2),
+  });
+  throw error;
+}
+
+    // 5. Update post comment count
     const { data: post } = await getSupabase()
       .from('posts')
       .select('comments_count')
-      .eq('id', comment.post_id)
+      .eq('id', postId)
       .single();
 
     if (post) {
-      const { error: updateError } = await getSupabase()
+      const newCount = (post.comments_count || 0) + 1;
+      await getSupabase()
         .from('posts')
-        .update({ comments_count: (post.comments_count || 0) + 1 })
-        .eq('id', comment.post_id);
-
-      if (updateError) {
-        console.error('[Queries] Error updating comments count:', updateError);
-      }
+        .update({ comments_count: newCount })
+        .eq('id', postId);
     }
-    
-    console.log('[Queries] Comment created successfully:', data);
+
     return data;
-  } catch (error) {
-    console.error('[Queries] Error in createComment:', error);
-    return null;
-  }
+  } catch (error: any) {
+  console.error('[Queries] Error in createComment function:', {
+    message: error?.message,
+    details: error?.details,
+    hint: error?.hint,
+    code: error?.code,
+    full: JSON.stringify(error, null, 2),
+  });
+  throw error;
 }
+}
+
 
 export async function getPostComments(postId: string, limit?: number): Promise<CommentWithAuthor[]> {
   try {
@@ -1457,7 +1472,6 @@ export async function getJobs(): Promise<JobWithCompany[]> {
             headline: 'Chief of Cardiology',
             bio: 'Experienced cardiologist with over 15 years in the field.',
             location: 'New York, NY',
-            country: 'United States',
             website: null,
             phone: null,
             specialization: ['Cardiology'],
@@ -1467,7 +1481,6 @@ export async function getJobs(): Promise<JobWithCompany[]> {
             institution_type: 'hospital',
             accreditations: ['JCAHO', 'AHA'],
             departments: ['Cardiology', 'Emergency Medicine'],
-            onboarding_completed: true,
             contact_info: {
               address: '1 Gustave L. Levy Place, New York, NY 10029',
               phone: '+1-212-241-6500',
@@ -1527,7 +1540,6 @@ export async function getJobs(): Promise<JobWithCompany[]> {
             headline: 'Director of Nursing',
             bio: 'Experienced healthcare administrator with focus on pediatric care.',
             location: 'Los Angeles, CA',
-            country: 'United States',
             website: null,
             phone: null,
             specialization: ['Pediatrics', 'Nursing'],
@@ -1537,7 +1549,6 @@ export async function getJobs(): Promise<JobWithCompany[]> {
             institution_type: 'hospital',
             accreditations: ['JCAHO', 'AAP'],
             departments: ['Pediatrics', 'Nursing'],
-            onboarding_completed: true,
             contact_info: {
               address: '4650 Sunset Blvd, Los Angeles, CA 90027',
               phone: '+1-323-660-2450',
