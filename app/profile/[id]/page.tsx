@@ -239,9 +239,9 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
       {/* Profile Content Section */}
       <div className="px-8 py-8">
         {/* Top Row: Avatar, Name, and Action Buttons */}
-        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between -mt-24 mb-8 gap-8">
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between -mt-24 mb-6 gap-6">
           {/* Left Side: Avatar and Profile Info */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-6">
+          <div className="flex flex-col sm:flex-row sm:items-start gap-4">
             {/* Avatar Container */}
             <div className="relative self-start">
               <div className="relative">
@@ -249,49 +249,49 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
                   src={profile.avatar_url}
                   alt={profile.full_name || 'Profile'}
                   size="2xl"
-                  className="border-4 border-white shadow-2xl ring-4 ring-[#007fff]/20 w-32 h-32"
+                  className="border-4 border-white shadow-2xl ring-4 ring-[#007fff]/20 w-28 h-28"
                 />
               </div>
               {/* Edit Avatar Button */}
               {isOwnProfile && (
                 <button
                   onClick={onEditImages}
-                  className="absolute -bottom-2 -right-2 bg-[#007fff] text-white p-2.5 rounded-full hover:bg-[#007fff]/90 transition-all duration-300 shadow-lg transform hover:scale-110"
+                  className="absolute -bottom-2 -right-2 bg-[#007fff] text-white p-2 rounded-full hover:bg-[#007fff]/90 transition-all duration-300 shadow-lg transform hover:scale-110"
                 >
-                  <CameraIcon className="w-4 h-4" />
+                  <CameraIcon className="w-3 h-3" />
                 </button>
               )}
             </div>
 
             {/* Profile Information */}
-            <div className="flex-1 min-w-0 space-y-4">
+            <div className="flex-1 min-w-0 space-y-3">
               {/* Name */}
               <div className="flex items-center gap-3">
-                <h1 className="text-4xl sm:text-5xl font-bold text-black">
+                <h1 className="text-3xl sm:text-4xl font-bold text-black">
                   {profile.full_name || 'Anonymous User'}
                 </h1>
               </div>
               
               {/* Headline */}
-              <p className="text-2xl sm:text-3xl text-gray-700 font-medium">
+              <p className="text-lg sm:text-xl text-gray-700 font-medium">
                 {profile.headline || 'Healthcare Professional'}
               </p>
               
               {/* Medical Specializations */}
               {profile.specialization && profile.specialization.length > 0 && (
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-2">
                   {profile.specialization.slice(0, 3).map((spec, index) => {
                     const badgeStyle = MEDICAL_SPECIALIZATIONS[spec as keyof typeof MEDICAL_SPECIALIZATIONS] || MEDICAL_SPECIALIZATIONS.Default;
                     const IconComponent = badgeStyle.icon;
                     return (
-                      <span key={index} className={`inline-flex items-center px-4 py-2 rounded-2xl text-sm font-semibold border-2 ${badgeStyle.color} hover:scale-105 transition-transform duration-200`}>
-                        <IconComponent className="w-4 h-4 mr-2" />
+                      <span key={index} className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium border ${badgeStyle.color} hover:scale-105 transition-transform duration-200`}>
+                        <IconComponent className="w-3 h-3 mr-1.5" />
                         {spec}
                       </span>
                     );
                   })}
                   {profile.specialization.length > 3 && (
-                    <span className="inline-flex items-center px-4 py-2 rounded-2xl text-sm font-semibold bg-gray-100 text-gray-600 border-2 border-gray-200">
+                    <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
                       +{profile.specialization.length - 3} more
                     </span>
                   )}
@@ -301,50 +301,42 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
           </div>
 
           {/* Right Side: Profile Stats and Action Buttons */}
-          <div className="flex flex-col gap-6 self-start lg:self-start min-w-[280px]">
-            {/* Current Position and Education - Vertical Layout */}
-            <div className="space-y-4">
+          <div className="flex flex-col gap-4 self-start lg:self-start min-w-[240px]">
+            {/* Current Position and Education - LinkedIn Style */}
+            <div className="space-y-3">
               {experiences.length > 0 && (
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-[#007fff]/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <BriefcaseIcon className="w-4 h-4 text-[#007fff]" />
+                  <div className="w-5 h-5 bg-gray-200 rounded flex items-center justify-center flex-shrink-0">
+                    <BuildingOfficeIcon className="w-3 h-3 text-gray-600" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-semibold text-gray-900">{experiences[0].title}</p>
-                    <p className="text-sm text-[#007fff]">{experiences[0].company}</p>
-                    {experiences[0].location && (
-                      <p className="text-xs text-gray-600">📍 {experiences[0].location}</p>
-                    )}
+                    <p className="text-sm font-medium text-gray-900">{experiences[0].company}</p>
                   </div>
                 </div>
               )}
               
               {education.length > 0 && (
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-[#007fff]/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <AcademicCapIcon className="w-4 h-4 text-[#007fff]" />
+                  <div className="w-5 h-5 bg-gray-200 rounded flex items-center justify-center flex-shrink-0">
+                    <AcademicCapIcon className="w-3 h-3 text-gray-600" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-semibold text-gray-900">{education[0].degree}</p>
-                    <p className="text-sm text-[#007fff]">{education[0].school}</p>
-                    {education[0].field && (
-                      <p className="text-xs text-gray-600">📚 {education[0].field}</p>
-                    )}
+                    <p className="text-sm font-medium text-gray-900">{education[0].school}</p>
                   </div>
                 </div>
               )}
             </div>
 
             {/* Network Stats */}
-            <div className="flex gap-6">
+            <div className="flex gap-4">
               <button 
                 onClick={() => router.push(`/profile/${profile.id}/connections`)}
                 className="text-center group"
               >
-                <div className="text-2xl font-bold text-[#007fff] group-hover:scale-110 transition-transform duration-200">
+                <div className="text-lg font-bold text-[#007fff] group-hover:scale-110 transition-transform duration-200">
                   {formatNumber(connectionCount)}
                 </div>
-                <div className="text-sm font-medium text-[#007fff]/80 group-hover:text-[#007fff] transition-colors duration-200">
+                <div className="text-xs font-medium text-[#007fff]/80 group-hover:text-[#007fff] transition-colors duration-200">
                   connections
                 </div>
               </button>
@@ -353,31 +345,24 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
                 onClick={() => router.push(`/profile/${profile.id}/followers`)}
                 className="text-center group"
               >
-                <div className="text-2xl font-bold text-[#007fff] group-hover:scale-110 transition-transform duration-200">
+                <div className="text-lg font-bold text-[#007fff] group-hover:scale-110 transition-transform duration-200">
                   {formatNumber(connectionCount)}
                 </div>
-                <div className="text-sm font-medium text-[#007fff]/80 group-hover:text-[#007fff] transition-colors duration-200">
+                <div className="text-xs font-medium text-[#007fff]/80 group-hover:text-[#007fff] transition-colors duration-200">
                   followers
                 </div>
               </button>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2">
               {isOwnProfile ? (
                 <>
                   <button 
-                    className="inline-flex items-center justify-center px-4 py-2 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-semibold w-full"
+                    className="inline-flex items-center justify-center px-3 py-1.5 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-xs font-semibold w-full"
                   >
-                    <SparklesIcon className="w-4 h-4 mr-2" />
+                    <SparklesIcon className="w-3 h-3 mr-1.5" />
                     Open to work
-                  </button>
-                  <button 
-                    onClick={() => router.push('/profile/setup')}
-                    className="inline-flex items-center justify-center px-4 py-2 bg-white text-[#007fff] border border-[#007fff] rounded-lg hover:bg-[#007fff]/5 transition-all duration-200 text-sm font-semibold w-full"
-                  >
-                    <PlusIcon className="w-4 h-4 mr-2" />
-                    Add profile section
                   </button>
                 </>
               ) : (
@@ -386,46 +371,46 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
                     followStatus === 'following' ? (
                       <button
                         onClick={onUnfollow}
-                        className="inline-flex items-center justify-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 text-sm font-semibold border border-gray-200 w-full"
+                        className="inline-flex items-center justify-center px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 text-xs font-semibold border border-gray-200 w-full"
                       >
-                        <CheckIcon className="w-4 h-4 mr-2" />
+                        <CheckIcon className="w-3 h-3 mr-1.5" />
                         Following
                       </button>
                     ) : (
                                           <button
                       onClick={onConnect}
-                      className="inline-flex items-center justify-center px-4 py-2 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-semibold w-full"
+                      className="inline-flex items-center justify-center px-3 py-1.5 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-xs font-semibold w-full"
                     >
-                      <PlusIcon className="w-4 h-4 mr-2" />
+                      <PlusIcon className="w-3 h-3 mr-1.5" />
                       Follow
                     </button>
                     )
                   ) : (
                     connectionStatus === 'connected' ? (
-                      <span className="inline-flex items-center justify-center px-4 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-semibold border border-green-200 w-full">
-                        <CheckIcon className="w-4 h-4 mr-2" />
+                      <span className="inline-flex items-center justify-center px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-xs font-semibold border border-green-200 w-full">
+                        <CheckIcon className="w-3 h-3 mr-1.5" />
                         Connected
                       </span>
                     ) : connectionStatus === 'pending' ? (
-                      <span className="inline-flex items-center justify-center px-4 py-2 bg-yellow-100 text-yellow-700 rounded-lg text-sm font-semibold border border-yellow-200 w-full">
-                        <ClockIcon className="w-4 h-4 mr-2" />
+                      <span className="inline-flex items-center justify-center px-3 py-1.5 bg-yellow-100 text-yellow-700 rounded-lg text-xs font-semibold border border-yellow-200 w-full">
+                        <ClockIcon className="w-3 h-3 mr-1.5" />
                         Pending
                       </span>
                     ) : (
                       <button
                         onClick={onConnect}
-                        className="inline-flex items-center justify-center px-4 py-2 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-semibold w-full"
+                        className="inline-flex items-center justify-center px-3 py-1.5 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-xs font-semibold w-full"
                       >
-                        <UserPlusIcon className="w-4 h-4 mr-2" />
+                        <UserPlusIcon className="w-3 h-3 mr-1.5" />
                         Connect
                       </button>
                     )
                   )}
                   <button 
                     onClick={() => router.push(`/messages?user=${profile.id}`)}
-                    className="inline-flex items-center justify-center px-4 py-2 bg-white text-[#007fff] border border-[#007fff] rounded-lg hover:bg-[#007fff]/5 transition-all duration-200 text-sm font-semibold w-full"
+                    className="inline-flex items-center justify-center px-3 py-1.5 bg-white text-[#007fff] border border-[#007fff] rounded-lg hover:bg-[#007fff]/5 transition-all duration-200 text-xs font-semibold w-full"
                   >
-                    <EnvelopeIcon className="w-4 h-4 mr-2" />
+                    <EnvelopeIcon className="w-3 h-3 mr-1.5" />
                     Message
                   </button>
                 </>
@@ -435,19 +420,18 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
         </div>
 
         {/* Contact Info Section */}
-        <div className="mb-8">
+        <div className="mb-6">
           <div className="flex items-center gap-4">
             {profile.location && (
-              <p className="text-gray-600 flex items-center gap-2">
+              <p className="text-gray-600 flex items-center gap-2 text-sm">
                 <MapPinIcon className="w-4 h-4" />
                 {profile.location}
               </p>
             )}
             <button 
               onClick={onViewContactInfo}
-              className="text-[#007fff] hover:underline text-sm font-medium flex items-center gap-2"
+              className="text-[#007fff] hover:underline text-sm font-medium"
             >
-              <UserGroupIcon className="w-4 h-4" />
               Contact info
             </button>
           </div>
