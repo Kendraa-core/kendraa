@@ -47,7 +47,7 @@ export default function ProfileBanner({
   };
 
   return (
-    <div className="relative h-48 bg-gradient-to-br from-blue-600 via-blue-700 to-purple-800 rounded-t-xl overflow-hidden group">
+    <div className="relative h-56 bg-[#007fff] rounded-t-xl overflow-hidden group">
       {/* Background Image */}
       {bannerUrl ? (
         <Image
@@ -57,7 +57,7 @@ export default function ProfileBanner({
           className="object-cover"
         />
       ) : (
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-700 to-purple-800">
+        <div className="absolute inset-0 bg-[#007fff]">
           {/* Decorative Pattern */}
           <div className="absolute inset-0 opacity-10">
             <svg width="100%" height="100%" viewBox="0 0 100 100" className="w-full h-full">
@@ -103,7 +103,7 @@ export default function ProfileBanner({
             {/* Quote Suggestions */}
             <button
               onClick={() => setShowQuoteSuggestions(!showQuoteSuggestions)}
-              className="mt-2 px-3 py-1 bg-blue-600 text-white text-xs rounded-lg hover:bg-blue-700"
+              className="mt-2 px-3 py-1 bg-[#007fff] text-white text-xs rounded-lg hover:bg-[#007fff]/90"
             >
               💡 Suggestions
             </button>
@@ -114,7 +114,7 @@ export default function ProfileBanner({
                   <button
                     key={index}
                     onClick={() => handleQuoteSuggestion(suggestedQuote)}
-                    className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 border-b border-gray-100 last:border-b-0"
+                    className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-[#007fff]/5 border-b border-gray-100 last:border-b-0"
                   >
                     {suggestedQuote}
                   </button>

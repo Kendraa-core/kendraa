@@ -35,6 +35,7 @@ import {
   getErrorMessage, 
   validateStringLength
 } from '@/utils/errorHandler';
+import { cn } from '@/lib/utils';
 
 interface PostCardProps {
   post: Post & {
@@ -394,8 +395,8 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
           onClick={handleBookmark}
           className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
             isBookmarked
-              ? 'text-azure-500 hover:bg-azure-50'
-              : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+              ? 'text-[#007fff] hover:bg-[#007fff]/10'
+              : 'text-gray-500 hover:text-[#007fff] hover:bg-[#007fff]/10'
           }`}
         >
           {isBookmarked ? (
@@ -431,7 +432,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
                   <button
                     onClick={submitComment}
                     disabled={isCommenting || !newComment.trim()}
-                    className="bg-azure-600 text-white px-4 py-2 rounded-lg hover:bg-azure-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="bg-[#007fff] text-white px-4 py-2 rounded-lg hover:bg-[#007fff]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     {isCommenting ? 'Posting...' : 'Post'}
                   </button>
@@ -444,7 +445,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
           <div className="space-y-4">
             {isLoadingComments ? (
               <div className="text-center py-4">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-azure-500 mx-auto"></div>
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#007fff] mx-auto"></div>
               </div>
             ) : comments.length > 0 ? (
               <>
@@ -462,7 +463,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
                 {comments.length > 2 && (
                   <button
                     onClick={() => setShowAllComments(!showAllComments)}
-                    className="text-sm text-azure-600 hover:text-azure-700 font-medium transition-colors"
+                    className="text-sm text-[#007fff] hover:text-[#007fff]/80 font-medium transition-colors"
                   >
                     {showAllComments 
                       ? `Show less` 

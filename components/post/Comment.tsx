@@ -168,7 +168,7 @@ export default function Comment({ comment, onReplyAdded, onReactionChange }: Com
                   <button
                     onClick={handleReply}
                     disabled={isSubmittingReply || !replyContent.trim()}
-                    className="px-3 py-1 text-sm bg-azure-600 text-white rounded-lg hover:bg-azure-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="px-3 py-1 text-sm bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     {isSubmittingReply ? 'Posting...' : 'Reply'}
                   </button>
@@ -200,7 +200,7 @@ export default function Comment({ comment, onReplyAdded, onReactionChange }: Com
             <div className="space-y-3">
               {isLoadingReplies ? (
                 <div className="text-center py-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-azure-500 mx-auto"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#007fff] mx-auto"></div>
                 </div>
               ) : (
                 replies.map((reply) => (

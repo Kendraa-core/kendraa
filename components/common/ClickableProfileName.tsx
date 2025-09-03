@@ -26,13 +26,13 @@ export default function ClickableProfileName({
     <Link
       href={`/profile/${userId}`}
       className={cn(
-        'font-semibold text-gray-900 hover:text-azure-500 transition-colors cursor-pointer inline-flex items-center space-x-1',
+        'font-semibold text-gray-900 hover:text-[#007fff] transition-colors cursor-pointer inline-flex items-center space-x-1',
         className
       )}
     >
       <span>{children || name}</span>
       {showBadge && userType === 'institution' && (
-        <CheckBadgeIcon className="w-4 h-4 text-azure-500" />
+        <CheckBadgeIcon className="w-4 h-4 text-[#007fff]" />
       )}
     </Link>
   );

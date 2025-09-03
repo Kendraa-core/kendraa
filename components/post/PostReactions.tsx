@@ -2,21 +2,23 @@
 
 import { useState } from 'react';
 import { 
-  HeartIcon, 
   HandThumbUpIcon,
+  HeartIcon,
   FaceSmileIcon,
   LightBulbIcon,
   StarIcon,
   QuestionMarkCircleIcon
 } from '@heroicons/react/24/outline';
 import { 
-  HeartIcon as HeartSolidIcon,
   HandThumbUpIcon as HandThumbUpSolidIcon,
+  HeartIcon as HeartSolidIcon,
   FaceSmileIcon as FaceSmileSolidIcon,
   LightBulbIcon as LightBulbSolidIcon,
   StarIcon as StarSolidIcon,
   QuestionMarkCircleIcon as QuestionMarkCircleSolidIcon
 } from '@heroicons/react/24/solid';
+import { cn } from '@/lib/utils';
+
 
 interface PostReactionsProps {
   postId: string;
@@ -25,13 +27,13 @@ interface PostReactionsProps {
   onReact: (reactionId: string) => void;
 }
 
-const reactionTypes = [
-  { id: 'like', icon: HandThumbUpIcon, solidIcon: HandThumbUpSolidIcon, label: 'Like', color: 'text-azure-500', bgColor: 'bg-azure-50' },
-  { id: 'love', icon: HeartIcon, solidIcon: HeartSolidIcon, label: 'Love', color: 'text-red-600', bgColor: 'bg-red-50' },
-  { id: 'support', icon: FaceSmileIcon, solidIcon: FaceSmileSolidIcon, label: 'Support', color: 'text-green-600', bgColor: 'bg-green-50' },
-  { id: 'insightful', icon: LightBulbIcon, solidIcon: LightBulbSolidIcon, label: 'Insightful', color: 'text-yellow-600', bgColor: 'bg-yellow-50' },
-  { id: 'celebrate', icon: StarIcon, solidIcon: StarSolidIcon, label: 'Celebrate', color: 'text-purple-600', bgColor: 'bg-purple-50' },
-  { id: 'curious', icon: QuestionMarkCircleIcon, solidIcon: QuestionMarkCircleSolidIcon, label: 'Curious', color: 'text-gray-600', bgColor: 'bg-gray-50' },
+const REACTIONS = [
+  { id: 'like', icon: HandThumbUpIcon, solidIcon: HandThumbUpSolidIcon, label: 'Like', color: 'text-[#007fff]', bgColor: 'bg-[#007fff]/10' },
+  { id: 'love', icon: HeartIcon, solidIcon: HeartSolidIcon, label: 'Love', color: 'text-red-500', bgColor: 'bg-red-50' },
+  { id: 'celebrate', icon: StarIcon, solidIcon: StarSolidIcon, label: 'Celebrate', color: 'text-yellow-500', bgColor: 'bg-yellow-50' },
+  { id: 'support', icon: FaceSmileIcon, solidIcon: FaceSmileSolidIcon, label: 'Support', color: 'text-green-500', bgColor: 'bg-green-50' },
+  { id: 'insightful', icon: LightBulbIcon, solidIcon: LightBulbSolidIcon, label: 'Insightful', color: 'text-purple-500', bgColor: 'bg-purple-50' },
+  { id: 'curious', icon: QuestionMarkCircleIcon, solidIcon: QuestionMarkCircleSolidIcon, label: 'Curious', color: 'text-orange-500', bgColor: 'bg-orange-50' }
 ];
 
 export default function PostReactions({ postId, userReaction, reactionCounts, onReact }: PostReactionsProps) {
@@ -39,7 +41,7 @@ export default function PostReactions({ postId, userReaction, reactionCounts, on
   const [isHovering, setIsHovering] = useState(false);
 
   const totalReactions = Object.values(reactionCounts).reduce((sum, count) => sum + count, 0);
-  const currentReaction = reactionTypes.find(r => r.id === userReaction);
+  const currentReaction = REACTIONS.find(r => r.id === userReaction);
 
   const handleReactionClick = (reactionId: string) => {
     // Only allow clicking if user has no reaction or is clicking their current reaction
@@ -61,11 +63,12 @@ export default function PostReactions({ postId, userReaction, reactionCounts, on
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
         onMouseDown={handleLongPress}
-        className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
-          userReaction
+        className={cn(
+          'flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors',
+          userReaction === 'like'
             ? `${currentReaction?.color} ${currentReaction?.bgColor} font-medium`
-            : 'text-gray-500 hover:text-azure-500 hover:bg-azure-50'
-        }`}
+            : 'text-gray-500 hover:text-[#007fff] hover:bg-[#007fff]/10'
+        )}
       >
         {userReaction && currentReaction ? (
           <currentReaction.solidIcon className="w-5 h-5" />
@@ -84,7 +87,7 @@ export default function PostReactions({ postId, userReaction, reactionCounts, on
       {showReactionPicker && (
         <div className="absolute bottom-full left-0 mb-2 bg-white rounded-lg shadow-lg border border-gray-200 p-2 z-10">
           <div className="flex items-center space-x-1">
-            {reactionTypes.map((reaction) => {
+            {REACTIONS.map((reaction) => {
               const Icon = reaction.icon;
               const SolidIcon = reaction.solidIcon;
               const isActive = userReaction === reaction.id;

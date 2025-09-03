@@ -179,7 +179,7 @@ const ContactInfoModal = React.memo(function ContactInfoModal({ profile, isOpen,
 });
 
 // Memoized components for better performance
-const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile, connectionStatus, followStatus, connectionCount, experiences, education, onConnect, onUnfollow, onEditProfile, onEditImages, onRemoveOpportunities, showOpportunities, onViewContactInfo }: {
+const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile, connectionStatus, followStatus, connectionCount, experiences, education, onConnect, onUnfollow, onEditImages, onViewContactInfo }: {
   profile: Profile;
   isOwnProfile: boolean;
   connectionStatus: string;
@@ -189,10 +189,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
   education: Education[];
   onConnect: () => void;
   onUnfollow: () => void;
-  onEditProfile: () => void;
   onEditImages: () => void;
-  onRemoveOpportunities: () => void;
-  showOpportunities: boolean;
   onViewContactInfo: () => void;
 }) {
   const { user } = useAuth();
@@ -205,14 +202,14 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
       transition={{ duration: 0.5 }}
       className="bg-white rounded-3xl border border-[#007fff]/10 overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500"
     >
-      {/* Modern Banner with Gradient Overlay */}
-      <div className="relative h-64 bg-gradient-to-br from-[#007fff] via-[#007fff]/90 to-[#007fff]/80 overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-8 left-8 w-16 h-16 border-2 border-white rounded-full"></div>
-          <div className="absolute top-16 right-16 w-12 h-12 border-2 border-white rounded-full"></div>
-          <div className="absolute bottom-12 left-1/3 w-8 h-8 border border-white rounded-full"></div>
-          <div className="absolute bottom-16 right-1/4 w-10 h-10 border border-white rounded-full"></div>
+      {/* Modern Banner with Azure Blue - LinkedIn Style */}
+      <div className="relative h-56 bg-[#007fff] overflow-hidden">
+        {/* Background Pattern - Subtle decorative elements */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-6 right-6 w-16 h-16 border-2 border-white rounded-full"></div>
+          <div className="absolute top-16 left-8 w-12 h-12 border-2 border-white rounded-full"></div>
+          <div className="absolute bottom-8 right-1/4 w-8 h-8 border border-white rounded-full"></div>
+          <div className="absolute bottom-16 left-1/3 w-10 h-10 border border-white rounded-full"></div>
         </div>
         
         {/* Banner Image if exists */}
@@ -229,19 +226,19 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
         {isOwnProfile && (
           <button
             onClick={onEditImages}
-            className="absolute top-6 right-6 bg-white/20 backdrop-blur-md text-white p-3 rounded-2xl hover:bg-white/30 transition-all duration-300 transform hover:scale-110 border border-white/30"
+            className="absolute top-4 right-4 bg-white/20 backdrop-blur-md text-white p-2 rounded-full hover:bg-white/30 transition-all duration-300 transform hover:scale-110 border border-white/30"
           >
-            <CameraIcon className="w-5 h-5" />
+            <CameraIcon className="w-4 h-4" />
           </button>
         )}
       </div>
 
       {/* Profile Content Section */}
-      <div className="px-8 py-8">
+      <div className="px-8 py-10">
         {/* Top Row: Avatar, Name, and Action Buttons */}
-        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between -mt-24 mb-6 gap-6">
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between -mt-32 mb-8 gap-8">
           {/* Left Side: Avatar and Profile Info */}
-          <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-start gap-6">
             {/* Avatar Container */}
             <div className="relative self-start">
               <div className="relative">
@@ -249,7 +246,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
                   src={profile.avatar_url}
                   alt={profile.full_name || 'Profile'}
                   size="2xl"
-                  className="border-4 border-white shadow-2xl ring-4 ring-[#007fff]/20 w-28 h-28"
+                  className="border-4 border-white shadow-2xl ring-4 ring-[#007fff]/20 w-36 h-36"
                 />
               </div>
               {/* Edit Avatar Button */}
@@ -258,16 +255,16 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
                   onClick={onEditImages}
                   className="absolute -bottom-2 -right-2 bg-[#007fff] text-white p-2 rounded-full hover:bg-[#007fff]/90 transition-all duration-300 shadow-lg transform hover:scale-110"
                 >
-                  <CameraIcon className="w-3 h-3" />
+                  <CameraIcon className="w-4 h-4" />
                 </button>
               )}
             </div>
 
             {/* Profile Information */}
-            <div className="flex-1 min-w-0 space-y-3">
+            <div className="flex-1 min-w-0 space-y-4">
               {/* Name */}
               <div className="flex items-center gap-3">
-                <h1 className="text-3xl sm:text-4xl font-bold text-black">
+                <h1 className="text-3xl sm:text-4xl font-bold text-[#007fff]">
                   {profile.full_name || 'Anonymous User'}
                 </h1>
               </div>
@@ -284,14 +281,14 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
                     const badgeStyle = MEDICAL_SPECIALIZATIONS[spec as keyof typeof MEDICAL_SPECIALIZATIONS] || MEDICAL_SPECIALIZATIONS.Default;
                     const IconComponent = badgeStyle.icon;
                     return (
-                      <span key={index} className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium border ${badgeStyle.color} hover:scale-105 transition-transform duration-200`}>
-                        <IconComponent className="w-3 h-3 mr-1.5" />
+                      <span key={index} className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium border ${badgeStyle.color} hover:scale-105 transition-transform duration-200`}>
+                        <IconComponent className="w-4 h-4 mr-1.5" />
                         {spec}
                       </span>
                     );
                   })}
                   {profile.specialization.length > 3 && (
-                    <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
+                    <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-600 border border-gray-200">
                       +{profile.specialization.length - 3} more
                     </span>
                   )}
@@ -336,7 +333,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
                 <div className="text-lg font-bold text-[#007fff] group-hover:scale-110 transition-transform duration-200">
                   {formatNumber(connectionCount)}
                 </div>
-                <div className="text-xs font-medium text-[#007fff]/80 group-hover:text-[#007fff] transition-colors duration-200">
+                <div className="text-xs font-medium text-gray-600 group-hover:text-[#007fff] transition-colors duration-200">
                   connections
                 </div>
               </button>
@@ -348,7 +345,7 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
                 <div className="text-lg font-bold text-[#007fff] group-hover:scale-110 transition-transform duration-200">
                   {formatNumber(connectionCount)}
                 </div>
-                <div className="text-xs font-medium text-[#007fff]/80 group-hover:text-[#007fff] transition-colors duration-200">
+                <div className="text-xs font-medium text-gray-600 group-hover:text-[#007fff] transition-colors duration-200">
                   followers
                 </div>
               </button>
@@ -359,9 +356,9 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
               {isOwnProfile ? (
                 <>
                   <button 
-                    className="inline-flex items-center justify-center px-3 py-1.5 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-xs font-semibold w-full"
+                    className="inline-flex items-center justify-center px-4 py-2.5 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-semibold w-full"
                   >
-                    <SparklesIcon className="w-3 h-3 mr-1.5" />
+                    <SparklesIcon className="w-4 h-4 mr-1.5" />
                     Open to work
                   </button>
                 </>
@@ -371,46 +368,46 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
                     followStatus === 'following' ? (
                       <button
                         onClick={onUnfollow}
-                        className="inline-flex items-center justify-center px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 text-xs font-semibold border border-gray-200 w-full"
+                        className="inline-flex items-center justify-center px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 text-sm font-semibold border border-gray-200 w-full"
                       >
-                        <CheckIcon className="w-3 h-3 mr-1.5" />
+                        <CheckIcon className="w-4 h-4 mr-1.5" />
                         Following
                       </button>
                     ) : (
-                                          <button
-                      onClick={onConnect}
-                      className="inline-flex items-center justify-center px-3 py-1.5 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-xs font-semibold w-full"
-                    >
-                      <PlusIcon className="w-3 h-3 mr-1.5" />
-                      Follow
-                    </button>
+                      <button
+                        onClick={onConnect}
+                        className="inline-flex items-center justify-center px-4 py-2.5 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-semibold w-full"
+                      >
+                        <PlusIcon className="w-4 h-4 mr-1.5" />
+                        Follow
+                      </button>
                     )
                   ) : (
                     connectionStatus === 'connected' ? (
-                      <span className="inline-flex items-center justify-center px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-xs font-semibold border border-green-200 w-full">
-                        <CheckIcon className="w-3 h-3 mr-1.5" />
+                      <span className="inline-flex items-center justify-center px-4 py-2.5 bg-green-100 text-green-700 rounded-lg text-sm font-semibold border border-green-200 w-full">
+                        <CheckIcon className="w-4 h-4 mr-1.5" />
                         Connected
                       </span>
                     ) : connectionStatus === 'pending' ? (
-                      <span className="inline-flex items-center justify-center px-3 py-1.5 bg-yellow-100 text-yellow-700 rounded-lg text-xs font-semibold border border-yellow-200 w-full">
-                        <ClockIcon className="w-3 h-3 mr-1.5" />
+                      <span className="inline-flex items-center justify-center px-4 py-2.5 bg-yellow-100 text-yellow-700 rounded-lg text-sm font-semibold border border-yellow-200 w-full">
+                        <ClockIcon className="w-4 h-4 mr-1.5" />
                         Pending
                       </span>
                     ) : (
                       <button
                         onClick={onConnect}
-                        className="inline-flex items-center justify-center px-3 py-1.5 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-xs font-semibold w-full"
+                        className="inline-flex items-center justify-center px-4 py-2.5 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-semibold w-full"
                       >
-                        <UserPlusIcon className="w-3 h-3 mr-1.5" />
+                        <UserPlusIcon className="w-4 h-4 mr-1.5" />
                         Connect
                       </button>
                     )
                   )}
                   <button 
                     onClick={() => router.push(`/messages?user=${profile.id}`)}
-                    className="inline-flex items-center justify-center px-3 py-1.5 bg-white text-[#007fff] border border-[#007fff] rounded-lg hover:bg-[#007fff]/5 transition-all duration-200 text-xs font-semibold w-full"
+                    className="inline-flex items-center justify-center px-4 py-2.5 bg-white text-[#007fff] border border-[#007fff] rounded-lg hover:bg-[#007fff]/5 transition-all duration-200 text-sm font-semibold w-full"
                   >
-                    <EnvelopeIcon className="w-3 h-3 mr-1.5" />
+                    <EnvelopeIcon className="w-4 h-4 mr-1.5" />
                     Message
                   </button>
                 </>
@@ -443,7 +440,13 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
 
 
 
-const AboutCard = React.memo(function AboutCard({ profile, isOwnProfile, onEditProfile }: { profile: Profile; isOwnProfile: boolean; onEditProfile: () => void }) {
+const AboutCard = React.memo(function AboutCard({ profile, isOwnProfile }: { profile: Profile; isOwnProfile: boolean }) {
+  const router = useRouter();
+  
+  const handleEditAbout = () => {
+    router.push('/onboarding?tab=about');
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -460,7 +463,7 @@ const AboutCard = React.memo(function AboutCard({ profile, isOwnProfile, onEditP
         </div>
         {isOwnProfile && (
           <button 
-            onClick={onEditProfile}
+            onClick={handleEditAbout}
             className="text-[#007fff]/60 hover:text-[#007fff] p-2 rounded-lg hover:bg-[#007fff]/5 transition-all duration-200"
           >
             <PencilIcon className="w-5 h-5" />
@@ -476,7 +479,7 @@ const AboutCard = React.memo(function AboutCard({ profile, isOwnProfile, onEditP
             <p className="text-gray-500 italic">Share your medical background and professional interests</p>
             {isOwnProfile && (
               <button 
-                onClick={onEditProfile}
+                onClick={handleEditAbout}
                 className="mt-4 px-4 py-2 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-colors text-sm font-medium"
               >
                 Add About Section
@@ -489,8 +492,13 @@ const AboutCard = React.memo(function AboutCard({ profile, isOwnProfile, onEditP
   );
 });
 
-const SkillsCard = React.memo(function SkillsCard({ profile, isOwnProfile, onEditSkills }: { profile: Profile; isOwnProfile: boolean; onEditSkills: () => void }) {
+const SkillsCard = React.memo(function SkillsCard({ profile, isOwnProfile }: { profile: Profile; isOwnProfile: boolean }) {
+  const router = useRouter();
   const skills = profile.specialization || [];
+  
+  const handleEditSkills = () => {
+    router.push('/onboarding?tab=specializations');
+  };
 
   return (
     <motion.div 
@@ -508,7 +516,7 @@ const SkillsCard = React.memo(function SkillsCard({ profile, isOwnProfile, onEdi
         </div>
         {isOwnProfile && (
           <button 
-            onClick={onEditSkills}
+            onClick={handleEditSkills}
             className="text-[#007fff]/60 hover:text-[#007fff] p-2 rounded-lg hover:bg-[#007fff]/5 transition-all duration-200"
           >
             <PencilIcon className="w-5 h-5" />
@@ -533,7 +541,7 @@ const SkillsCard = React.memo(function SkillsCard({ profile, isOwnProfile, onEdi
                   <span className="font-medium">{skill}</span>
                   {isOwnProfile && (
                     <button 
-                      onClick={onEditSkills}
+                      onClick={handleEditSkills}
                       className="ml-2 opacity-0 group-hover:opacity-100 text-current hover:scale-110 transition-all duration-200"
                     >
                       <PencilIcon className="w-4 h-4" />
@@ -550,7 +558,7 @@ const SkillsCard = React.memo(function SkillsCard({ profile, isOwnProfile, onEdi
             <p className="text-gray-500 text-sm mb-6">Showcase your medical expertise and areas of focus</p>
             {isOwnProfile && (
               <button 
-                onClick={onEditSkills}
+                onClick={handleEditSkills}
                 className="px-6 py-3 bg-[#007fff] text-white rounded-xl hover:bg-[#007fff]/90 transition-colors font-medium"
               >
                 Add Specializations
@@ -563,7 +571,13 @@ const SkillsCard = React.memo(function SkillsCard({ profile, isOwnProfile, onEdi
   );
 });
 
-const ExperienceCard = React.memo(function ExperienceCard({ experience, isOwnProfile, onEditExperience }: { experience: Experience; isOwnProfile: boolean; onEditExperience: () => void }) {
+const ExperienceCard = React.memo(function ExperienceCard({ experience, isOwnProfile }: { experience: Experience; isOwnProfile: boolean }) {
+  const router = useRouter();
+  
+  const handleEditExperience = () => {
+    router.push('/onboarding?tab=experience');
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0, x: -20 }}
@@ -607,7 +621,7 @@ const ExperienceCard = React.memo(function ExperienceCard({ experience, isOwnPro
         </div>
         {isOwnProfile && (
           <button 
-            onClick={onEditExperience}
+            onClick={handleEditExperience}
             className="opacity-0 group-hover:opacity-100 text-[#007fff]/60 hover:text-[#007fff] ml-3 p-2 rounded-lg hover:bg-[#007fff]/5 transition-all duration-200"
           >
             <PencilIcon className="w-5 h-5" />
@@ -618,7 +632,13 @@ const ExperienceCard = React.memo(function ExperienceCard({ experience, isOwnPro
   );
 });
 
-const EducationCard = React.memo(function EducationCard({ education, isOwnProfile, onEditEducation }: { education: Education; isOwnProfile: boolean; onEditEducation: () => void }) {
+const EducationCard = React.memo(function EducationCard({ education, isOwnProfile }: { education: Education; isOwnProfile: boolean }) {
+  const router = useRouter();
+  
+  const handleEditEducation = () => {
+    router.push('/onboarding?tab=education');
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0, x: -20 }}
@@ -659,16 +679,16 @@ const EducationCard = React.memo(function EducationCard({ education, isOwnProfil
         </div>
         {isOwnProfile && (
           <button 
-            onClick={onEditEducation}
+            onClick={handleEditEducation}
             className="opacity-0 group-hover:opacity-100 text-[#007fff]/60 hover:text-[#007fff] ml-3 p-2 rounded-lg hover:bg-[#007fff]/5 transition-all duration-200"
           >
             <PencilIcon className="w-5 h-5" />
           </button>
-        )}
-      </div>
-    </motion.div>
-  );
-});
+          )}
+        </div>
+      </motion.div>
+    );
+  });
 
 const ActivityCard = React.memo(function ActivityCard({ posts, isOwnProfile, connectionCount }: { posts: PostWithAuthor[]; isOwnProfile: boolean; connectionCount: number }) {
   return (
@@ -749,50 +769,6 @@ const SidebarCard = React.memo(function SidebarCard({ profile, isOwnProfile }: {
 }) {
   return (
     <div className="space-y-8">
-      {/* Profile Strength */}
-      <div className="bg-white rounded-3xl border border-[#007fff]/10 p-8 shadow-xl hover:shadow-2xl transition-all duration-500">
-        <h4 className="text-lg font-bold text-[#007fff] mb-4 flex items-center gap-2">
-          <SparklesIcon className="w-5 h-5" />
-          Profile Strength
-        </h4>
-        <div className="mb-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">60%</span>
-            <span className="text-xs text-gray-500">Intermediate</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div className="bg-[#007fff] h-2 rounded-full" style={{ width: '60%' }}></div>
-          </div>
-        </div>
-        <p className="text-sm text-gray-600">Add more details to improve your profile strength</p>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="bg-white rounded-3xl border border-[#007fff]/10 p-8 shadow-xl hover:shadow-2xl transition-all duration-500">
-        <h4 className="text-lg font-bold text-[#007fff] mb-4 flex items-center gap-2">
-          <StarIcon className="w-5 h-5" />
-          Quick Actions
-        </h4>
-        <div className="space-y-3">
-          <button className="w-full text-left text-gray-600 hover:text-[#007fff] text-sm font-medium p-3 rounded-xl hover:bg-[#007fff]/5 transition-all duration-200 flex items-center gap-3">
-            <DocumentTextIcon className="w-4 h-4 text-[#007fff]" />
-            Medical Resources
-          </button>
-          <button className="w-full text-left text-gray-600 hover:text-[#007fff] text-sm font-medium p-3 rounded-xl hover:bg-[#007fff]/5 transition-all duration-200 flex items-center gap-3">
-            <PlusIcon className="w-4 h-4 text-[#007fff]" />
-            Add Profile Section
-          </button>
-          <button className="w-full text-left text-gray-600 hover:text-[#007fff] text-sm font-medium p-3 rounded-xl hover:bg-[#007fff]/5 transition-all duration-200 flex items-center gap-3">
-            <SparklesIcon className="w-4 h-4 text-[#007fff]" />
-            Open to Opportunities
-          </button>
-          <button className="w-full text-left text-gray-600 hover:text-[#007fff] text-sm font-medium p-3 rounded-xl hover:bg-[#007fff]/5 transition-all duration-200 flex items-center gap-3">
-            <ShareIcon className="w-4 h-4 text-[#007fff]" />
-            Share Profile
-          </button>
-        </div>
-      </div>
-
       {/* Medical Interests */}
       <div className="bg-white rounded-3xl border border-[#007fff]/10 p-8 shadow-xl hover:shadow-2xl transition-all duration-500">
         <h4 className="text-lg font-bold text-[#007fff] mb-4 flex items-center gap-2">
@@ -1067,10 +1043,7 @@ export default function ProfilePage() {
               education={education}
               onConnect={handleConnect}
               onUnfollow={handleUnfollow}
-              onEditProfile={handleEditProfile}
               onEditImages={handleEditImages}
-              onRemoveOpportunities={handleRemoveOpportunities}
-              showOpportunities={showOpportunities}
               onViewContactInfo={handleViewContactInfo}
             />
 
@@ -1079,152 +1052,128 @@ export default function ProfilePage() {
             {/* Left Column - Main Content */}
             <div className="xl:col-span-8 space-y-12">
               {/* About */}
-              <AboutCard profile={profile} isOwnProfile={isOwnProfile} onEditProfile={handleEditProfile} />
+              <AboutCard profile={profile} isOwnProfile={isOwnProfile} />
 
               {/* Skills */}
-              <SkillsCard profile={profile} isOwnProfile={isOwnProfile} onEditSkills={handleEditSkills} />
+              <SkillsCard profile={profile} isOwnProfile={isOwnProfile} />
 
-                          {/* Experience */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="bg-white rounded-3xl border border-[#007fff]/10 p-8 shadow-xl hover:shadow-2xl transition-all duration-500"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-[#007fff]/10 rounded-xl flex items-center justify-center">
-                    <BriefcaseIcon className="w-5 h-5 text-[#007fff]" />
+              {/* Experience */}
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="bg-white rounded-3xl border border-[#007fff]/10 p-8 shadow-xl hover:shadow-2xl transition-all duration-500"
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-[#007fff]/10 rounded-xl flex items-center justify-center">
+                      <BriefcaseIcon className="w-5 h-5 text-[#007fff]" />
+                    </div>
+                    <h2 className="text-xl font-bold text-[#007fff]">Professional Experience</h2>
                   </div>
-                  <h2 className="text-xl font-bold text-[#007fff]">Professional Experience</h2>
-                </div>
-                {isOwnProfile && (
-                  <div className="flex space-x-2">
+                  {isOwnProfile && (
                     <button 
-                      onClick={handleEditExperience}
+                      onClick={() => router.push('/onboarding?tab=experience')}
                       className="text-[#007fff]/60 hover:text-[#007fff] p-2 rounded-lg hover:bg-[#007fff]/5 transition-all duration-200"
                       title="Add Experience"
                     >
                       <PlusIcon className="w-5 h-5" />
                     </button>
-                    <button 
-                      onClick={handleEditExperience}
-                      className="text-[#007fff]/60 hover:text-[#007fff] p-2 rounded-lg hover:bg-[#007fff]/5 transition-all duration-200"
-                      title="Edit Experience"
-                    >
-                      <PencilIcon className="w-5 h-5" />
-                    </button>
+                  )}
+                </div>
+                
+                {experiences.length > 0 ? (
+                  <div className="space-y-4">
+                    {experiences.slice(0, 3).map((experience, index) => (
+                      <ExperienceCard 
+                        key={experience.id} 
+                        experience={experience} 
+                        isOwnProfile={isOwnProfile} 
+                      />
+                    ))}
+                    {experiences.length > 3 && (
+                      <button className="w-full text-center py-3 text-[#007fff] hover:text-[#007fff]/80 text-sm font-semibold border border-[#007fff]/20 rounded-xl hover:bg-[#007fff]/5 transition-all duration-200">
+                        Show all {experiences.length} experiences →
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <BriefcaseIcon className="w-16 h-16 text-[#007fff]/30 mx-auto mb-4" />
+                    <p className="text-gray-600 text-lg mb-2">No experience added yet</p>
+                    <p className="text-gray-500 text-sm mb-6">Showcase your medical career and professional achievements</p>
+                    {isOwnProfile && (
+                      <button 
+                        onClick={() => router.push('/onboarding?tab=experience')}
+                        className="px-6 py-3 bg-[#007fff] text-white rounded-xl hover:bg-[#007fff]/90 transition-colors font-medium"
+                      >
+                        Add Experience
+                      </button>
+                    )}
                   </div>
                 )}
-              </div>
-              
-              {experiences.length > 0 ? (
-                <div className="space-y-4">
-                  {experiences.map((experience, index) => (
-                    <motion.div
-                      key={experience.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.4, delay: index * 0.1 }}
-                    >
-                      <ExperienceCard experience={experience} isOwnProfile={isOwnProfile} onEditExperience={handleEditExperience} />
-                    </motion.div>
-                  ))}
-                  {experiences.length > 2 && (
-                    <button className="w-full text-center py-3 text-[#007fff] hover:text-[#007fff]/80 text-sm font-semibold border border-[#007fff]/20 rounded-xl hover:bg-[#007fff]/5 transition-all duration-200">
-                      Show all {experiences.length} experiences →
-                    </button>
-                  )}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <BriefcaseIcon className="w-16 h-16 text-[#007fff]/30 mx-auto mb-4" />
-                  <p className="text-gray-600 text-lg mb-2">No experience added yet</p>
-                  <p className="text-gray-500 text-sm mb-6">Showcase your medical career and professional achievements</p>
+              </motion.div>
+
+              {/* Education */}
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.35 }}
+                className="bg-white rounded-3xl border border-[#007fff]/10 p-8 shadow-xl hover:shadow-2xl transition-all duration-500"
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-[#007fff]/10 rounded-xl flex items-center justify-center">
+                      <AcademicCapIcon className="w-5 h-5 text-[#007fff]" />
+                    </div>
+                    <h2 className="text-xl font-bold text-[#007fff]">Medical Education</h2>
+                  </div>
                   {isOwnProfile && (
                     <button 
-                      onClick={handleEditExperience}
-                      className="px-6 py-3 bg-[#007fff] text-white rounded-xl hover:bg-[#007fff]/90 transition-colors font-medium"
-                    >
-                      Add Experience
-                    </button>
-                  )}
-                </div>
-              )}
-            </motion.div>
-
-            {/* Education */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.35 }}
-              className="bg-white rounded-3xl border border-[#007fff]/10 p-8 shadow-xl hover:shadow-2xl transition-all duration-500"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-[#007fff]/10 rounded-xl flex items-center justify-center">
-                    <AcademicCapIcon className="w-5 h-5 text-[#007fff]" />
-                  </div>
-                  <h2 className="text-xl font-bold text-[#007fff]">Medical Education</h2>
-                </div>
-                {isOwnProfile && (
-                  <div className="flex space-x-2">
-                    <button 
-                      onClick={handleEditEducation}
+                      onClick={() => router.push('/onboarding?tab=education')}
                       className="text-[#007fff]/60 hover:text-[#007fff] p-2 rounded-lg hover:bg-[#007fff]/5 transition-all duration-200"
                       title="Add Education"
                     >
                       <PlusIcon className="w-5 h-5" />
                     </button>
-                    <button 
-                      onClick={handleEditEducation}
-                      className="text-[#007fff]/60 hover:text-[#007fff] p-2 rounded-lg hover:bg-[#007fff]/5 transition-all duration-200"
-                      title="Edit Education"
-                    >
-                      <PencilIcon className="w-5 h-5" />
-                    </button>
+                  )}
+                </div>
+                
+                {education.length > 0 ? (
+                  <div className="space-y-4">
+                    {education.slice(0, 3).map((edu, index) => (
+                      <EducationCard 
+                        key={edu.id} 
+                        education={edu} 
+                        isOwnProfile={isOwnProfile} 
+                      />
+                    ))}
+                    {education.length > 3 && (
+                      <button className="w-full text-center py-3 text-[#007fff] hover:text-[#007fff]/80 text-sm font-semibold border border-[#007fff]/20 rounded-xl hover:bg-[#007fff]/5 transition-all duration-200">
+                        Show all {education.length} education →
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <AcademicCapIcon className="w-16 h-16 text-[#007fff]/30 mx-auto mb-4" />
+                    <p className="text-gray-600 text-lg mb-2">No education added yet</p>
+                    <p className="text-gray-500 text-sm mb-6">Add your medical degree and educational background</p>
+                    {isOwnProfile && (
+                      <button 
+                        onClick={() => router.push('/onboarding?tab=education')}
+                        className="px-6 py-3 bg-[#007fff] text-white rounded-xl hover:bg-[#007fff]/90 transition-colors font-medium"
+                      >
+                        Add Education
+                      </button>
+                    )}
                   </div>
                 )}
-              </div>
-              
-              {education.length > 0 ? (
-                <div className="space-y-4">
-                  {education.map((edu, index) => (
-                    <motion.div
-                      key={edu.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.4, delay: index * 0.1 }}
-                    >
-                      <EducationCard education={edu} isOwnProfile={isOwnProfile} onEditEducation={handleEditEducation} />
-                    </motion.div>
-                  ))}
-                  {education.length > 2 && (
-                    <button className="w-full text-center py-3 text-[#007fff] hover:text-[#007fff]/80 text-sm font-semibold border border-[#007fff]/20 rounded-xl hover:bg-[#007fff]/5 transition-all duration-200">
-                      Show all {education.length} education →
-                    </button>
-                  )}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <AcademicCapIcon className="w-16 h-16 text-[#007fff]/30 mx-auto mb-4" />
-                  <p className="text-gray-600 text-lg mb-2">No education added yet</p>
-                  <p className="text-gray-500 text-sm mb-6">Add your medical degree and educational background</p>
-                  {isOwnProfile && (
-                    <button 
-                      onClick={handleEditEducation}
-                      className="px-6 py-3 bg-[#007fff] text-white rounded-xl hover:bg-[#007fff]/90 transition-colors font-medium"
-                    >
-                      Add Education
-                    </button>
-                  )}
-                </div>
-              )}
-            </motion.div>
+              </motion.div>
 
-            {/* Activity */}
-            <ActivityCard posts={posts} isOwnProfile={isOwnProfile} connectionCount={connectionCount} />
-          </div>
+              {/* Activity */}
+              <ActivityCard posts={posts} isOwnProfile={isOwnProfile} connectionCount={connectionCount} />
+            </div>
 
             {/* Right Column - Sidebar */}
             <div className="xl:col-span-4 space-y-12">
@@ -1251,14 +1200,14 @@ export default function ProfilePage() {
                       style={{ width: `${getProfileCompletionPercentage()}%` }}
                     ></div>
                   </div>
-                                   {getProfileCompletionPercentage() < 50 && !profile.onboarding_completed && (
-                   <button
-                     onClick={() => router.push('/onboarding')}
-                     className="w-full px-4 py-3 bg-[#007fff] text-white rounded-xl hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-medium shadow-lg transform hover:scale-105"
-                   >
-                     Complete Your Profile
-                   </button>
-                 )}
+                  {getProfileCompletionPercentage() < 50 && !profile.onboarding_completed && (
+                    <button
+                      onClick={() => router.push('/onboarding')}
+                      className="w-full px-4 py-3 bg-[#007fff] text-white rounded-xl hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-medium shadow-lg transform hover:scale-105"
+                    >
+                      Complete Your Profile
+                    </button>
+                  )}
                   {getProfileCompletionPercentage() >= 80 && (
                     <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
                       <CheckBadgeIcon className="w-8 h-8 text-green-500 mx-auto mb-2" />
@@ -1267,6 +1216,7 @@ export default function ProfilePage() {
                   )}
                 </motion.div>
               )}
+              
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -1279,48 +1229,6 @@ export default function ProfilePage() {
         </div>
 
         {/* Modals */}
-        {showEditModal && profile && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg max-w-2xl w-full mx-4">
-              <h3 className="text-lg font-bold mb-4">Edit Profile - Test Modal</h3>
-              <p>Profile: {profile.full_name}</p>
-              <p>Email: {profile.email}</p>
-              <div className="mt-4 flex space-x-2">
-                <button 
-                  onClick={() => setShowEditModal(false)}
-                  className="px-4 py-2 bg-gray-500 text-white rounded"
-                >
-                  Close
-                </button>
-                <button 
-                  onClick={() => {
-                    handleProfileUpdate();
-                    setShowEditModal(false);
-                  }}
-                  className="px-4 py-2 bg-[#007fff] text-white rounded"
-                >
-                  Save
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {/* Debug: Show when modal should be visible */}
-        {showEditModal && !profile && (
-          <div className="fixed inset-0 bg-red-500/50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg">
-              <h3>Debug: Modal should be visible but no profile</h3>
-              <p>showEditModal: {showEditModal.toString()}</p>
-              <p>profile: {profile ? 'exists' : 'null'}</p>
-            </div>
-          </div>
-        )}
-        
-
-        
-
-
         {showImageEditor && profile && (
           <ProfileImageEditor
             isOpen={showImageEditor}
