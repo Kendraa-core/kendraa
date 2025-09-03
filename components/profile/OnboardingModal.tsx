@@ -533,15 +533,15 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
       }
 
       // Get the public URL of the uploaded file
-      const { data, error: urlError } = supabase
+      const { data } = supabase
         .storage
         .from('avatars')
         .getPublicUrl(filePath);
 
-      if (urlError || !data?.publicUrl) {
+      if (!data?.publicUrl) {
         toast.dismiss();
         setUploading(false);
-        throw urlError || new Error("Failed to get public avatar URL.");
+        throw new Error("Failed to get public avatar URL.");
       }
       // Set in your formData before upserting user profile
       formData.avatar_url = data.publicUrl;

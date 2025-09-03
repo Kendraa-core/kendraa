@@ -289,7 +289,12 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
 
       {/* Post Actions */}
       <div className="flex items-center justify-between border-t border-gray-100 pt-4">
-        <PostReactions userReaction={userReaction} onReact={handleReaction} />
+        <PostReactions 
+          postId={post.id} 
+          userReaction={userReaction} 
+          reactionCounts={{ like: likesCount }}
+          onReact={handleReaction} 
+        />
         <button
           onClick={() => {
             setShowCommentBox(!showCommentBox);
@@ -319,7 +324,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
           {/* Add Comment */}
           {showCommentBox && (
             <div className="flex items-start space-x-3">
-              <Avatar src={user?.user_metadata?.avatar_url} size="sm" />
+              <Avatar src={user?.user_metadata?.avatar_url} alt={user?.user_metadata?.full_name || 'User'} size="sm" />
               <div className="flex-1">
                 <textarea
                   value={newComment}
