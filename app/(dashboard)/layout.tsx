@@ -9,9 +9,7 @@ import {
   getUserGroupsCount,
   getUserPagesCount,
   getUserNewslettersCount,
-  getUserEventsCount,
-  getExperiences,
-  getEducation
+  getUserEventsCount
 } from '@/lib/queries';
 import { useOnboardingProtection } from '@/hooks/useOnboardingProtection';
 import Header from '@/components/layout/Header';
@@ -33,7 +31,7 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, profile, updateProfile } = useAuth();
+  const { user, profile, loading: authLoading, updateProfile } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [loading, setLoading] = useState(true);
@@ -44,75 +42,33 @@ export default function DashboardLayout({
   const [newslettersCount, setNewslettersCount] = useState(0);
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
 
-  // Use the onboarding protection hook
+  // Use the new, cleaner onboarding protection hook
   const { isProtected, isLoading: isOnboardingLoading } = useOnboardingProtection();
 
   useEffect(() => {
-    const loadUserProfile = async () => {
+    const loadData = async () => {
       if (!user?.id) {
-        router.push('/signin');
+        if (!authLoading) {
+          router.push('/signin');
+        }
         return;
       }
 
-      // Prevent multiple simultaneous profile loads
-      if (isLoadingProfile) {
-        console.log('[Dashboard] Profile load already in progress, skipping...');
-        return;
-      }
+      if (isLoadingProfile) return;
 
       setIsLoadingProfile(true);
 
       try {
-        const userProfile = await getProfile(user.id);
-        
-        // Update profile in context if it's different
+        const userProfile = profile || await getProfile(user.id);
         if (userProfile && (!profile || profile.id !== userProfile.id)) {
-          await updateProfile(userProfile);
+          updateProfile(userProfile);
         }
 
-        // Calculate profile completion percentage
-        const calculateProfileCompletion = () => {
-          if (!userProfile) return 0;
-          
-          const fields = [
-            userProfile.full_name,
-            userProfile.headline,
-            userProfile.bio,
-            userProfile.location,
-            userProfile.avatar_url
-          ];
-          
-          const completedFields = fields.filter(field => {
-            if (typeof field === 'string') {
-              return field && field.trim() !== '';
-            }
-            return field;
-          }).length;
-          return Math.round((completedFields / fields.length) * 100);
-        };
-
-        const completionPercentage = calculateProfileCompletion();
+        // The onboarding check is now handled by the useOnboardingProtection hook.
+        // This useEffect is now only responsible for fetching sidebar data.
         
-        // Check if user has completed onboarding from database
-        const hasCompletedOnboarding = userProfile?.onboarding_completed || false;
-        
-        console.log('[Dashboard] Profile loaded:', {
-          userId: user.id,
-          onboardingCompleted: hasCompletedOnboarding,
-          completionPercentage,
-          profile: userProfile
-        });
-        
-        // Note: Onboarding completion check is now handled by the useOnboardingProtection hook
-        // We only need to ensure the profile is loaded for the sidebar data
-
-        // Load all network data for sidebar
         const [
-          connectionsCount,
-          groupsCount,
-          eventsCount,
-          pagesCount,
-          newslettersCount
+          connections, groups, events, pages, newsletters
         ] = await Promise.all([
           getConnectionCount(user.id),
           getUserGroupsCount(user.id),
@@ -121,46 +77,28 @@ export default function DashboardLayout({
           getUserNewslettersCount(user.id)
         ]);
         
-        setConnectionCount(connectionsCount);
-        setGroupsCount(groupsCount);
-        setEventsCount(eventsCount);
-        setPagesCount(pagesCount);
-        setNewslettersCount(newslettersCount);
+        setConnectionCount(connections);
+        setGroupsCount(groups);
+        setEventsCount(events);
+        setPagesCount(pages);
+        setNewslettersCount(newsletters);
       } catch (error) {
-        console.error('Error loading user profile:', error);
-        // Redirect to onboarding on error for new users
-        router.push('/onboarding');
-        return;
+        console.error('Error loading dashboard layout data:', error);
       } finally {
         setLoading(false);
         setIsLoadingProfile(false);
       }
     };
 
-    loadUserProfile();
-  }, [user?.id, router, updateProfile]);
+    if (!authLoading) {
+        loadData();
+    }
+  }, [user, profile, authLoading, router, updateProfile, isLoadingProfile]);
 
-  // Show loading while checking onboarding status
-  if (isOnboardingLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <LoadingSpinner />
-          <p className="mt-4 text-gray-600">Checking onboarding status...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Don't render dashboard content if onboarding is not complete
-  if (!isProtected) {
-    return null; // The hook will handle the redirect
-  }
-
-  // Check if we're on the network page
   const isNetworkPage = pathname === '/network';
 
-  if (loading) {
+  // Show a loading screen while the hook is checking the user's status
+  if (isOnboardingLoading || loading || authLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-white via-[#007fff]/5 to-[#007fff]/10 flex items-center justify-center">
         <div className="text-center">
@@ -170,23 +108,24 @@ export default function DashboardLayout({
       </div>
     );
   }
-
+  
+  // The hook handles the redirect, so we just return null to prevent rendering the dashboard
+  if (!isProtected) {
+    return null;
+  }
+  
   if (!user) {
     return null;
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-[#007fff]/5 to-[#007fff]/10 flex flex-col">
-      {/* Header */}
       <Header />
       
-      {/* Main Content with unified scrolling */}
       <div className="flex-1 flex overflow-hidden pt-16">
-        {/* Left Sidebar - Desktop */}
         <div className="hidden lg:block lg:w-80 lg:flex-shrink-0">
           <div className="p-6 h-full">
             {isNetworkPage ? (
-              // Network-specific sidebar
               <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 h-full">
                 <h2 className="text-lg font-semibold text-black mb-4">Manage my network</h2>
                 
@@ -198,14 +137,12 @@ export default function DashboardLayout({
                     </div>
                     <span className="text-sm font-medium text-black">{formatNumber(connectionCount)}</span>
                   </div>
-                  
-                  <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
+                   <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
                     <div className="flex items-center space-x-3">
                       <UserIcon className="w-5 h-5 text-[#007fff]" />
                       <span className="text-sm text-gray-700">Following & followers</span>
                     </div>
                   </div>
-                  
                   <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
                     <div className="flex items-center space-x-3">
                       <BuildingOfficeIcon className="w-5 h-5 text-[#007fff]" />
@@ -213,7 +150,6 @@ export default function DashboardLayout({
                     </div>
                     <span className="text-sm font-medium text-black">{formatNumber(groupsCount)}</span>
                   </div>
-                  
                   <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
                     <div className="flex items-center space-x-3">
                       <CalendarDaysIcon className="w-5 h-5 text-[#007fff]" />
@@ -221,7 +157,6 @@ export default function DashboardLayout({
                     </div>
                     <span className="text-sm font-medium text-black">{formatNumber(eventsCount)}</span>
                   </div>
-                  
                   <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
                     <div className="flex items-center space-x-3">
                       <DocumentTextIcon className="w-5 h-5 text-[#007fff]" />
@@ -229,7 +164,6 @@ export default function DashboardLayout({
                     </div>
                     <span className="text-sm font-medium text-black">{formatNumber(pagesCount)}</span>
                   </div>
-                  
                   <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
                     <div className="flex items-center space-x-3">
                       <NewspaperIcon className="w-5 h-5 text-[#007fff]" />
@@ -239,7 +173,6 @@ export default function DashboardLayout({
                   </div>
                 </div>
                 
-                {/* Footer Links */}
                 <div className="mt-8 pt-6 border-t border-gray-200">
                   <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
                     <a href="#" className="hover:text-gray-700">About</a>
@@ -256,17 +189,14 @@ export default function DashboardLayout({
                 </div>
               </div>
             ) : (
-              // Regular sidebar for other pages
               <LeftSidebar />
             )}
           </div>
         </div>
 
-        {/* Main Content Area with unified scrolling */}
         <div className="flex-1 overflow-y-auto">
           <div className="w-full px-4 sm:px-6 lg:px-8">
             <div className="flex justify-center">
-              {/* Center Content */}
               <div className="w-full max-w-2xl">
                 <main className="py-8">
                   {children}
@@ -276,7 +206,6 @@ export default function DashboardLayout({
           </div>
         </div>
 
-        {/* Right Sidebar - Desktop */}
         <div className="hidden xl:block xl:w-80 xl:flex-shrink-0">
           <div className="p-6 h-full">
             <RightSidebar />
@@ -285,4 +214,4 @@ export default function DashboardLayout({
       </div>
     </div>
   );
-} 
+}
