@@ -234,195 +234,156 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
       </div>
 
       {/* Profile Content Section */}
-      <div className="px-8 py-6">
-        {/* Avatar positioned to overlap banner */}
-        <div className="flex justify-start -mt-20 mb-6">
-          <div className="relative">
-            <Avatar
-              src={profile.avatar_url}
-              alt={profile.full_name || 'Profile'}
-              size="2xl"
-              className="border-4 border-white shadow-2xl ring-4 ring-[#007fff]/20 w-32 h-32"
-            />
-            {/* Edit Avatar Button */}
-            {isOwnProfile && (
-              <button
-                onClick={onEditImages}
-                className="absolute -bottom-2 -right-2 bg-[#007fff] text-white p-2 rounded-full hover:bg-[#007fff]/90 transition-all duration-300 shadow-lg transform hover:scale-110"
-              >
-                <CameraIcon className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Profile Information and Actions */}
-        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
-          {/* Left Side: Profile Info and Stats */}
-          <div className="flex-1 min-w-0 space-y-4">
-            {/* Name */}
-            <h1 className="text-3xl sm:text-4xl font-bold text-[#007fff]">
-              {profile.full_name || 'Anonymous User'}
-            </h1>
-            
-            {/* Headline */}
-            <p className="text-lg sm:text-xl text-gray-700 font-medium">
-              {profile.headline || 'Healthcare Professional'}
-            </p>
-            
-            {/* Network Stats */}
-            <div className="flex gap-6">
-              <button 
-                onClick={() => router.push(`/profile/${profile.id}/connections`)}
-                className="text-center group"
-              >
-                <div className="text-lg font-bold text-[#007fff] group-hover:scale-110 transition-transform duration-200">
-                  {formatNumber(connectionCount)}
-                </div>
-                <div className="text-xs font-medium text-gray-600 group-hover:text-[#007fff] transition-colors duration-200">
-                  connections
-                </div>
-              </button>
+      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+        <ProfileHeader
+          profile={profile}
+          isOwnProfile={isOwnProfile}
+          connectionStatus={connectionStatus}
+          followStatus={followStatus}
+          connectionCount={connectionCount}
+          onConnect={onConnect}
+          onUnfollow={onUnfollow}
+          onEditImages={onEditImages}
+          onViewContactInfo={onViewContactInfo}
+          experiences={experiences}
+          education={education}
+        />
+        
+        {/* Profile Content */}
+        <div className="px-8 py-8 border-t border-gray-100 bg-gradient-to-br from-gray-50/50 to-white">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Main Content - Left 2 columns */}
+            <div className="lg:col-span-2 space-y-8">
+                             {/* About Section */}
+               <AboutCard
+                 profile={profile}
+                 isOwnProfile={isOwnProfile}
+               />
+               
+               {/* Skills Section */}
+               <SkillsCard
+                 profile={profile}
+                 isOwnProfile={isOwnProfile}
+               />
               
-              <button 
-                onClick={() => router.push(`/profile/${profile.id}/followers`)}
-                className="text-center group"
-              >
-                <div className="text-lg font-bold text-[#007fff] group-hover:scale-110 transition-transform duration-200">
-                  {formatNumber(connectionCount)}
+              {/* Experience Section */}
+              <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                      <BuildingOfficeIcon className="w-5 h-5 text-[#007fff]" />
+                      Experience
+                    </h2>
+                    {isOwnProfile && (
+                      <button
+                        onClick={() => router.push('/onboarding?tab=experience')}
+                        className="text-[#007fff] hover:text-[#007fff]/80 text-sm font-medium hover:underline transition-colors duration-200"
+                      >
+                        Edit
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <div className="text-xs font-medium text-gray-600 group-hover:text-[#007fff] transition-colors duration-200">
-                  followers
+                <div className="p-6">
+                  {experiences.length > 0 ? (
+                    <div className="space-y-4">
+                                             {experiences.slice(0, 3).map((experience, index) => (
+                         <ExperienceCard
+                           key={experience.id}
+                           experience={experience}
+                           isOwnProfile={isOwnProfile}
+                         />
+                       ))}
+                      {experiences.length > 3 && (
+                        <div className="text-center pt-4">
+                          <button className="text-[#007fff] hover:text-[#007fff]/80 text-sm font-medium hover:underline transition-colors duration-200">
+                            View all {experiences.length} experiences
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <BuildingOfficeIcon className="w-12 h-12 mx-auto text-gray-300 mb-3" />
+                      <p className="text-gray-600">No experience added yet</p>
+                      {isOwnProfile && (
+                        <button
+                          onClick={() => router.push('/onboarding?tab=experience')}
+                          className="mt-3 text-[#007fff] hover:text-[#007fff]/80 text-sm font-medium hover:underline transition-colors duration-200"
+                        >
+                          Add your first experience
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
-              </button>
-            </div>
-
-            {/* Action Button */}
-            {isOwnProfile && (
-              <button 
-                className="inline-flex items-center justify-center px-4 py-2.5 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-semibold w-fit"
-              >
-                <SparklesIcon className="w-4 h-4 mr-1.5" />
-                Open to work
-              </button>
-            )}
-            
-            {/* Medical Specializations */}
-            {profile.specialization && profile.specialization.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {profile.specialization.slice(0, 3).map((spec, index) => {
-                  const badgeStyle = MEDICAL_SPECIALIZATIONS[spec as keyof typeof MEDICAL_SPECIALIZATIONS] || MEDICAL_SPECIALIZATIONS.Default;
-                  const IconComponent = badgeStyle.icon;
-                  return (
-                    <span key={index} className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium border ${badgeStyle.color} hover:scale-105 transition-transform duration-200`}>
-                      <IconComponent className="w-4 h-4 mr-1.5" />
-                      {spec}
-                    </span>
-                  );
-                })}
-                {profile.specialization.length > 3 && (
-                  <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-600 border border-gray-200">
-                    +{profile.specialization.length - 3} more
-                  </span>
-                )}
               </div>
-            )}
-
-            {/* Contact Info Section */}
-            <div className="flex items-center gap-4 pt-2">
-              {profile.location && (
-                <p className="text-gray-600 flex items-center gap-2 text-sm">
-                  <MapPinIcon className="w-4 h-4" />
-                  {profile.location}
-                </p>
-              )}
-              <button 
-                onClick={onViewContactInfo}
-                className="text-[#007fff] hover:underline text-sm font-medium"
-              >
-                Contact info
-              </button>
-            </div>
-          </div>
-
-          {/* Right Side: Education and Experience */}
-          <div className="flex flex-col gap-4 min-w-[280px]">
-            {/* Current Position and Education */}
-            <div className="space-y-3">
-              {experiences.length > 0 && (
-                <div className="flex items-start gap-3">
-                  <div className="w-5 h-5 bg-gray-200 rounded flex items-center justify-center flex-shrink-0">
-                    <BuildingOfficeIcon className="w-3 h-3 text-gray-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{experiences[0].company}</p>
-                  </div>
-                </div>
-              )}
               
-              {education.length > 0 && (
-                <div className="flex items-start gap-3">
-                  <div className="w-5 h-5 bg-gray-200 rounded flex items-center justify-center flex-shrink-0">
-                    <AcademicCapIcon className="w-3 h-3 text-gray-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{education[0].school}</p>
+              {/* Education Section */}
+              <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                      <AcademicCapIcon className="w-5 h-5 text-[#007fff]" />
+                      Education
+                    </h2>
+                    {isOwnProfile && (
+                      <button
+                        onClick={() => router.push('/onboarding?tab=education')}
+                        className="text-[#007fff] hover:text-[#007fff]/80 text-sm font-medium hover:underline transition-colors duration-200"
+                      >
+                        Edit
+                      </button>
+                    )}
                   </div>
                 </div>
-              )}
-            </div>
-
-            {/* Action Buttons for non-own profiles */}
-            {!isOwnProfile && (
-              <div className="flex flex-col gap-2">
-                {profile.profile_type === 'institution' ? (
-                  followStatus === 'following' ? (
-                    <button
-                      onClick={onUnfollow}
-                      className="inline-flex items-center justify-center px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 text-sm font-semibold border border-gray-200 w-full"
-                    >
-                      <CheckIcon className="w-4 h-4 mr-1.5" />
-                      Following
-                    </button>
+                <div className="p-6">
+                  {education.length > 0 ? (
+                    <div className="space-y-4">
+                                             {education.slice(0, 3).map((edu, index) => (
+                         <EducationCard
+                           key={edu.id}
+                           education={edu}
+                           isOwnProfile={isOwnProfile}
+                         />
+                       ))}
+                      {education.length > 3 && (
+                        <div className="text-center pt-4">
+                          <button className="text-[#007fff] hover:text-[#007fff]/80 text-sm font-medium hover:underline transition-colors duration-200">
+                            View all {education.length} education entries
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   ) : (
-                    <button
-                      onClick={onConnect}
-                      className="inline-flex items-center justify-center px-4 py-2.5 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-semibold w-full"
-                    >
-                      <PlusIcon className="w-4 h-4 mr-1.5" />
-                      Follow
-                    </button>
-                  )
-                ) : (
-                  connectionStatus === 'connected' ? (
-                    <span className="inline-flex items-center justify-center px-4 py-2.5 bg-green-100 text-green-700 rounded-lg text-sm font-semibold border border-green-200 w-full">
-                      <CheckIcon className="w-4 h-4 mr-1.5" />
-                      Connected
-                    </span>
-                  ) : connectionStatus === 'pending' ? (
-                    <span className="inline-flex items-center justify-center px-4 py-2.5 bg-yellow-100 text-yellow-700 rounded-lg text-sm font-semibold border border-yellow-200 w-full">
-                      <ClockIcon className="w-4 h-4 mr-1.5" />
-                      Pending
-                    </span>
-                  ) : (
-                    <button
-                      onClick={onConnect}
-                      className="inline-flex items-center justify-center px-4 py-2.5 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-semibold w-full"
-                    >
-                      <UserPlusIcon className="w-4 h-4 mr-1.5" />
-                      Connect
-                    </button>
-                  )
-                )}
-                <button 
-                  onClick={() => router.push(`/messages?user=${profile.id}`)}
-                  className="inline-flex items-center justify-center px-4 py-2.5 bg-white text-[#007fff] border border-[#007fff] rounded-lg hover:bg-[#007fff]/5 transition-all duration-200 text-sm font-semibold w-full"
-                >
-                  <EnvelopeIcon className="w-4 h-4 mr-1.5" />
-                  Message
-                </button>
+                    <div className="text-center py-8 text-gray-500">
+                      <AcademicCapIcon className="w-12 h-12 mx-auto text-gray-300 mb-3" />
+                      <p className="text-gray-600">No education added yet</p>
+                      {isOwnProfile && (
+                        <button
+                          onClick={() => router.push('/onboarding?tab=education')}
+                          className="mt-3 text-[#007fff] hover:text-[#007fff]/80 text-sm font-medium hover:underline transition-colors duration-200"
+                        >
+                          Add your first education
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
+              
+                             {/* Activity Section */}
+               <ActivityCard 
+                 posts={[]} 
+                 isOwnProfile={isOwnProfile} 
+                 connectionCount={connectionCount} 
+               />
+             </div>
+             
+             {/* Right Sidebar */}
+             <div className="lg:col-span-1">
+               <SidebarCard profile={profile} isOwnProfile={isOwnProfile} />
+             </div>
           </div>
         </div>
       </div>
