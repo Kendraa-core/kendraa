@@ -146,8 +146,7 @@ export default function OnboardingPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [completionPercentage, setCompletionPercentage] = useState(0);
   const [hasSavedExperience, setHasSavedExperience] = useState(false);
-  const [savingInBackground, setSavingInBackground] = useState(false);
-  const [lastSaveTime, setLastSaveTime] = useState(0);
+
   const router = useRouter();
 
   // Test database connection
@@ -321,8 +320,53 @@ export default function OnboardingPage() {
           isCurrentStudent(user.id)
         ]);
 
-        setExperiences(userExperiences);
-        setEducations(userEducations);
+        // Convert database experiences to form format
+        const formattedExperiences = userExperiences.map(exp => {
+          console.log('Processing experience:', exp);
+          const startDate = exp.start_date ? new Date(exp.start_date) : null;
+          const endDate = exp.end_date ? new Date(exp.end_date) : null;
+          
+          const formatted = {
+            id: exp.id || Date.now(),
+            title: exp.title || '',
+            company: exp.company || '',
+            location: exp.location || '',
+            start_date: exp.start_date || '',
+            start_month: startDate ? String(startDate.getMonth() + 1).padStart(2, '0') : '',
+            start_year: startDate ? startDate.getFullYear() : '',
+            end_date: exp.end_date || '',
+            end_month: endDate ? String(endDate.getMonth() + 1).padStart(2, '0') : '',
+            end_year: endDate ? endDate.getFullYear() : '',
+            current: exp.current || false,
+            description: exp.description || ''
+          };
+          console.log('Formatted experience:', formatted);
+          return formatted;
+        });
+
+        // Convert database educations to form format
+        const formattedEducations = userEducations.map(edu => {
+          const startDate = edu.start_date ? new Date(edu.start_date) : null;
+          const endDate = edu.end_date ? new Date(edu.end_date) : null;
+          
+          return {
+            id: edu.id || Date.now(),
+            degree: edu.degree || '',
+            school: edu.school || '',
+            field: edu.field || '',
+            start_date: edu.start_date || '',
+            start_month: startDate ? String(startDate.getMonth() + 1).padStart(2, '0') : '',
+            start_year: startDate ? startDate.getFullYear() : '',
+            end_date: edu.end_date || '',
+            end_month: endDate ? String(endDate.getMonth() + 1).padStart(2, '0') : '',
+            end_year: endDate ? endDate.getFullYear() : '',
+            current: edu.current || false,
+            description: edu.description || ''
+          };
+        });
+
+        setExperiences(formattedExperiences);
+        setEducations(formattedEducations);
         setIsStudent(studentStatus);
         
         // Calculate completion percentage
@@ -331,12 +375,12 @@ export default function OnboardingPage() {
           profile?.headline,
           profile?.specialization && profile.specialization.length > 0,
           profile?.bio,
-          userEducations.length > 0, // At least one education entry - REQUIRED
+          formattedEducations.length > 0, // At least one education entry - REQUIRED
         ];
         
         // Only require experience if not a current student
         if (!studentStatus) {
-          requiredFields.push(userExperiences.length > 0); // At least one experience entry - REQUIRED
+          requiredFields.push(formattedExperiences.length > 0); // At least one experience entry - REQUIRED
         }
         
         const completed = requiredFields.filter(field => field).length;
@@ -358,16 +402,21 @@ export default function OnboardingPage() {
   };
 
   const addExperience = () => {
-    setExperiences(prev => [...prev, {
+    const newExperience = {
       id: Date.now(),
       title: '',
       company: '',
       location: '',
       start_date: '',
+      start_month: '',
+      start_year: '',
       end_date: '',
+      end_month: '',
+      end_year: '',
       current: false,
       description: ''
-    }]);
+    };
+    setExperiences([...experiences, newExperience]);
   };
 
   const updateExperience = (index: number, field: string, value: any) => {
@@ -380,17 +429,26 @@ export default function OnboardingPage() {
     setExperiences(prev => prev.filter((_, i) => i !== index));
   };
 
+  const clearAllExperiences = () => {
+    setExperiences([]);
+  };
+
   const addEducation = () => {
-    setEducations(prev => [...prev, {
+    const newEducation = {
       id: Date.now(),
       degree: '',
       school: '',
       field: '',
       start_date: '',
+      start_month: '',
+      start_year: '',
       end_date: '',
+      end_month: '',
+      end_year: '',
       current: false,
       description: ''
-    }]);
+    };
+    setEducations([...educations, newEducation]);
   };
 
   const updateEducation = (index: number, field: string, value: any) => {
@@ -401,6 +459,10 @@ export default function OnboardingPage() {
 
   const removeEducation = (index: number) => {
     setEducations(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const clearAllEducations = () => {
+    setEducations([]);
   };
 
   const handleInputChange = (field: string, value: any) => {
@@ -435,141 +497,139 @@ export default function OnboardingPage() {
   };
 
   const handleNext = async () => {
-    const currentStepData = filteredSteps[currentStep];
+    // Save ALL data on every Next click
+    await saveAllData(false); // false = don't mark as completed yet
     
-    // Skip validation for welcome and student-selection but still persist what we have
-    // Proceed to saving logic directly
-
-    if (user?.id && supabase) {
-      // Immediately advance to next step for seamless navigation
-      const nextStep = Math.min(currentStep + 1, filteredSteps.length - 1);
-      setCurrentStep(nextStep);
-      
-      // DISABLED: Only save data in background for non-welcome and non-student-selection steps
-      // This was causing infinite saving loops
-      // if (currentStepData.type !== 'welcome' && currentStepData.type !== 'student-selection') {
-      //   saveDataInBackground();
-      // }
-      return;
-    }
-    
-    // If no user/supabase, just advance
-    setCurrentStep(Math.min(currentStep + 1, filteredSteps.length - 1));
+    // Advance to next step
+    const nextStep = Math.min(currentStep + 1, filteredSteps.length - 1);
+    setCurrentStep(nextStep);
   };
 
-  // Background data saving function
-  const saveDataInBackground = async () => {
-    if (!user?.id || !supabase) {
-      console.error('User or Supabase not available for background save');
-      return;
-    }
+  // Unified save function for all data
+  const saveAllData = async (markCompleted = false) => {
+    if (!user?.id || !supabase) return;
     
-    // Debouncing: prevent multiple saves within 3 seconds
-    const now = Date.now();
-    if (now - lastSaveTime < 3000) {
-      console.log('Skipping background save due to debouncing');
-      return;
-    }
-    setLastSaveTime(now);
+    try {
+      const sb = supabase;
+      const uid = user.id;
 
-    // Prevent multiple simultaneous saves
-    if (savingInBackground) {
-      console.log('Background save already in progress');
-        return;
-      }
+      // Save profile data
+      await sb.from('profiles').upsert({
+        id: uid,
+        ...formData,
+        updated_at: new Date().toISOString()
+      });
+
+      // Save valid experiences - replace all existing ones
+      const validExperiences = experiences.filter(exp => 
+        exp.title && exp.company && (exp.start_month || exp.start_year)
+      );
       
-    setSavingInBackground(true);
-      try {
-        let avatarUrl = formData.avatar_url;
-
-        // Upload avatar if changed
-        if (avatarFile && user?.id) {
-          const filePath = generateFilePath(user.id, avatarFile.name, 'avatars');
-          const { url, error } = await uploadToSupabaseStorage('avatars', filePath, avatarFile);
-          if (error) throw new Error(error);
-          avatarUrl = url;
-        }
-
-        // Always save basic profile data on Next
-        console.log('Saving formData to profiles (Next click):', formData);
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .upsert({
-            id: user.id,
-            ...formData,
-            avatar_url: avatarUrl,
-            updated_at: new Date().toISOString()
-          });
-        if (profileError) throw new Error(`Failed to save profile: ${profileError.message}`);
-
-        // Save any valid experiences
-          for (const experience of experiences) {
-          if (experience.title && experience.company && (experience.start_date || (experience.start_month && experience.start_year))) {
-            const startDate = experience.start_month && experience.start_year 
-              ? `${experience.start_year}-${experience.start_month}-01`
-              : experience.start_date;
-            const endDate = experience.end_month && experience.end_year 
-              ? `${experience.end_year}-${experience.end_month}-01`
-              : experience.end_date;
-
-            const { error } = await supabase
-                .from('experiences')
-                .upsert({
-                  profile_id: user.id,
-                  title: experience.title,
-                  company: experience.company,
-                  location: experience.location || null,
-                start_date: startDate,
-                end_date: experience.current ? null : (endDate || null),
-                  current: experience.current,
-                  description: experience.description || null
-                });
-            if (error) throw new Error(`Failed to save experience: ${error.message}`);
-          }
-        }
-
-        // Save any valid educations
-          for (const education of educations) {
-          if (education.degree && education.school && (education.start_date || (education.start_month && education.start_year))) {
-            const startDate = education.start_month && education.start_year 
-              ? `${education.start_year}-${education.start_month}-01`
-              : education.start_date;
-            const endDate = education.end_month && education.end_year 
-              ? `${education.end_year}-${education.end_month}-01`
-              : education.end_date;
-
-            const { error } = await supabase
-                .from('education')
-                .upsert({
-                  profile_id: user.id,
-                  school: education.school,
-                  degree: education.degree,
-                  field: education.field || null,
-                start_date: startDate,
-                end_date: education.current ? null : (endDate || null),
-                  current: education.current,
-                  description: education.description || null
-                });
-            if (error) throw new Error(`Failed to save education: ${error.message}`);
-          }
-        }
-
-        // Update profile context without triggering recalculation
-        await updateProfile({ ...formData, avatar_url: avatarUrl });
-
-        // Show success toast only if there were no errors
-        toast.success('Progress saved successfully!');
+      console.log('Valid experiences to save:', validExperiences);
+      
+      if (validExperiences.length > 0) {
+        // First, delete all existing experiences for this user
+        await sb.from('experiences').delete().eq('profile_id', uid);
         
-        // Update last save time to prevent immediate re-saves
-        setLastSaveTime(Date.now());
+        // Then insert the new ones
+        const expData = validExperiences.map(exp => {
+          // Convert month/year to proper date format
+          let startDate = null;
+          if (exp.start_month && exp.start_year) {
+            startDate = `${exp.start_year}-${exp.start_month.padStart(2, '0')}-01`;
+          } else if (exp.start_date) {
+            startDate = exp.start_date;
+          }
+          
+          let endDate = null;
+          if (!exp.current && exp.end_month && exp.end_year) {
+            endDate = `${exp.end_year}-${exp.end_month.padStart(2, '0')}-01`;
+          } else if (!exp.current && exp.end_date) {
+            endDate = exp.end_date;
+          }
+          
+          const expToSave = {
+            profile_id: uid,
+            title: exp.title,
+            company: exp.company,
+            company_type: null, // Add default value
+            location: exp.location || null,
+            start_date: startDate,
+            end_date: endDate,
+            current: exp.current,
+            description: exp.description || null
+          };
+          
+          console.log('Experience to save:', expToSave);
+          return expToSave;
+        });
         
-      } catch (error: any) {
-        console.error('Background save error:', error);
-        // Don't show error toast for background saves to avoid interrupting user flow
-      } finally {
-        setSavingInBackground(false);
+        console.log('All experiences data to insert:', expData);
+        
+        const { error: expError } = await sb.from('experiences').insert(expData);
+        if (expError) {
+          console.error('Error saving experiences:', expError);
+          throw expError;
+        }
+      } else {
+        // If no valid experiences, delete all existing ones
+        await sb.from('experiences').delete().eq('profile_id', uid);
       }
-    };
+
+      // Save valid educations - replace all existing ones
+      const validEducations = educations.filter(edu => 
+        edu.degree && edu.school && (edu.start_month || edu.start_year)
+      );
+      
+      if (validEducations.length > 0) {
+        // First, delete all existing educations for this user
+        await sb.from('education').delete().eq('profile_id', uid);
+        
+        // Then insert the new ones
+        const eduData = validEducations.map(edu => ({
+          profile_id: uid,
+          degree: edu.degree,
+          school: edu.school,
+          field: edu.field || null,
+          start_date: edu.start_month && edu.start_year 
+            ? `${edu.start_year}-${edu.start_month.padStart(2, '0')}-01`
+            : edu.start_date,
+          end_date: edu.current ? null : (
+            edu.end_month && edu.end_year 
+              ? `${edu.end_year}-${edu.end_month.padStart(2, '0')}-01`
+              : edu.end_date
+          ),
+          current: edu.current,
+          description: edu.description || null
+        }));
+        
+        const { error: eduError } = await sb.from('education').insert(eduData);
+        if (eduError) {
+          console.error('Error saving educations:', eduError);
+          throw eduError;
+        }
+      } else {
+        // If no valid educations, delete all existing ones
+        await sb.from('education').delete().eq('profile_id', uid);
+      }
+
+      // Mark as completed if requested
+      if (markCompleted) {
+        await sb.from('profiles')
+          .update({ onboarding_completed: true })
+          .eq('id', uid);
+        
+        await updateProfile({ ...formData, onboarding_completed: true });
+      }
+
+      console.log('All data saved successfully');
+    } catch (error) {
+      console.error('Save error:', error);
+      throw error;
+    }
+  };
+
+  
 
   const handlePrevious = () => {
     if (currentStep > 0) {
@@ -587,105 +647,18 @@ export default function OnboardingPage() {
 
   const handleSkip = () => {
     if (currentStep < filteredSteps.length - 1) {
-      setCurrentStep(currentStep + 1);
+        setCurrentStep(currentStep + 1);
     }
   };
 
-  const handleSave = async () => {
+      const handleSave = async () => {
     setLoading(true);
     try {
-      if (user?.id && supabase) {
-        const sb = supabase; // local non-null alias for TS
-        const uid = user.id; // local non-null alias for TS
-        // Save basic profile data
-        console.log('handleSave - Saving formData to profiles:', formData);
-        const { error: profileError } = await sb
-          .from('profiles')
-          .upsert({
-            id: uid,
-            ...formData,
-            updated_at: new Date().toISOString()
-          });
-        
-        if (profileError) {
-          throw profileError;
-        }
-
-        // Save experiences in parallel
-        const experienceSaves = experiences
-          .filter((experience) => experience.title && experience.company && (experience.start_month || experience.start_year))
-          .map(async (experience) => {
-            const startDate = experience.start_month && experience.start_year 
-              ? `${experience.start_year}-${experience.start_month}-01`
-              : experience.start_date;
-            const endDate = experience.end_month && experience.end_year 
-              ? `${experience.end_year}-${experience.end_month}-01`
-              : experience.end_date;
-
-            const { error: expError } = await sb
-              .from('experiences')
-              .upsert({
-                profile_id: uid,
-                title: experience.title,
-                company: experience.company,
-                location: experience.location || null,
-                start_date: startDate,
-                end_date: experience.current ? null : (endDate || null),
-                current: experience.current,
-                description: experience.description || null
-              });
-            if (expError) {
-              console.error('Error saving experience:', expError);
-            }
-          });
-
-        // Save educations in parallel
-        const educationSaves = educations
-          .filter((education) => education.degree && education.school && (education.start_month || education.start_year))
-          .map(async (education) => {
-            const startDate = education.start_month && education.start_year 
-              ? `${education.start_year}-${education.start_month}-01`
-              : education.start_date;
-            const endDate = education.end_month && education.end_year 
-              ? `${education.end_year}-${education.end_month}-01`
-              : education.end_date;
-
-            const { error: eduError } = await sb
-              .from('education')
-              .upsert({
-                profile_id: uid,
-                degree: education.degree,
-                school: education.school,
-                field: education.field || null,
-                start_date: startDate,
-                end_date: education.current ? null : (endDate || null),
-                current: education.current,
-                description: education.description || null
-              });
-            if (eduError) {
-              console.error('Error saving education:', eduError);
-            }
-          });
-
-        await Promise.all([...experienceSaves, ...educationSaves]);
-
-        // Explicit submissions should mark onboarding as completed to prevent redirect loops
-        const { error: onboardingError } = await sb
-          .from('profiles')
-          .update({ onboarding_completed: true, updated_at: new Date().toISOString() })
-          .eq('id', uid);
-        if (onboardingError) {
-          console.error('Error updating onboarding status:', onboardingError);
-        }
-
-        // Update profile context immediately so UI reflects the change
-        await updateProfile({ ...formData, onboarding_completed: true });
-
-        toast.success('Progress saved successfully!');
-      }
+      await saveAllData(false); // Save but don't mark completed
+      toast.success('Progress saved successfully!');
     } catch (error: any) {
-      console.error('Error saving progress:', error);
-      toast.error('Failed to save progress. Please try again.');
+      console.error('Save error:', error);
+      toast.error('Failed to save progress.');
     } finally {
       setLoading(false);
     }
@@ -836,7 +809,7 @@ export default function OnboardingPage() {
             >
             <input
               type="text"
-              value={formData[step.field as keyof typeof formData] as string}
+              value={formData[step.field as keyof typeof formData] as string || ''}
               onChange={(e) => handleInputChange(step.field!, e.target.value)}
               placeholder={step.placeholder}
                 className="w-full px-6 py-4 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 bg-white text-xl transition-all duration-200 hover:border-[#007fff]/40"
@@ -880,7 +853,7 @@ export default function OnboardingPage() {
               className="bg-white border-2 border-[#007fff]/10 rounded-2xl p-6 hover:border-[#007fff]/20 hover:shadow-lg transition-all duration-300"
             >
             <textarea
-              value={formData[step.field as keyof typeof formData] as string}
+              value={formData[step.field as keyof typeof formData] as string || ''}
               onChange={(e) => handleInputChange(step.field!, e.target.value)}
               placeholder={step.placeholder}
               rows={6}
@@ -1060,7 +1033,7 @@ export default function OnboardingPage() {
                     <input
                       type="text"
                         placeholder="e.g., Senior Cardiologist"
-                      value={experience.title}
+                      value={experience.title || ''}
                       onChange={(e) => updateExperience(index, 'title', e.target.value)}
                         className="w-full px-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 bg-white transition-all duration-200 hover:border-[#007fff]/40"
                       />
@@ -1074,7 +1047,7 @@ export default function OnboardingPage() {
                     <input
                       type="text"
                         placeholder="e.g., Mayo Clinic"
-                      value={experience.company}
+                      value={experience.company || ''}
                       onChange={(e) => updateExperience(index, 'company', e.target.value)}
                         className="w-full px-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 bg-white transition-all duration-200 hover:border-[#007fff]/40"
                       />
@@ -1088,7 +1061,7 @@ export default function OnboardingPage() {
                     <input
                       type="text"
                         placeholder="e.g., Rochester, MN"
-                      value={experience.location}
+                      value={experience.location || ''}
                       onChange={(e) => updateExperience(index, 'location', e.target.value)}
                         className="w-full px-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 bg-white transition-all duration-200 hover:border-[#007fff]/40"
                       />
@@ -1208,7 +1181,7 @@ export default function OnboardingPage() {
                       </label>
                   <textarea
                         placeholder="Describe your responsibilities, achievements, and key projects..."
-                    value={experience.description}
+                    value={experience.description || ''}
                     onChange={(e) => updateExperience(index, 'description', e.target.value)}
                     rows={3}
                         className="w-full px-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 bg-white transition-all duration-200 hover:border-[#007fff]/40 resize-none"
@@ -1230,6 +1203,47 @@ export default function OnboardingPage() {
                 </div>
                 <span className="font-semibold">Add Work Experience</span>
               </motion.button>
+              
+              {/* Clear All Button - Only show if there are experiences */}
+              {experiences.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="mt-4 flex justify-center"
+                >
+                  <button
+                    onClick={clearAllExperiences}
+                    className="px-6 py-2 text-red-600 border-2 border-red-200 rounded-lg hover:bg-red-50 hover:border-red-300 transition-all duration-200 text-sm font-medium"
+                  >
+                    Clear All Experiences
+                  </button>
+                </motion.div>
+              )}
+              
+              {/* Save Progress Button */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="mt-6 flex justify-center"
+              >
+                <button
+                  onClick={handleSave}
+                  disabled={loading}
+                  className="px-8 py-3 bg-[#007fff] text-white font-semibold rounded-xl hover:bg-[#007fff]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center space-x-2"
+                >
+                  {loading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>Saving...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircleIcon className="w-5 h-5" />
+                      <span>Save Progress</span>
+                    </>
+                  )}
+                </button>
+              </motion.div>
             </div>
             
             {step.required && (
@@ -1299,7 +1313,7 @@ export default function OnboardingPage() {
                     <input
                       type="text"
                         placeholder="e.g., MD, PhD, BSN"
-                      value={education.degree}
+                      value={education.degree || ''}
                       onChange={(e) => updateEducation(index, 'degree', e.target.value)}
                         className="w-full px-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 bg-white transition-all duration-200 hover:border-[#007fff]/40"
                       />
@@ -1313,7 +1327,7 @@ export default function OnboardingPage() {
                     <input
                       type="text"
                         placeholder="e.g., Harvard Medical School"
-                      value={education.school}
+                      value={education.school || ''}
                       onChange={(e) => updateEducation(index, 'school', e.target.value)}
                         className="w-full px-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 bg-white transition-all duration-200 hover:border-[#007fff]/40"
                       />
@@ -1327,7 +1341,7 @@ export default function OnboardingPage() {
                     <input
                       type="text"
                         placeholder="e.g., Internal Medicine, Nursing"
-                      value={education.field}
+                      value={education.field || ''}
                       onChange={(e) => updateEducation(index, 'field', e.target.value)}
                         className="w-full px-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 bg-white transition-all duration-200 hover:border-[#007fff]/40"
                       />
@@ -1447,7 +1461,7 @@ export default function OnboardingPage() {
                       </label>
                   <textarea
                         placeholder="Describe your achievements, coursework, research, or special recognitions..."
-                    value={education.description}
+                    value={education.description || ''}
                     onChange={(e) => updateEducation(index, 'description', e.target.value)}
                     rows={3}
                         className="w-full px-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 bg-white transition-all duration-200 hover:border-[#007fff]/40 resize-none"
@@ -1467,8 +1481,49 @@ export default function OnboardingPage() {
                 <div className="w-8 h-8 bg-[#007fff]/10 rounded-full flex items-center justify-center group-hover:bg-[#007fff]/20 transition-colors duration-200">
                   <span className="text-black font-bold text-lg">+</span>
                 </div>
-                <span className="font-semibold">Add Education</span>
+                <span className="text-black font-semibold">Add Education</span>
               </motion.button>
+              
+              {/* Clear All Button - Only show if there are educations */}
+              {educations.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="mt-4 flex justify-center"
+                >
+                  <button
+                    onClick={clearAllEducations}
+                    className="px-6 py-2 text-red-600 border-2 border-red-200 rounded-lg hover:bg-red-50 hover:border-red-300 transition-all duration-200 text-sm font-medium"
+                  >
+                    Clear All Education
+                  </button>
+                </motion.div>
+              )}
+              
+              {/* Save Progress Button */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="mt-6 flex justify-center"
+              >
+                <button
+                  onClick={handleSave}
+                  disabled={loading}
+                  className="px-8 py-3 bg-[#007fff] text-white font-semibold rounded-xl hover:bg-[#007fff]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center space-x-2"
+                >
+                  {loading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>Saving...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircleIcon className="w-5 h-5" />
+                      <span>Save Progress</span>
+                    </>
+                  )}
+                </button>
+              </motion.div>
             </div>
             
             {step.required && (
@@ -1517,7 +1572,7 @@ export default function OnboardingPage() {
               <input
                 type="tel"
                 placeholder="Phone Number"
-                value={formData.phone}
+                value={formData.phone || ''}
                 onChange={(e) => handleInputChange('phone', e.target.value)}
                       className="w-full pl-10 pr-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 bg-white transition-all duration-200 hover:border-[#007fff]/40"
                     />
@@ -1533,7 +1588,7 @@ export default function OnboardingPage() {
               <input
                 type="email"
                 placeholder="Email Address"
-                value={formData.email}
+                value={formData.email || ''}
                 onChange={(e) => handleInputChange('email', e.target.value)}
                       className="w-full pl-10 pr-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 bg-white transition-all duration-200 hover:border-[#007fff]/40"
                     />
@@ -1549,7 +1604,7 @@ export default function OnboardingPage() {
               <input
                 type="url"
                       placeholder="Website URL"
-                value={formData.website}
+                value={formData.website || ''}
                 onChange={(e) => handleInputChange('website', e.target.value)}
                       className="w-full pl-10 pr-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 bg-white transition-all duration-200 hover:border-[#007fff]/40"
               />
@@ -1867,13 +1922,7 @@ export default function OnboardingPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
           <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-3">
 
-            {/* Background saving indicator */}
-            {savingInBackground && (
-              <div className="flex items-center text-sm text-black/60 mb-2">
-                <div className="w-3 h-3 border-2 border-[#007fff]/30 border-t-[#007fff] rounded-full animate-spin mr-2"></div>
-                Saving progress in background...
-            </div>
-            )}
+            
 
             <div className="flex justify-center space-x-3 w-full">
               {currentStep < filteredSteps.length - 1 ? (
@@ -1932,26 +1981,23 @@ export default function OnboardingPage() {
               ) : (
                 <button
                   onClick={async () => {
-                     // Mark onboarding as completed in database
-                     if (user?.id && supabase) {
-                       try {
-                         const { error } = await supabase
-                           .from('profiles')
-                           .update({ onboarding_completed: true })
-                           .eq('id', user.id);
-                         
-                         if (error) {
-                           console.error('Error updating onboarding status:', error);
-                         }
-                       } catch (error) {
-                         console.error('Error updating onboarding status:', error);
-                       }
+                    setLoading(true);
+                    try {
+                      // Save all data AND mark as completed
+                      await saveAllData(true);
+                      toast.success('Welcome to Kendraa!');
+                      router.push('/feed');
+                    } catch (error) {
+                      console.error('Completion error:', error);
+                      toast.error('Failed to complete onboarding.');
+                    } finally {
+                      setLoading(false);
                     }
-                    router.push('/feed');
                   }}
-                  className="px-8 py-3 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 transition-colors"
+                  disabled={loading}
+                  className="px-8 py-3 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Get Started
+                  {loading ? 'Completing...' : 'Get Started'}
                 </button>
               )}
             </div>

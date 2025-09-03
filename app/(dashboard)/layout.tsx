@@ -13,6 +13,7 @@ import {
   getExperiences,
   getEducation
 } from '@/lib/queries';
+import { useOnboardingProtection } from '@/hooks/useOnboardingProtection';
 import Header from '@/components/layout/Header';
 import RightSidebar from '@/components/layout/RightSidebar';
 import LeftSidebar from '@/components/layout/LeftSidebar';
@@ -43,14 +44,8 @@ export default function DashboardLayout({
   const [newslettersCount, setNewslettersCount] = useState(0);
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
 
-  // Immediate redirect check if profile is already loaded and onboarding is not completed
-  useEffect(() => {
-    if (profile && !profile.onboarding_completed) {
-      console.log('[Dashboard] Immediate redirect: Profile loaded but onboarding not completed');
-      // Use window.location to prevent router conflicts
-      window.location.href = '/onboarding';
-    }
-  }, [profile]);
+  // Use the onboarding protection hook
+  const { isProtected, isLoading: isOnboardingLoading } = useOnboardingProtection();
 
   useEffect(() => {
     const loadUserProfile = async () => {
@@ -108,19 +103,8 @@ export default function DashboardLayout({
           profile: userProfile
         });
         
-        // Redirect to onboarding if onboarding hasn't been completed
-        if (!hasCompletedOnboarding) {
-          console.log('[Dashboard] User has not completed onboarding, redirecting...');
-          try {
-            router.push('/onboarding');
-          } catch (error) {
-            console.error('[Dashboard] Router push failed, using window.location:', error);
-            window.location.href = '/onboarding';
-          }
-          return;
-        }
-        
-        // Note: Do not redirect based on completion percentage; rely solely on onboarding_completed flag.
+        // Note: Onboarding completion check is now handled by the useOnboardingProtection hook
+        // We only need to ensure the profile is loaded for the sidebar data
 
         // Load all network data for sidebar
         const [
@@ -155,6 +139,23 @@ export default function DashboardLayout({
 
     loadUserProfile();
   }, [user?.id, router, updateProfile]);
+
+  // Show loading while checking onboarding status
+  if (isOnboardingLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <LoadingSpinner />
+          <p className="mt-4 text-gray-600">Checking onboarding status...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render dashboard content if onboarding is not complete
+  if (!isProtected) {
+    return null; // The hook will handle the redirect
+  }
 
   // Check if we're on the network page
   const isNetworkPage = pathname === '/network';

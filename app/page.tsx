@@ -5,11 +5,25 @@ import { motion } from 'framer-motion';
 import Logo from '@/components/common/Logo';
 import { useIsClient } from '@/hooks/useIsClient';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import { ArrowRightIcon, CheckCircleIcon, UsersIcon, GlobeAltIcon, AcademicCapIcon, BuildingOfficeIcon, HeartIcon, BeakerIcon, CpuChipIcon, SparklesIcon, StarIcon } from '@heroicons/react/24/outline';
 
 export default function LandingPage() {
   const isClient = useIsClient();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const router = useRouter();
+
+  // Handle redirects for logged-in users
+  useEffect(() => {
+    if (user && profile) {
+      if (profile.onboarding_completed) {
+        router.push('/feed');
+      } else {
+        router.push('/onboarding');
+      }
+    }
+  }, [user, profile, router]);
 
   // Show loading while checking authentication
   if (!isClient) {
@@ -23,14 +37,14 @@ export default function LandingPage() {
     );
   }
 
-  // Redirect logged-in users to feed
+  // Show loading while redirecting logged-in users
   if (user) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-            <div className="text-center">
+        <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#007fff] mx-auto mb-3"></div>
-          <p className="text-sm text-[#007fff]">Redirecting to dashboard...</p>
-          </div>
+          <p className="text-sm text-[#007fff]">Redirecting...</p>
+        </div>
       </div>
     );
   }

@@ -62,6 +62,7 @@ import {
   isFollowing,
   getConnectionCount,
   getEventsByOrganizer,
+  updateProfile,
   type Profile,
   type Experience,
   type Education,
@@ -80,7 +81,7 @@ const MEDICAL_SPECIALIZATIONS = {
 };
 
 // Memoized components for better performance
-const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile, connectionStatus, followStatus, connectionCount, experiences, education, onConnect, onUnfollow, onEditProfile, onEditImages }: {
+const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile, connectionStatus, followStatus, connectionCount, experiences, education, onConnect, onUnfollow, onEditProfile, onEditImages, onRemoveOpportunities, showOpportunities }: {
   profile: Profile;
   isOwnProfile: boolean;
   connectionStatus: string;
@@ -92,6 +93,8 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
   onUnfollow: () => void;
   onEditProfile: () => void;
   onEditImages: () => void;
+  onRemoveOpportunities: () => void;
+  showOpportunities: boolean;
 }) {
   const { user } = useAuth();
   const router = useRouter();
@@ -101,88 +104,128 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="bg-white rounded-2xl border border-[#007fff]/10 overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300"
+      className="bg-white rounded-3xl border border-[#007fff]/10 overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500"
     >
-      {/* Banner */}
-      <div className="h-40 sm:h-56 bg-gradient-to-br from-[#007fff] via-[#007fff]/90 to-[#007fff]/80 relative overflow-hidden">
-        {profile.banner_url ? (
+      {/* Modern Banner with Gradient Overlay */}
+      <div className="relative h-64 bg-gradient-to-br from-[#007fff] via-[#007fff]/90 to-[#007fff]/80 overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-8 left-8 w-16 h-16 border-2 border-white rounded-full"></div>
+          <div className="absolute top-16 right-16 w-12 h-12 border-2 border-white rounded-full"></div>
+          <div className="absolute bottom-12 left-1/3 w-8 h-8 border border-white rounded-full"></div>
+          <div className="absolute bottom-16 right-1/4 w-10 h-10 border border-white rounded-full"></div>
+        </div>
+        
+        {/* Banner Image if exists */}
+        {profile.banner_url && (
           <Image
             src={profile.banner_url}
             alt="Profile banner"
             fill
             className="object-cover mix-blend-overlay"
           />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-[#007fff] to-[#007fff]/70">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-x-12"></div>
-          </div>
         )}
         
-        {/* Medical pattern overlay */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-4 left-4 w-8 h-8 border-2 border-white rounded-full"></div>
-          <div className="absolute top-8 right-8 w-6 h-6 border-2 border-white rounded-full"></div>
-          <div className="absolute bottom-6 left-1/4 w-4 h-4 border border-white rounded-full"></div>
-          <div className="absolute bottom-8 right-1/3 w-5 h-5 border border-white rounded-full"></div>
-        </div>
-        
-        {/* Edit banner button for own profile */}
+        {/* Edit Banner Button */}
         {isOwnProfile && (
           <button
             onClick={onEditImages}
-            className="absolute top-4 right-4 bg-white/20 backdrop-blur-sm text-white p-2.5 rounded-xl hover:bg-white/30 transition-all duration-200 transform hover:scale-105"
+            className="absolute top-6 right-6 bg-white/20 backdrop-blur-md text-white p-3 rounded-2xl hover:bg-white/30 transition-all duration-300 transform hover:scale-110 border border-white/30"
           >
             <CameraIcon className="w-5 h-5" />
           </button>
         )}
       </div>
 
-      {/* Profile Info */}
-      <div className="px-6 sm:px-8 pb-8">
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between -mt-16 sm:-mt-20 mb-6 gap-4">
-          {/* Avatar */}
-          <div className="relative self-start">
-            <div className="relative">
-              <Avatar
-                src={profile.avatar_url}
-                alt={profile.full_name || 'Profile'}
-                size="2xl"
-                className="border-4 border-white shadow-2xl ring-4 ring-[#007fff]/20"
-              />
-              {/* Verification badge for medical professionals */}
-              {profile.profile_type === 'individual' && (
-                <div className="absolute -top-1 -right-1 w-8 h-8 bg-[#007fff] rounded-full flex items-center justify-center border-2 border-white shadow-lg">
-                  <ShieldCheckIcon className="w-4 h-4 text-white" />
+      {/* Profile Content Section */}
+      <div className="px-8 py-8">
+        {/* Top Row: Avatar, Name, and Action Buttons */}
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between -mt-24 mb-8 gap-8">
+          {/* Left Side: Avatar and Profile Info */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-6">
+            {/* Avatar Container */}
+            <div className="relative self-start">
+              <div className="relative">
+                <Avatar
+                  src={profile.avatar_url}
+                  alt={profile.full_name || 'Profile'}
+                  size="2xl"
+                  className="border-4 border-white shadow-2xl ring-4 ring-[#007fff]/20 w-32 h-32"
+                />
+              </div>
+              {/* Edit Avatar Button */}
+              {isOwnProfile && (
+                <button
+                  onClick={onEditImages}
+                  className="absolute -bottom-2 -right-2 bg-[#007fff] text-white p-2.5 rounded-full hover:bg-[#007fff]/90 transition-all duration-300 shadow-lg transform hover:scale-110"
+                >
+                  <CameraIcon className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+
+            {/* Profile Information */}
+            <div className="flex-1 min-w-0 space-y-4">
+              {/* Name */}
+              <div className="flex items-center gap-3">
+                <h1 className="text-4xl sm:text-5xl font-bold text-black">
+                  {profile.full_name || 'Anonymous User'}
+                </h1>
+              </div>
+              
+              {/* Headline */}
+              <p className="text-2xl sm:text-3xl text-gray-700 font-medium">
+                {profile.headline || 'Healthcare Professional'}
+              </p>
+              
+              {/* Medical Specializations */}
+              {profile.specialization && profile.specialization.length > 0 && (
+                <div className="flex flex-wrap gap-3">
+                  {profile.specialization.slice(0, 3).map((spec, index) => {
+                    const badgeStyle = MEDICAL_SPECIALIZATIONS[spec as keyof typeof MEDICAL_SPECIALIZATIONS] || MEDICAL_SPECIALIZATIONS.Default;
+                    const IconComponent = badgeStyle.icon;
+                    return (
+                      <span key={index} className={`inline-flex items-center px-4 py-2 rounded-2xl text-sm font-semibold border-2 ${badgeStyle.color} hover:scale-105 transition-transform duration-200`}>
+                        <IconComponent className="w-4 h-4 mr-2" />
+                        {spec}
+                      </span>
+                    );
+                  })}
+                  {profile.specialization.length > 3 && (
+                    <span className="inline-flex items-center px-4 py-2 rounded-2xl text-sm font-semibold bg-gray-100 text-gray-600 border-2 border-gray-200">
+                      +{profile.specialization.length - 3} more
+                    </span>
+                  )}
                 </div>
               )}
             </div>
-            {isOwnProfile && (
-              <button
-                onClick={onEditImages}
-                className="absolute -bottom-2 -right-2 bg-[#007fff] text-white p-2 rounded-full hover:bg-[#007fff]/90 transition-all duration-200 shadow-lg transform hover:scale-105"
-              >
-                <CameraIcon className="w-4 h-4" />
-              </button>
-            )}
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex items-center space-x-3 self-start">
+          {/* Right Side: Action Buttons */}
+          <div className="flex flex-wrap items-center gap-4 self-start lg:self-start">
             {isOwnProfile ? (
-              <div className="flex flex-wrap gap-2">
-                <button className="inline-flex items-center px-4 py-2 bg-[#007fff] text-white rounded-xl hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-medium shadow-lg hover:shadow-xl transform hover:scale-105">
-                  <SparklesIcon className="w-4 h-4 mr-2" />
-                  Available for opportunities
-                </button>
-                <button className="inline-flex items-center px-4 py-2 bg-white text-[#007fff] border-2 border-[#007fff]/20 rounded-xl hover:border-[#007fff]/40 hover:bg-[#007fff]/5 transition-all duration-200 text-sm font-medium">
-                  <PlusIcon className="w-4 h-4 mr-2" />
+              <div className="flex flex-wrap gap-4">
+                {showOpportunities && (
+                  <button 
+                    onClick={onRemoveOpportunities}
+                    className="inline-flex items-center px-6 py-4 bg-[#007fff] text-white rounded-2xl hover:bg-[#007fff]/90 transition-all duration-300 text-base font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+                  >
+                    <SparklesIcon className="w-5 h-5 mr-3" />
+                    Available for opportunities
+                  </button>
+                )}
+                <button 
+                  onClick={() => router.push('/profile/setup')}
+                  className="inline-flex items-center px-5 py-4 bg-white text-[#007fff] border-2 border-[#007fff]/20 rounded-2xl hover:border-[#007fff]/40 hover:bg-[#007fff]/5 transition-all duration-300 text-base font-semibold"
+                >
+                  <PlusIcon className="w-5 h-5 mr-2" />
                   Add section
                 </button>
                 <button 
                   onClick={onEditProfile}
-                  className="inline-flex items-center px-4 py-2 bg-white text-[#007fff] border-2 border-[#007fff]/20 rounded-xl hover:border-[#007fff]/40 hover:bg-[#007fff]/5 transition-all duration-200 text-sm font-medium"
+                  className="inline-flex items-center px-5 py-4 bg-white text-[#007fff] border-2 border-[#007fff]/20 rounded-2xl hover:border-[#007fff]/40 hover:bg-[#007fff]/5 transition-all duration-300 text-base font-semibold"
                 >
-                  <PencilIcon className="w-4 h-4 mr-2" />
+                  <PencilIcon className="w-5 h-5 mr-2" />
                   Edit Profile
                 </button>
               </div>
@@ -192,43 +235,46 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
                   followStatus === 'following' ? (
                     <button
                       onClick={onUnfollow}
-                      className="inline-flex items-center px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-200 text-sm font-medium border border-gray-200"
+                      className="inline-flex items-center px-6 py-4 bg-gray-100 text-gray-700 rounded-2xl hover:bg-gray-200 transition-all duration-300 text-base font-semibold border-2 border-gray-200"
                     >
-                      <CheckIcon className="w-4 h-4 mr-2" />
+                      <CheckIcon className="w-5 h-5 mr-2" />
                       Following
                     </button>
                   ) : (
                     <button
                       onClick={onConnect}
-                      className="inline-flex items-center px-5 py-2.5 bg-[#007fff] text-white rounded-xl hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-medium shadow-lg transform hover:scale-105"
+                      className="inline-flex items-center px-6 py-4 bg-[#007fff] text-white rounded-2xl hover:bg-[#007fff]/90 transition-all duration-300 text-base font-semibold shadow-lg transform hover:scale-105"
                     >
-                      <PlusIcon className="w-4 h-4 mr-2" />
+                      <PlusIcon className="w-5 h-5 mr-2" />
                       Follow
                     </button>
                   )
                 ) : (
                   connectionStatus === 'connected' ? (
-                    <span className="inline-flex items-center px-5 py-2.5 bg-green-100 text-green-700 rounded-xl text-sm font-medium border border-green-200">
-                      <CheckIcon className="w-4 h-4 mr-2" />
+                    <span className="inline-flex items-center px-6 py-4 bg-green-100 text-green-700 rounded-2xl text-base font-semibold border-2 border-green-200">
+                      <CheckIcon className="w-5 h-5 mr-2" />
                       Connected
                     </span>
                   ) : connectionStatus === 'pending' ? (
-                    <span className="inline-flex items-center px-5 py-2.5 bg-yellow-100 text-yellow-700 rounded-xl text-sm font-medium border border-yellow-200">
-                      <ClockIcon className="w-4 h-4 mr-2" />
+                    <span className="inline-flex items-center px-6 py-4 bg-yellow-100 text-yellow-700 rounded-2xl text-base font-semibold border-2 border-yellow-200">
+                      <ClockIcon className="w-5 h-5 mr-2" />
                       Pending
                     </span>
                   ) : (
                     <button
                       onClick={onConnect}
-                      className="inline-flex items-center px-5 py-2.5 bg-[#007fff] text-white rounded-xl hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-medium shadow-lg transform hover:scale-105"
+                      className="inline-flex items-center px-6 py-4 bg-[#007fff] text-white rounded-2xl hover:bg-[#007fff]/90 transition-all duration-300 text-base font-semibold shadow-lg transform hover:scale-105"
                     >
-                      <UserPlusIcon className="w-4 h-4 mr-2" />
+                      <UserPlusIcon className="w-5 h-5 mr-2" />
                       Connect
                     </button>
                   )
                 )}
-                <button className="inline-flex items-center px-4 py-2.5 bg-white text-[#007fff] border-2 border-[#007fff]/20 rounded-xl hover:border-[#007fff]/40 hover:bg-[#007fff]/5 transition-all duration-200 text-sm font-medium">
-                  <EnvelopeIcon className="w-4 h-4 mr-2" />
+                <button 
+                  onClick={() => router.push(`/messages?user=${profile.id}`)}
+                  className="inline-flex items-center px-5 py-4 bg-white text-[#007fff] border-2 border-[#007fff]/20 rounded-2xl hover:border-[#007fff]/40 hover:bg-[#007fff]/5 transition-all duration-300 text-base font-semibold"
+                >
+                  <EnvelopeIcon className="w-5 h-5 mr-2" />
                   Message
                 </button>
               </>
@@ -236,91 +282,65 @@ const ProfileHeader = React.memo(function ProfileHeader({ profile, isOwnProfile,
           </div>
         </div>
 
-        {/* Profile Details */}
-        <div className="space-y-4">
-          <div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-black flex items-center gap-3">
-              {profile.full_name || 'Anonymous User'}
-              {profile.profile_type === 'individual' && (
-                <CheckBadgeIcon className="w-8 h-8 text-[#007fff]" title="Verified Medical Professional" />
-              )}
-            </h1>
-            <p className="text-xl sm:text-2xl text-gray-700 mt-2 font-medium">
-              {profile.headline || 'Healthcare Professional'}
-            </p>
-          </div>
-
-          {/* Medical Specializations */}
-          {profile.specialization && profile.specialization.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {profile.specialization.slice(0, 3).map((spec, index) => {
-                const badgeStyle = MEDICAL_SPECIALIZATIONS[spec as keyof typeof MEDICAL_SPECIALIZATIONS] || MEDICAL_SPECIALIZATIONS.Default;
-                const IconComponent = badgeStyle.icon;
-                return (
-                  <span key={index} className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium border ${badgeStyle.color}`}>
-                    <IconComponent className="w-4 h-4 mr-1.5" />
-                    {spec}
-                  </span>
-                );
-              })}
-              {profile.specialization.length > 3 && (
-                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-600 border border-gray-200">
-                  +{profile.specialization.length - 3} more
-                </span>
-              )}
-            </div>
-          )}
-
-          {/* Location & Contact */}
-          <div className="flex flex-wrap gap-6 text-sm text-gray-600">
+        {/* Middle Row: Contact Info and Network Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          {/* Left: Contact and Location */}
+          <div className="space-y-4">
+            {/* Location */}
             {profile.location && (
-              <div className="flex items-center">
-                <MapPinIcon className="w-5 h-5 mr-2 text-[#007fff]" />
-                <span className="font-medium">{profile.location}</span>
+              <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors duration-200">
+                <div className="w-10 h-10 bg-[#007fff]/10 rounded-xl flex items-center justify-center">
+                  <MapPinIcon className="w-5 h-5 text-[#007fff]" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 font-medium">Location</p>
+                  <p className="text-base font-semibold text-gray-900">{profile.location}</p>
+                </div>
               </div>
             )}
-            <button className="flex items-center hover:text-[#007fff] transition-colors group">
-              <UserGroupIcon className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform text-[#007fff]" />
-              <span className="font-medium underline decoration-2 underline-offset-2">Contact info</span>
+            
+            {/* Contact Info */}
+            <button 
+              onClick={() => router.push(`/profile/${profile.id}/contact`)}
+              className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors duration-200 w-full text-left"
+            >
+              <div className="w-10 h-10 bg-[#007fff]/10 rounded-xl flex items-center justify-center">
+                <UserGroupIcon className="w-5 h-5 text-[#007fff]" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600 font-medium">Contact Info</p>
+                <p className="text-base font-semibold text-[#007fff] underline decoration-2 underline-offset-2">View details</p>
+              </div>
             </button>
           </div>
 
-          {/* Network Stats */}
-          <div className="flex items-center space-x-6 text-sm">
-            <button className="text-[#007fff] font-semibold hover:underline decoration-2 underline-offset-4 transition-all group">
-              <span className="text-lg">{formatNumber(connectionCount)}</span>
-              <span className="ml-1 group-hover:text-[#007fff]/80">connections</span>
-            </button>
-            <button className="text-[#007fff] font-semibold hover:underline decoration-2 underline-offset-4 transition-all group">
-              <span className="text-lg">{formatNumber(connectionCount)}</span>
-              <span className="ml-1 group-hover:text-[#007fff]/80">followers</span>
-            </button>
-          </div>
-
-          {/* Current Position & Education Preview */}
-          <div className="flex flex-wrap gap-6 text-sm bg-[#007fff]/5 rounded-xl p-4 border border-[#007fff]/10">
-            {experiences.length > 0 && (
-              <div className="flex items-center">
-                <div className="w-8 h-8 bg-[#007fff]/20 rounded-lg flex items-center justify-center mr-3">
-                  <BriefcaseIcon className="w-4 h-4 text-[#007fff]" />
+          {/* Right: Network Stats */}
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <button 
+                onClick={() => router.push(`/profile/${profile.id}/connections`)}
+                className="p-4 bg-[#007fff]/5 rounded-2xl hover:bg-[#007fff]/10 transition-colors duration-200 text-center group"
+              >
+                <div className="text-3xl font-bold text-[#007fff] group-hover:scale-110 transition-transform duration-200">
+                  {formatNumber(connectionCount)}
                 </div>
-                <div>
-                  <div className="font-semibold text-[#007fff]">{experiences[0].title}</div>
-                  <div className="text-[#007fff]/70 hover:underline cursor-pointer">{experiences[0].company}</div>
+                <div className="text-sm font-medium text-[#007fff]/80 group-hover:text-[#007fff] transition-colors duration-200">
+                  connections
                 </div>
-              </div>
-            )}
-            {education.length > 0 && (
-              <div className="flex items-center">
-                <div className="w-8 h-8 bg-[#007fff]/20 rounded-lg flex items-center justify-center mr-3">
-                  <AcademicCapIcon className="w-4 h-4 text-[#007fff]" />
+              </button>
+              
+              <button 
+                onClick={() => router.push(`/profile/${profile.id}/followers`)}
+                className="p-4 bg-[#007fff]/5 rounded-2xl hover:bg-[#007fff]/10 transition-colors duration-200 text-center group"
+              >
+                <div className="text-3xl font-bold text-[#007fff] group-hover:scale-110 transition-transform duration-200">
+                  {formatNumber(connectionCount)}
                 </div>
-                <div>
-                  <div className="font-semibold text-[#007fff]">{education[0].degree}</div>
-                  <div className="text-[#007fff]/70 hover:underline cursor-pointer">{education[0].school}</div>
+                <div className="text-sm font-medium text-[#007fff]/80 group-hover:text-[#007fff] transition-colors duration-200">
+                  followers
                 </div>
-              </div>
-            )}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -336,7 +356,7 @@ const AboutCard = React.memo(function AboutCard({ profile, isOwnProfile, onEditP
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.1 }}
-      className="bg-white rounded-2xl border border-[#007fff]/10 p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300"
+      className="bg-white rounded-3xl border border-[#007fff]/10 p-8 shadow-xl hover:shadow-2xl transition-all duration-500"
     >
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
@@ -384,7 +404,7 @@ const SkillsCard = React.memo(function SkillsCard({ profile, isOwnProfile, onEdi
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
-      className="bg-white rounded-2xl border border-[#007fff]/10 p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300"
+      className="bg-white rounded-3xl border border-[#007fff]/10 p-8 shadow-xl hover:shadow-2xl transition-all duration-500"
     >
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
@@ -630,11 +650,54 @@ const ActivityCard = React.memo(function ActivityCard({ posts, isOwnProfile, con
   );
 });
 
-const SidebarCard = React.memo(function SidebarCard({ profile, isOwnProfile }: { profile: Profile; isOwnProfile: boolean }) {
+const SidebarCard = React.memo(function SidebarCard({ profile, isOwnProfile, experiences, education }: { 
+  profile: Profile; 
+  isOwnProfile: boolean; 
+  experiences: Experience[];
+  education: Education[];
+}) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Experience Preview */}
+      {experiences.length > 0 && (
+        <div className="bg-white rounded-3xl border border-[#007fff]/10 p-6 shadow-xl hover:shadow-2xl transition-all duration-500">
+          <h4 className="text-lg font-bold text-[#007fff] mb-4 flex items-center gap-2">
+            <BriefcaseIcon className="w-5 h-5" />
+            Current Position
+          </h4>
+          <div className="space-y-3">
+            <div className="p-3 bg-[#007fff]/5 rounded-xl">
+              <h5 className="font-semibold text-[#007fff] text-sm">{experiences[0].title}</h5>
+              <p className="text-[#007fff]/80 text-xs">{experiences[0].company}</p>
+              {experiences[0].location && (
+                <p className="text-gray-600 text-xs mt-1">📍 {experiences[0].location}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Education Preview */}
+      {education.length > 0 && (
+        <div className="bg-white rounded-3xl border border-[#007fff]/10 p-6 shadow-xl hover:shadow-2xl transition-all duration-500">
+          <h4 className="text-lg font-bold text-[#007fff] mb-4 flex items-center gap-2">
+            <AcademicCapIcon className="w-5 h-5" />
+            Education
+          </h4>
+          <div className="space-y-3">
+            <div className="p-3 bg-[#007fff]/5 rounded-xl">
+              <h5 className="font-semibold text-[#007fff] text-sm">{education[0].degree}</h5>
+              <p className="text-[#007fff]/80 text-xs">{education[0].school}</p>
+              {education[0].field && (
+                <p className="text-gray-600 text-xs mt-1">📚 {education[0].field}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Quick Actions */}
-      <div className="bg-white rounded-2xl border border-[#007fff]/10 p-6 shadow-lg hover:shadow-xl transition-all duration-300">
+      <div className="bg-white rounded-3xl border border-[#007fff]/10 p-8 shadow-xl hover:shadow-2xl transition-all duration-500">
         <h4 className="text-lg font-bold text-[#007fff] mb-4 flex items-center gap-2">
           <StarIcon className="w-5 h-5" />
           Quick Actions
@@ -660,7 +723,7 @@ const SidebarCard = React.memo(function SidebarCard({ profile, isOwnProfile }: {
       </div>
 
       {/* Medical Interests */}
-      <div className="bg-white rounded-2xl border border-[#007fff]/10 p-6 shadow-lg hover:shadow-xl transition-all duration-300">
+      <div className="bg-white rounded-3xl border border-[#007fff]/10 p-8 shadow-xl hover:shadow-2xl transition-all duration-500">
         <h4 className="text-lg font-bold text-[#007fff] mb-4 flex items-center gap-2">
           <BeakerIcon className="w-5 h-5" />
           Medical Interests
@@ -675,7 +738,7 @@ const SidebarCard = React.memo(function SidebarCard({ profile, isOwnProfile }: {
       </div>
 
       {/* Similar Professionals */}
-      <div className="bg-white rounded-2xl border border-[#007fff]/10 p-6 shadow-lg hover:shadow-xl transition-all duration-300">
+      <div className="bg-white rounded-3xl border border-[#007fff]/10 p-8 shadow-xl hover:shadow-2xl transition-all duration-500">
         <h4 className="text-lg font-bold text-[#007fff] mb-4 flex items-center gap-2">
           <UserGroupIcon className="w-5 h-5" />
           Similar Professionals
@@ -704,6 +767,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showImageEditor, setShowImageEditor] = useState(false);
+  const [showOpportunities, setShowOpportunities] = useState(true);
 
   const debugLog = (message: string, data?: unknown) => {
     if (process.env.NODE_ENV === 'development') {
@@ -880,6 +944,11 @@ export default function ProfilePage() {
     setShowEditModal(false);
   };
 
+  const handleRemoveOpportunities = () => {
+    setShowOpportunities(false);
+    toast.success('You are no longer open to opportunities.');
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-white via-[#007fff]/5 to-[#007fff]/10 flex items-center justify-center">
@@ -904,40 +973,42 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-[#007fff]/5 to-[#007fff]/10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-[#007fff]/5">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="space-y-12">
           {/* Profile Header */}
-          <ProfileHeader
-            profile={profile}
-            isOwnProfile={isOwnProfile}
-            connectionStatus={connectionStatus}
-            followStatus={followStatus}
-            connectionCount={connectionCount}
-            experiences={experiences}
-            education={education}
-            onConnect={handleConnect}
-            onUnfollow={handleUnfollow}
-            onEditProfile={handleEditProfile}
-            onEditImages={handleEditImages}
-          />
+                      <ProfileHeader
+              profile={profile}
+              isOwnProfile={isOwnProfile}
+              connectionStatus={connectionStatus}
+              followStatus={followStatus}
+              connectionCount={connectionCount}
+              experiences={experiences}
+              education={education}
+              onConnect={handleConnect}
+              onUnfollow={handleUnfollow}
+              onEditProfile={handleEditProfile}
+              onEditImages={handleEditImages}
+              onRemoveOpportunities={handleRemoveOpportunities}
+              showOpportunities={showOpportunities}
+            />
 
           {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="grid grid-cols-1 xl:grid-cols-12 gap-12">
             {/* Left Column - Main Content */}
-            <div className="lg:col-span-8 space-y-8">
-            {/* About */}
-            <AboutCard profile={profile} isOwnProfile={isOwnProfile} onEditProfile={handleEditProfile} />
+            <div className="xl:col-span-8 space-y-12">
+              {/* About */}
+              <AboutCard profile={profile} isOwnProfile={isOwnProfile} onEditProfile={handleEditProfile} />
 
-            {/* Skills */}
-            <SkillsCard profile={profile} isOwnProfile={isOwnProfile} onEditSkills={handleEditSkills} />
+              {/* Skills */}
+              <SkillsCard profile={profile} isOwnProfile={isOwnProfile} onEditSkills={handleEditSkills} />
 
-            {/* Experience */}
+                          {/* Experience */}
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="bg-white rounded-2xl border border-[#007fff]/10 p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300"
+              className="bg-white rounded-3xl border border-[#007fff]/10 p-8 shadow-xl hover:shadow-2xl transition-all duration-500"
             >
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
@@ -1006,7 +1077,7 @@ export default function ProfilePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.35 }}
-              className="bg-white rounded-2xl border border-[#007fff]/10 p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300"
+              className="bg-white rounded-3xl border border-[#007fff]/10 p-8 shadow-xl hover:shadow-2xl transition-all duration-500"
             >
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
@@ -1075,14 +1146,14 @@ export default function ProfilePage() {
           </div>
 
             {/* Right Column - Sidebar */}
-            <div className="lg:col-span-4 space-y-8">
+            <div className="xl:col-span-4 space-y-12">
               {/* Profile Completion Card - Only show for own profile */}
               {isOwnProfile && (
                 <motion.div 
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.5 }}
-                  className="bg-white rounded-2xl border border-[#007fff]/10 p-6 shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="bg-white rounded-3xl border border-[#007fff]/10 p-8 shadow-xl hover:shadow-2xl transition-all duration-500"
                 >
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
@@ -1120,7 +1191,7 @@ export default function ProfilePage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.6 }}
               >
-                <SidebarCard profile={profile} isOwnProfile={isOwnProfile} />
+                <SidebarCard profile={profile} isOwnProfile={isOwnProfile} experiences={experiences} education={education} />
               </motion.div>
             </div>
           </div>

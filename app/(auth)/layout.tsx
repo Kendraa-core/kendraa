@@ -9,14 +9,19 @@ export default function AuthLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (!loading && user) {
-      router.push('/feed');
+      // Check if user has completed onboarding
+      if (profile?.onboarding_completed) {
+        router.push('/feed');
+      } else {
+        router.push('/onboarding');
+      }
     }
-  }, [user, loading, router]);
+  }, [user, profile, loading, router]);
 
   if (loading) {
     return (
