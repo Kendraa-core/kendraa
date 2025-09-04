@@ -760,6 +760,28 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                   <span className="text-black text-sm font-medium">Access exclusive healthcare content</span>
                 </div>
               </div>
+              
+              {/* Save Button - positioned right below the benefits */}
+              <div className="mt-6 pt-6 border-t border-[#007fff]/20">
+                <button
+                  onClick={handleSave}
+                  disabled={loading}
+                  className={`w-full px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 ${
+                    !loading
+                      ? 'bg-green-500 text-white hover:bg-green-600 hover:shadow-md transform hover:scale-105'
+                      : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  {loading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>Saving...</span>
+                    </>
+                  ) : (
+                    <span>Save Progress</span>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         );
@@ -825,6 +847,28 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                 Students will only need to add education information. Professionals will need both education and work experience.
               </p>
             </div>
+            
+            {/* Save Button - positioned below the info text */}
+            <div className="mt-6 pt-6 border-t border-[#007fff]/20">
+              <button
+                onClick={handleSave}
+                disabled={loading}
+                className={`w-full px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 ${
+                  !loading
+                    ? 'bg-green-500 text-white hover:bg-green-600 hover:shadow-md transform hover:scale-105'
+                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                {loading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <span>Save Progress</span>
+                )}
+              </button>
+            </div>
           </div>
         );
 
@@ -870,6 +914,28 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
               </p>
                 </motion.div>
             )}
+            
+            {/* Save Button - positioned below the input field */}
+            <div className="mt-6 pt-6 border-t border-[#007fff]/20">
+              <button
+                onClick={handleSave}
+                disabled={loading}
+                className={`w-full px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 ${
+                  !loading
+                    ? 'bg-green-500 text-white hover:bg-green-600 hover:shadow-md transform hover:scale-105'
+                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                {loading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <span>Save Progress</span>
+                )}
+              </button>
+            </div>
             </motion.div>
           </div>
         );
@@ -915,6 +981,28 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
               </p>
                 </motion.div>
             )}
+            
+            {/* Save Button - positioned below the textarea field */}
+            <div className="mt-6 pt-6 border-t border-[#007fff]/20">
+              <button
+                onClick={handleSave}
+                disabled={loading}
+                className={`w-full px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 ${
+                  !loading
+                    ? 'bg-green-500 text-white hover:bg-green-600 hover:shadow-md transform hover:scale-105'
+                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                {loading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <span>Save Progress</span>
+                )}
+              </button>
+            </div>
             </motion.div>
           </div>
         );
@@ -1879,6 +1967,28 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
               </p>
                 </motion.div>
             )}
+            
+            {/* Save Button - positioned below the contact fields */}
+            <div className="mt-6 pt-6 border-t border-[#007fff]/20">
+              <button
+                onClick={handleSave}
+                disabled={loading}
+                className={`w-full px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 ${
+                  !loading
+                    ? 'bg-green-500 text-white hover:bg-green-600 hover:shadow-md transform hover:scale-105'
+                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                {loading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <span>Save Progress</span>
+                )}
+              </button>
+            </div>
             </motion.div>
           </div>
         );
