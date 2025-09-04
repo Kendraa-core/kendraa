@@ -211,7 +211,6 @@ export default function IndividualProfileWizard() {
         toast.error('Failed to create profile');
       }
     } catch (error: any) {
-      console.error('Error creating profile:', error);
       toast.error(error.message || 'Failed to create profile');
     } finally {
       setIsSubmitting(false);

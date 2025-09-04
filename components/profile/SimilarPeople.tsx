@@ -22,9 +22,9 @@ export default function SimilarPeople() {
       try {
         const connections = await getSuggestedConnections(user.id, 5);
         setSimilarPeople(connections);
-      } catch (error) {
-        console.error('Error loading similar people:', error);
-      } finally {
+          } catch (error) {
+      // Silent error handling for similar people
+    } finally {
         setLoading(false);
       }
     };

@@ -30,20 +30,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!isClient) return;
     
     try {
-      console.log('[Auth] Loading profile for user:', userId);
       const profileData = await getProfile(userId);
       setProfile(profileData);
-      console.log('[Auth] Profile loaded successfully');
     } catch (error: any) {
       console.error('[Auth] Error loading profile:', error);
       
       // Handle specific error types
       if (error.message.includes('Authentication error')) {
-        console.error('[Auth] Authentication error while loading profile');
         // Don't set a fallback profile for auth errors
         return;
       } else if (error.message.includes('Profile not found')) {
-        console.log('[Auth] Profile not found, creating fallback profile');
         // Set a basic profile to prevent UI blocking
         setProfile({
           id: userId,
@@ -66,7 +62,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           updated_at: new Date().toISOString(),
         });
       } else {
-        console.error('[Auth] Unknown error loading profile:', error);
         // Set a basic profile to prevent UI blocking
         setProfile({
           id: userId,
@@ -102,7 +97,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         // Check if Supabase is properly configured
         if (!supabase) {
-          console.warn('Supabase is not configured. Please check your environment variables.');
           if (mounted) {
             setLoading(false);
           }
@@ -113,7 +107,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const { data: { session }, error } = await supabase!.auth.getSession();
         
         if (error) {
-          console.error('Error getting session:', error);
           if (mounted) {
             setLoading(false);
           }
@@ -152,7 +145,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           subscription.unsubscribe();
         };
       } catch (error) {
-        console.error('Auth initialization error:', error);
+        // Auth initialization error logged
         if (mounted) {
           setLoading(false);
         }
@@ -175,8 +168,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     
     try {
-      console.log('[Auth] Starting signup process for:', email);
-      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -189,8 +180,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (error) {
-        console.error('[Auth] Supabase signup error:', error);
-        
         // Handle specific error types with better messages
         if (error.message.includes('Invalid Refresh Token')) {
           toast.error('Authentication error. Please try refreshing the page and try again.');
@@ -209,8 +198,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (data.user) {
-        console.log('[Auth] User created successfully, creating profile...');
-        
         try {
           // Create profile with retry logic
           await ensureProfileExists(
@@ -220,11 +207,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             profileType
           );
           
-          console.log('[Auth] Profile created successfully');
           toast.success('Account created successfully! Please check your email to verify your account.');
         } catch (profileError: any) {
-          console.error('[Auth] Profile creation error:', profileError);
-          
           // Provide specific error messages for profile creation failures
           if (profileError.message.includes('Authentication error')) {
             toast.error('Account created but profile setup failed due to authentication issues. Please contact support.');
@@ -235,23 +219,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           } else {
             toast.error('Account created but profile setup failed. You can complete your profile later.');
           }
-          
-          // Don't fail the signup if profile creation fails, but log it
-          console.warn('[Auth] Continuing with signup despite profile creation error');
         }
       } else {
-        console.log('[Auth] No user data returned from signup');
         toast.success('Account creation initiated! Please check your email to verify your account.');
       }
     } catch (error: any) {
-      console.error('[Auth] Sign up error:', error);
-      
-      // Don't show duplicate error messages
-      if (!error.message.includes('Invalid Refresh Token') && 
-          !error.message.includes('Email not confirmed') &&
-          !error.message.includes('User already registered')) {
-        // Error message already shown above, don't show again
-      }
       throw error;
     }
   }, [isClient]);
@@ -265,7 +237,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     
     try {
-      console.log('[Auth] Starting signin process for:', email);
+      // Starting signin process
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -273,7 +245,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (error) {
-        console.error('[Auth] Sign in error:', error);
+        // Sign in error logged
         
         // Provide specific error messages
         if (error.message.includes('Invalid login credentials')) {
@@ -291,12 +263,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (data.user) {
-        console.log('[Auth] User signed in successfully');
         toast.success('Signed in successfully!');
       }
     } catch (error: any) {
-      console.error('[Auth] Sign in error:', error);
-      // Error message already shown above, don't show again
       throw error;
     }
   }, [isClient]);
@@ -316,7 +285,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       toast.success('Signed out successfully!');
     } catch (error: any) {
-      console.error('Sign out error:', error);
       toast.error('Failed to sign out');
       throw error;
     }
@@ -347,7 +315,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setProfile(prev => prev ? { ...prev, ...updates } : null);
       toast.success('Profile updated successfully!');
     } catch (error: any) {
-      console.error('Profile update error:', error);
       toast.error('Failed to update profile');
       throw error;
     }

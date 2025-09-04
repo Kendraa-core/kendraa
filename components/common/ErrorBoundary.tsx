@@ -25,14 +25,14 @@ export default class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    // ErrorBoundary caught an error
     this.setState({ error, errorInfo });
     
     // Handle webpack module loading errors
     if (error.message.includes('Cannot read properties of undefined') || 
         error.message.includes('webpack') ||
         error.message.includes('call')) {
-      console.log('Webpack module error detected, attempting recovery...');
+      // Webpack module error detected, attempting recovery
       // Force a page reload for webpack errors
       setTimeout(() => {
         window.location.reload();

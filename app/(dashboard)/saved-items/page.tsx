@@ -21,12 +21,9 @@ export default function SavedItemsPage() {
 
       try {
         setLoading(true);
-        console.log('Fetching saved posts for user:', user.id);
         const posts = await getSavedPosts(user.id);
-        console.log('Fetched saved posts:', posts);
         setSavedPosts(posts || []);
       } catch (error) {
-        console.error('Error fetching saved posts:', error);
         setSavedPosts([]);
       } finally {
         setLoading(false);

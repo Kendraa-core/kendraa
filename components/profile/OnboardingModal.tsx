@@ -162,11 +162,8 @@ export default function OnboardingPage() {
         .limit(1);
       
       if (error) {
-        console.error('Database connection test failed:', error);
         return false;
       }
-      
-      console.log('Database connection test successful');
       
       // Test if we can access the education table
       const { data: eduData, error: eduError } = await supabase
@@ -175,14 +172,11 @@ export default function OnboardingPage() {
         .limit(1);
       
       if (eduError) {
-        console.error('Education table access failed:', eduError);
         return false;
       }
       
-      console.log('Education table access successful');
       return true;
     } catch (error) {
-      console.error('Database connection test error:', error);
       return false;
     }
   };
@@ -274,12 +268,12 @@ export default function OnboardingPage() {
             .eq('id', user.id);
           
           if (error) {
-            console.error('Error updating onboarding status:', error);
+            // Error updating onboarding status
           } else {
         router.push('/feed');
           }
         } catch (error) {
-          console.error('Error updating onboarding status:', error);
+          // Error updating onboarding status
         }
       }
     };
@@ -323,7 +317,6 @@ export default function OnboardingPage() {
 
         // Convert database experiences to form format
         const formattedExperiences = userExperiences.map(exp => {
-          console.log('Processing experience:', exp);
           const startDate = exp.start_date ? new Date(exp.start_date) : null;
           const endDate = exp.end_date ? new Date(exp.end_date) : null;
           
@@ -341,7 +334,6 @@ export default function OnboardingPage() {
             current: exp.current || false,
             description: exp.description || ''
           };
-          console.log('Formatted experience:', formatted);
           return formatted;
         });
 
@@ -389,7 +381,6 @@ export default function OnboardingPage() {
         setCompletionPercentage(percentage);
         setLoading(false);
       } catch (error) {
-        console.error('Error loading user experiences and educations:', error);
         toast.error('Failed to load your profile data');
         setLoading(false);
       }
@@ -467,13 +458,11 @@ export default function OnboardingPage() {
   };
 
   const handleInputChange = (field: string, value: any) => {
-    console.log(`handleInputChange - Field: ${field}, Value:`, value);
     setFormData(prev => {
       const newData = {
       ...prev,
       [field]: value
       };
-      console.log('Updated formData:', newData);
       return newData;
     });
   };
@@ -565,8 +554,6 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         exp.title && exp.company && (exp.start_month || exp.start_year)
       );
       
-      console.log('Valid experiences to save:', validExperiences);
-      
       if (validExperiences.length > 0) {
         // First, delete all existing experiences for this user
         await sb.from('experiences').delete().eq('profile_id', uid);
@@ -600,15 +587,11 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
             description: exp.description || null
           };
           
-          console.log('Experience to save:', expToSave);
           return expToSave;
         });
         
-        console.log('All experiences data to insert:', expData);
-        
         const { error: expError } = await sb.from('experiences').insert(expData);
         if (expError) {
-          console.error('Error saving experiences:', expError);
           throw expError;
         }
       } else {
@@ -645,7 +628,6 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         
         const { error: eduError } = await sb.from('education').insert(eduData);
         if (eduError) {
-          console.error('Error saving educations:', eduError);
           throw eduError;
         }
       } else {
@@ -662,11 +644,10 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         await updateProfile({ ...formData, onboarding_completed: true });
       }
 
-      console.log('All data saved successfully');
+      // All data saved successfully
     } catch (error) {
     toast.dismiss();
     setUploading(false);
-    console.error('Save error:', error);
     throw error;
   }
 };
@@ -699,7 +680,6 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
       await saveAllData(false); // Save but don't mark completed
       toast.success('Progress saved successfully!');
     } catch (error: any) {
-      console.error('Save error:', error);
       toast.error('Failed to save progress.');
     } finally {
       setLoading(false);
@@ -2101,10 +2081,9 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                       await saveAllData(true);
                       toast.success('Welcome to Kendraa!');
                       router.push('/feed');
-                    } catch (error) {
-                      console.error('Completion error:', error);
-                      toast.error('Failed to complete onboarding.');
-                    } finally {
+                        } catch (error) {
+      toast.error('Failed to complete onboarding.');
+    } finally {
                       setLoading(false);
                     }
                   }}

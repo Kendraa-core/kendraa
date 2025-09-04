@@ -79,11 +79,8 @@ export async function ensureProfileExists(
   profileType: 'individual' | 'institution'
 ): Promise<Profile> {
   try {
-    console.log('[Queries] Ensuring profile exists for user:', userId);
-    
     // Check if Supabase is available
     if (!supabase) {
-      console.error('[Queries] Supabase client is not available');
       throw new Error('Database connection not available');
     }
 
@@ -96,12 +93,10 @@ export async function ensureProfileExists(
 
     if (fetchError && fetchError.code !== 'PGRST116') {
       // PGRST116 is "no rows returned" which is expected for new users
-      console.error('[Queries] Error fetching existing profile:', fetchError);
       throw new Error(`Failed to check existing profile: ${fetchError.message}`);
     }
 
     if (existingProfile) {
-      console.log('[Queries] Profile already exists, returning existing profile');
       return existingProfile as Profile;
     }
 
@@ -111,8 +106,6 @@ export async function ensureProfileExists(
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        console.log(`[Queries] Creating profile (attempt ${attempt}/${maxRetries})`);
-        
         const { data, error } = await getSupabase()
           .from('profiles')
           .insert({
@@ -141,7 +134,6 @@ export async function ensureProfileExists(
           // Handle specific error types
           if (error.code === '23505') {
             // Unique constraint violation - profile was created by another process
-            console.log('[Queries] Profile already exists (race condition), fetching it');
             const { data: raceProfile, error: raceError } = await getSupabase()
               .from('profiles')
               .select('*')
@@ -152,7 +144,6 @@ export async function ensureProfileExists(
               throw new Error(`Failed to fetch profile after race condition: ${raceError.message}`);
             }
             
-            console.log('[Queries] Successfully retrieved profile after race condition');
             return raceProfile as Profile;
           } else if (error.code === 'PGRST301' || error.message.includes('JWT') || error.message.includes('401')) {
             throw new Error('Authentication error. Please check your Supabase credentials and database permissions.');
@@ -179,17 +170,14 @@ export async function ensureProfileExists(
         if (attempt < maxRetries) {
           // Wait before retrying (exponential backoff)
           const delay = Math.pow(2, attempt) * 1000; // 2s, 4s, 8s
-          console.log(`[Queries] Waiting ${delay}ms before retry...`);
           await new Promise(resolve => setTimeout(resolve, delay));
         }
       }
     }
 
     // All retries failed
-    console.error('[Queries] All profile creation attempts failed');
     throw new Error(`Failed to create profile after ${maxRetries} attempts: ${lastError?.message || 'Unknown error'}`);
   } catch (error) {
-    console.error('[Queries] Error in ensureProfileExists:', error);
     throw error;
   }
 }
@@ -207,12 +195,10 @@ export async function getPosts(limit = 10, offset = 0): Promise<Post[]> {
       .range(offset, offset + limit - 1);
 
     if (error) {
-      console.error('[Queries] Error fetching posts:', error);
       return [];
     }
     
     if (!posts || posts.length === 0) {
-
       return [];
     }
     
@@ -226,7 +212,7 @@ export async function getPosts(limit = 10, offset = 0): Promise<Post[]> {
       .in('id', authorIds);
     
     if (authorsError) {
-      console.error('[Queries] Error fetching authors:', authorsError);
+      // Silent error handling for author fetching
     }
     
     // Create author lookup map
@@ -238,21 +224,16 @@ export async function getPosts(limit = 10, offset = 0): Promise<Post[]> {
       profiles: authorMap.get(post.author_id) || null
     }));
 
-    
     return postsWithAuthors;
   } catch (error) {
-    console.error('[Queries] Error in getPosts:', error);
     return [];
   }
 }
 
 export async function getPostsByAuthor(authorId: string): Promise<PostWithAuthor[]> {
   try {
-    console.log('Getting posts by author', { authorId });
-    
     const schemaExists = await true;
     if (!schemaExists) {
-      console.log('Database schema not found, returning empty posts');
       return [];
     }
     
@@ -264,12 +245,10 @@ export async function getPostsByAuthor(authorId: string): Promise<PostWithAuthor
       .order('created_at', { ascending: false });
 
     if (postsError) {
-      console.log('Error fetching posts by author', postsError);
       return [];
     }
     
     if (!posts || posts.length === 0) {
-      console.log('No posts found for author');
       return [];
     }
     
@@ -281,7 +260,7 @@ export async function getPostsByAuthor(authorId: string): Promise<PostWithAuthor
       .single();
     
     if (authorError) {
-      console.log('Error fetching author', authorError);
+      // Silent error handling for author fetching
       // Return posts without author info
       return posts.map(post => ({
         ...post,
@@ -307,10 +286,8 @@ export async function getPostsByAuthor(authorId: string): Promise<PostWithAuthor
       }
     }));
     
-    console.log('Posts by author fetched successfully', postsWithAuthor);
     return postsWithAuthor;
   } catch (error) {
-    console.log('Error fetching posts by author', error);
     return [];
   }
 }
@@ -351,11 +328,8 @@ export async function createPost(
 // Connection queries
 export async function getConnections(userId: string): Promise<Profile[]> {
   try {
-    console.log('Getting connections', { userId });
-    
     const schemaExists = await true;
     if (!schemaExists) {
-      console.log('Database schema not found, returning empty connections');
       return [];
     }
     
@@ -371,7 +345,6 @@ export async function getConnections(userId: string): Promise<Profile[]> {
       .eq('status', 'accepted');
 
     if (error) {
-      console.log('Error fetching connections', error);
       return [];
     }
 
@@ -387,21 +360,16 @@ export async function getConnections(userId: string): Promise<Profile[]> {
       }
     }
     
-    console.log('Connections fetched successfully', connections);
     return connections;
   } catch (error) {
-    console.log('Error fetching connections', error);
     return [];
   }
 }
 
 export async function getConnectionStatus(userId: string, targetUserId: string): Promise<string | null> {
   try {
-    console.log('Getting connection status', { userId, targetUserId });
-    
     const schemaExists = await true;
     if (!schemaExists) {
-      console.log('Database schema not found, returning null connection status');
       return null;
     }
     
@@ -414,7 +382,6 @@ export async function getConnectionStatus(userId: string, targetUserId: string):
       .single();
 
     if (data1) {
-      console.log('Connection status fetched', data1.status);
       return data1.status;
     }
 
@@ -426,25 +393,19 @@ export async function getConnectionStatus(userId: string, targetUserId: string):
       .single();
 
     if (data2) {
-      console.log('Connection status fetched', data2.status);
       return data2.status;
     }
 
-    console.log('Connection status fetched', null);
     return null;
   } catch (error) {
-    console.log('Error fetching connection status', error);
     return null;
   }
 }
 
 export async function sendConnectionRequest(requesterId: string, recipientId: string): Promise<Connection | null> {
   try {
-    console.log('Sending connection request', { requesterId, recipientId });
-    
     const schemaExists = await true;
     if (!schemaExists) {
-      console.log('Database schema not found, cannot send connection request');
       return null;
     }
     
@@ -477,10 +438,8 @@ export async function sendConnectionRequest(requesterId: string, recipientId: st
       });
     }
     
-    console.log('Connection request sent successfully', data);
     return data;
   } catch (error) {
-    console.log('Error sending connection request', error);
     return null;
   }
 }
@@ -488,11 +447,8 @@ export async function sendConnectionRequest(requesterId: string, recipientId: st
 // Missing connection functions
 export async function getSuggestedConnections(userId: string, limit = 10): Promise<Profile[]> {
   try {
-    console.log('Getting suggested connections', { userId, limit });
-    
     const schemaExists = await true;
     if (!schemaExists) {
-      console.log('Database schema not found, returning empty suggested connections');
       return [];
     }
     
@@ -528,25 +484,19 @@ export async function getSuggestedConnections(userId: string, limit = 10): Promi
       .limit(limit);
 
     if (error) {
-      console.log('Error fetching suggested connections', error);
       return [];
     }
     
-    console.log('Suggested connections fetched successfully', data);
     return data || [];
   } catch (error) {
-    console.log('Error fetching suggested connections', error);
     return [];
   }
 }
 
 export async function getConnectionRequests(userId: string): Promise<ConnectionWithProfile[]> {
   try {
-    console.log('Getting connection requests', { userId });
-    
     const schemaExists = await true;
     if (!schemaExists) {
-      console.log('Database schema not found, returning empty connection requests');
       return [];
     }
     
@@ -563,21 +513,16 @@ export async function getConnectionRequests(userId: string): Promise<ConnectionW
 
     if (error) throw error;
     
-    console.log('Connection requests fetched successfully', data);
     return data || [];
   } catch (error) {
-    console.log('Error fetching connection requests', error);
     return [];
   }
 }
 
 export async function acceptConnectionRequest(connectionId: string): Promise<boolean> {
   try {
-    console.log('Accepting connection request', { connectionId });
-    
     const schemaExists = await true;
     if (!schemaExists) {
-      console.log('Database schema not found, cannot accept connection request');
       return false;
     }
     
@@ -617,21 +562,16 @@ export async function acceptConnectionRequest(connectionId: string): Promise<boo
       }
     }
     
-    console.log('Connection request accepted successfully');
     return true;
   } catch (error) {
-    console.log('Error accepting connection request', error);
     return false;
   }
 }
 
 export async function rejectConnectionRequest(connectionId: string): Promise<boolean> {
   try {
-    console.log('Rejecting connection request', { connectionId });
-    
     const schemaExists = await true;
     if (!schemaExists) {
-      console.log('Database schema not found, cannot reject connection request');
       return false;
     }
     
@@ -645,10 +585,8 @@ export async function rejectConnectionRequest(connectionId: string): Promise<boo
 
     if (error) throw error;
     
-    console.log('Connection request rejected successfully');
     return true;
   } catch (error) {
-    console.log('Error rejecting connection request', error);
     return false;
   }
 }
@@ -656,11 +594,8 @@ export async function rejectConnectionRequest(connectionId: string): Promise<boo
 // Experience queries
 export async function getExperiences(profileId: string): Promise<Experience[]> {
   try {
-    console.log('Getting experiences', { profileId });
-    
     const schemaExists = await true;
     if (!schemaExists) {
-      console.log('Database schema not found, returning empty experiences');
       return [];
     }
     
@@ -672,10 +607,8 @@ export async function getExperiences(profileId: string): Promise<Experience[]> {
 
     if (error) throw error;
     
-    console.log('Experiences fetched successfully', data);
     return data || [];
   } catch (error) {
-    console.log('Error fetching experiences', error);
     return [];
   }
 }
@@ -683,11 +616,8 @@ export async function getExperiences(profileId: string): Promise<Experience[]> {
 // Education queries
 export async function getEducation(profileId: string): Promise<Education[]> {
   try {
-    console.log('Getting education', { profileId });
-    
     const schemaExists = await true;
     if (!schemaExists) {
-      console.log('Database schema not found, returning empty education');
       return [];
     }
     
@@ -699,10 +629,8 @@ export async function getEducation(profileId: string): Promise<Education[]> {
 
     if (error) throw error;
     
-    console.log('Education fetched successfully', data);
     return data || [];
   } catch (error) {
-    console.log('Error fetching education', error);
     return [];
   }
 }
@@ -719,7 +647,6 @@ export async function createExperience(experience: Omit<Experience, 'id' | 'crea
     if (error) throw error;
     return data;
   } catch (error) {
-    console.error('Error creating experience:', error);
     throw error;
   }
 }
@@ -737,7 +664,6 @@ export async function updateExperience(experienceId: string, updates: Partial<Ex
     if (error) throw error;
     return data;
   } catch (error) {
-    console.error('Error updating experience:', error);
     throw error;
   }
 }
@@ -754,7 +680,6 @@ export async function createEducation(education: Omit<Education, 'id' | 'created
     if (error) throw error;
     return data;
   } catch (error) {
-    console.error('Error creating education:', error);
     throw error;
   }
 }
@@ -772,7 +697,6 @@ export async function updateEducation(educationId: string, updates: Partial<Educ
     if (error) throw error;
     return data;
   } catch (error) {
-    console.error('Error updating education:', error);
     throw error;
   }
 }
@@ -780,11 +704,8 @@ export async function updateEducation(educationId: string, updates: Partial<Educ
 // Notifications - returning mock data for now
 export async function getNotifications(userId: string): Promise<Notification[]> {
   try {
-    console.log('Getting notifications', { userId });
-    
     const schemaExists = await true;
     if (!schemaExists) {
-      console.log('Database schema not found, returning mock notifications');
       return [
         {
           id: '1',
@@ -830,7 +751,6 @@ export async function getNotifications(userId: string): Promise<Notification[]> 
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.log('Error fetching notifications from database, returning mock data', error);
       // If table doesn't exist or other error, return mock data
       return [
         {
@@ -869,7 +789,6 @@ export async function getNotifications(userId: string): Promise<Notification[]> 
       ];
     }
     
-    console.log('Notifications fetched successfully', data);
     // Transform the data to match our interface
     return (data || []).map(notification => ({
       id: notification.id,
@@ -926,11 +845,8 @@ export async function getNotifications(userId: string): Promise<Notification[]> 
 // Create notification function
 export async function createNotification(notification: Omit<Notification, 'id' | 'created_at'>): Promise<Notification | null> {
   try {
-    console.log('Creating notification', notification);
-    
     const schemaExists = await true;
     if (!schemaExists) {
-      console.log('Database schema not found, cannot create notification');
       return null;
     }
     
@@ -950,10 +866,8 @@ export async function createNotification(notification: Omit<Notification, 'id' |
 
     if (error) throw error;
     
-    console.log('Notification created successfully', data);
     return data;
   } catch (error) {
-    console.log('Error creating notification', error);
     return null;
   }
 }
@@ -961,11 +875,8 @@ export async function createNotification(notification: Omit<Notification, 'id' |
 // Mark notification as read
 export async function markNotificationAsRead(notificationId: string): Promise<boolean> {
   try {
-    console.log('Marking notification as read', { notificationId });
-    
     const schemaExists = await true;
     if (!schemaExists) {
-      console.log('Database schema not found, cannot mark notification as read');
       return false;
     }
     
@@ -976,10 +887,8 @@ export async function markNotificationAsRead(notificationId: string): Promise<bo
 
     if (error) throw error;
     
-    console.log('Notification marked as read successfully');
     return true;
   } catch (error) {
-    console.log('Error marking notification as read', error);
     return false;
   }
 }
@@ -1018,15 +927,8 @@ export async function createComment(postId: string, content: string): Promise<Po
       .single();
 
     if (error) {
-  console.error('[Queries] Error creating comment:', {
-    message: error.message,
-    details: error.details,
-    hint: error.hint,
-    code: error.code,
-    full: JSON.stringify(error, null, 2),
-  });
-  throw error;
-}
+      throw error;
+    }
 
     // 5. Update post comment count
     const { data: post } = await getSupabase()
@@ -1045,15 +947,8 @@ export async function createComment(postId: string, content: string): Promise<Po
 
     return data;
   } catch (error: any) {
-  console.error('[Queries] Error in createComment function:', {
-    message: error?.message,
-    details: error?.details,
-    hint: error?.hint,
-    code: error?.code,
-    full: JSON.stringify(error, null, 2),
-  });
-  throw error;
-}
+    throw error;
+  }
 }
 
 
@@ -1079,8 +974,6 @@ export async function getPostComments(postId: string, limit?: number): Promise<C
     const { data, error } = await query;
 
     if (error) {
-      console.error('[Queries] Error fetching comments with author data:', error);
-      
       // If the join fails, try fetching comments without author data
 
       let fallbackQuery = getSupabase()
@@ -1097,7 +990,6 @@ export async function getPostComments(postId: string, limit?: number): Promise<C
       const { data: commentsOnly, error: commentsError } = await fallbackQuery;
       
       if (commentsError) {
-        console.error('[Queries] Error fetching comments without author data:', commentsError);
         return [];
       }
       
@@ -1112,7 +1004,7 @@ export async function getPostComments(postId: string, limit?: number): Promise<C
           .in('id', authorIds);
         
         if (authorsError) {
-          console.error('[Queries] Error fetching authors:', authorsError);
+          // Silent error handling for author fetching
         }
         
         // Create author lookup map
@@ -1186,22 +1078,18 @@ export async function likePost(postId: string, userId: string, reactionType: str
         .eq('id', postId);
 
       if (updateError) {
-        console.error('[Queries] Error updating likes count:', updateError);
+        // Silent error handling for likes count update
       }
     }
 
-    console.log('[Queries] Reaction added successfully');
     return true;
   } catch (error) {
-    console.error('[Queries] Error in likePost:', error);
     return false;
   }
 }
 
 export async function unlikePost(postId: string, userId: string): Promise<boolean> {
   try {
-    console.log('[Queries] Unliking post:', postId, 'by user:', userId);
-    
     // Remove like record
     const { error: unlikeError } = await getSupabase()
       .from('post_likes')
@@ -1210,7 +1098,6 @@ export async function unlikePost(postId: string, userId: string): Promise<boolea
       .eq('post_id', postId);
 
     if (unlikeError) {
-      console.error('[Queries] Error removing like:', unlikeError);
       throw unlikeError;
     }
 
@@ -1229,22 +1116,18 @@ export async function unlikePost(postId: string, userId: string): Promise<boolea
         .eq('id', postId);
 
       if (updateError) {
-        console.error('[Queries] Error updating likes count:', updateError);
+        // Silent error handling for likes count update
       }
     }
 
-    console.log('[Queries] Post unliked successfully');
     return true;
   } catch (error) {
-    console.error('[Queries] Error in unlikePost:', error);
     return false;
   }
 }
 
 export async function isPostLiked(userId: string, postId: string): Promise<string | null> {
   try {
-    console.log('[Queries] Checking if post is reacted by user:', userId, 'post:', postId);
-    
     const { data, error } = await getSupabase()
       .from('post_likes')
       .select('reaction_type')
@@ -1253,15 +1136,12 @@ export async function isPostLiked(userId: string, postId: string): Promise<strin
       .limit(1);
 
     if (error) {
-      console.error('[Queries] Error checking reaction status:', error);
       return null;
     }
     
     const reactionType = data && data.length > 0 ? data[0].reaction_type : null;
-    console.log('[Queries] Post reaction status checked:', reactionType);
     return reactionType;
   } catch (error) {
-    console.error('[Queries] Error in isPostLiked:', error);
     return null;
   }
 }
@@ -1269,11 +1149,8 @@ export async function isPostLiked(userId: string, postId: string): Promise<strin
 // Institution functions
 export async function createInstitution(institution: Omit<Institution, 'id' | 'created_at' | 'updated_at'>): Promise<Institution | null> {
   try {
-    console.log('Creating institution', institution);
-    
     const schemaExists = await true;
     if (!schemaExists) {
-      console.log('Database schema not found, cannot create institution');
       return null;
     }
     

@@ -138,7 +138,6 @@ export default function ProfileWizard({ isOpen, onClose, onComplete }: ProfileWi
         onComplete();
       }
     } catch (error) {
-      console.error('Error updating profile:', error);
       toast.error('Failed to update profile. Please try again.');
     } finally {
       setIsSubmitting(false);

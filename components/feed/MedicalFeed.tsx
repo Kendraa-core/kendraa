@@ -146,7 +146,7 @@ export default function MedicalFeed() {
         ]);
       }
     } catch (error) {
-      console.error('Error loading feed content:', error);
+      // Silent error handling for feed content
     } finally {
       setLoading(false);
     }

@@ -46,7 +46,6 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
         toast.error('Failed to create post. Please try again.');
       }
     } catch (error) {
-      console.error('Error creating post:', error);
       toast.error('Failed to create post. Please try again.');
     } finally {
       setIsPosting(false);

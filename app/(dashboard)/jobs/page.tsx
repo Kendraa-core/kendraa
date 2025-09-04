@@ -93,7 +93,7 @@ export default function JobsPage() {
       const profileData = await getProfile(user.id);
       setProfile(profileData);
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      // Silent error handling for profile
     }
   }, [user?.id]);
 
@@ -105,7 +105,7 @@ export default function JobsPage() {
       setJobs(data);
       setFilteredJobs(data);
     } catch (error) {
-      console.error('Error fetching jobs:', error);
+      // Silent error handling for jobs
       toast.error('Failed to load jobs');
     } finally {
       setLoading(false);
@@ -123,7 +123,7 @@ export default function JobsPage() {
       }
       setApplicationStatuses(statuses);
     } catch (error) {
-      console.error('Error checking application statuses:', error);
+      // Silent error handling for application statuses
     }
   }, [user?.id, jobs]);
 
@@ -132,21 +132,16 @@ export default function JobsPage() {
     if (!user?.id || !profile) return;
     
     try {
-      console.log('Fetching job applications for profile:', profile.id);
       const applications: Record<string, JobApplication[]> = {};
       for (const job of jobs) {
-        console.log('Checking job:', { jobId: job.id, postedBy: job.posted_by, profileId: profile.id });
         if (job.posted_by === profile.id) {
-          console.log('Fetching applications for job:', job.id);
           const jobApps = await getJobApplications(job.id);
-          console.log('Applications fetched:', { jobId: job.id, count: jobApps.length });
           applications[job.id] = jobApps;
         }
       }
-      console.log('All applications:', applications);
       setJobApplications(applications);
     } catch (error) {
-      console.error('Error fetching job applications:', error);
+      // Silent error handling for job applications
     }
   }, [user?.id, profile, jobs]);
 
@@ -238,8 +233,6 @@ export default function JobsPage() {
         toast.error('Failed to submit application');
       }
     } catch (error) {
-      console.error('Error submitting application:', error);
-      
       // Handle specific error messages
       if (error instanceof Error) {
         if (error.message === 'You have already applied to this job') {

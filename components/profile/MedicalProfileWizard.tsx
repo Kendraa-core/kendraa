@@ -157,7 +157,7 @@ export default function MedicalProfileWizard({ onComplete, onCancel }: MedicalPr
       await new Promise(resolve => setTimeout(resolve, 2000));
       onComplete(profileData);
     } catch (error) {
-      console.error('Error saving profile:', error);
+      // Silent error handling for profile saving
     } finally {
       setLoading(false);
     }

@@ -99,7 +99,6 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
 
   // Validate post data
   if (!post || !post.id) {
-    console.error('[PostCard] Invalid post data:', post);
     return (
       <div className="bg-white rounded-xl shadow-sm p-6">
         <p className="text-red-500">Error: Invalid post data</p>

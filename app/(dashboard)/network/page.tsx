@@ -54,7 +54,7 @@ export default function NetworkPage() {
 
   const debugLog = (message: string, data?: unknown) => {
     if (process.env.NODE_ENV === 'development') {
-      console.log(`[Network] ${message}`, data);
+      // Network debug log
     }
   };
 
