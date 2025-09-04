@@ -733,7 +733,7 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
             
             {/* Benefits Card */}
             <div className="bg-white border-2 border-[#007fff]/10 rounded-xl p-6 mb-8 shadow-lg hover:border-[#007fff]/20 transition-all duration-300">
-              <h3 className="font-bold text-[#007fff] mb-6 text-xl">Why complete your profile?</h3>
+              <h3 className="font-bold text-[#007fff] mb-6 text-xl">COLLABORATE, SHARE KNOWLEDGE, CREATE OPPORTUNITIES</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
                 <div className="flex items-start space-x-3">
                   <div className="flex-shrink-0 w-6 h-6 bg-[#007fff] rounded-full flex items-center justify-center">
