@@ -760,28 +760,6 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                   <span className="text-black text-sm font-medium">Access exclusive healthcare content</span>
                 </div>
               </div>
-              
-              {/* Save Button - positioned right below the benefits */}
-              <div className="mt-6 pt-6 border-t border-[#007fff]/20">
-                <button
-                  onClick={handleSave}
-                  disabled={loading}
-                  className={`w-full px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 ${
-                    !loading
-                      ? 'bg-green-500 text-white hover:bg-green-600 hover:shadow-md transform hover:scale-105'
-                      : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  }`}
-                >
-                  {loading ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span>Saving...</span>
-                    </>
-                  ) : (
-                    <span>Save Progress</span>
-                  )}
-                </button>
-              </div>
             </div>
           </div>
         );
@@ -855,7 +833,7 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                 disabled={loading}
                 className={`w-full px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 ${
                   !loading
-                    ? 'bg-green-500 text-white hover:bg-green-600 hover:shadow-md transform hover:scale-105'
+                    ? 'bg-[#007fff] text-white hover:bg-[#007fff]/90 hover:shadow-md transform hover:scale-105'
                     : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                 }`}
               >
@@ -922,7 +900,7 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                 disabled={loading}
                 className={`w-full px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 ${
                   !loading
-                    ? 'bg-green-500 text-white hover:bg-green-600 hover:shadow-md transform hover:scale-105'
+                    ? 'bg-[#007fff] text-white hover:bg-[#007fff]/90 hover:shadow-md transform hover:scale-105'
                     : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                 }`}
               >
@@ -989,7 +967,7 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                 disabled={loading}
                 className={`w-full px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 ${
                   !loading
-                    ? 'bg-green-500 text-white hover:bg-green-600 hover:shadow-md transform hover:scale-105'
+                    ? 'bg-[#007fff] text-white hover:bg-[#007fff]/90 hover:shadow-md transform hover:scale-105'
                     : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                 }`}
               >
@@ -997,7 +975,7 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     <span>Saving...</span>
-                  </>
+                </>
                 ) : (
                   <span>Save Progress</span>
                 )}
@@ -1077,7 +1055,7 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                     <button
                       onClick={handleSave}
                       disabled={loading}
-                      className="flex-1 px-6 py-3 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors font-semibold flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                      className="flex-1 px-6 py-3 bg-[#007fff] text-white rounded-xl hover:bg-[#007fff]/90 transition-colors font-semibold flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                     >
                       <CheckCircleIcon className="w-5 h-5" />
                       <span>Save Photo</span>
@@ -1975,7 +1953,7 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                 disabled={loading}
                 className={`w-full px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 ${
                   !loading
-                    ? 'bg-green-500 text-white hover:bg-green-600 hover:shadow-md transform hover:scale-105'
+                    ? 'bg-[#007fff] text-white hover:bg-[#007fff]/90 hover:shadow-md transform hover:scale-105'
                     : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                 }`}
               >
@@ -2112,24 +2090,7 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                       </>
                     )}
                   </button>
-                  <button
-                    onClick={handleSave}
-                    disabled={loading}
-                    className={`px-4 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 ${
-                      !loading
-                        ? 'bg-green-500 text-white hover:bg-green-600 hover:shadow-md'
-                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    }`}
-                  >
-                    {loading ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        <span>Saving...</span>
-                      </>
-                    ) : (
-                      <span>Save</span>
-                    )}
-                  </button>
+
                 </>
               ) : (
                 <button
@@ -2148,7 +2109,7 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                     }
                   }}
                   disabled={loading}
-                  className="px-8 py-3 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-8 py-3 bg-[#007fff] text-white rounded-xl font-medium hover:bg-[#007fff]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                    {loading || uploading ? 'Completing...' : 'Get Started'}
                 </button>

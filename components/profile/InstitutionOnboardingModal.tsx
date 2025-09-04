@@ -570,7 +570,7 @@ export default function InstitutionOnboardingModal({
                     disabled={loading || savingInBackground}
                     className={`px-4 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 ${
                       !loading && !savingInBackground
-                        ? 'bg-green-500 text-white hover:bg-green-600 hover:shadow-md'
+                        ? 'bg-[#007fff] text-white hover:bg-[#007fff]/90 hover:shadow-md'
                         : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                     }`}
                   >
@@ -588,7 +588,7 @@ export default function InstitutionOnboardingModal({
                 <button
                   onClick={handleComplete}
                   disabled={loading}
-                  className="px-8 py-3 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-8 py-3 bg-[#007fff] text-white rounded-xl font-medium hover:bg-[#007fff]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? 'Completing...' : 'Get Started'}
                 </button>
