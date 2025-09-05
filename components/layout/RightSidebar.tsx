@@ -230,24 +230,33 @@ export default function RightSidebar() {
         {suggestedConnections.length > 0 ? (
           <div className="space-y-3">
             {suggestedConnections.map((connection) => (
-              <div key={connection.id} className="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all duration-200">
-                <Avatar
-                  src={connection.avatar_url}
-                  alt={connection.full_name || 'User'}
-                  size="sm"
-                />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    {connection.full_name || 'Unknown User'}
-                  </p>
-                  <p className="text-xs text-gray-500 truncate">
-                    {connection.headline || 'Healthcare Professional'}
-                  </p>
+              <Link key={connection.id} href={`/profile/${connection.id}`} className="block">
+                <div className="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all duration-200 cursor-pointer">
+                  <Avatar
+                    src={connection.avatar_url}
+                    alt={connection.full_name || 'User'}
+                    size="sm"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate hover:text-[#007fff] transition-colors">
+                      {connection.full_name || 'Unknown User'}
+                    </p>
+                    <p className="text-xs text-gray-500 truncate">
+                      {connection.headline || 'Healthcare Professional'}
+                    </p>
+                  </div>
+                  <button 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      // TODO: Implement connection request
+                    }}
+                    className="text-xs font-medium text-azure-500 hover:text-azure-600 bg-white px-2 py-1 rounded-lg border border-azure-200 hover:border-azure-300 transition-all duration-200"
+                  >
+                    Connect
+                  </button>
                 </div>
-                <button className="text-xs font-medium text-azure-500 hover:text-azure-600 bg-white px-2 py-1 rounded-lg border border-azure-200 hover:border-azure-300 transition-all duration-200">
-                  Connect
-                </button>
-              </div>
+              </Link>
             ))}
           </div>
         ) : (

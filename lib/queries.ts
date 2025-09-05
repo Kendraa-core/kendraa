@@ -260,7 +260,8 @@ export async function getPostsByAuthor(authorId: string): Promise<PostWithAuthor
       .single();
     
     if (authorError) {
-      // Silent error handling for author fetching
+      console.error('Error fetching author profile:', authorError);
+      console.error('Author ID:', authorId);
       // Return posts without author info
       return posts.map(post => ({
         ...post,

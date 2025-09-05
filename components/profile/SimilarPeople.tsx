@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import Avatar from '@/components/common/Avatar';
 import { Button } from '@/components/ui/Button';
@@ -86,21 +87,27 @@ export default function SimilarPeople() {
         <div className="space-y-4">
           {similarPeople.map((person) => (
             <div key={person.id} className="flex items-center space-x-3">
-              <Avatar
-                src={person.avatar_url}
-                alt={person.full_name || 'User'}
-                size="sm"
-              />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
-                  {person.full_name || 'Anonymous User'}
-                </p>
-                <p className="text-xs text-gray-500 truncate">
-                  {person.headline || 'Healthcare Professional'}
-                </p>
-              </div>
+              <Link href={`/profile/${person.id}`} className="flex items-center space-x-3 flex-1 min-w-0">
+                <Avatar
+                  src={person.avatar_url}
+                  alt={person.full_name || 'User'}
+                  size="sm"
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate hover:text-[#007fff] transition-colors">
+                    {person.full_name || 'Anonymous User'}
+                  </p>
+                  <p className="text-xs text-gray-500 truncate">
+                    {person.headline || 'Healthcare Professional'}
+                  </p>
+                </div>
+              </Link>
               <Button
-                onClick={() => handleConnect(person.id)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleConnect(person.id);
+                }}
                 size="sm"
                 className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 text-xs"
               >
