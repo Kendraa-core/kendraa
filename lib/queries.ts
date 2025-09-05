@@ -245,6 +245,7 @@ export async function getPostsByAuthor(authorId: string): Promise<PostWithAuthor
       .order('created_at', { ascending: false });
 
     if (postsError) {
+      console.error('Error fetching posts:', postsError);
       return [];
     }
     
@@ -252,12 +253,11 @@ export async function getPostsByAuthor(authorId: string): Promise<PostWithAuthor
       return [];
     }
     
-    // Fetch author separately
-    const { data: author, error: authorError } = await getSupabase()
+    // Fetch author using the same approach as getPosts() - use .in() instead of .single()
+    const { data: authors, error: authorError } = await getSupabase()
       .from('profiles')
       .select('id, full_name, avatar_url, headline, email')
-      .eq('id', authorId)
-      .single();
+      .in('id', [authorId]);
     
     if (authorError) {
       console.error('Error fetching author profile:', authorError);
@@ -275,6 +275,9 @@ export async function getPostsByAuthor(authorId: string): Promise<PostWithAuthor
       }));
     }
     
+    // Get the author from the results (should be first and only result)
+    const author = authors && authors.length > 0 ? authors[0] : null;
+    
     // Combine posts with author
     const postsWithAuthor = posts.map(post => ({
       ...post,
@@ -286,9 +289,10 @@ export async function getPostsByAuthor(authorId: string): Promise<PostWithAuthor
         email: ''
       }
     }));
-    
+
     return postsWithAuthor;
   } catch (error) {
+    console.error('Error in getPostsByAuthor:', error);
     return [];
   }
 }
