@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/Button';
 import Avatar from '@/components/common/Avatar';
 import Breadcrumb from '@/components/common/Breadcrumb';
 import EditProfileModal from '@/components/profile/EditProfileModal';
-import ProfileImageEditor from '@/components/profile/ProfileImageEditor';
+import EnhancedProfileImageEditor from '@/components/profile/EnhancedProfileImageEditor';
 import PostCard from '@/components/post/PostCard';
 import SimilarPeople from '@/components/profile/SimilarPeople';
 import { cn, formatDate, formatNumber } from '@/lib/utils';
@@ -1368,10 +1368,10 @@ export default function ProfilePage() {
                   {/* Contact Info Section */}
                   <div className="flex items-center gap-6 pt-2">
                     {editingField === 'location' ? (
-                      <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3">
                         <div className="w-5 h-5 bg-gray-100 rounded-full flex items-center justify-center">
                           <MapPinIcon className="w-3 h-3 text-gray-500" />
-                        </div>
+                  </div>
                         <input
                           type="text"
                           value={editValues.location || profile.location || ''}
@@ -1392,7 +1392,7 @@ export default function ProfilePage() {
                           >
                             <XCircleIcon className="w-3 h-3" />
                           </button>
-                        </div>
+                </div>
                       </div>
                     ) : (
                       <div className="flex items-center gap-2 text-gray-600 group">
@@ -1402,7 +1402,7 @@ export default function ProfilePage() {
                         <p className="text-sm font-medium group-hover:text-[#007fff] transition-colors duration-200">
                           {profile.location || 'No location set'}
                         </p>
-                  {isOwnProfile && (
+                {isOwnProfile && (
                     <button 
                             onClick={() => startEdit('location', profile.location)}
                             className="opacity-0 group-hover:opacity-100 p-1 text-[#007fff] hover:bg-[#007fff]/10 rounded-full transition-all duration-200"
@@ -1444,7 +1444,7 @@ export default function ProfilePage() {
                         <p className="text-xs text-gray-500 mt-1">
                           Current Position
                         </p>
-                      </div>
+              </div>
                     </div>
                   )}
                   
@@ -1486,7 +1486,7 @@ export default function ProfilePage() {
                           >
                             <CheckIcon className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
                             Following
-                          </button>
+                    </button>
                         ) : (
                           <button
                             onClick={handleConnect}
@@ -1524,7 +1524,7 @@ export default function ProfilePage() {
                         <EnvelopeIcon className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
                         Message
                       </button>
-                      </div>
+                </div>
                   )}
                     </div>
                   </div>
@@ -1556,15 +1556,15 @@ export default function ProfilePage() {
                           <BuildingOfficeIcon className="w-5 h-5 text-[#007fff]" />
                           Experience
                         </h2>
-              {isOwnProfile && (
-                          <button
+                  {isOwnProfile && (
+                    <button 
                             onClick={() => startEdit('add_experience', {})}
                             className="text-[#007fff] hover:text-[#007fff]/80 text-sm font-medium hover:underline transition-colors duration-200"
-                          >
+                    >
                             Add Experience
-                          </button>
-                        )}
-                      </div>
+                    </button>
+                  )}
+                </div>
                     </div>
                     <div className="p-6">
                       {editingField === 'add_experience' ? (
@@ -1590,8 +1590,8 @@ export default function ProfilePage() {
                                   onChange={(e) => setEditValues(prev => ({ ...prev, new_experience_title: e.target.value }))}
                                   className="w-full p-4 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-4 focus:ring-[#007fff]/10 transition-all duration-300 bg-white/80 backdrop-blur-sm"
                                 />
-                              </div>
-                              
+          </div>
+
                               <div className="space-y-3">
                                 <label className="text-sm font-semibold text-[#007fff] flex items-center gap-2">
                                   <BuildingOfficeIcon className="w-4 h-4" />
@@ -1632,8 +1632,8 @@ export default function ProfilePage() {
                                       <option key={year} value={year}>{year}</option>
                                     ))}
                                   </select>
-                                </div>
-                              </div>
+                      </div>
+                    </div>
                               
                               <div className="space-y-3">
                                 <label className="text-sm font-semibold text-[#007fff] flex items-center gap-2">
@@ -1661,8 +1661,8 @@ export default function ProfilePage() {
                                       <option key={year} value={year}>{year}</option>
                                     ))}
                                   </select>
-                                </div>
-                              </div>
+                  </div>
+                  </div>
                               
                               <div className="space-y-3">
                                 <label className="text-sm font-semibold text-[#007fff] flex items-center gap-2">
@@ -1958,7 +1958,7 @@ export default function ProfilePage() {
         
         {/* Modals */}
         {showImageEditor && profile && (
-          <ProfileImageEditor
+          <EnhancedProfileImageEditor
             isOpen={showImageEditor}
             onClose={() => setShowImageEditor(false)}
             onUpdate={() => {
