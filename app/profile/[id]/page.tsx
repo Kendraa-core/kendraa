@@ -25,7 +25,6 @@ import {
   BriefcaseIcon,
   AcademicCapIcon,
   UserPlusIcon,
-  EyeIcon,
   ShareIcon,
   UserGroupIcon,
   BookmarkIcon,
@@ -37,14 +36,10 @@ import {
   StarIcon,
   BuildingOfficeIcon,
   UserIcon,
-  SparklesIcon,
   FireIcon,
   BellIcon,
   XCircleIcon,
   ClockIcon,
-  BeakerIcon,
-  HeartIcon,
-  ShieldCheckIcon,
   DocumentTextIcon
 } from '@heroicons/react/24/outline';
 import { CheckBadgeIcon, BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
@@ -120,16 +115,6 @@ const getMonthIndex = (monthName: string): number => {
   return months.indexOf(monthName);
 };
 
-// Medical specialization badges mapping
-const MEDICAL_SPECIALIZATIONS = {
-  'Cardiology': { color: 'bg-red-100 text-red-700 border-red-200', icon: HeartIcon },
-  'Neurology': { color: 'bg-purple-100 text-purple-700 border-purple-200', icon: BeakerIcon },
-  'Oncology': { color: 'bg-pink-100 text-pink-700 border-pink-200', icon: ShieldCheckIcon },
-  'Pediatrics': { color: 'bg-blue-100 text-blue-700 border-blue-200', icon: UserIcon },
-  'Radiology': { color: 'bg-indigo-100 text-indigo-700 border-indigo-200', icon: EyeIcon },
-  'Surgery': { color: 'bg-green-100 text-green-700 border-green-200', icon: SparklesIcon },
-  'Default': { color: 'bg-[#007fff]/10 text-[#007fff] border-[#007fff]/20', icon: UserIcon }
-};
 
 // Contact Info Modal Component
 const ContactInfoModal = React.memo(function ContactInfoModal({ profile, isOpen, onClose }: {
@@ -780,20 +765,6 @@ const SidebarCard = React.memo(function SidebarCard({ profile, isOwnProfile }: {
 }) {
   return (
     <div className="space-y-6">
-      {/* Medical Interests */}
-      <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
-        <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <BeakerIcon className="w-5 h-5 text-[#007fff]" />
-          Medical Interests
-        </h4>
-        <div className="space-y-2">
-          {['Cardiology', 'Research', 'Innovation', 'Patient Care'].map((interest, index) => (
-            <span key={index} className="inline-block bg-[#007fff]/10 text-[#007fff] px-3 py-1.5 rounded-full text-xs font-medium mr-2 mb-2">
-              {interest}
-            </span>
-          ))}
-        </div>
-      </div>
 
       {/* Similar Professionals */}
       <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
@@ -1163,55 +1134,18 @@ export default function ProfilePage() {
     setEditValues({});
   };
 
-  const handleSpecializationChange = (specialization: string, action: 'add' | 'remove') => {
-    if (!profile) return;
-    
-    const currentSpecializations = profile.specialization || [];
-    let newSpecializations: string[];
-    
-    if (action === 'add') {
-      newSpecializations = [...currentSpecializations, specialization];
-    } else {
-      newSpecializations = currentSpecializations.filter(s => s !== specialization);
-    }
-    
-    setEditValues(prev => ({
-      ...prev,
-      specialization: newSpecializations
-    }));
-  };
-
-  const saveSpecializationEdit = async () => {
-    if (!profile || !user) return;
-    
-    try {
-      const updates = { specialization: editValues.specialization };
-      const updatedProfile = await updateProfile(profile.id, updates);
-      
-      // Update local state
-      setProfile(updatedProfile);
-      setEditingField(null);
-      setEditValues({});
-      
-      toast.success('Specializations updated successfully');
-    } catch (error) {
-      console.error('Error updating specializations:', error);
-      toast.error('Failed to update specializations');
-    }
-  };
 
   const getProfileCompletionPercentage = () => {
     if (!profile) return 0;
     
     let score = 0;
-    if (profile.full_name) score += 20;
-    if (profile.headline) score += 15;
-    if (profile.bio) score += 15;
-    if (profile.avatar_url) score += 10;
+    if (profile.full_name) score += 25;
+    if (profile.headline) score += 20;
+    if (profile.bio) score += 20;
+    if (profile.avatar_url) score += 15;
     if (profile.location) score += 10;
-    if (profile.specialization && profile.specialization.length > 0) score += 10;
-    if (experiences.length > 0) score += 10;
-    if (education.length > 0) score += 10;
+    if (experiences.length > 0) score += 5;
+    if (education.length > 0) score += 5;
     
     return Math.min(score, 100);
   };
@@ -1418,100 +1352,6 @@ export default function ProfilePage() {
 
                   {/* Action Button - Removed "Open to work" as it's not applicable for medical professionals */}
                   
-                  {/* Medical Specializations */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Specializations</h3>
-                      {isOwnProfile && editingField !== 'specialization' && (
-                    <button 
-                          onClick={() => startEdit('specialization', profile.specialization || [])}
-                          className="text-[#007fff] hover:text-[#007fff]/80 text-xs font-medium hover:underline transition-colors duration-200"
-                    >
-                          Edit
-                    </button>
-                )}
-              </div>
-              
-                    {editingField === 'specialization' ? (
-                      <div className="space-y-3">
-                        <div className="flex flex-wrap gap-2">
-                          {(editValues.specialization || profile.specialization || []).map((spec, index) => {
-                            const badgeStyle = MEDICAL_SPECIALIZATIONS[spec as keyof typeof MEDICAL_SPECIALIZATIONS] || MEDICAL_SPECIALIZATIONS.Default;
-                            const IconComponent = badgeStyle.icon;
-                            return (
-                              <span key={index} className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium border ${badgeStyle.color} group`}>
-                                <IconComponent className="w-3 h-3 mr-1.5" />
-                                {spec}
-                                <button
-                                  onClick={() => handleSpecializationChange(spec, 'remove')}
-                                  className="ml-2 opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-700 transition-all duration-200"
-                                >
-                                  <XCircleIcon className="w-3 h-3" />
-                                </button>
-                              </span>
-                            );
-                          })}
-                        </div>
-                        
-                        {/* Add new specialization */}
-                        <div className="flex items-center gap-2">
-                          <select
-                            onChange={(e) => {
-                              if (e.target.value) {
-                                handleSpecializationChange(e.target.value, 'add');
-                                e.target.value = '';
-                              }
-                            }}
-                            className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#007fff]"
-                            defaultValue=""
-                          >
-                            <option value="">Add specialization...</option>
-                            {Object.keys(MEDICAL_SPECIALIZATIONS).filter(key => key !== 'Default').map(spec => (
-                              <option key={spec} value={spec}>{spec}</option>
-                            ))}
-                          </select>
-                        </div>
-                        
-                        {/* Action buttons */}
-                        <div className="flex gap-2">
-                          <button
-                            onClick={saveSpecializationEdit}
-                            className="px-3 py-1.5 bg-green-500 text-white text-sm rounded-lg hover:bg-green-600 transition-colors"
-                          >
-                            Save
-                    </button>
-                          <button
-                            onClick={cancelEdit}
-                            className="px-3 py-1.5 bg-gray-500 text-white text-sm rounded-lg hover:bg-gray-600 transition-colors"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      profile.specialization && profile.specialization.length > 0 ? (
-                        <div className="flex flex-wrap gap-3">
-                          {profile.specialization.slice(0, 3).map((spec, index) => {
-                            const badgeStyle = MEDICAL_SPECIALIZATIONS[spec as keyof typeof MEDICAL_SPECIALIZATIONS] || MEDICAL_SPECIALIZATIONS.Default;
-                            const IconComponent = badgeStyle.icon;
-                            return (
-                              <span key={index} className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium border-2 ${badgeStyle.color} hover:scale-105 transition-all duration-300 shadow-sm hover:shadow-md`}>
-                                <IconComponent className="w-4 h-4 mr-2" />
-                                {spec}
-                              </span>
-                            );
-                          })}
-                          {profile.specialization.length > 3 && (
-                            <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 border-2 border-gray-200 hover:bg-gray-200 transition-colors duration-200">
-                              +{profile.specialization.length - 3} more
-                            </span>
-                  )}
-                </div>
-              ) : (
-                        <p className="text-gray-500 text-sm italic">No specializations added yet</p>
-                      )
-                    )}
-                  </div>
 
                   {/* Contact Info Section */}
                   <div className="flex items-center gap-6 pt-2">
