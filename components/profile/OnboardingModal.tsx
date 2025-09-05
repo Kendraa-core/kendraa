@@ -52,60 +52,60 @@ const ONBOARDING_STEPS = [
   },
   {
     id: 'name',
-    title: 'What\'s your full name?',
+    title: 'What\'s your full name? *',
     subtitle: 'This is how other professionals will see you',
     type: 'input',
     field: 'full_name',
     placeholder: 'Enter your full name',
-    required: false
+    required: true
   },
   {
     id: 'headline',
-    title: 'What\'s your professional headline?',
+    title: 'What\'s your professional headline? *',
     subtitle: 'A brief description of your role and expertise',
     type: 'input',
     field: 'headline',
     placeholder: 'e.g., Cardiologist at Mayo Clinic',
-    required: false
+    required: true
   },
 
   {
     id: 'bio',
-    title: 'Tell us about yourself',
+    title: 'Tell us about yourself *',
     subtitle: 'Share your professional background and interests',
     type: 'textarea',
     field: 'bio',
     placeholder: 'Describe your experience, achievements, and what drives you in healthcare...',
-    required: false
+    required: true
   },
   {
     id: 'contact',
-    title: 'Contact Information',
+    title: 'Contact Information *',
     subtitle: 'How can other professionals reach you?',
     type: 'contact',
-    required: false
+    required: true
   },
   {
     id: 'experience',
-    title: 'Add your work experience',
-    subtitle: 'Share your professional experience to build credibility (optional for testing)',
+    title: 'Add your work experience *',
+    subtitle: 'Share your professional experience to build credibility',
     type: 'experience',
-    required: false
+    required: true
   },
   {
     id: 'education',
-    title: 'Add your education',
-    subtitle: 'Include your academic background and qualifications (optional for testing)',
+    title: 'Add your education *',
+    subtitle: 'Include your academic background and qualifications',
     type: 'education',
-    required: false
+    required: true
   },
   {
     id: 'avatar',
-    title: 'Add a profile picture',
-    subtitle: 'A professional photo helps build trust with connections (optional)',
+    title: 'Add a profile picture *',
+    subtitle: 'A professional photo helps build trust with connections',
     type: 'image',
     field: 'avatar_url',
-    required: false
+    required: true
   },
 
 ];
@@ -663,9 +663,31 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
   const canProceed = () => {
     const currentStepData = filteredSteps[currentStep];
     
-    // Always allow proceeding for seamless navigation
-    // Data validation and saving happens in background
-    return true;
+    if (!currentStepData.required) {
+      return true; // Welcome and student-selection steps
+    }
+    
+    // Validate required fields based on step type
+    switch (currentStepData.type) {
+      case 'input':
+        return !!(formData[currentStepData.field as keyof typeof formData] as string)?.trim();
+      case 'textarea':
+        return !!(formData[currentStepData.field as keyof typeof formData] as string)?.trim();
+      case 'contact':
+        return !!(formData.phone?.trim() && formData.email?.trim() && formData.country?.trim());
+      case 'experience':
+        return experiences.length > 0 && experiences.some(exp => 
+          exp.title?.trim() && exp.company?.trim() && (exp.start_month || exp.start_year)
+        );
+      case 'education':
+        return educations.length > 0 && educations.some(edu => 
+          edu.degree?.trim() && edu.school?.trim() && (edu.start_month || edu.start_year)
+        );
+      case 'image':
+        return !!(avatarPreview || formData.avatar_url);
+      default:
+        return true;
+    }
   };
 
   const handleSkip = () => {
@@ -695,50 +717,29 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         return (
           <div className="text-center max-w-4xl mx-auto px-6">
             {/* Logo Section */}
-            <div className="mb-8">
+            <div className="mb-12">
               <img 
                 src="/Kendraa Logo (1).png" 
                 alt="Kendraa Logo" 
-                className="h-32 md:h-48 lg:h-56 w-auto mx-auto drop-shadow-xl"
+                className="h-24 md:h-32 lg:h-40 w-auto mx-auto drop-shadow-lg"
               />
             </div>
             
             {/* Typography */}
-            <h2 className="text-3xl md:text-4xl font-bold text-black mb-4 leading-tight" 
-                dangerouslySetInnerHTML={{ __html: step.title }}>
-            </h2>
-            <p className="text-lg md:text-xl text-gray-700 mb-8 leading-relaxed max-w-2xl mx-auto">
-              {step.subtitle}
-            </p>
+            <div className="space-y-6">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight" 
+                  dangerouslySetInnerHTML={{ __html: step.title }}>
+              </h2>
+              <p className="text-xl md:text-2xl text-gray-600 leading-relaxed max-w-3xl mx-auto">
+                {step.subtitle}
+              </p>
+            </div>
             
-            {/* Benefits Card */}
-            <div className="bg-white border-2 border-[#007fff]/10 rounded-xl p-6 mb-8 shadow-lg hover:border-[#007fff]/20 transition-all duration-300">
-              <h3 className="font-bold text-[#007fff] mb-6 text-xl">COLLABORATE, SHARE KNOWLEDGE, CREATE OPPORTUNITIES</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 w-6 h-6 bg-[#007fff] rounded-full flex items-center justify-center">
-                    <CheckCircleIcon className="w-4 h-4 text-white" />
-                  </div>
-                  <span className="text-black text-sm font-medium">Build trust with other healthcare professionals</span>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 w-6 h-6 bg-[#007fff] rounded-full flex items-center justify-center">
-                    <CheckCircleIcon className="w-4 h-4 text-white" />
-                  </div>
-                  <span className="text-black text-sm font-medium">Get personalized job recommendations</span>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 w-6 h-6 bg-[#007fff] rounded-full flex items-center justify-center">
-                    <CheckCircleIcon className="w-4 h-4 text-white" />
-                  </div>
-                  <span className="text-black text-sm font-medium">Connect with relevant industry professionals</span>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 w-6 h-6 bg-[#007fff] rounded-full flex items-center justify-center">
-                    <CheckCircleIcon className="w-4 h-4 text-white" />
-                  </div>
-                  <span className="text-black text-sm font-medium">Access exclusive healthcare content</span>
-                </div>
+            {/* Call to Action */}
+            <div className="mt-12">
+              <div className="inline-flex items-center space-x-2 text-[#007fff] font-semibold text-lg">
+                <span>Let&apos;s get started</span>
+                <ArrowRightIcon className="w-5 h-5" />
               </div>
             </div>
           </div>
@@ -1054,18 +1055,6 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                 )}
               </div>
               
-            {!step.required && (
-                <motion.div 
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="mt-6 p-3 bg-[#007fff]/5 rounded-xl"
-                >
-                  <p className="text-sm text-[#007fff] flex items-center justify-center">
-                    <ExclamationTriangleIcon className="w-4 h-4 mr-2" />
-                This step is optional - you can skip it
-              </p>
-                </motion.div>
-            )}
             </motion.div>
           </div>
         );
@@ -1266,7 +1255,7 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                     {/* Description */}
                     <div className="lg:col-span-2 space-y-2">
                       <label className="block text-sm font-semibold text-[#007fff]">
-                        Description (optional)
+                        Description
                       </label>
                   <textarea
                         placeholder="Describe your responsibilities, achievements, and key projects..."
@@ -1546,7 +1535,7 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                     {/* Description */}
                     <div className="lg:col-span-2 space-y-2">
                       <label className="block text-sm font-semibold text-[#007fff]">
-                        Description (optional)
+                        Description
                       </label>
                   <textarea
                         placeholder="Describe your achievements, coursework, research, or special recognitions..."
@@ -1654,7 +1643,7 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-[#007fff]">
-                    Phone Number
+                    Phone Number *
                   </label>
                   <div className="relative">
                     <PhoneIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-black/40" />
@@ -1670,7 +1659,7 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
 
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-[#007fff]">
-                    Email Address
+                    Email Address *
                   </label>
                   <div className="relative">
                     <EnvelopeIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-black/40" />
@@ -1686,7 +1675,7 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
 
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-[#007fff]">
-                    Website (optional)
+                    Website
                   </label>
                   <div className="relative">
                     <GlobeAltIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-black/40" />
@@ -1913,18 +1902,6 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
 
             </div>
             
-            {!step.required && (
-                <motion.div 
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="mt-6 p-3 bg-[#007fff]/5 rounded-xl"
-                >
-                  <p className="text-sm text-[#007fff] flex items-center justify-center">
-                    <ExclamationTriangleIcon className="w-4 h-4 mr-2" />
-                This step is optional - you can skip it
-              </p>
-                </motion.div>
-            )}
             
             {/* Save Button - positioned below the contact fields */}
             <div className="mt-6 pt-6 border-t border-[#007fff]/20">
@@ -1971,9 +1948,9 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-[#007fff]/5 flex flex-col">
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm shadow-lg border-b border-gray-200/50">
+      <div className="bg-white/90 backdrop-blur-md shadow-sm border-b border-gray-100">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -1983,7 +1960,7 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                 className={`p-3 rounded-xl transition-all duration-200 ${
                   currentStep === 0
                     ? 'text-gray-400 cursor-not-allowed'
-                    : 'text-gray-600 hover:bg-azure-50 hover:text-azure-600'
+                    : 'text-gray-600 hover:bg-[#007fff]/10 hover:text-[#007fff]'
                 }`}
               >
                 <ChevronLeftIcon className="w-6 h-6" />
@@ -2000,16 +1977,16 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         </div>
 
         {/* Progress Bar */}
-        <div className="w-full bg-gray-200/50 h-2">
+        <div className="w-full bg-gray-100 h-1">
           <div
-            className="bg-gradient-to-r from-azure-500 to-blue-500 h-2 transition-all duration-500 ease-out"
+            className="bg-[#007fff] h-1 transition-all duration-500 ease-out"
             style={{ width: `${((currentStep + 1) / filteredSteps.length) * 100}%` }}
           ></div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="flex-1 flex items-center justify-center py-12 px-4 sm:px-6">
+      <div className="flex-1 flex items-center justify-center py-16 px-4 sm:px-6">
         <div className="w-full max-w-5xl">
           <AnimatePresence mode="wait">
             <motion.div
@@ -2018,9 +1995,9 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.4, ease: "easeOut" }}
-              className="flex items-center justify-center min-h-[500px]"
+              className="flex items-center justify-center min-h-[600px]"
             >
-              <div className="w-full bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8">
+              <div className="w-full bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/30 p-8 md:p-12">
               {renderStep()}
               </div>
             </motion.div>
@@ -2029,19 +2006,16 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
       </div>
 
       {/* Footer */}
-      <div className="bg-white/80 backdrop-blur-sm border-t border-gray-200/50">
+      <div className="bg-white/90 backdrop-blur-md border-t border-gray-100">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
           <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-3">
-
-            
-
             <div className="flex justify-center space-x-3 w-full">
               {currentStep < filteredSteps.length - 1 ? (
                 <>
                   <button
                     onClick={handlePrevious}
                     disabled={currentStep === 0}
-                    className={`px-4 py-3 rounded-xl font-semibold transition-all duration-200 ${
+                    className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
                       currentStep === 0
                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md'
@@ -2052,9 +2026,9 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                   <button
                     onClick={handleNext}
                     disabled={!canProceed() || loading || uploading}
-                    className={`px-4 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg ${
+                    className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg ${
                       canProceed() && !loading
-                        ? 'bg-gradient-to-r from-azure-500 to-blue-500 text-white hover:from-azure-600 hover:to-blue-600 hover:shadow-xl transform hover:scale-105'
+                        ? 'bg-[#007fff] text-white hover:bg-[#007fff]/90 hover:shadow-xl transform hover:scale-105'
                         : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                     }`}
                   >
@@ -2070,7 +2044,6 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                       </>
                     )}
                   </button>
-
                 </>
               ) : (
                 <button
@@ -2088,7 +2061,7 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                     }
                   }}
                   disabled={loading}
-                  className="px-8 py-3 bg-[#007fff] text-white rounded-xl font-medium hover:bg-[#007fff]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-8 py-3 bg-[#007fff] text-white rounded-xl font-semibold hover:bg-[#007fff]/90 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
                    {loading || uploading ? 'Completing...' : 'Get Started'}
                 </button>
