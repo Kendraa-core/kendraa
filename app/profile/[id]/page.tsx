@@ -994,22 +994,28 @@ export default function ProfilePage() {
           company: editValues[`experience_${experienceId}_company`],
           description: editValues[`experience_${experienceId}_description`],
           start_date: expStartDate,
-          end_date: expEndDate,
-          location: editValues[`experience_${experienceId}_location`],
+          end_date: expEndDate || null,
+          location: editValues[`experience_${experienceId}_location`] || null,
           current: !expEndDate
         };
         
-        await updateExperience(experienceId, experienceUpdates);
-        
-        // Update local state
-        const updatedExperiences = experiences.map(exp => 
-          exp.id === experienceId ? { ...exp, ...experienceUpdates } : exp
-        );
-        setExperiences(updatedExperiences);
-        
-        setEditingField(null);
-        setEditValues({});
-        toast.success('Experience updated successfully');
+        try {
+          await updateExperience(experienceId, experienceUpdates);
+          
+          // Update local state
+          const updatedExperiences = experiences.map(exp => 
+            exp.id === experienceId ? { ...exp, ...experienceUpdates } : exp
+          );
+          setExperiences(updatedExperiences);
+          
+          setEditingField(null);
+          setEditValues({});
+          toast.success('Experience updated successfully');
+        } catch (error) {
+          console.error('Error updating experience:', error);
+          toast.error('Failed to update experience. Please try again.');
+          return;
+        }
         return; // Don't continue with profile update
       } else if (fieldName.startsWith('education_') && !fieldName.startsWith('add_')) {
         const educationId = fieldName.split('_')[1];
@@ -1023,23 +1029,29 @@ export default function ProfilePage() {
         const educationUpdates = {
           degree: editValues[`education_${educationId}_degree`],
           school: editValues[`education_${educationId}_school`],
-          field: editValues[`education_${educationId}_field`],
+          field: editValues[`education_${educationId}_field`] || null,
           start_date: eduStartDate,
-          end_date: eduEndDate,
+          end_date: eduEndDate || null,
           current: !eduEndDate
         };
         
-        await updateEducation(educationId, educationUpdates);
-        
-        // Update local state
-        const updatedEducation = education.map(edu => 
-          edu.id === educationId ? { ...edu, ...educationUpdates } : edu
-        );
-        setEducation(updatedEducation);
-        
-        setEditingField(null);
-        setEditValues({});
-        toast.success('Education updated successfully');
+        try {
+          await updateEducation(educationId, educationUpdates);
+          
+          // Update local state
+          const updatedEducation = education.map(edu => 
+            edu.id === educationId ? { ...edu, ...educationUpdates } : edu
+          );
+          setEducation(updatedEducation);
+          
+          setEditingField(null);
+          setEditValues({});
+          toast.success('Education updated successfully');
+        } catch (error) {
+          console.error('Error updating education:', error);
+          toast.error('Failed to update education. Please try again.');
+          return;
+        }
         return; // Don't continue with profile update
       } else if (fieldName === 'add_experience') {
          // Handle adding new experience

@@ -661,9 +661,15 @@ export async function updateExperience(experienceId: string, updates: Partial<Ex
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error updating experience:', error);
+      console.error('Experience ID:', experienceId);
+      console.error('Updates:', updates);
+      throw error;
+    }
     return data;
   } catch (error) {
+    console.error('Error updating experience:', error);
     throw error;
   }
 }
@@ -694,9 +700,15 @@ export async function updateEducation(educationId: string, updates: Partial<Educ
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error updating education:', error);
+      console.error('Education ID:', educationId);
+      console.error('Updates:', updates);
+      throw error;
+    }
     return data;
   } catch (error) {
+    console.error('Error updating education:', error);
     throw error;
   }
 }
