@@ -197,7 +197,7 @@ export default function DashboardLayout({
         <div className="flex-1 overflow-y-auto">
           <div className="w-full px-4 sm:px-6 lg:px-8">
             <div className="flex justify-center">
-              <div className="w-full max-w-2xl">
+              <div className={`w-full ${isNetworkPage ? '' : 'max-w-2xl'}`}>
                 <main className="py-8">
                   {children}
                 </main>
@@ -206,11 +206,13 @@ export default function DashboardLayout({
           </div>
         </div>
 
-        <div className="hidden xl:block xl:w-80 xl:flex-shrink-0">
-          <div className="p-6 h-full">
-            <RightSidebar />
+        {!isNetworkPage && (
+          <div className="hidden xl:block xl:w-80 xl:flex-shrink-0">
+            <div className="p-6 h-full">
+              <RightSidebar />
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

@@ -17,7 +17,6 @@ import {
   ClockIcon, 
   UsersIcon, 
   PlusIcon,
-  MagnifyingGlassIcon,
   VideoCameraIcon,
   BuildingOfficeIcon,
   AcademicCapIcon,
@@ -46,7 +45,6 @@ export default function EventsPage() {
   const [events, setEvents] = useState<EventWithRegistration[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'upcoming' | 'registered' | 'my-events'>('upcoming');
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState<string>('all');
   const [selectedFormat, setSelectedFormat] = useState<string>('all');
 
@@ -213,18 +211,14 @@ export default function EventsPage() {
     }
   };
 
-  // Filter events based on search and filters
+  // Filter events based on filters
   const filteredEvents = events.filter(event => {
-    const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         event.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         event.organizer?.full_name.toLowerCase().includes(searchQuery.toLowerCase());
-    
     const matchesType = selectedType === 'all' || event.event_type === selectedType;
     const matchesFormat = selectedFormat === 'all' || 
                          (selectedFormat === 'virtual' && event.is_virtual) ||
                          (selectedFormat === 'in-person' && !event.is_virtual);
     
-    return matchesSearch && matchesType && matchesFormat;
+    return matchesType && matchesFormat;
   });
 
   const upcomingEvents = filteredEvents.filter(event => !event.isRegistered);
@@ -252,21 +246,9 @@ export default function EventsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Search and Filters */}
+      {/* Filters */}
       <div className="bg-white rounded-lg border border-gray-200 p-4">
         <div className="flex flex-col sm:flex-row gap-4">
-          {/* Search */}
-          <div className="flex-1 relative">
-            <MagnifyingGlassIcon className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search events..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent transition-colors"
-            />
-          </div>
-          
           {/* Filters */}
           <div className="flex gap-3">
             <select
