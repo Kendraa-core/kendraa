@@ -1063,20 +1063,20 @@ export default function ProfilePage() {
            : '';
          
          // Validate required fields
-         if (!editValues.new_experience_title?.trim() || !editValues.new_experience_company?.trim() || !newExpStartDate) {
+         if (!editValues.new_experience_title || !editValues.new_experience_company || !newExpStartDate) {
            toast.error('Please fill in all required fields (Title, Company, and Start Date)');
            return;
          }
          
          const newExperienceData = {
            profile_id: profile!.id,
-           title: editValues.new_experience_title.trim(),
-           company: editValues.new_experience_company.trim(),
+           title: editValues.new_experience_title,
+           company: editValues.new_experience_company,
            company_type: 'other' as const,
-           description: editValues.new_experience_description?.trim() || null,
+           description: editValues.new_experience_description || null,
            start_date: newExpStartDate,
            end_date: newExpEndDate || null,
-           location: editValues.new_experience_location?.trim() || null,
+           location: editValues.new_experience_location || null,
            current: !newExpEndDate,
            specialization: []
          };
@@ -1098,16 +1098,16 @@ export default function ProfilePage() {
            : '';
          
          // Validate required fields
-         if (!editValues.new_education_degree?.trim() || !editValues.new_education_school?.trim() || !newEduStartDate) {
+         if (!editValues.new_education_degree || !editValues.new_education_school || !newEduStartDate) {
            toast.error('Please fill in all required fields (Degree, School, and Start Date)');
            return;
          }
          
          const newEducationData = {
            profile_id: profile!.id,
-           school: editValues.new_education_school.trim(),
-           degree: editValues.new_education_degree.trim(),
-           field: editValues.new_education_field?.trim() || null,
+           school: editValues.new_education_school,
+           degree: editValues.new_education_degree,
+           field: editValues.new_education_field || null,
            specialization: null,
            start_date: newEduStartDate,
            end_date: newEduEndDate || null,
