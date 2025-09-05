@@ -118,7 +118,6 @@ export default function ProfileImageEditor({
       toast.success(`${type === 'avatar' ? 'Profile picture' : 'Cover photo'} removed successfully`);
       onUpdate();
     } catch (error) {
-      console.error(`Error removing ${type}:`, error);
       toast.error(`Failed to remove ${type === 'avatar' ? 'profile picture' : 'cover photo'}`);
     }
   };
@@ -161,7 +160,6 @@ export default function ProfileImageEditor({
       toast.success(`${type === 'avatar' ? 'Profile picture' : 'Cover photo'} updated successfully`);
       onUpdate();
     } catch (error) {
-      console.error(`Error saving ${type}:`, error);
       toast.error(`Failed to save ${type === 'avatar' ? 'profile picture' : 'cover photo'}`);
     } finally {
       setLoadingState(false);
@@ -210,7 +208,6 @@ export default function ProfileImageEditor({
       onUpdate();
       onClose();
     } catch (error) {
-      console.error('Error saving images:', error);
       toast.error('Failed to save images');
     } finally {
       setLoading(false);

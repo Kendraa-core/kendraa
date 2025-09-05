@@ -88,7 +88,6 @@ export default function UserSearch() {
         const searchResults = await searchUsers(query.trim());
         setResults(searchResults);
       } catch (error) {
-        console.error('Search error:', error);
         setResults([]);
       } finally {
         setIsLoading(false);

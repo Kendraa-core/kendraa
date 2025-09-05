@@ -36,7 +36,7 @@ export default function ConnectionButton({ profileId, onStatusChange }: Connecti
         setStatus(data.status === 'accepted' ? 'connected' : 'pending');
       }
     } catch (error) {
-      console.error('Error fetching connection status:', error);
+      // Silent error handling for connection status
     }
   }, [user?.id, profileId]);
 
@@ -62,7 +62,7 @@ export default function ConnectionButton({ profileId, onStatusChange }: Connecti
       setStatus('pending');
       onStatusChange?.();
     } catch (error) {
-      console.error('Error sending connection request:', error);
+      // Silent error handling for connection request
     } finally {
       setLoading(false);
     }
@@ -84,7 +84,7 @@ export default function ConnectionButton({ profileId, onStatusChange }: Connecti
       setStatus('none');
       onStatusChange?.();
     } catch (error) {
-      console.error('Error removing connection:', error);
+      // Silent error handling for connection removal
     } finally {
       setLoading(false);
     }

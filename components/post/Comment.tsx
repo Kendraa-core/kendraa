@@ -51,7 +51,7 @@ export default function Comment({ comment, onReplyAdded, onReactionChange }: Com
       const fetchedReplies = await getCommentReplies(comment.id);
       setRepliesCount(fetchedReplies.length);
     } catch (error) {
-      console.error('Error loading replies count:', error);
+      // Silent error handling for replies count
     }
   };
 
@@ -86,7 +86,6 @@ export default function Comment({ comment, onReplyAdded, onReactionChange }: Com
         toast.error('Failed to add reply');
       }
     } catch (error: any) {
-      console.error('Error adding reply:', error);
       toast.error('Failed to add reply');
     } finally {
       setIsSubmittingReply(false);
@@ -102,7 +101,6 @@ export default function Comment({ comment, onReplyAdded, onReactionChange }: Com
       setReplies(fetchedReplies);
       setRepliesCount(fetchedReplies.length);
     } catch (error) {
-      console.error('Error loading replies:', error);
       toast.error('Failed to load replies');
     } finally {
       setIsLoadingReplies(false);

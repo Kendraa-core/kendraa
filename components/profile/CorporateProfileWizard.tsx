@@ -183,7 +183,6 @@ export default function CorporateProfileWizard() {
         toast.error('Failed to create corporate profile');
       }
     } catch (error: any) {
-      console.error('Error creating corporate profile:', error);
       toast.error(error.message || 'Failed to create corporate profile');
     } finally {
       setIsSubmitting(false);

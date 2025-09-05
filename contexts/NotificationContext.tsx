@@ -33,7 +33,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       setNotifications(data);
       setUnreadCount(data.filter(n => !n.read).length);
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      // Silent error handling for notifications
       // Set empty state on error
       setNotifications([]);
       setUnreadCount(0);
@@ -54,7 +54,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         setUnreadCount(prev => Math.max(0, prev - 1));
       }
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      // Silent error handling for marking notification as read
     }
   }, []);
 
@@ -66,7 +66,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       setNotifications(data);
       setUnreadCount(data.filter(n => !n.read).length);
     } catch (error) {
-      console.error('Error refreshing notifications:', error);
+      // Silent error handling for refreshing notifications
     }
   }, [user?.id]);
 

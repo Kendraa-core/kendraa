@@ -153,21 +153,18 @@ export default function InstitutionOnboardingModal({
   // Background data saving function
   const saveDataInBackground = async () => {
     if (!user?.id || !supabase) {
-      console.error('User or Supabase not available for background save');
       return;
     }
 
     // Debouncing: prevent multiple saves within 2 seconds
     const now = Date.now();
     if (now - lastSaveTime < 2000) {
-      console.log('Skipping background save due to debouncing');
       return;
     }
     setLastSaveTime(now);
 
     // Prevent multiple simultaneous saves
     if (savingInBackground) {
-      console.log('Background save already in progress');
       return;
     }
 
@@ -191,12 +188,12 @@ export default function InstitutionOnboardingModal({
         });
 
       if (error) {
-        console.error('Background save error:', error);
+        // Silent error handling for background saves
       } else {
         toast.success('Progress saved successfully!');
       }
     } catch (error: any) {
-      console.error('Background save error:', error);
+      // Silent error handling for background saves
     } finally {
       setSavingInBackground(false);
     }
@@ -239,7 +236,6 @@ export default function InstitutionOnboardingModal({
       toast.success('Institution profile created successfully!');
       onComplete();
     } catch (error: any) {
-      console.error('Error creating institution profile:', error);
       toast.error('Failed to create institution profile. Please try again.');
     } finally {
       setLoading(false);

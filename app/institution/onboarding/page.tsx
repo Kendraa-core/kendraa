@@ -29,7 +29,7 @@ export default function InstitutionOnboardingPage() {
         // If no institution profile exists, show onboarding
         setShowOnboarding(true);
       } catch (error) {
-        console.error('Error checking institution profile:', error);
+        // Silent error handling for institution profile check
         router.push('/feed');
       } finally {
         setLoading(false);

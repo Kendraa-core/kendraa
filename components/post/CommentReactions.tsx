@@ -53,7 +53,7 @@ export default function CommentReactions({ commentId, likesCount, onReactionChan
       const reaction = await isCommentLiked(commentId, user!.id);
       setCurrentReaction(reaction);
     } catch (error) {
-      console.error('Error loading user reaction:', error);
+      // Silent error handling for user reaction
     }
   };
 
@@ -96,7 +96,6 @@ export default function CommentReactions({ commentId, likesCount, onReactionChan
       
       onReactionChange?.();
     } catch (error: any) {
-      console.error('Error handling reaction:', error);
       toast.error('Failed to update reaction');
     } finally {
       setIsReacting(false);

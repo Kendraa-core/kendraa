@@ -73,9 +73,9 @@ export function AccessibilityProvider({ children }: AccessibilityProviderProps) 
       try {
         const parsed = JSON.parse(savedSettings);
         setSettings({ ...defaultSettings, ...parsed });
-      } catch (error) {
-        console.error('Error loading accessibility settings:', error);
-      }
+          } catch (error) {
+      // Silent error handling for accessibility settings
+    }
     }
 
     // Detect system preferences

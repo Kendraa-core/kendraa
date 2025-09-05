@@ -21,7 +21,7 @@ export function useOnboardingProtection() {
 
     // If onboarding is not completed, redirect to onboarding
     if (!profile.onboarding_completed) {
-      console.log('[OnboardingProtection] User has not completed onboarding, redirecting to /onboarding');
+      // User has not completed onboarding, redirecting to /onboarding
       router.push('/onboarding');
       return;
     }

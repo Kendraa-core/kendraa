@@ -53,7 +53,7 @@ export default function LeftSidebar() {
                 }
               };
             } catch (error) {
-              console.error('Error fetching organizer for event:', event.id, error);
+              // Silent error handling for event organizer
               return {
                 ...event,
                 organizer: {
@@ -70,9 +70,9 @@ export default function LeftSidebar() {
         
         setConnectionCount(connectionsCount);
         setUserEvents(eventsWithOrganizers);
-      } catch (error) {
-        console.error('Error loading left sidebar data:', error);
-      } finally {
+          } catch (error) {
+      // Silent error handling for left sidebar data
+    } finally {
         setLoading(false);
       }
     };

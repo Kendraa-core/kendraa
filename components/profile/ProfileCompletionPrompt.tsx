@@ -88,7 +88,7 @@ export default function ProfileCompletionPrompt() {
   const clearOnboardingFlag = () => {
     if (user?.id) {
       localStorage.removeItem(`onboarding_completed_${user.id}`);
-      console.log('Onboarding completion flag cleared');
+      // Onboarding completion flag cleared
     }
   };
 

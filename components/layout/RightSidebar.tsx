@@ -67,7 +67,6 @@ export default function RightSidebar() {
       );
       
       if (!response.ok) {
-        console.warn('NewsAPI request failed, using demo data');
         return getDemoHealthcareNews();
       }
       
@@ -86,7 +85,6 @@ export default function RightSidebar() {
       
       return getDemoHealthcareNews();
     } catch (error) {
-      console.warn('Error fetching news, using demo data:', error);
       return getDemoHealthcareNews();
     }
   };

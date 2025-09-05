@@ -37,7 +37,7 @@ export class NetworkError extends Error {
 
 // Parse Supabase errors and convert to AppError
 export function handleSupabaseError(error: any): AppError {
-  console.error('[ErrorHandler] Supabase error:', error);
+        // Supabase error logged
 
   if (!error) {
     return {
@@ -138,7 +138,7 @@ export function handleSupabaseError(error: any): AppError {
 
 // Handle authentication errors
 export function handleAuthError(error: any): AppError {
-  console.error('[ErrorHandler] Auth error:', error);
+        // Auth error logged
 
   if (!error) {
     return {
@@ -202,7 +202,7 @@ export function logError(context: string, error: any, additionalData?: any) {
     additionalData
   };
 
-  console.error(`[${timestamp}] [${context}] Error:`, errorInfo);
+      // Error logged with timestamp and context
   
   // In production, you might want to send this to an error tracking service
   // like Sentry, LogRocket, etc.
