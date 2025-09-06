@@ -1333,46 +1333,14 @@ export default function ProfilePage() {
                 </div>
               )}
                   </div>
-                  
-                  {/* Network Stats - Reduced Size */}
-                  <div className="flex gap-4 p-3 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-100 shadow-sm">
-                    <button 
-                      onClick={() => router.push(`/profile/${profile.id}/connections`)}
-                      className="text-center group flex-1"
-                    >
-                      <div className="text-lg font-bold text-[#007fff] group-hover:scale-110 transition-transform duration-300">
-                        {formatNumber(connectionCount)}
-                  </div>
-                      <div className="text-xs font-medium text-gray-600 group-hover:text-[#007fff] transition-colors duration-300">
-                        connections
-                </div>
-                    </button>
-                    
-                    <div className="w-px bg-gray-200"></div>
-                    
-                    <button 
-                      onClick={() => router.push(`/profile/${profile.id}/followers`)}
-                      className="text-center group flex-1"
-                    >
-                      <div className="text-lg font-bold text-[#007fff] group-hover:scale-110 transition-transform duration-300">
-                        {formatNumber(connectionCount)}
-                      </div>
-                      <div className="text-xs font-medium text-gray-600 group-hover:text-[#007fff] transition-colors duration-300">
-                        followers
-                      </div>
-                    </button>
-                  </div>
 
-                  {/* Action Button - Removed "Open to work" as it's not applicable for medical professionals */}
-                  
-
-                  {/* Contact Info Section */}
-                  <div className="flex items-center gap-6 pt-2">
+                  {/* Location - Moved Up */}
+                  <div className="pt-2">
                     {editingField === 'location' ? (
-                <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3">
                         <div className="w-5 h-5 bg-gray-100 rounded-full flex items-center justify-center">
                           <MapPinIcon className="w-3 h-3 text-gray-500" />
-                  </div>
+                        </div>
                         <input
                           type="text"
                           value={editValues.location || profile.location || ''}
@@ -1393,7 +1361,7 @@ export default function ProfilePage() {
                           >
                             <XCircleIcon className="w-3 h-3" />
                           </button>
-                </div>
+                        </div>
                       </div>
                     ) : (
                       <div className="flex items-center gap-2 text-gray-600 group">
@@ -1403,39 +1371,58 @@ export default function ProfilePage() {
                         <p className="text-sm font-medium group-hover:text-[#007fff] transition-colors duration-200">
                           {profile.location || 'No location set'}
                         </p>
-                {isOwnProfile && (
-                    <button 
+                        {isOwnProfile && (
+                          <button 
                             onClick={() => startEdit('location', profile.location)}
                             className="opacity-0 group-hover:opacity-100 p-1 text-[#007fff] hover:bg-[#007fff]/10 rounded-full transition-all duration-200"
-                    >
+                          >
                             <PencilIcon className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Connections and Followers - Plain Text */}
+                  <div className="flex items-center gap-6 pt-2 text-sm text-gray-600">
+                    <button 
+                      onClick={() => router.push(`/profile/${profile.id}/connections`)}
+                      className="hover:text-[#007fff] transition-colors duration-200"
+                    >
+                      <span className="font-semibold text-[#007fff]">{formatNumber(connectionCount)}</span> connections
                     </button>
-                  )}
-                </div>
-              )}
+                    <button 
+                      onClick={() => router.push(`/profile/${profile.id}/followers`)}
+                      className="hover:text-[#007fff] transition-colors duration-200"
+                    >
+                      <span className="font-semibold text-[#007fff]">{formatNumber(connectionCount)}</span> followers
+                    </button>
                     <button 
                       onClick={handleViewContactInfo}
-                      className="text-[#007fff] hover:text-[#007fff]/80 hover:underline text-sm font-semibold transition-all duration-200 flex items-center gap-2 group"
+                      className="text-[#007fff] hover:text-[#007fff]/80 hover:underline font-semibold transition-all duration-200 flex items-center gap-2 group"
                     >
-                      <div className="w-5 h-5 bg-[#007fff]/10 rounded-full flex items-center justify-center group-hover:bg-[#007fff]/20 transition-colors duration-200">
-                        <EnvelopeIcon className="w-3 h-3 text-[#007fff]" />
+                      <div className="w-4 h-4 bg-[#007fff]/10 rounded-full flex items-center justify-center group-hover:bg-[#007fff]/20 transition-colors duration-200">
+                        <EnvelopeIcon className="w-2 h-2 text-[#007fff]" />
                       </div>
                       Contact info
                     </button>
                   </div>
-
-                  {/* Current Position - Moved to Left Column */}
+              </div>
+              
+                {/* Right Side: Current Position and Similar Professionals */}
+                <div className="flex flex-col gap-6 min-w-[320px]">
+                  {/* Current Position - Moved to Right Sidebar */}
                   {currentExperiences.length > 0 && (
-                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100 hover:border-[#007fff]/20 transition-all duration-300 group mt-4">
-                      <div className="w-6 h-6 bg-[#007fff] rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
-                        <BuildingOfficeIcon className="w-3 h-3 text-white" />
+                    <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-100 hover:border-[#007fff]/20 transition-all duration-300 group">
+                      <div className="w-8 h-8 bg-[#007fff] rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                        <BuildingOfficeIcon className="w-4 h-4 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-gray-900 group-hover:text-[#007fff] transition-colors duration-300">
+                        <p className="text-base font-semibold text-gray-900 group-hover:text-[#007fff] transition-colors duration-300">
                           {currentExperiences[0].company}
                         </p>
                         {currentExperiences[0].title && (
-                          <p className="text-xs text-gray-600 mt-1">
+                          <p className="text-sm text-gray-600 mt-1">
                             {currentExperiences[0].title}
                           </p>
                         )}
@@ -1444,11 +1431,8 @@ export default function ProfilePage() {
                         </p>
                       </div>
                     </div>
-                )}
-              </div>
-              
-                {/* Right Side: Similar Professionals - Moved Up */}
-                <div className="flex flex-col gap-6 min-w-[320px]">
+                  )}
+
                   {/* Similar Professionals */}
                   <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
                     <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
