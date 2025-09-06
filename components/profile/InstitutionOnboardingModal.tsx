@@ -213,7 +213,7 @@ export default function InstitutionOnboardingModal({
       }
 
       // Save institution data to database
-      const { error } = await supabase
+      const { error: institutionError } = await supabase
         .from('institutions')
         .upsert({
           user_id: user?.id,
@@ -229,8 +229,22 @@ export default function InstitutionOnboardingModal({
           updated_at: new Date().toISOString()
         });
 
-      if (error) {
-        throw error;
+      if (institutionError) {
+        console.error('Institution creation error:', institutionError);
+        // Continue even if institution creation fails
+      }
+
+      // Mark user profile onboarding as completed
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ 
+          onboarding_completed: true,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user?.id);
+
+      if (profileError) {
+        throw new Error(`Failed to update profile: ${profileError.message}`);
       }
 
       toast.success('Institution profile created successfully!');

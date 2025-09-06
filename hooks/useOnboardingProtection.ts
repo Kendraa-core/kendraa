@@ -19,10 +19,14 @@ export function useOnboardingProtection() {
     // If user exists but no profile, wait for profile to load
     if (!profile) return;
 
-    // If onboarding is not completed, redirect to onboarding
+    // If onboarding is not completed, redirect to appropriate onboarding
     if (!profile.onboarding_completed) {
-      // User has not completed onboarding, redirecting to /onboarding
-      router.push('/onboarding');
+      // Redirect based on user type
+      if (profile.user_type === 'institution' || profile.profile_type === 'institution') {
+        router.push('/institution/onboarding');
+      } else {
+        router.push('/onboarding');
+      }
       return;
     }
   }, [user, profile, loading, router]);

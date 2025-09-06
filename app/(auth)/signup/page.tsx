@@ -58,7 +58,13 @@ export default function SignUp() {
       );
       
       toast.success('Account created successfully!');
-      router.push('/profile/setup');
+      
+      // Redirect based on profile type
+      if (profileType === 'institution') {
+        router.push('/institution/onboarding');
+      } else {
+        router.push('/profile/setup');
+      }
     } catch (error: any) {
       console.error('Error signing up:', error);
       toast.error(error.message || 'An error occurred during sign up');

@@ -20,7 +20,12 @@ export default function LandingPage() {
       if (profile.onboarding_completed) {
         router.push('/feed');
       } else {
-        router.push('/onboarding');
+        // Redirect based on user type
+        if (profile.user_type === 'institution' || profile.profile_type === 'institution') {
+          router.push('/institution/onboarding');
+        } else {
+          router.push('/onboarding');
+        }
       }
     }
   }, [user, profile, router]);
