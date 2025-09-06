@@ -56,14 +56,14 @@ export default function SettingsPage() {
         {
           title: 'Profile Information',
           description: 'Update your personal and professional details',
-          action: () => router.push('/profile/setup'),
+          action: () => router.push('/onboarding'),
           actionText: 'Edit Profile',
           icon: UserIcon,
         },
         {
           title: 'Professional Credentials',
           description: 'Manage your medical licenses and certifications',
-          action: () => router.push('/profile/setup'),
+          action: () => router.push('/onboarding'),
           actionText: 'Update',
           icon: AcademicCapIcon,
         },

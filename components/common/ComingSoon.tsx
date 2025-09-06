@@ -147,7 +147,7 @@ export default function ComingSoon({
             <Link href="/network">
               <Button variant="ghost" size="sm">Network</Button>
             </Link>
-            <Link href="/profile/setup">
+            <Link href="/onboarding">
               <Button variant="ghost" size="sm">Profile</Button>
             </Link>
           </div>

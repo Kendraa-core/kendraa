@@ -63,7 +63,7 @@ export default function SignUp() {
       if (profileType === 'institution') {
         router.push('/institution/onboarding');
       } else {
-        router.push('/profile/setup');
+        router.push('/onboarding');
       }
     } catch (error: any) {
       console.error('Error signing up:', error);
