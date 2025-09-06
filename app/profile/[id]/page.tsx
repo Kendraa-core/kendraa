@@ -467,7 +467,18 @@ const ExperienceCard = React.memo(function ExperienceCard({ experience, isOwnPro
               ) : (
                 <>
                   <h3 className="font-bold text-gray-900 text-base mb-1">{experience.title}</h3>
-                  <p className="text-[#007fff] font-semibold text-sm mb-2">{experience.company}</p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <p className="text-[#007fff] font-semibold text-sm">{experience.company}</p>
+                    {experience.location && (
+                      <>
+                        <span className="text-gray-400">•</span>
+                        <div className="flex items-center gap-1 text-xs text-gray-600">
+                          <MapPinIcon className="w-3 h-3 text-[#007fff]" />
+                          <span>{experience.location}</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
                   <div className="flex items-center gap-2 text-xs text-gray-600 mb-2">
                     <CalendarIcon className="w-3 h-3 text-[#007fff]" />
                 <span className="font-medium">
@@ -477,12 +488,6 @@ const ExperienceCard = React.memo(function ExperienceCard({ experience, isOwnPro
                   <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">Current</span>
                 )}
               </div>
-              {experience.location && (
-                    <div className="flex items-center gap-2 text-xs text-gray-600 mb-2">
-                      <MapPinIcon className="w-3 h-3 text-[#007fff]" />
-                  <span>{experience.location}</span>
-                </div>
-              )}
               {experience.description && (
                     <div className="bg-white rounded-lg p-3 mt-2">
                   <p className="text-gray-700 leading-relaxed text-sm whitespace-pre-wrap">
@@ -657,16 +662,21 @@ const EducationCard = React.memo(function EducationCard({ education, isOwnProfil
               ) : (
                 <>
                   <h3 className="font-bold text-gray-900 text-base mb-1">{education.degree}</h3>
-                  <p className="text-[#007fff] font-semibold text-sm mb-2">{education.school}</p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <p className="text-[#007fff] font-semibold text-sm">{education.school}</p>
+                    {education.field && (
+                      <>
+                        <span className="text-gray-400">•</span>
+                        <p className="text-xs text-gray-600">{education.field}</p>
+                      </>
+                    )}
+                  </div>
                   <div className="flex items-center gap-2 text-xs text-gray-600 mb-2">
                     <CalendarIcon className="w-3 h-3 text-[#007fff]" />
                 <span className="font-medium">
                       {formatDateToMonthYear(education.start_date)} - {education.end_date ? formatDateToMonthYear(education.end_date) : 'Present'}
                 </span>
               </div>
-              {education.field && (
-                    <p className="text-sm text-gray-600 mb-2">{education.field}</p>
-              )}
               {education.description && (
                     <div className="bg-white rounded-lg p-3 mt-2">
                   <p className="text-gray-700 leading-relaxed text-sm whitespace-pre-wrap">
@@ -1337,10 +1347,10 @@ export default function ProfilePage() {
                   {/* Location - Moved Up */}
                   <div className="pt-2">
                     {editingField === 'location' ? (
-                      <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3">
                         <div className="w-5 h-5 bg-gray-100 rounded-full flex items-center justify-center">
                           <MapPinIcon className="w-3 h-3 text-gray-500" />
-                        </div>
+                  </div>
                         <input
                           type="text"
                           value={editValues.location || profile.location || ''}
@@ -1361,7 +1371,7 @@ export default function ProfilePage() {
                           >
                             <XCircleIcon className="w-3 h-3" />
                           </button>
-                        </div>
+                </div>
                       </div>
                     ) : (
                       <div className="flex items-center gap-2 text-gray-600 group">
@@ -1371,13 +1381,13 @@ export default function ProfilePage() {
                         <p className="text-sm font-medium group-hover:text-[#007fff] transition-colors duration-200">
                           {profile.location || 'No location set'}
                         </p>
-                        {isOwnProfile && (
-                          <button 
+                {isOwnProfile && (
+                    <button 
                             onClick={() => startEdit('location', profile.location)}
                             className="opacity-0 group-hover:opacity-100 p-1 text-[#007fff] hover:bg-[#007fff]/10 rounded-full transition-all duration-200"
-                          >
+                    >
                             <PencilIcon className="w-3 h-3" />
-                          </button>
+                    </button>
                         )}
                       </div>
                     )}
@@ -1403,7 +1413,7 @@ export default function ProfilePage() {
                     >
                       <div className="w-4 h-4 bg-[#007fff]/10 rounded-full flex items-center justify-center group-hover:bg-[#007fff]/20 transition-colors duration-200">
                         <EnvelopeIcon className="w-2 h-2 text-[#007fff]" />
-                      </div>
+                  </div>
                       Contact info
                     </button>
                   </div>
@@ -1429,7 +1439,7 @@ export default function ProfilePage() {
                         <p className="text-xs text-gray-500 mt-1">
                           Current Position
                         </p>
-                      </div>
+              </div>
                     </div>
                   )}
 
