@@ -714,9 +714,9 @@ const ActivityCard = React.memo(function ActivityCard({ posts, isOwnProfile, con
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.4 }}
-      className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm"
+      className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm"
     >
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-[#007fff]/10 rounded-lg flex items-center justify-center">
             <FireIcon className="w-4 h-4 text-[#007fff]" />
@@ -731,22 +731,26 @@ const ActivityCard = React.memo(function ActivityCard({ posts, isOwnProfile, con
 
       {/* Posts */}
       {posts.length > 0 ? (
-        <div className="space-y-4">
-          {posts.slice(0, 2).map((post, index) => (
-            <motion.div 
-              key={post.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.1 }}
-              className="border border-gray-100 rounded-lg p-4 hover:border-[#007fff]/20 transition-colors"
-            >
-              <PostCard post={post} />
-            </motion.div>
-          ))}
-          {posts.length > 2 && (
-            <button className="w-full text-center py-3 text-[#007fff] hover:text-[#007fff]/80 text-sm font-medium hover:underline transition-all duration-200">
-            Show all {posts.length} posts →
-          </button>
+        <div>
+          <div className="flex gap-4 overflow-x-auto pb-2">
+            {posts.slice(0, 3).map((post, index) => (
+              <motion.div 
+                key={post.id}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+                className="flex-shrink-0 w-80 border border-gray-100 rounded-lg p-4 hover:border-[#007fff]/20 transition-colors"
+              >
+                <PostCard post={post} />
+              </motion.div>
+            ))}
+          </div>
+          {posts.length > 3 && (
+            <div className="mt-4 text-center">
+              <button className="text-[#007fff] hover:text-[#007fff]/80 text-sm font-medium hover:underline transition-all duration-200">
+                Show all {posts.length} posts →
+              </button>
+            </div>
           )}
         </div>
       ) : (
@@ -1198,8 +1202,9 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-[#007fff]/5">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="space-y-12">
+      <div className="flex gap-6 px-4 sm:px-6 lg:px-8 py-6">
+        {/* Main Content Container */}
+        <div className="flex-1 max-w-4xl mx-auto space-y-4">
           {/* Profile Header */}
           <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
             {/* Banner */}
@@ -1234,9 +1239,9 @@ export default function ProfilePage() {
             </div>
 
             {/* Profile Content */}
-            <div className="px-8 py-6">
+            <div className="px-4 py-3">
               {/* Avatar positioned to overlap banner */}
-              <div className="flex justify-start -mt-20 mb-6">
+              <div className="flex justify-start -mt-20 mb-3">
                 <div className="relative">
                   <Avatar
                     src={profile.avatar_url}
@@ -1257,9 +1262,9 @@ export default function ProfilePage() {
                 </div>
 
               {/* Profile Information and Actions */}
-              <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+              <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
                 {/* Left Side: Profile Info and Stats */}
-                <div className="flex-1 min-w-0 space-y-6">
+                <div className="flex-1 min-w-0 space-y-3">
                   {/* Name */}
                   <div className="space-y-2">
                     {editingField === 'full_name' ? (
@@ -1420,10 +1425,10 @@ export default function ProfilePage() {
               </div>
               
                 {/* Right Side: Current Position and Similar Professionals */}
-                <div className="flex flex-col gap-6 min-w-[320px]">
+                <div className="flex flex-col gap-3 min-w-[320px]">
                   {/* Current Position - Moved to Right Sidebar */}
                   {currentExperiences.length > 0 && (
-                    <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-100 hover:border-[#007fff]/20 transition-all duration-300 group">
+                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100 hover:border-[#007fff]/20 transition-all duration-300 group">
                       <div className="w-8 h-8 bg-[#007fff] rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
                         <BuildingOfficeIcon className="w-4 h-4 text-white" />
                       </div>
@@ -1443,18 +1448,10 @@ export default function ProfilePage() {
                     </div>
                   )}
 
-                  {/* Similar Professionals */}
-                  <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
-                    <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                      <UserGroupIcon className="w-5 h-5 text-[#007fff]" />
-                      Similar Professionals
-                    </h4>
-                    <SimilarPeople />
-                  </div>
                   
                   {/* Current Education */}
                   {currentEducation.length > 0 && (
-                    <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg border border-gray-100 hover:border-[#007fff]/20 transition-all duration-300 group">
+                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100 hover:border-[#007fff]/20 transition-all duration-300 group">
                       <div className="w-8 h-8 bg-[#007fff] rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
                         <AcademicCapIcon className="w-4 h-4 text-white" />
                       </div>
@@ -1535,10 +1532,16 @@ export default function ProfilePage() {
                   </div>
             
             {/* Profile Content */}
-            <div className="px-8 py-8 border-t border-gray-100 bg-gradient-to-br from-gray-50/50 to-white">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Main Content - Left 2 columns */}
-                <div className="lg:col-span-2 space-y-8">
+            <div className="px-4 py-4 border-t border-gray-100 bg-gradient-to-br from-gray-50/50 to-white">
+              <div className="space-y-3">
+                  {/* Activity Section */}
+                  <ActivityCard 
+                    posts={posts} 
+                    isOwnProfile={isOwnProfile} 
+                    connectionCount={connectionCount} 
+                    router={router}
+                  />
+
                   {/* About Section */}
                   <AboutCard
                     profile={profile}
@@ -1941,46 +1944,50 @@ export default function ProfilePage() {
         )}
                     </div>
           </div>
-                  
-                  {/* Activity Section */}
-                  <ActivityCard 
-                    posts={posts} 
-                    isOwnProfile={isOwnProfile} 
-                    connectionCount={connectionCount} 
-                    router={router}
-                  />
-            </div>
-                
-                {/* Right Sidebar */}
-                <div className="lg:col-span-1">
-                  <SidebarCard profile={profile} isOwnProfile={isOwnProfile} />
-          </div>
               </div>
             </div>
           </div>
         </div>
         
-        {/* Modals */}
-        {showImageEditor && profile && (
-          <EnhancedProfileImageEditor
-            isOpen={showImageEditor}
-            onClose={() => setShowImageEditor(false)}
-            onUpdate={() => {
-              setShowImageEditor(false);
-              fetchProfileData();
-            }}
-            currentAvatar={profile.avatar_url}
-            currentBanner={profile.banner_url}
-          />
-        )}
-
-        {/* Contact Info Modal */}
-        <ContactInfoModal
-          profile={profile}
-          isOpen={showContactModal}
-          onClose={() => setShowContactModal(false)}
-        />
+        {/* Right Sidebar - Outside main content */}
+        <div className="hidden xl:block w-80 space-y-4 sticky top-6 h-fit">
+          {/* People You May Know Section */}
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <UserGroupIcon className="w-4 h-4 text-[#007fff]" />
+                People You May Know
+              </h3>
+            </div>
+            <div className="p-3">
+              <SimilarPeople />
+            </div>
+          </div>
+          
+          <SidebarCard profile={profile} isOwnProfile={isOwnProfile} />
+        </div>
       </div>
+        
+      {/* Modals */}
+      {showImageEditor && profile && (
+        <EnhancedProfileImageEditor
+          isOpen={showImageEditor}
+          onClose={() => setShowImageEditor(false)}
+          onUpdate={() => {
+            setShowImageEditor(false);
+            fetchProfileData();
+          }}
+          currentAvatar={profile.avatar_url}
+          currentBanner={profile.banner_url}
+        />
+      )}
+
+      {/* Contact Info Modal */}
+      <ContactInfoModal
+        profile={profile}
+        isOpen={showContactModal}
+        onClose={() => setShowContactModal(false)}
+      />
     </div>
   );
 } 
