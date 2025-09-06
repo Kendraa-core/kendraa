@@ -13,8 +13,16 @@ import {
 } from '@heroicons/react/24/outline';
 
 export default function QuickNav() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+
+  // Determine the correct profile URL based on user type
+  const getProfileUrl = () => {
+    if (profile?.user_type === 'institution' || profile?.profile_type === 'institution') {
+      return '/institution/profile';
+    }
+    return `/profile/${user?.id}`;
+  };
 
   const quickActions = [
     {
@@ -44,7 +52,7 @@ export default function QuickNav() {
     {
       icon: UserCircleIcon,
       label: 'Profile',
-      href: `/profile/${user?.id}`,
+      href: getProfileUrl(),
       color: 'bg-secondary-600 hover:bg-secondary-700',
     },
   ];

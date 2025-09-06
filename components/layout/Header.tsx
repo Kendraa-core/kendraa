@@ -330,7 +330,7 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
                     {/* Quick Actions */}
                     <div className="px-2 py-1">
                       <Link
-                        href={`/profile/${user?.id}`}
+                        href={profile?.user_type === 'institution' || profile?.profile_type === 'institution' ? '/institution/profile' : `/profile/${user?.id}`}
                         className="flex items-center space-x-3 px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
                       >
                         <UserIcon className="w-4 h-4" />

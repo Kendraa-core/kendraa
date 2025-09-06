@@ -822,6 +822,13 @@ export default function ProfilePage() {
 
   const isOwnProfile = user?.id === id;
 
+  // Redirect institution users to their dedicated profile page
+  useEffect(() => {
+    if (profile && (profile.user_type === 'institution' || profile.profile_type === 'institution')) {
+      router.push('/institution/profile');
+    }
+  }, [profile, router]);
+
   // Get only current (ongoing) experiences and education
   const currentExperiences = useMemo(() => 
     experiences.filter(exp => exp.current), [experiences]

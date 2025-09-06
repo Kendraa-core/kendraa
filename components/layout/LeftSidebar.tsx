@@ -132,7 +132,7 @@ export default function LeftSidebar() {
             {formatNumber(connectionCount)} connections
           </div>
           <Link 
-            href={`/profile/${user?.id}`}
+            href={profile?.user_type === 'institution' || profile?.profile_type === 'institution' ? '/institution/profile' : `/profile/${user?.id}`}
             className="inline-block bg-azure-500 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-azure-600 transition-colors"
           >
             View Profile

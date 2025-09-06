@@ -22,9 +22,17 @@ export default function ClickableProfileName({
   className,
   children
 }: ClickableProfileNameProps) {
+  // Determine the correct profile URL based on user type
+  const getProfileUrl = () => {
+    if (userType === 'institution') {
+      return `/institution/profile`;
+    }
+    return `/profile/${userId}`;
+  };
+
   return (
     <Link
-      href={`/profile/${userId}`}
+      href={getProfileUrl()}
       className={cn(
         'font-semibold text-gray-900 hover:text-[#007fff] transition-colors cursor-pointer inline-flex items-center space-x-1',
         className
