@@ -765,14 +765,15 @@ const SidebarCard = React.memo(function SidebarCard({ profile, isOwnProfile }: {
 }) {
   return (
     <div className="space-y-6">
-
-      {/* Similar Professionals */}
+      {/* Sidebar content can be added here in the future */}
       <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
         <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
           <UserGroupIcon className="w-5 h-5 text-[#007fff]" />
-          Similar Professionals
+          Profile Overview
         </h4>
-        <SimilarPeople />
+        <p className="text-sm text-gray-600">
+          Additional profile information and insights can be displayed here.
+        </p>
       </div>
     </div>
   );
@@ -1333,16 +1334,16 @@ export default function ProfilePage() {
               )}
                   </div>
                   
-                  {/* Network Stats */}
-                  <div className="flex gap-8 p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-100 shadow-sm">
+                  {/* Network Stats - Reduced Size */}
+                  <div className="flex gap-4 p-3 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-100 shadow-sm">
                     <button 
                       onClick={() => router.push(`/profile/${profile.id}/connections`)}
                       className="text-center group flex-1"
                     >
-                      <div className="text-2xl font-bold text-[#007fff] group-hover:scale-110 transition-transform duration-300">
+                      <div className="text-lg font-bold text-[#007fff] group-hover:scale-110 transition-transform duration-300">
                         {formatNumber(connectionCount)}
                   </div>
-                      <div className="text-sm font-medium text-gray-600 group-hover:text-[#007fff] transition-colors duration-300">
+                      <div className="text-xs font-medium text-gray-600 group-hover:text-[#007fff] transition-colors duration-300">
                         connections
                 </div>
                     </button>
@@ -1353,10 +1354,10 @@ export default function ProfilePage() {
                       onClick={() => router.push(`/profile/${profile.id}/followers`)}
                       className="text-center group flex-1"
                     >
-                      <div className="text-2xl font-bold text-[#007fff] group-hover:scale-110 transition-transform duration-300">
+                      <div className="text-lg font-bold text-[#007fff] group-hover:scale-110 transition-transform duration-300">
                         {formatNumber(connectionCount)}
                       </div>
-                      <div className="text-sm font-medium text-gray-600 group-hover:text-[#007fff] transition-colors duration-300">
+                      <div className="text-xs font-medium text-gray-600 group-hover:text-[#007fff] transition-colors duration-300">
                         followers
                       </div>
                     </button>
@@ -1422,31 +1423,40 @@ export default function ProfilePage() {
                       Contact info
                     </button>
                   </div>
-                </div>
 
-                {/* Right Side: Current Work and Education */}
-                <div className="flex flex-col gap-6 min-w-[320px]">
-                  {/* Current Position */}
+                  {/* Current Position - Moved to Left Column */}
                   {currentExperiences.length > 0 && (
-                    <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg border border-gray-100 hover:border-[#007fff]/20 transition-all duration-300 group">
-                      <div className="w-8 h-8 bg-[#007fff] rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
-                        <BuildingOfficeIcon className="w-4 h-4 text-white" />
-          </div>
+                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100 hover:border-[#007fff]/20 transition-all duration-300 group mt-4">
+                      <div className="w-6 h-6 bg-[#007fff] rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                        <BuildingOfficeIcon className="w-3 h-3 text-white" />
+                      </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-base font-semibold text-gray-900 group-hover:text-[#007fff] transition-colors duration-300">
+                        <p className="text-sm font-semibold text-gray-900 group-hover:text-[#007fff] transition-colors duration-300">
                           {currentExperiences[0].company}
                         </p>
                         {currentExperiences[0].title && (
-                          <p className="text-sm text-gray-600 mt-1">
+                          <p className="text-xs text-gray-600 mt-1">
                             {currentExperiences[0].title}
                           </p>
                         )}
                         <p className="text-xs text-gray-500 mt-1">
                           Current Position
                         </p>
-              </div>
+                      </div>
                     </div>
-                  )}
+                )}
+              </div>
+              
+                {/* Right Side: Similar Professionals - Moved Up */}
+                <div className="flex flex-col gap-6 min-w-[320px]">
+                  {/* Similar Professionals */}
+                  <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
+                    <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                      <UserGroupIcon className="w-5 h-5 text-[#007fff]" />
+                      Similar Professionals
+                    </h4>
+                    <SimilarPeople />
+                  </div>
                   
                   {/* Current Education */}
                   {currentEducation.length > 0 && (
