@@ -61,7 +61,7 @@ const ONBOARDING_STEPS = [
   },
   {
     id: 'headline',
-    title: 'What\'s your professional headline? *',
+    title: 'What\'s your designation/title? *',
     subtitle: 'A brief description of your role and expertise',
     type: 'input',
     field: 'headline',
@@ -670,18 +670,18 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Validate required fields based on step type
     switch (currentStepData.type) {
       case 'input':
-        return !!(formData[currentStepData.field as keyof typeof formData] as string)?.trim();
+        return !!(formData[currentStepData.field as keyof typeof formData] as string);
       case 'textarea':
-        return !!(formData[currentStepData.field as keyof typeof formData] as string)?.trim();
+        return !!(formData[currentStepData.field as keyof typeof formData] as string);
       case 'contact':
-        return !!(formData.phone?.trim() && formData.email?.trim() && formData.country?.trim());
+        return !!(formData.phone && formData.email && formData.country);
       case 'experience':
         return experiences.length > 0 && experiences.some(exp => 
-          exp.title?.trim() && exp.company?.trim() && (exp.start_month || exp.start_year)
+          exp.title && exp.company && (exp.start_month || exp.start_year)
         );
       case 'education':
         return educations.length > 0 && educations.some(edu => 
-          edu.degree?.trim() && edu.school?.trim() && (edu.start_month || edu.start_year)
+          edu.degree && edu.school && (edu.start_month || edu.start_year)
         );
       case 'image':
         return !!(avatarPreview || formData.avatar_url);

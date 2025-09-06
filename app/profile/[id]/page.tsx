@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/Button';
 import Avatar from '@/components/common/Avatar';
 import Breadcrumb from '@/components/common/Breadcrumb';
 import EditProfileModal from '@/components/profile/EditProfileModal';
-import ProfileImageEditor from '@/components/profile/ProfileImageEditor';
+import EnhancedProfileImageEditor from '@/components/profile/EnhancedProfileImageEditor';
 import PostCard from '@/components/post/PostCard';
 import SimilarPeople from '@/components/profile/SimilarPeople';
 import { cn, formatDate, formatNumber } from '@/lib/utils';
@@ -467,7 +467,18 @@ const ExperienceCard = React.memo(function ExperienceCard({ experience, isOwnPro
               ) : (
                 <>
                   <h3 className="font-bold text-gray-900 text-base mb-1">{experience.title}</h3>
-                  <p className="text-[#007fff] font-semibold text-sm mb-2">{experience.company}</p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <p className="text-[#007fff] font-semibold text-sm">{experience.company}</p>
+                    {experience.location && (
+                      <>
+                        <span className="text-gray-400">•</span>
+                        <div className="flex items-center gap-1 text-xs text-gray-600">
+                          <MapPinIcon className="w-3 h-3 text-[#007fff]" />
+                          <span>{experience.location}</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
                   <div className="flex items-center gap-2 text-xs text-gray-600 mb-2">
                     <CalendarIcon className="w-3 h-3 text-[#007fff]" />
                 <span className="font-medium">
@@ -477,12 +488,6 @@ const ExperienceCard = React.memo(function ExperienceCard({ experience, isOwnPro
                   <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">Current</span>
                 )}
               </div>
-              {experience.location && (
-                    <div className="flex items-center gap-2 text-xs text-gray-600 mb-2">
-                      <MapPinIcon className="w-3 h-3 text-[#007fff]" />
-                  <span>{experience.location}</span>
-                </div>
-              )}
               {experience.description && (
                     <div className="bg-white rounded-lg p-3 mt-2">
                   <p className="text-gray-700 leading-relaxed text-sm whitespace-pre-wrap">
@@ -657,16 +662,21 @@ const EducationCard = React.memo(function EducationCard({ education, isOwnProfil
               ) : (
                 <>
                   <h3 className="font-bold text-gray-900 text-base mb-1">{education.degree}</h3>
-                  <p className="text-[#007fff] font-semibold text-sm mb-2">{education.school}</p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <p className="text-[#007fff] font-semibold text-sm">{education.school}</p>
+                    {education.field && (
+                      <>
+                        <span className="text-gray-400">•</span>
+                        <p className="text-xs text-gray-600">{education.field}</p>
+                      </>
+                    )}
+                  </div>
                   <div className="flex items-center gap-2 text-xs text-gray-600 mb-2">
                     <CalendarIcon className="w-3 h-3 text-[#007fff]" />
                 <span className="font-medium">
                       {formatDateToMonthYear(education.start_date)} - {education.end_date ? formatDateToMonthYear(education.end_date) : 'Present'}
                 </span>
               </div>
-              {education.field && (
-                    <p className="text-sm text-gray-600 mb-2">{education.field}</p>
-              )}
               {education.description && (
                     <div className="bg-white rounded-lg p-3 mt-2">
                   <p className="text-gray-700 leading-relaxed text-sm whitespace-pre-wrap">
@@ -765,14 +775,15 @@ const SidebarCard = React.memo(function SidebarCard({ profile, isOwnProfile }: {
 }) {
   return (
     <div className="space-y-6">
-
-      {/* Similar Professionals */}
+      {/* Sidebar content can be added here in the future */}
       <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
         <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
           <UserGroupIcon className="w-5 h-5 text-[#007fff]" />
-          Similar Professionals
+          Profile Overview
         </h4>
-        <SimilarPeople />
+        <p className="text-sm text-gray-600">
+          Additional profile information and insights can be displayed here.
+        </p>
       </div>
     </div>
   );
@@ -1063,20 +1074,20 @@ export default function ProfilePage() {
            : '';
          
          // Validate required fields
-         if (!editValues.new_experience_title?.trim() || !editValues.new_experience_company?.trim() || !newExpStartDate) {
+         if (!editValues.new_experience_title || !editValues.new_experience_company || !newExpStartDate) {
            toast.error('Please fill in all required fields (Title, Company, and Start Date)');
            return;
          }
          
          const newExperienceData = {
            profile_id: profile!.id,
-           title: editValues.new_experience_title.trim(),
-           company: editValues.new_experience_company.trim(),
+           title: editValues.new_experience_title,
+           company: editValues.new_experience_company,
            company_type: 'other' as const,
-           description: editValues.new_experience_description?.trim() || null,
+           description: editValues.new_experience_description || null,
            start_date: newExpStartDate,
            end_date: newExpEndDate || null,
-           location: editValues.new_experience_location?.trim() || null,
+           location: editValues.new_experience_location || null,
            current: !newExpEndDate,
            specialization: []
          };
@@ -1098,16 +1109,16 @@ export default function ProfilePage() {
            : '';
          
          // Validate required fields
-         if (!editValues.new_education_degree?.trim() || !editValues.new_education_school?.trim() || !newEduStartDate) {
+         if (!editValues.new_education_degree || !editValues.new_education_school || !newEduStartDate) {
            toast.error('Please fill in all required fields (Degree, School, and Start Date)');
            return;
          }
          
          const newEducationData = {
            profile_id: profile!.id,
-           school: editValues.new_education_school.trim(),
-           degree: editValues.new_education_degree.trim(),
-           field: editValues.new_education_field?.trim() || null,
+           school: editValues.new_education_school,
+           degree: editValues.new_education_degree,
+           field: editValues.new_education_field || null,
            specialization: null,
            start_date: newEduStartDate,
            end_date: newEduEndDate || null,
@@ -1332,46 +1343,14 @@ export default function ProfilePage() {
                 </div>
               )}
                   </div>
-                  
-                  {/* Network Stats */}
-                  <div className="flex gap-8 p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-100 shadow-sm">
-                    <button 
-                      onClick={() => router.push(`/profile/${profile.id}/connections`)}
-                      className="text-center group flex-1"
-                    >
-                      <div className="text-2xl font-bold text-[#007fff] group-hover:scale-110 transition-transform duration-300">
-                        {formatNumber(connectionCount)}
-                  </div>
-                      <div className="text-sm font-medium text-gray-600 group-hover:text-[#007fff] transition-colors duration-300">
-                        connections
-                </div>
-                    </button>
-                    
-                    <div className="w-px bg-gray-200"></div>
-                    
-                    <button 
-                      onClick={() => router.push(`/profile/${profile.id}/followers`)}
-                      className="text-center group flex-1"
-                    >
-                      <div className="text-2xl font-bold text-[#007fff] group-hover:scale-110 transition-transform duration-300">
-                        {formatNumber(connectionCount)}
-                      </div>
-                      <div className="text-sm font-medium text-gray-600 group-hover:text-[#007fff] transition-colors duration-300">
-                        followers
-                      </div>
-                    </button>
-                  </div>
 
-                  {/* Action Button - Removed "Open to work" as it's not applicable for medical professionals */}
-                  
-
-                  {/* Contact Info Section */}
-                  <div className="flex items-center gap-6 pt-2">
+                  {/* Location - Moved Up */}
+                  <div className="pt-2">
                     {editingField === 'location' ? (
-                      <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3">
                         <div className="w-5 h-5 bg-gray-100 rounded-full flex items-center justify-center">
                           <MapPinIcon className="w-3 h-3 text-gray-500" />
-                        </div>
+                  </div>
                         <input
                           type="text"
                           value={editValues.location || profile.location || ''}
@@ -1392,7 +1371,7 @@ export default function ProfilePage() {
                           >
                             <XCircleIcon className="w-3 h-3" />
                           </button>
-                        </div>
+                </div>
                       </div>
                     ) : (
                       <div className="flex items-center gap-2 text-gray-600 group">
@@ -1402,36 +1381,52 @@ export default function ProfilePage() {
                         <p className="text-sm font-medium group-hover:text-[#007fff] transition-colors duration-200">
                           {profile.location || 'No location set'}
                         </p>
-                  {isOwnProfile && (
+                {isOwnProfile && (
                     <button 
                             onClick={() => startEdit('location', profile.location)}
                             className="opacity-0 group-hover:opacity-100 p-1 text-[#007fff] hover:bg-[#007fff]/10 rounded-full transition-all duration-200"
                     >
                             <PencilIcon className="w-3 h-3" />
                     </button>
-                  )}
-                </div>
-              )}
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Connections and Followers - Plain Text */}
+                  <div className="flex items-center gap-6 pt-2 text-sm text-gray-600">
+                    <button 
+                      onClick={() => router.push(`/profile/${profile.id}/connections`)}
+                      className="hover:text-[#007fff] transition-colors duration-200"
+                    >
+                      <span className="font-semibold text-[#007fff]">{formatNumber(connectionCount)}</span> connections
+                    </button>
+                    <button 
+                      onClick={() => router.push(`/profile/${profile.id}/followers`)}
+                      className="hover:text-[#007fff] transition-colors duration-200"
+                    >
+                      <span className="font-semibold text-[#007fff]">{formatNumber(connectionCount)}</span> followers
+                    </button>
                     <button 
                       onClick={handleViewContactInfo}
-                      className="text-[#007fff] hover:text-[#007fff]/80 hover:underline text-sm font-semibold transition-all duration-200 flex items-center gap-2 group"
+                      className="text-[#007fff] hover:text-[#007fff]/80 hover:underline font-semibold transition-all duration-200 flex items-center gap-2 group"
                     >
-                      <div className="w-5 h-5 bg-[#007fff]/10 rounded-full flex items-center justify-center group-hover:bg-[#007fff]/20 transition-colors duration-200">
-                        <EnvelopeIcon className="w-3 h-3 text-[#007fff]" />
-                      </div>
+                      <div className="w-4 h-4 bg-[#007fff]/10 rounded-full flex items-center justify-center group-hover:bg-[#007fff]/20 transition-colors duration-200">
+                        <EnvelopeIcon className="w-2 h-2 text-[#007fff]" />
+                  </div>
                       Contact info
                     </button>
                   </div>
-                </div>
-
-                {/* Right Side: Current Work and Education */}
+              </div>
+              
+                {/* Right Side: Current Position and Similar Professionals */}
                 <div className="flex flex-col gap-6 min-w-[320px]">
-                  {/* Current Position */}
+                  {/* Current Position - Moved to Right Sidebar */}
                   {currentExperiences.length > 0 && (
-                    <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg border border-gray-100 hover:border-[#007fff]/20 transition-all duration-300 group">
+                    <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-100 hover:border-[#007fff]/20 transition-all duration-300 group">
                       <div className="w-8 h-8 bg-[#007fff] rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
                         <BuildingOfficeIcon className="w-4 h-4 text-white" />
-          </div>
+                      </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-base font-semibold text-gray-900 group-hover:text-[#007fff] transition-colors duration-300">
                           {currentExperiences[0].company}
@@ -1444,9 +1439,18 @@ export default function ProfilePage() {
                         <p className="text-xs text-gray-500 mt-1">
                           Current Position
                         </p>
-                      </div>
+              </div>
                     </div>
                   )}
+
+                  {/* Similar Professionals */}
+                  <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
+                    <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                      <UserGroupIcon className="w-5 h-5 text-[#007fff]" />
+                      Similar Professionals
+                    </h4>
+                    <SimilarPeople />
+                  </div>
                   
                   {/* Current Education */}
                   {currentEducation.length > 0 && (
@@ -1486,7 +1490,7 @@ export default function ProfilePage() {
                           >
                             <CheckIcon className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
                             Following
-                          </button>
+                    </button>
                         ) : (
                           <button
                             onClick={handleConnect}
@@ -1524,7 +1528,7 @@ export default function ProfilePage() {
                         <EnvelopeIcon className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
                         Message
                       </button>
-                      </div>
+                </div>
                   )}
                     </div>
                   </div>
@@ -1556,15 +1560,15 @@ export default function ProfilePage() {
                           <BuildingOfficeIcon className="w-5 h-5 text-[#007fff]" />
                           Experience
                         </h2>
-              {isOwnProfile && (
-                          <button
+                  {isOwnProfile && (
+                    <button 
                             onClick={() => startEdit('add_experience', {})}
                             className="text-[#007fff] hover:text-[#007fff]/80 text-sm font-medium hover:underline transition-colors duration-200"
-                          >
+                    >
                             Add Experience
-                          </button>
-                        )}
-                      </div>
+                    </button>
+                  )}
+                </div>
                     </div>
                     <div className="p-6">
                       {editingField === 'add_experience' ? (
@@ -1590,8 +1594,8 @@ export default function ProfilePage() {
                                   onChange={(e) => setEditValues(prev => ({ ...prev, new_experience_title: e.target.value }))}
                                   className="w-full p-4 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-4 focus:ring-[#007fff]/10 transition-all duration-300 bg-white/80 backdrop-blur-sm"
                                 />
-                              </div>
-                              
+          </div>
+
                               <div className="space-y-3">
                                 <label className="text-sm font-semibold text-[#007fff] flex items-center gap-2">
                                   <BuildingOfficeIcon className="w-4 h-4" />
@@ -1632,8 +1636,8 @@ export default function ProfilePage() {
                                       <option key={year} value={year}>{year}</option>
                                     ))}
                                   </select>
-                                </div>
-                              </div>
+                      </div>
+                    </div>
                               
                               <div className="space-y-3">
                                 <label className="text-sm font-semibold text-[#007fff] flex items-center gap-2">
@@ -1661,8 +1665,8 @@ export default function ProfilePage() {
                                       <option key={year} value={year}>{year}</option>
                                     ))}
                                   </select>
-                                </div>
-                              </div>
+                  </div>
+                  </div>
                               
                               <div className="space-y-3">
                                 <label className="text-sm font-semibold text-[#007fff] flex items-center gap-2">
@@ -1958,7 +1962,7 @@ export default function ProfilePage() {
         
         {/* Modals */}
         {showImageEditor && profile && (
-          <ProfileImageEditor
+          <EnhancedProfileImageEditor
             isOpen={showImageEditor}
             onClose={() => setShowImageEditor(false)}
             onUpdate={() => {
