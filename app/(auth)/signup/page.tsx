@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -35,8 +35,20 @@ export default function SignUp() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { signUp } = useAuth();
+  const { signUp, user, profile } = useAuth();
   const router = useRouter();
+
+  // Handle redirect after successful signup and profile loading
+  useEffect(() => {
+    if (user && profile && !loading) {
+      // Redirect based on user type
+      if (profile.user_type === 'institution' || profile.profile_type === 'institution') {
+        router.push('/institution/onboarding');
+      } else {
+        router.push('/onboarding');
+      }
+    }
+  }, [user, profile, loading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,13 +70,7 @@ export default function SignUp() {
       );
       
       toast.success('Account created successfully!');
-      
-      // Redirect based on profile type
-      if (profileType === 'institution') {
-        router.push('/institution/onboarding');
-      } else {
-        router.push('/onboarding');
-      }
+      // Redirect will be handled by useEffect when profile is loaded
     } catch (error: any) {
       console.error('Error signing up:', error);
       toast.error(error.message || 'An error occurred during sign up');
