@@ -16,6 +16,7 @@ import {
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import Logo from '@/components/common/Logo';
+import { getInstitutionByAdminId } from '@/lib/queries';
 
 const STUDENT_OPTIONS = [
   'I AM A MEDICAL SCIENCES STUDENT'
@@ -111,15 +112,53 @@ export default function InstitutionOnboardingPage() {
 
   // Redirect if not logged in or not an institution user
   useEffect(() => {
-    if (!user) {
+    const guardAndPrefill = async () => {
+      if (!user) {
         router.push('/signin');
         return;
       }
 
-    if (profile && (profile.user_type !== 'institution' && profile.profile_type !== 'institution')) {
-      router.push('/onboarding');
-      return;
-    }
+      if (profile && (profile.user_type !== 'institution' && profile.profile_type !== 'institution')) {
+        router.push('/onboarding');
+        return;
+      }
+
+      // If onboarding already completed, go to institution profile
+      if (profile?.onboarding_completed) {
+        router.push('/institution/profile');
+        return;
+      }
+
+      // Prefill from existing profile
+      if (profile) {
+        setFormData(prev => ({
+          ...prev,
+          institutionName: profile.full_name || prev.institutionName,
+          description: profile.bio || prev.description,
+          location: profile.location || prev.location,
+          website: profile.website || prev.website,
+        }));
+      }
+
+      // If institution already exists for this user, mark onboarding complete and redirect
+      try {
+        const existing = await getInstitutionByAdminId(user.id);
+        if (existing) {
+          if (supabase) {
+            await supabase
+              .from('profiles')
+              .update({ onboarding_completed: true })
+              .eq('id', user.id);
+          }
+          router.push('/institution/profile');
+          return;
+        }
+      } catch {
+        // silent
+      }
+    };
+
+    guardAndPrefill();
   }, [user, profile, router]);
 
   const currentStepData = ONBOARDING_STEPS[currentStep];
@@ -173,32 +212,55 @@ export default function InstitutionOnboardingPage() {
 
     setLoading(true);
     try {
-      // Create institution data
-      const institutionData = {
+      const categorySlug = (formData.category || '').toLowerCase().replace(/\s+/g, '_');
+
+      // Build institution payload
+      const institutionPayload: any = {
         name: formData.institutionName,
         description: formData.description,
-        type: formData.category.toLowerCase().replace(' ', '_') as any,
-        location: formData.location,
-        website: formData.website,
-        established_year: parseInt(formData.establishmentYear),
-        size: formData.employeeCount,
+        type: categorySlug || 'hospital',
+        location: formData.location || null,
+        website: formData.website || null,
+        established_year: formData.establishmentYear ? parseInt(formData.establishmentYear) : null,
+        size: formData.employeeCount || null,
         admin_user_id: user.id,
-        email: user.email || '',
+        email: user.email || null,
         verified: false
       };
 
-      // Insert into institutions table
-      const { error: institutionError } = await supabase
-        .from('institutions')
-        .upsert(institutionData);
-
-      if (institutionError) {
-        console.error('Error creating institution:', institutionError);
-        toast.error('Failed to create institution profile');
-        return;
+      // Check if institution exists for this admin
+      let existingId: string | null = null;
+      try {
+        const existing = await getInstitutionByAdminId(user.id);
+        existingId = existing?.id ?? null;
+      } catch {
+        existingId = null;
       }
 
-      // Update user profile to mark onboarding as completed
+      if (existingId) {
+        const { error: updateError } = await supabase
+          .from('institutions')
+          .update(institutionPayload)
+          .eq('id', existingId);
+        if (updateError) {
+          console.error('Error updating institution:', updateError);
+          toast.error('Failed to update institution profile');
+          setLoading(false);
+          return;
+        }
+      } else {
+        const { error: insertError } = await supabase
+          .from('institutions')
+          .insert(institutionPayload);
+        if (insertError) {
+          console.error('Error creating institution:', insertError);
+          toast.error('Failed to create institution profile');
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Update user profile to mark onboarding as completed and sync basic fields
       const { error: profileError } = await supabase
         .from('profiles')
         .update({ 
@@ -213,18 +275,19 @@ export default function InstitutionOnboardingPage() {
       if (profileError) {
         console.error('Error updating profile:', profileError);
         toast.error('Failed to complete onboarding');
+        setLoading(false);
         return;
       }
 
-      toast.success('Institution profile created successfully!');
+      toast.success('Institution profile saved!');
       router.push('/institution/profile');
-      } catch (error) {
+    } catch (error) {
       console.error('Error completing onboarding:', error);
       toast.error('Failed to complete onboarding');
-      } finally {
-        setLoading(false);
-      }
-    };
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const renderStepContent = () => {
     switch (currentStepData.type) {
