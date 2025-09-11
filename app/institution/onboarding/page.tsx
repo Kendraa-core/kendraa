@@ -18,20 +18,32 @@ import toast from 'react-hot-toast';
 import Logo from '@/components/common/Logo';
 import { getInstitutionByAdminId } from '@/lib/queries';
 
-const STUDENT_OPTIONS = [
-  'I AM A MEDICAL SCIENCES STUDENT'
+const INSTITUTION_TYPES = [
+  'Hospital',
+  'Medical Center',
+  'Clinic',
+  'Research Institute',
+  'Medical School/University',
+  'Pharmaceutical Company',
+  'Medical Device Company',
+  'Healthcare Technology',
+  'Government Health Agency',
+  'Non-Profit Health Organization',
+  'Other'
 ];
 
-const PROFESSIONAL_OPTIONS = [
-  'Pharmaceutical',
-  'Hospital', 
-  'Medical Devices',
-  'Medical Engineering',
-  'Genetics',
-  'Research Institute',
-  'Academia',
-  'AI/Robotics',
-  'Others'
+const INSTITUTION_FOCUS_AREAS = [
+  'Patient Care & Treatment',
+  'Medical Research & Development',
+  'Medical Education & Training',
+  'Public Health & Prevention',
+  'Healthcare Innovation & Technology',
+  'Medical Equipment & Devices',
+  'Pharmaceutical Development',
+  'Healthcare Policy & Administration',
+  'Mental Health Services',
+  'Emergency & Critical Care',
+  'Other'
 ];
 
 const EMPLOYEE_COUNT_OPTIONS = [
@@ -46,49 +58,49 @@ const ONBOARDING_STEPS = [
   {
     id: 'about',
     title: 'About Your Institution',
-    subtitle: 'Tell us about your organization',
+    subtitle: 'Tell us about your healthcare organization',
     type: 'about',
     required: true
   },
   {
     id: 'focus',
-    title: 'I AM A MEDICAL SCIENCES STUDENT / PROFESSIONAL',
-    subtitle: 'Select your category and focus area',
+    title: 'Institution Type & Focus Area',
+    subtitle: 'What type of healthcare institution are you and what do you focus on?',
     type: 'focus',
     required: true
   },
   {
     id: 'establishment',
     title: 'Year of Establishment',
-    subtitle: 'When was your institution established?',
+    subtitle: 'When was your institution founded?',
     type: 'establishment',
     required: true
   },
   {
     id: 'nerve_centre',
-    title: 'Nerve Centre',
-    subtitle: 'Where is your main office located?',
+    title: 'Main Office Location',
+    subtitle: 'Where is your primary headquarters located?',
     type: 'nerve_centre',
     required: true
   },
   {
     id: 'url',
     title: 'Website URL',
-    subtitle: 'Your organization\'s website',
+    subtitle: 'Your institution\'s official website',
     type: 'url',
     required: true
   },
   {
     id: 'employees',
-    title: 'Number of Employees',
-    subtitle: 'How many people work at your institution?',
+    title: 'Organization Size',
+    subtitle: 'How many employees work at your institution?',
     type: 'employees',
     required: true
   },
   {
     id: 'complete',
-    title: 'You\'re all set!',
-    subtitle: 'Your institution profile is ready',
+    title: 'Welcome to Kendraa!',
+    subtitle: 'Your institution profile is ready to connect with healthcare professionals',
     type: 'complete',
     required: false
   }
@@ -102,7 +114,7 @@ export default function InstitutionOnboardingPage() {
   const [formData, setFormData] = useState({
     institutionName: '',
     description: '',
-    category: '',
+    institutionType: '',
     focusArea: '',
     establishmentYear: '',
     location: '',
@@ -179,7 +191,7 @@ export default function InstitutionOnboardingPage() {
       case 'about':
         return formData.institutionName.trim() !== '' && formData.description.trim() !== '';
       case 'focus':
-        return formData.category !== '' && formData.focusArea !== '';
+        return formData.institutionType !== '' && formData.focusArea !== '';
       case 'establishment':
         return formData.establishmentYear !== '';
       case 'nerve_centre':
@@ -210,9 +222,9 @@ export default function InstitutionOnboardingPage() {
   const handleComplete = async () => {
     if (!user?.id || !supabase) return;
 
-    setLoading(true);
+        setLoading(true);
     try {
-      const categorySlug = (formData.category || '').toLowerCase().replace(/\s+/g, '_');
+      const categorySlug = (formData.institutionType || '').toLowerCase().replace(/\s+/g, '_');
 
       // Build institution payload
       const institutionPayload: any = {
@@ -281,13 +293,13 @@ export default function InstitutionOnboardingPage() {
 
       toast.success('Institution profile saved!');
       router.push('/institution/profile');
-    } catch (error) {
+      } catch (error) {
       console.error('Error completing onboarding:', error);
       toast.error('Failed to complete onboarding');
-    } finally {
-      setLoading(false);
-    }
-  };
+      } finally {
+        setLoading(false);
+      }
+    };
 
   const renderStepContent = () => {
     switch (currentStepData.type) {
@@ -303,18 +315,18 @@ export default function InstitutionOnboardingPage() {
                 value={formData.institutionName}
                 onChange={(e) => setFormData(prev => ({ ...prev, institutionName: e.target.value }))}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
-                placeholder="Enter your institution name"
+                placeholder="e.g., City General Hospital, MedTech Innovations Inc."
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description *
+                Institution Description *
               </label>
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent h-32 resize-none"
-                placeholder="Tell us about your institution..."
+                placeholder="Describe your institution's mission, services, and what makes you unique in healthcare..."
               />
             </div>
           </div>
@@ -325,15 +337,15 @@ export default function InstitutionOnboardingPage() {
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
-                Category *
+                Institution Type *
               </label>
               <div className="grid grid-cols-1 gap-3">
-                {PROFESSIONAL_OPTIONS.map((option) => (
+                {INSTITUTION_TYPES.map((option) => (
                   <button
                     key={option}
-                    onClick={() => setFormData(prev => ({ ...prev, category: option }))}
+                    onClick={() => setFormData(prev => ({ ...prev, institutionType: option }))}
                     className={`p-4 text-left border rounded-lg transition-all ${
-                      formData.category === option
+                      formData.institutionType === option
                         ? 'border-[#007fff] bg-[#007fff]/5 text-[#007fff]'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
@@ -348,7 +360,7 @@ export default function InstitutionOnboardingPage() {
                 Focus Area *
               </label>
               <div className="grid grid-cols-1 gap-3">
-                {STUDENT_OPTIONS.map((option) => (
+                {INSTITUTION_FOCUS_AREAS.map((option) => (
                   <button
                     key={option}
                     onClick={() => setFormData(prev => ({ ...prev, focusArea: option }))}
@@ -382,6 +394,9 @@ export default function InstitutionOnboardingPage() {
                 min="1800"
                 max={new Date().getFullYear()}
               />
+              <p className="text-sm text-gray-500 mt-1">
+                When was your institution first established or founded?
+              </p>
             </div>
           </div>
         );
@@ -400,6 +415,9 @@ export default function InstitutionOnboardingPage() {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
                 placeholder="e.g., New York, NY, USA"
               />
+              <p className="text-sm text-gray-500 mt-1">
+                Where is your institution&apos;s main headquarters or primary location?
+              </p>
             </div>
           </div>
         );
@@ -418,6 +436,9 @@ export default function InstitutionOnboardingPage() {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
                 placeholder="https://www.yourinstitution.com"
               />
+              <p className="text-sm text-gray-500 mt-1">
+                Your institution&apos;s official website URL (optional but recommended)
+              </p>
             </div>
           </div>
         );
@@ -427,7 +448,7 @@ export default function InstitutionOnboardingPage() {
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
-                Number of Employees *
+                Organization Size *
               </label>
               <div className="grid grid-cols-1 gap-3">
                 {EMPLOYEE_COUNT_OPTIONS.map((option) => (
@@ -457,7 +478,7 @@ export default function InstitutionOnboardingPage() {
             <div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2">Welcome to Kendraa!</h3>
               <p className="text-gray-600">
-                Your institution profile has been created successfully. You can now start connecting with healthcare professionals and sharing your organization&apos;s updates.
+                Your institution profile has been created successfully. You can now start connecting with healthcare professionals, sharing your organization&apos;s updates, and building your network in the healthcare community.
               </p>
             </div>
           </div>
