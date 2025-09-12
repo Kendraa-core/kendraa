@@ -58,37 +58,42 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
       {/* Navigation Bar */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center h-20">
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
-              className="flex items-center"
+              className="flex flex-col"
             >
-              <Logo size="md" />
+              <div className="text-3xl font-bold text-[#007fff] tracking-tight">
+                kendraa
+              </div>
+              <div className="text-sm text-gray-500 -mt-1">
+                The future of Professional Networking
+              </div>
             </motion.div>
 
             <motion.div 
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="flex items-center space-x-6"
+              className="flex items-center space-x-8"
             >
-              <Link href="/feed" className="text-gray-700 hover:text-[#007fff] transition-colors">Network</Link>
-              <Link href="/jobs" className="text-gray-700 hover:text-[#007fff] transition-colors">Jobs</Link>
-              <Link href="/events" className="text-gray-700 hover:text-[#007fff] transition-colors">Events</Link>
-              <Link href="/groups" className="text-gray-700 hover:text-[#007fff] transition-colors">Groups</Link>
+              <Link href="/feed" className="text-gray-700 hover:text-[#007fff] transition-colors font-medium">Network</Link>
+              <Link href="/jobs" className="text-gray-700 hover:text-[#007fff] transition-colors font-medium">Jobs</Link>
+              <Link href="/events" className="text-gray-700 hover:text-[#007fff] transition-colors font-medium">Events</Link>
+              <Link href="/groups" className="text-gray-700 hover:text-[#007fff] transition-colors font-medium">Groups</Link>
               <Link 
                 href="/signup" 
-                className="px-6 py-2 text-sm font-medium text-white bg-[#007fff] hover:bg-[#007fff]/90 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
+                className="px-6 py-2 text-sm font-medium text-white bg-[#007fff] hover:bg-[#007fff]/90 rounded-lg transition-all duration-200"
               >
                 Sign Up
               </Link>
               <Link 
                 href="/signin" 
-                className="text-gray-700 hover:text-[#007fff] transition-colors"
+                className="text-gray-700 hover:text-[#007fff] transition-colors font-medium"
               >
                 Login
               </Link>
@@ -98,7 +103,7 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative pt-20 pb-24 bg-white overflow-hidden">
+      <section className="relative pt-24 pb-24 bg-white overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 pt-16">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             {/* Left Column - Text Content */}
