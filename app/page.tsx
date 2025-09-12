@@ -7,7 +7,7 @@ import { useIsClient } from '@/hooks/useIsClient';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { ArrowRightIcon, CheckCircleIcon, UsersIcon, GlobeAltIcon, AcademicCapIcon, BuildingOfficeIcon, HeartIcon, BeakerIcon, CpuChipIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { ArrowRightIcon, CheckCircleIcon, UsersIcon, GlobeAltIcon, AcademicCapIcon, BuildingOfficeIcon, HeartIcon, BeakerIcon, CpuChipIcon, SparklesIcon, ChatBubbleLeftRightIcon, DocumentTextIcon, CalendarIcon, ChartBarIcon, PhotoIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 
 export default function LandingPage() {
   const isClient = useIsClient();
@@ -23,7 +23,7 @@ export default function LandingPage() {
         // Redirect based on user type
         if (profile.user_type === 'institution' || profile.profile_type === 'institution') {
           router.push('/institution/onboarding');
-        } else {
+      } else {
         router.push('/onboarding');
         }
       }
@@ -73,19 +73,23 @@ export default function LandingPage() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="flex items-center space-x-4"
+              className="flex items-center space-x-6"
             >
-              <Link 
-                href="/signin" 
-                className="px-4 py-2 text-sm font-medium text-[#007fff] border-2 border-[#007fff]/30 hover:border-[#007fff] hover:bg-[#007fff]/5 rounded-lg transition-all duration-200"
-              >
-                Sign In
-              </Link>
+              <Link href="/feed" className="text-gray-700 hover:text-[#007fff] transition-colors">Network</Link>
+              <Link href="/jobs" className="text-gray-700 hover:text-[#007fff] transition-colors">Jobs</Link>
+              <Link href="/events" className="text-gray-700 hover:text-[#007fff] transition-colors">Events</Link>
+              <Link href="/groups" className="text-gray-700 hover:text-[#007fff] transition-colors">Groups</Link>
               <Link 
                 href="/signup" 
                 className="px-6 py-2 text-sm font-medium text-white bg-[#007fff] hover:bg-[#007fff]/90 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
               >
                 Sign Up
+              </Link>
+              <Link 
+                href="/signin" 
+                className="text-gray-700 hover:text-[#007fff] transition-colors"
+              >
+                Login
               </Link>
             </motion.div>
           </div>
@@ -93,91 +97,25 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative pt-20 pb-32 bg-gradient-to-br from-white via-blue-50/30 to-azure-50/30 overflow-hidden">
-        {/* Background Elements */}
-        <div className="absolute inset-0">
-          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-[#007fff]/5 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-200/20 rounded-full blur-3xl"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-[#007fff]/5 to-blue-100/10 rounded-full blur-3xl"></div>
-        </div>
-
-        {/* Custom Networking SVG Illustration */}
-        <div className="absolute top-20 right-10 w-96 h-96 opacity-10">
-          <svg viewBox="0 0 400 400" className="w-full h-full">
-            <defs>
-              <linearGradient id="networkGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#007fff" />
-                <stop offset="100%" stopColor="#0056b3" />
-              </linearGradient>
-            </defs>
-            {/* Network Nodes */}
-            <circle cx="100" cy="100" r="8" fill="url(#networkGradient)" />
-            <circle cx="300" cy="120" r="8" fill="url(#networkGradient)" />
-            <circle cx="200" cy="200" r="12" fill="url(#networkGradient)" />
-            <circle cx="80" cy="300" r="8" fill="url(#networkGradient)" />
-            <circle cx="320" cy="280" r="8" fill="url(#networkGradient)" />
-            <circle cx="150" cy="350" r="8" fill="url(#networkGradient)" />
-            <circle cx="250" cy="80" r="8" fill="url(#networkGradient)" />
-            <circle cx="350" cy="200" r="8" fill="url(#networkGradient)" />
-            
-            {/* Connection Lines */}
-            <line x1="100" y1="100" x2="200" y2="200" stroke="url(#networkGradient)" strokeWidth="2" opacity="0.6" />
-            <line x1="300" y1="120" x2="200" y2="200" stroke="url(#networkGradient)" strokeWidth="2" opacity="0.6" />
-            <line x1="200" y1="200" x2="80" y2="300" stroke="url(#networkGradient)" strokeWidth="2" opacity="0.6" />
-            <line x1="200" y1="200" x2="320" y2="280" stroke="url(#networkGradient)" strokeWidth="2" opacity="0.6" />
-            <line x1="80" y1="300" x2="150" y2="350" stroke="url(#networkGradient)" strokeWidth="2" opacity="0.6" />
-            <line x1="320" y1="280" x2="150" y2="350" stroke="url(#networkGradient)" strokeWidth="2" opacity="0.6" />
-            <line x1="250" y1="80" x2="200" y2="200" stroke="url(#networkGradient)" strokeWidth="2" opacity="0.6" />
-            <line x1="350" y1="200" x2="200" y2="200" stroke="url(#networkGradient)" strokeWidth="2" opacity="0.6" />
-          </svg>
-        </div>
-
-        <div className="relative max-w-7xl mx-auto px-6 pt-16">
+      <section className="relative pt-20 pb-24 bg-gradient-to-br from-[#007fff] to-blue-600 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 pt-16">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             {/* Left Column - Text Content */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, ease: "easeOut" }}
-              className="text-left lg:text-left"
+              className="text-left"
             >
-               <h1 className="text-6xl md:text-7xl lg:text-8xl font-black text-[#007fff] leading-tight tracking-tight mulish-bold mb-8">
-                 kendraa
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-white leading-tight tracking-tight mb-8">
+                Let&apos;s make medical networking easier.
                </h1>
-               <p className="text-2xl md:text-3xl lg:text-4xl font-bold text-black mb-8 leading-relaxed">
-                 Professional Networking for Global Medical Science Professionals
+              <p className="text-xl md:text-2xl text-blue-100 leading-relaxed mb-8">
+                kendraa is a professional networking platform made for medical science professionals and healthcare institutions.
                </p>
-               
-               <p className="text-xl md:text-2xl text-gray-600 leading-relaxed mb-8">
-                Welcome to a dedicated platform designed to connect, collaborate, and innovate across the vast ecosystem of medical sciences.
-              </p>
-               <p className="text-xl md:text-2xl font-semibold text-[#007fff] leading-relaxed mb-12">
-                From Hospitals and Academia to Pharmaceuticals, Medtech, Medical Devices, Research, Medical Engineering, Genetics, Healthcare Entrepreneurs, Universities and Wellness.
-              </p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-                 className="flex flex-col sm:flex-row gap-4"
-            >
-                <Link 
-                  href="/signup" 
-                className="inline-flex items-center px-10 py-4 text-xl font-semibold text-white bg-[#007fff] hover:bg-[#007fff]/90 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl"
-                >
-                  <span>Get Started Free</span>
-                <ArrowRightIcon className="w-6 h-6 ml-3" />
-                </Link>
-                <Link 
-                href="/signin"
-                className="inline-flex items-center px-10 py-4 text-xl font-semibold text-[#007fff] bg-white border-2 border-[#007fff] hover:border-[#007fff] hover:bg-[#007fff]/5 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl"
-                >
-                Sign In
-                </Link>
-            </motion.div>
             </motion.div>
 
-            {/* Right Column - Custom Healthcare Networking Illustration */}
+            {/* Right Column - Medical Science Illustration */}
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
@@ -185,102 +123,97 @@ export default function LandingPage() {
               className="relative"
             >
               <div className="relative w-full h-96 lg:h-[500px]">
-                <svg viewBox="0 0 600 500" className="w-full h-full">
+                <svg viewBox="0 0 600 400" className="w-full h-full">
                   <defs>
-                    <linearGradient id="healthGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#007fff" />
-                      <stop offset="50%" stopColor="#00a8ff" />
-                      <stop offset="100%" stopColor="#0056b3" />
+                    <linearGradient id="deskGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#f8fafc" />
+                      <stop offset="100%" stopColor="#e2e8f0" />
                     </linearGradient>
-                    <linearGradient id="nodeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#ffffff" />
-                      <stop offset="100%" stopColor="#f0f8ff" />
+                    <linearGradient id="screenGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#1e293b" />
+                      <stop offset="100%" stopColor="#334155" />
                     </linearGradient>
                   </defs>
                   
-                  {/* Background Network Pattern */}
-                  <g opacity="0.1">
-                    <circle cx="100" cy="100" r="4" fill="url(#healthGradient)" />
-                    <circle cx="500" cy="120" r="4" fill="url(#healthGradient)" />
-                    <circle cx="300" cy="250" r="6" fill="url(#healthGradient)" />
-                    <circle cx="80" cy="400" r="4" fill="url(#healthGradient)" />
-                    <circle cx="520" cy="380" r="4" fill="url(#healthGradient)" />
-                    <circle cx="150" cy="450" r="4" fill="url(#healthGradient)" />
-                    <circle cx="250" cy="80" r="4" fill="url(#healthGradient)" />
-                    <circle cx="450" cy="200" r="4" fill="url(#healthGradient)" />
+                  {/* Desk */}
+                  <rect x="50" y="250" width="500" height="20" fill="url(#deskGradient)" rx="10" />
+                  
+                  {/* Laptop */}
+                  <rect x="200" y="200" width="200" height="120" fill="url(#screenGradient)" rx="8" />
+                  <rect x="210" y="210" width="180" height="100" fill="#ffffff" rx="4" />
+                  
+                  {/* Medical Icons Floating Around */}
+                  {/* Heart Icon */}
+                  <g transform="translate(100, 120)">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#ef4444" />
                   </g>
-
-                  {/* Main Healthcare Icons */}
-                  {/* Hospital */}
-                  <g transform="translate(50, 80)">
-                    <rect x="0" y="20" width="40" height="30" fill="url(#nodeGradient)" stroke="url(#healthGradient)" strokeWidth="2" rx="4" />
-                    <rect x="15" y="0" width="10" height="20" fill="url(#nodeGradient)" stroke="url(#healthGradient)" strokeWidth="2" />
-                    <circle cx="20" cy="35" r="3" fill="url(#healthGradient)" />
-                    <text x="20" y="70" textAnchor="middle" className="text-xs font-semibold fill-gray-600">Hospital</text>
+                  
+                  {/* Calendar Icon */}
+                  <g transform="translate(450, 100)">
+                    <rect x="2" y="4" width="20" height="18" fill="white" stroke="#007fff" strokeWidth="2" rx="2" />
+                    <rect x="2" y="2" width="20" height="4" fill="#007fff" />
+                    <text x="12" y="6" textAnchor="middle" className="text-xs font-bold fill-white">15</text>
                   </g>
-
-                  {/* Research Lab */}
-                  <g transform="translate(500, 100)">
-                    <rect x="0" y="0" width="40" height="40" fill="url(#nodeGradient)" stroke="url(#healthGradient)" strokeWidth="2" rx="4" />
-                    <circle cx="20" cy="20" r="8" fill="none" stroke="url(#healthGradient)" strokeWidth="2" />
-                    <circle cx="20" cy="20" r="3" fill="url(#healthGradient)" />
-                    <text x="20" y="55" textAnchor="middle" className="text-xs font-semibold fill-gray-600">Research</text>
+                  
+                  {/* Chat Bubble with Question */}
+                  <g transform="translate(80, 180)">
+                    <ellipse cx="15" cy="15" rx="12" ry="10" fill="white" stroke="#007fff" strokeWidth="2" />
+                    <text x="15" y="12" textAnchor="middle" className="text-xs font-bold fill-gray-600">?</text>
+                    <path d="M8 20 L15 15 L22 20" fill="white" stroke="#007fff" strokeWidth="2" />
                   </g>
-
-                  {/* Central Hub */}
-                  <g transform="translate(280, 220)">
-                    <circle cx="0" cy="0" r="25" fill="url(#nodeGradient)" stroke="url(#healthGradient)" strokeWidth="3" />
-                    <circle cx="0" cy="0" r="15" fill="url(#healthGradient)" opacity="0.2" />
-                    <circle cx="0" cy="0" r="8" fill="url(#healthGradient)" />
-                    <text x="0" y="45" textAnchor="middle" className="text-sm font-bold fill-[#007fff]">kendraa</text>
+                  
+                  {/* Chat Bubble with Exclamation */}
+                  <g transform="translate(480, 200)">
+                    <ellipse cx="15" cy="15" rx="12" ry="10" fill="white" stroke="#007fff" strokeWidth="2" />
+                    <text x="15" y="12" textAnchor="middle" className="text-xs font-bold fill-gray-600">!</text>
+                    <path d="M8 20 L15 15 L22 20" fill="white" stroke="#007fff" strokeWidth="2" />
                   </g>
-
-                  {/* Medical Device */}
-                  <g transform="translate(80, 380)">
-                    <rect x="0" y="10" width="30" height="20" fill="url(#nodeGradient)" stroke="url(#healthGradient)" strokeWidth="2" rx="3" />
-                    <rect x="5" y="0" width="20" height="10" fill="url(#nodeGradient)" stroke="url(#healthGradient)" strokeWidth="2" rx="2" />
-                    <circle cx="15" cy="20" r="2" fill="url(#healthGradient)" />
-                    <text x="15" y="45" textAnchor="middle" className="text-xs font-semibold fill-gray-600">MedTech</text>
+                  
+                  {/* Chart Icon */}
+                  <g transform="translate(120, 80)">
+                    <rect x="2" y="2" width="20" height="16" fill="white" stroke="#007fff" strokeWidth="2" rx="2" />
+                    <rect x="6" y="12" width="3" height="4" fill="#007fff" />
+                    <rect x="10" y="8" width="3" height="8" fill="#007fff" />
+                    <rect x="14" y="4" width="3" height="12" fill="#007fff" />
                   </g>
-
-                  {/* Pharmaceutical */}
-                  <g transform="translate(520, 360)">
-                    <rect x="0" y="0" width="30" height="30" fill="url(#nodeGradient)" stroke="url(#healthGradient)" strokeWidth="2" rx="4" />
-                    <rect x="5" y="5" width="20" height="20" fill="url(#healthGradient)" opacity="0.3" rx="2" />
-                    <circle cx="15" cy="15" r="4" fill="url(#healthGradient)" />
-                    <text x="15" y="45" textAnchor="middle" className="text-xs font-semibold fill-gray-600">Pharma</text>
+                  
+                  {/* Photo/Research Icon */}
+                  <g transform="translate(420, 60)">
+                    <rect x="2" y="6" width="16" height="12" fill="white" stroke="#007fff" strokeWidth="2" rx="2" />
+                    <circle cx="8" cy="10" r="2" fill="#007fff" />
+                    <path d="M2 18 L6 14 L10 16 L18 8" stroke="#007fff" strokeWidth="2" fill="none" />
                   </g>
-
-                  {/* University */}
-                  <g transform="translate(150, 430)">
-                    <rect x="0" y="15" width="40" height="25" fill="url(#nodeGradient)" stroke="url(#healthGradient)" strokeWidth="2" rx="4" />
-                    <rect x="10" y="0" width="20" height="15" fill="url(#nodeGradient)" stroke="url(#healthGradient)" strokeWidth="2" />
-                    <rect x="15" y="5" width="10" height="5" fill="url(#healthGradient)" />
-                    <text x="20" y="55" textAnchor="middle" className="text-xs font-semibold fill-gray-600">University</text>
+                  
+                  {/* Users/Network Icon */}
+                  <g transform="translate(350, 80)">
+                    <circle cx="8" cy="8" r="6" fill="white" stroke="#007fff" strokeWidth="2" />
+                    <circle cx="8" cy="6" r="2" fill="#007fff" />
+                    <path d="M4 12 Q8 8 12 12" stroke="#007fff" strokeWidth="2" fill="none" />
+                    <circle cx="20" cy="8" r="6" fill="white" stroke="#007fff" strokeWidth="2" />
+                    <circle cx="20" cy="6" r="2" fill="#007fff" />
+                    <path d="M16 12 Q20 8 24 12" stroke="#007fff" strokeWidth="2" fill="none" />
                   </g>
-
-                  {/* Connection Lines */}
-                  <g opacity="0.6">
-                    <line x1="70" y1="95" x2="280" y2="220" stroke="url(#healthGradient)" strokeWidth="2" />
-                    <line x1="520" y1="120" x2="280" y2="220" stroke="url(#healthGradient)" strokeWidth="2" />
-                    <line x1="95" y1="400" x2="280" y2="220" stroke="url(#healthGradient)" strokeWidth="2" />
-                    <line x1="535" y1="375" x2="280" y2="220" stroke="url(#healthGradient)" strokeWidth="2" />
-                    <line x1="170" y1="445" x2="280" y2="220" stroke="url(#healthGradient)" strokeWidth="2" />
-                    <line x1="270" y1="95" x2="280" y2="220" stroke="url(#healthGradient)" strokeWidth="2" />
-                    <line x1="450" y1="200" x2="280" y2="220" stroke="url(#healthGradient)" strokeWidth="2" />
+                  
+                  {/* Plant on Desk */}
+                  <g transform="translate(150, 230)">
+                    <rect x="8" y="0" width="4" height="20" fill="#8b5cf6" />
+                    <circle cx="10" cy="5" r="8" fill="#10b981" />
+                    <circle cx="6" cy="8" r="6" fill="#059669" />
+                    <circle cx="14" cy="7" r="5" fill="#047857" />
                   </g>
-
-                  {/* Floating Particles */}
-                  <g opacity="0.4">
-                    <circle cx="200" cy="150" r="2" fill="url(#healthGradient)">
-                      <animate attributeName="opacity" values="0.4;0.8;0.4" dur="3s" repeatCount="indefinite" />
-                    </circle>
-                    <circle cx="400" cy="300" r="2" fill="url(#healthGradient)">
-                      <animate attributeName="opacity" values="0.8;0.4;0.8" dur="2.5s" repeatCount="indefinite" />
-                    </circle>
-                    <circle cx="150" cy="300" r="2" fill="url(#healthGradient)">
-                      <animate attributeName="opacity" values="0.4;0.8;0.4" dur="2s" repeatCount="indefinite" />
-                    </circle>
+                  
+                  {/* Coffee Cup */}
+                  <g transform="translate(400, 220)">
+                    <rect x="2" y="0" width="12" height="16" fill="white" stroke="#007fff" strokeWidth="2" rx="2" />
+                    <rect x="0" y="2" width="16" height="2" fill="#8b4513" />
+                    <rect x="14" y="4" width="2" height="8" fill="#8b4513" />
+                  </g>
+                  
+                  {/* Lamp */}
+                  <g transform="translate(500, 200)">
+                    <rect x="8" y="0" width="4" height="30" fill="#6b7280" />
+                    <rect x="2" y="30" width="16" height="4" fill="#6b7280" />
+                    <circle cx="10" cy="25" r="8" fill="#fbbf24" opacity="0.8" />
                   </g>
                 </svg>
               </div>
@@ -289,126 +222,156 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-24 bg-white relative">
-        <div className="max-w-7xl mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
+      {/* Introductory Text Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="text-center mb-20"
+            className="text-xl md:text-2xl text-gray-700 leading-relaxed"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-black mb-8">
-              COLLABORATE, SHARE KNOWLEDGE, CREATE OPPORTUNITIES
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              <span className="mulish-semibold">kendraa</span> brings professionals, institutions and innovators together to grow their careers and networks while shaping the future of global healthcare.
-            </p>
-          </motion.div>
+            Whether you&apos;re a healthcare professional looking to expand your network, a researcher seeking collaboration opportunities, or an institution building partnerships - we&apos;ve got you covered.
+          </motion.p>
+        </div>
+      </section>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+      {/* Features Section */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+            {/* Left Column - Professional Networking */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
               viewport={{ once: true }}
-              className="group"
+              className="space-y-8"
             >
-              <div className="bg-gradient-to-br from-white to-blue-50/30 border-2 border-gray-100 rounded-3xl p-10 hover:border-[#007fff]/30 hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-2">
-                <div className="w-20 h-20 bg-gradient-to-br from-[#007fff] to-blue-600 rounded-3xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300">
-                  <UsersIcon className="w-10 h-10 text-white" />
+              <div className="flex items-center space-x-4 mb-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-[#007fff] to-blue-600 rounded-2xl flex items-center justify-center">
+                  <UsersIcon className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-black mb-6">COLLABORATE</h3>
-                <p className="text-gray-600 leading-relaxed text-lg">
-                  Connect with healthcare professionals worldwide. Build meaningful relationships and partnerships across the medical science ecosystem.
-                </p>
+                <h2 className="text-3xl font-bold text-black">Professional Networking for Medical Sciences</h2>
               </div>
+              
+              <p className="text-lg text-gray-600 leading-relaxed">
+                Connect with healthcare professionals, researchers, and medical institutions worldwide. Build meaningful relationships, share knowledge, and discover collaboration opportunities across the entire medical science ecosystem.
+              </p>
+              
+              <ul className="space-y-3 text-gray-600">
+                <li className="flex items-center space-x-3">
+                  <CheckCircleIcon className="w-5 h-5 text-[#007fff] flex-shrink-0" />
+                  <span>Connect with professionals from hospitals, research labs, and universities</span>
+                </li>
+                <li className="flex items-center space-x-3">
+                  <CheckCircleIcon className="w-5 h-5 text-[#007fff] flex-shrink-0" />
+                  <span>Share research findings and clinical insights</span>
+                </li>
+                <li className="flex items-center space-x-3">
+                  <CheckCircleIcon className="w-5 h-5 text-[#007fff] flex-shrink-0" />
+                  <span>Discover career opportunities and research collaborations</span>
+                </li>
+                <li className="flex items-center space-x-3">
+                  <CheckCircleIcon className="w-5 h-5 text-[#007fff] flex-shrink-0" />
+                  <span>Join specialized groups and communities</span>
+                </li>
+              </ul>
+              
+              <Link 
+                href="/signup" 
+                className="inline-flex items-center px-8 py-3 text-lg font-semibold text-white bg-[#007fff] hover:bg-[#007fff]/90 rounded-xl transition-all duration-200"
+              >
+                Learn more about Networking
+              </Link>
             </motion.div>
 
+            {/* Right Column - Institution Collaboration */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
               viewport={{ once: true }}
-              className="group"
+              className="space-y-8"
             >
-              <div className="bg-gradient-to-br from-white to-blue-50/30 border-2 border-gray-100 rounded-3xl p-10 hover:border-[#007fff]/30 hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-2">
-                <div className="w-20 h-20 bg-gradient-to-br from-[#007fff] to-blue-600 rounded-3xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300">
-                  <AcademicCapIcon className="w-10 h-10 text-white" />
-                  </div>
-                <h3 className="text-2xl font-bold text-black mb-6">SHARE KNOWLEDGE</h3>
-                <p className="text-gray-600 leading-relaxed text-lg">
-                  Exchange insights, research findings, and best practices. Contribute to the advancement of medical science through knowledge sharing.
-                </p>
-                  </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              viewport={{ once: true }}
-              className="group"
-            >
-              <div className="bg-gradient-to-br from-white to-blue-50/30 border-2 border-gray-100 rounded-3xl p-10 hover:border-[#007fff]/30 hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-2">
-                <div className="w-20 h-20 bg-gradient-to-br from-[#007fff] to-blue-600 rounded-3xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300">
-                  <SparklesIcon className="w-10 h-10 text-white" />
+              <div className="flex items-center space-x-4 mb-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-[#007fff] to-blue-600 rounded-2xl flex items-center justify-center">
+                  <BuildingOfficeIcon className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-black mb-6">CREATE OPPORTUNITIES</h3>
-                <p className="text-gray-600 leading-relaxed text-lg">
-                  Discover career opportunities, research collaborations, and innovative projects. Shape the future of healthcare together.
-                </p>
+                <h2 className="text-3xl font-bold text-black">Institution Partnerships & Collaboration</h2>
               </div>
+              
+              <p className="text-lg text-gray-600 leading-relaxed">
+                Build strategic partnerships between hospitals, universities, research institutions, and healthcare organizations. Facilitate cross-institutional collaboration and knowledge sharing.
+              </p>
+              
+              <ul className="space-y-3 text-gray-600">
+                <li className="flex items-center space-x-3">
+                  <CheckCircleIcon className="w-5 h-5 text-[#007fff] flex-shrink-0" />
+                  <span>Connect institutions across different healthcare sectors</span>
+                </li>
+                <li className="flex items-center space-x-3">
+                  <CheckCircleIcon className="w-5 h-5 text-[#007fff] flex-shrink-0" />
+                  <span>Facilitate research partnerships and clinical trials</span>
+                </li>
+                <li className="flex items-center space-x-3">
+                  <CheckCircleIcon className="w-5 h-5 text-[#007fff] flex-shrink-0" />
+                  <span>Share best practices and institutional knowledge</span>
+                </li>
+                <li className="flex items-center space-x-3">
+                  <CheckCircleIcon className="w-5 h-5 text-[#007fff] flex-shrink-0" />
+                  <span>Create joint educational and training programs</span>
+                </li>
+              </ul>
+              
+              <Link 
+                href="/signup" 
+                className="inline-flex items-center px-8 py-3 text-lg font-semibold text-white bg-[#007fff] hover:bg-[#007fff]/90 rounded-xl transition-all duration-200"
+              >
+                Learn more about Partnerships
+              </Link>
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Industries Section */}
-      <section className="py-24 bg-gradient-to-br from-gray-50 to-blue-50/30">
+      {/* Medical Institutions Section */}
+      <section className="py-24 bg-gray-900">
         <div className="max-w-7xl mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="text-center mb-20"
+            className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-black mb-8">
-              Connect Across the Medical Science Ecosystem
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-8">
+              These medical institutions already rely on kendraa:
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Join professionals from every corner of the healthcare industry
-            </p>
           </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 items-center">
             {[
-              { icon: BuildingOfficeIcon, name: 'Hospitals', color: 'from-blue-500 to-blue-600' },
-              { icon: AcademicCapIcon, name: 'Academia', color: 'from-green-500 to-green-600' },
-              { icon: BeakerIcon, name: 'Pharmaceuticals', color: 'from-purple-500 to-purple-600' },
-              { icon: CpuChipIcon, name: 'Medtech', color: 'from-orange-500 to-orange-600' },
-              { icon: HeartIcon, name: 'Medical Devices', color: 'from-red-500 to-red-600' },
-              { icon: AcademicCapIcon, name: 'Research', color: 'from-indigo-500 to-indigo-600' },
-              { icon: CpuChipIcon, name: 'Medical Engineering', color: 'from-teal-500 to-teal-600' },
-              { icon: BeakerIcon, name: 'Genetics', color: 'from-pink-500 to-pink-600' },
-              { icon: UsersIcon, name: 'Healthcare Entrepreneurs', color: 'from-yellow-500 to-yellow-600' },
-              { icon: GlobeAltIcon, name: 'Universities', color: 'from-gray-500 to-gray-600' }
-            ].map((industry, index) => (
+              { name: 'Johns Hopkins', type: 'Hospital' },
+              { name: 'Mayo Clinic', type: 'Medical Center' },
+              { name: 'Cleveland Clinic', type: 'Hospital' },
+              { name: 'Mass General', type: 'Hospital' }
+            ].map((institution, index) => (
               <motion.div
-                key={industry.name}
+                key={institution.name}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="group"
+                className="text-center"
               >
-                <div className="bg-white rounded-2xl p-8 text-center hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-2 border border-gray-100">
-                  <div className={`w-16 h-16 bg-gradient-to-br ${industry.color} rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                    <industry.icon className="w-8 h-8 text-white" />
-                </div>
-                  <h3 className="text-sm font-bold text-black">{industry.name}</h3>
+                <div className="bg-white rounded-2xl p-8 hover:shadow-2xl transition-all duration-500">
+                  <div className="w-16 h-16 bg-gradient-to-br from-[#007fff] to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <BuildingOfficeIcon className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">{institution.name}</h3>
+                  <p className="text-sm text-gray-600">{institution.type}</p>
                 </div>
               </motion.div>
             ))}
@@ -416,72 +379,121 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Why Choose kendraa Section */}
-      <section className="py-24 bg-gradient-to-br from-gray-50 to-blue-50/30">
+      {/* Pricing & Signup Section */}
+      <section className="py-24 bg-gray-100">
         <div className="max-w-7xl mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center mb-20"
-          >
-            <h2 className="text-4xl md:text-5xl font-bold text-black mb-8">
-              Why Choose kendraa?
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              A purpose-built platform designed specifically for the medical science community
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                icon: UsersIcon,
-                title: "Medical-Focused Community",
-                description: "Connect with professionals who share your passion for advancing healthcare and medical sciences."
-              },
-              {
-                icon: AcademicCapIcon,
-                title: "Knowledge Sharing",
-                description: "Share research, insights, and best practices with a community that values evidence-based medicine."
-              },
-              {
-                icon: BuildingOfficeIcon,
-                title: "Institution Partnerships",
-                description: "Build relationships between hospitals, universities, research labs, and healthcare organizations."
-              },
-              {
-                icon: HeartIcon,
-                title: "Patient-Centered Focus",
-                description: "Every connection and collaboration ultimately serves to improve patient care and outcomes."
-              },
-              {
-                icon: BeakerIcon,
-                title: "Research Collaboration",
-                description: "Find partners for clinical trials, research projects, and innovative medical solutions."
-              },
-              {
-                icon: GlobeAltIcon,
-                title: "Global Reach",
-                description: "Connect with healthcare professionals and institutions from around the world."
-              }
-            ].map((feature, index) => (
-              <motion.div
-                key={feature.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 group"
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+            {/* Left Side - Pricing */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="space-y-8"
+            >
+              <h2 className="text-4xl md:text-5xl font-bold text-black mb-8">
+                Starting at Free
+              </h2>
+              
+              <ul className="space-y-4 text-lg text-gray-700">
+                <li className="flex items-center space-x-3">
+                  <CheckCircleIcon className="w-6 h-6 text-[#007fff] flex-shrink-0" />
+                  <span>Unlimited Professional Connections</span>
+                </li>
+                <li className="flex items-center space-x-3">
+                  <CheckCircleIcon className="w-6 h-6 text-[#007fff] flex-shrink-0" />
+                  <span>Access to Medical Science Communities</span>
+                </li>
+                <li className="flex items-center space-x-3">
+                  <CheckCircleIcon className="w-6 h-6 text-[#007fff] flex-shrink-0" />
+                  <span>Research Collaboration Tools</span>
+                </li>
+                <li className="flex items-center space-x-3">
+                  <CheckCircleIcon className="w-6 h-6 text-[#007fff] flex-shrink-0" />
+                  <span>Institution Partnership Features</span>
+                </li>
+                <li className="flex items-center space-x-3">
+                  <CheckCircleIcon className="w-6 h-6 text-[#007fff] flex-shrink-0" />
+                  <span>Simple, Transparent Pricing</span>
+                </li>
+              </ul>
+              
+              <Link 
+                href="/signup" 
+                className="inline-flex items-center text-lg font-semibold text-[#007fff] hover:text-blue-600 transition-colors"
               >
-                <div className="w-16 h-16 bg-gradient-to-br from-[#007fff] to-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <feature.icon className="w-8 h-8 text-white" />
+                See Pricing Table »
+              </Link>
+            </motion.div>
+
+            {/* Right Side - Free Trial Form */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="bg-white rounded-3xl p-8 shadow-xl"
+            >
+              <h3 className="text-2xl font-bold text-black mb-4">
+                Request Free Access
+              </h3>
+              <p className="text-gray-600 mb-8">
+                Join kendraa for free and start building your medical science network today.
+              </p>
+              
+              <form className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
+                    placeholder="Enter your full name"
+                  />
                 </div>
-                <h3 className="text-xl font-bold text-black mb-4">{feature.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{feature.description}</p>
-              </motion.div>
-            ))}
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
+                    placeholder="Enter your email address"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Institution/Organization
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
+                    placeholder="Enter your institution name"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Professional Role
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
+                    placeholder="e.g., Doctor, Researcher, Administrator"
+                  />
+                </div>
+                
+                <Link 
+                  href="/signup" 
+                  className="w-full inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-[#007fff] hover:bg-[#007fff]/90 rounded-xl transition-all duration-200"
+                >
+                  Request Access
+                </Link>
+              </form>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -537,19 +549,35 @@ export default function LandingPage() {
               </p>
             </div>
             <div>
-              <h3 className="font-bold text-white mb-6 text-lg">Platform</h3>
+              <h3 className="font-bold text-white mb-6 text-lg">Support</h3>
               <ul className="space-y-3 text-gray-400">
-                <li><Link href="/about" className="hover:text-white transition-colors text-lg">About</Link></li>
-                <li><Link href="/signup" className="hover:text-white transition-colors text-lg">Join</Link></li>
-                <li><Link href="/signin" className="hover:text-white transition-colors text-lg">Sign In</Link></li>
+                <li><Link href="/contact" className="hover:text-white transition-colors text-lg">Contact</Link></li>
+                <li><Link href="/help" className="hover:text-white transition-colors text-lg">Help Center</Link></li>
+                <li><Link href="/privacy" className="hover:text-white transition-colors text-lg">Privacy Policy</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-bold text-white mb-6 text-lg">Support</h3>
+              <h3 className="font-bold text-white mb-6 text-lg">The Platform</h3>
               <ul className="space-y-3 text-gray-400">
-                <li><Link href="/help" className="hover:text-white transition-colors text-lg">Help Center</Link></li>
-                <li><Link href="/contact" className="hover:text-white transition-colors text-lg">Contact</Link></li>
-                <li><Link href="/privacy" className="hover:text-white transition-colors text-lg">Privacy</Link></li>
+                <li><Link href="/about" className="hover:text-white transition-colors text-lg">About Us</Link></li>
+                <li><Link href="/feed" className="hover:text-white transition-colors text-lg">Network</Link></li>
+                <li><Link href="/jobs" className="hover:text-white transition-colors text-lg">Jobs</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-bold text-white mb-6 text-lg">Use Cases</h3>
+              <ul className="space-y-3 text-gray-400">
+                <li><Link href="/signup" className="hover:text-white transition-colors text-lg">For Professionals</Link></li>
+                <li><Link href="/signup" className="hover:text-white transition-colors text-lg">For Institutions</Link></li>
+                <li><Link href="/signup" className="hover:text-white transition-colors text-lg">For Researchers</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-bold text-white mb-6 text-lg">Account</h3>
+              <ul className="space-y-3 text-gray-400">
+                <li><Link href="/signin" className="hover:text-white transition-colors text-lg">Login</Link></li>
+                <li><Link href="/signup" className="hover:text-white transition-colors text-lg">Signup</Link></li>
+                <li><Link href="/privacy" className="hover:text-white transition-colors text-lg">Terms & Conditions</Link></li>
               </ul>
             </div>
           </div>
