@@ -8,9 +8,23 @@ export function cn(...inputs: ClassValue[]) {
 
 // Utility function to get Supabase storage URL
 export function getSupabaseStorageUrl(bucket: string, path: string): string {
-  const supabase = getSupabase();
-  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-  return data.publicUrl;
+  try {
+    const supabase = getSupabase();
+    
+    // If path is already a full URL, return it
+    if (path.startsWith('http')) {
+      return path;
+    }
+    
+    // Clean the path - only remove leading slashes, keep the full path structure
+    const cleanPath = path.replace(/^\/+/, '');
+    
+    const { data } = supabase.storage.from(bucket).getPublicUrl(cleanPath);
+    return data.publicUrl;
+  } catch (error) {
+    console.error(`Error getting storage URL for ${bucket}/${path}:`, error);
+    return '';
+  }
 }
 
 // Utility function to upload file to Supabase storage
@@ -22,18 +36,26 @@ export async function uploadToSupabaseStorage(
   try {
     const supabase = getSupabase();
     
+    if (!supabase) {
+      return { url: '', error: 'Supabase client not available' };
+    }
+    
+    console.log(`Uploading to bucket: ${bucket}, path: ${path}`);
+    
     // Check if bucket exists first
     const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
     
     if (bucketsError) {
+      console.error('Error listing buckets:', bucketsError);
       return { url: '', error: `Failed to check buckets: ${bucketsError.message}` };
     }
     
     const bucketExists = buckets?.some(b => b.name === bucket);
     if (!bucketExists) {
+      console.error(`Bucket '${bucket}' not found. Available buckets:`, buckets?.map(b => b.name));
       return { 
         url: '', 
-        error: `Bucket '${bucket}' not found. Please create the '${bucket}' bucket in your Supabase dashboard. See SUPABASE_STORAGE_SETUP.md for instructions.` 
+        error: `Bucket '${bucket}' not found. Available buckets: ${buckets?.map(b => b.name).join(', ') || 'none'}` 
       };
     }
     
@@ -46,14 +68,17 @@ export async function uploadToSupabaseStorage(
       });
 
     if (uploadError) {
-      return { url: '', error: uploadError.message };
+      console.error('Upload error:', uploadError);
+      return { url: '', error: `Upload failed: ${uploadError.message}` };
     }
 
     // Get the public URL
     const { data } = supabase.storage.from(bucket).getPublicUrl(path);
     
+    console.log('Upload successful, public URL:', data.publicUrl);
     return { url: data.publicUrl, error: null };
   } catch (error) {
+    console.error('Upload exception:', error);
     return { url: '', error: error instanceof Error ? error.message : 'Upload failed' };
   }
 }

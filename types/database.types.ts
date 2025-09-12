@@ -212,6 +212,12 @@ export interface Institution {
   verified: boolean;
   admin_user_id: string; // Foreign key to profiles table
   
+  // Additional fields for institution onboarding
+  short_description: string | null;
+  short_tagline: string | null;
+  theme_color: string | null;
+  social_media_links: any | null; // JSONB field for social media links
+  
   // Corporate Profile Fields (from requirements) - Optional for backward compatibility
   organization_email?: string | null;
   organization_head_name?: string | null;

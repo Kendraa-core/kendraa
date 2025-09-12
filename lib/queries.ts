@@ -723,41 +723,7 @@ export async function getNotifications(userId: string): Promise<Notification[]> 
   try {
     const schemaExists = await true;
     if (!schemaExists) {
-      return [
-        {
-          id: '1',
-          created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
-          user_id: userId,
-          type: 'connection_request',
-          title: 'New Connection Request',
-          message: 'Dr. Sarah Johnson wants to connect with you',
-          read: false,
-          data: { profileId: 'user-1' },
-          action_url: null,
-        },
-        {
-          id: '2',
-          created_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(), // 4 hours ago
-          user_id: userId,
-          type: 'connection_accepted',
-          title: 'Connection Accepted',
-          message: 'Dr. Michael Chen accepted your connection request',
-          read: true,
-          data: { profileId: 'user-2' },
-          action_url: null,
-        },
-        {
-          id: '3',
-          created_at: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(), // 6 hours ago
-          user_id: userId,
-          type: 'post_like',
-          title: 'Post Liked',
-          message: 'Dr. Emily Rodriguez liked your post about healthcare innovation',
-          read: true,
-          data: { postId: 'post-1' },
-          action_url: null,
-        },
-      ];
+      return [];
     }
     
     // Try to get notifications from database
@@ -768,42 +734,8 @@ export async function getNotifications(userId: string): Promise<Notification[]> 
       .order('created_at', { ascending: false });
 
     if (error) {
-      // If table doesn't exist or other error, return mock data
-      return [
-        {
-          id: '1',
-          created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-          user_id: userId,
-          type: 'connection_request',
-          title: 'New Connection Request',
-          message: 'Dr. Sarah Johnson wants to connect with you',
-          read: false,
-          data: { profileId: 'user-1' },
-          action_url: null,
-        },
-        {
-          id: '2',
-          created_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-          user_id: userId,
-          type: 'connection_accepted',
-          title: 'Connection Accepted',
-          message: 'Dr. Michael Chen accepted your connection request',
-          read: true,
-          data: { profileId: 'user-2' },
-          action_url: null,
-        },
-        {
-          id: '3',
-          created_at: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
-          user_id: userId,
-          type: 'post_like',
-          title: 'Post Liked',
-          message: 'Dr. Emily Rodriguez liked your post about healthcare innovation',
-          read: true,
-          data: { postId: 'post-1' },
-          action_url: null,
-        },
-      ];
+      console.error('Error fetching notifications:', error);
+      return [];
     }
     
     // Transform the data to match our interface
@@ -1292,6 +1224,11 @@ export async function ensureInstitutionExists(userId: string, profile: Profile):
       size: 'medium' as const,
       verified: false,
       admin_user_id: userId,
+      // Additional fields for institution onboarding
+      short_description: profile.bio || null,
+      short_tagline: null,
+      theme_color: '#007fff',
+      social_media_links: null,
     };
     
     const result = await createInstitution(institutionData);
@@ -1382,150 +1319,8 @@ export async function getJobs(): Promise<JobWithCompany[]> {
     
     const schemaExists = await true;
     if (!schemaExists) {
-      console.log('Database schema not found, returning mock jobs');
-      // Return mock data for testing
-      return [
-        {
-          id: '1',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          title: 'Senior Cardiologist',
-          description: 'We are seeking a highly qualified cardiologist to join our team. The ideal candidate will have extensive experience in interventional cardiology and a passion for patient care.',
-          requirements: ['Board certified in Cardiology', '5+ years experience', 'Interventional cardiology skills'],
-          salary_min: 250000,
-          salary_max: 350000,
-          currency: 'USD',
-          location: 'New York, NY',
-          job_type: 'full_time',
-          experience_level: 'senior',
-          specializations: ['Cardiology'],
-          company_id: 'inst-1',
-          posted_by: 'user-1',
-          status: 'active',
-          application_deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-          applications_count: 12,
-          company: {
-            id: 'inst-1',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            name: 'Mount Sinai Hospital',
-            type: 'hospital',
-            description: 'Leading healthcare institution in New York',
-            location: 'New York, NY',
-            website: 'https://mountsinai.org',
-            phone: '+1-212-241-6500',
-            email: 'hr@mountsinai.org',
-            logo_url: null,
-            banner_url: null,
-            specialties: ['Cardiology', 'Neurology', 'Oncology'],
-            license_number: 'NY123456',
-            accreditation: ['JCAHO', 'AHA'],
-            established_year: 1852,
-            size: 'large',
-            verified: true,
-            admin_user_id: 'user-1',
-          },
-          posted_by_user: {
-            id: 'user-1',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            full_name: 'Dr. Sarah Johnson',
-            email: 'sarah.johnson@mountsinai.org',
-            avatar_url: null,
-            banner_url: null,
-            headline: 'Chief of Cardiology',
-            bio: 'Experienced cardiologist with over 15 years in the field.',
-            location: 'New York, NY',
-            country: 'USA',
-            website: null,
-            phone: null,
-            specialization: ['Cardiology'],
-            is_premium: true,
-            onboarding_completed: true,
-            user_type: 'institution',
-            profile_type: 'institution',
-            institution_type: 'hospital',
-            accreditations: ['JCAHO', 'AHA'],
-            departments: ['Cardiology', 'Emergency Medicine'],
-            contact_info: {
-              address: '1 Gustave L. Levy Place, New York, NY 10029',
-              phone: '+1-212-241-6500',
-              email: 'hr@mountsinai.org',
-              website: 'https://mountsinai.org',
-            },
-          },
-        },
-        {
-          id: '2',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          title: 'Pediatric Nurse Practitioner',
-          description: 'Join our pediatric team to provide comprehensive care to children and adolescents. Experience in primary care pediatrics required.',
-          requirements: ['NP license', 'Pediatric certification', '2+ years experience'],
-          salary_min: 80000,
-          salary_max: 120000,
-          currency: 'USD',
-          location: 'Los Angeles, CA',
-          job_type: 'full_time',
-          experience_level: 'mid',
-          specializations: ['Pediatrics', 'Nursing'],
-          company_id: 'inst-2',
-          posted_by: 'user-2',
-          status: 'active',
-          application_deadline: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString(),
-          applications_count: 8,
-          company: {
-            id: 'inst-2',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            name: 'Children\'s Hospital Los Angeles',
-            type: 'hospital',
-            description: 'Premier pediatric hospital in Southern California',
-            location: 'Los Angeles, CA',
-            website: 'https://chla.org',
-            phone: '+1-323-660-2450',
-            email: 'hr@chla.org',
-            logo_url: null,
-            banner_url: null,
-            specialties: ['Pediatrics', 'Emergency Medicine'],
-            license_number: 'CA789012',
-            accreditation: ['JCAHO', 'AAP'],
-            established_year: 1901,
-            size: 'large',
-            verified: true,
-            admin_user_id: 'user-2',
-          },
-          posted_by_user: {
-            id: 'user-2',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            full_name: 'Dr. Michael Chen',
-            email: 'michael.chen@chla.org',
-            avatar_url: null,
-            banner_url: null,
-            headline: 'Director of Nursing',
-            bio: 'Experienced healthcare administrator with focus on pediatric care.',
-            location: 'Los Angeles, CA',
-            country: 'USA',
-            website: null,
-            phone: null,
-            specialization: ['Pediatrics', 'Nursing'],
-            is_premium: true,
-            onboarding_completed: true,
-            user_type: 'institution',
-            profile_type: 'institution',
-            institution_type: 'hospital',
-            accreditations: ['JCAHO', 'AAP'],
-            departments: ['Pediatrics', 'Nursing'],
-            contact_info: {
-              address: '4650 Sunset Blvd, Los Angeles, CA 90027',
-              phone: '+1-323-660-2450',
-              email: 'hr@chla.org',
-              website: 'https://chla.org',
-            },
-          },
-        },
-      ];
+      console.log('Database schema not found, returning empty array');
+      return [];
     }
     
     const { data, error } = await getSupabase()
@@ -1960,50 +1755,8 @@ export async function getUserApplications(userId: string): Promise<(JobApplicati
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.log('Error fetching applications, returning mock data:', error);
-      // Return mock data for testing
-      return [
-        {
-          id: 'mock-app-1',
-          job_id: '1',
-          applicant_id: userId,
-          status: 'pending',
-          cover_letter: 'I am very interested in this position and believe my skills would be a great fit.',
-          resume_url: null,
-          reviewed_by: null,
-          reviewed_at: null,
-          notes: null,
-          created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-          updated_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-          job: {
-            id: '1',
-            title: 'Cardiologist',
-            company: {
-              name: 'Mount Sinai Hospital'
-            }
-          }
-        },
-        {
-          id: 'mock-app-2',
-          job_id: '2',
-          applicant_id: userId,
-          status: 'reviewed',
-          cover_letter: 'I have extensive experience in pediatric care and would love to join your team.',
-          resume_url: null,
-          reviewed_by: 'mock-reviewer',
-          reviewed_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-          notes: 'Strong candidate with relevant experience',
-          created_at: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
-          updated_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-          job: {
-            id: '2',
-            title: 'Pediatric Nurse Practitioner',
-            company: {
-              name: 'Children\'s Hospital Los Angeles'
-            }
-          }
-        }
-      ];
+      console.error('Error fetching applications:', error);
+      return [];
     }
     
     console.log('User applications fetched successfully', data);
@@ -3621,5 +3374,265 @@ export async function isCurrentStudent(userId: string): Promise<boolean> {
   }
 
   return data && data.length > 0;
+}
+
+// Institution-specific queries
+export async function getInstitutionPosts(institutionId: string, limit = 10, offset = 0): Promise<PostWithAuthor[]> {
+  try {
+    console.log('[Queries] Getting institution posts:', institutionId);
+    
+    const { data: posts, error } = await getSupabase()
+      .from('posts')
+      .select('*')
+      .eq('author_id', institutionId)
+      .eq('author_type', 'institution')
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      console.error('Error fetching institution posts:', error);
+      return [];
+    }
+    
+    if (!posts || posts.length === 0) {
+      return [];
+    }
+    
+    // Get institution profile
+    const { data: institution, error: institutionError } = await getSupabase()
+      .from('profiles')
+      .select('*')
+      .eq('id', institutionId)
+      .single();
+    
+    if (institutionError) {
+      console.error('Error fetching institution profile:', institutionError);
+      return [];
+    }
+    
+    // Combine posts with institution data
+    return posts.map(post => ({
+      ...post,
+      author: institution
+    }));
+  } catch (error) {
+    console.error('Error getting institution posts:', error);
+    return [];
+  }
+}
+
+export async function getInstitutionJobs(institutionId: string, limit = 10, offset = 0): Promise<JobWithCompany[]> {
+  try {
+    console.log('[Queries] Getting institution jobs:', institutionId);
+    
+    const { data: jobs, error } = await getSupabase()
+      .from('jobs')
+      .select('*')
+      .eq('company_id', institutionId)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      console.error('Error fetching institution jobs:', error);
+      return [];
+    }
+    
+    if (!jobs || jobs.length === 0) {
+      return [];
+    }
+    
+    // Get institution profile
+    const { data: institution, error: institutionError } = await getSupabase()
+      .from('profiles')
+      .select('*')
+      .eq('id', institutionId)
+      .single();
+    
+    if (institutionError) {
+      console.error('Error fetching institution profile:', institutionError);
+      return [];
+    }
+    
+    // Get posted by user profile
+    const { data: postedByUser, error: userError } = await getSupabase()
+      .from('profiles')
+      .select('*')
+      .eq('id', institutionId)
+      .single();
+    
+    // Combine jobs with company and user data
+    return jobs.map(job => ({
+      ...job,
+      company: institution,
+      posted_by_user: postedByUser || institution
+    }));
+  } catch (error) {
+    console.error('Error getting institution jobs:', error);
+    return [];
+  }
+}
+
+export async function getInstitutionEvents(institutionId: string, limit = 10, offset = 0): Promise<EventWithOrganizer[]> {
+  try {
+    console.log('[Queries] Getting institution events:', institutionId);
+    
+    const { data: events, error } = await getSupabase()
+      .from('events')
+      .select('*')
+      .eq('organizer_id', institutionId)
+      .order('start_date', { ascending: true })
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      console.error('Error fetching institution events:', error);
+      return [];
+    }
+    
+    if (!events || events.length === 0) {
+      return [];
+    }
+    
+    // Get institution profile
+    const { data: institution, error: institutionError } = await getSupabase()
+      .from('profiles')
+      .select('*')
+      .eq('id', institutionId)
+      .single();
+    
+    if (institutionError) {
+      console.error('Error fetching institution profile:', institutionError);
+      return [];
+    }
+    
+    // Combine events with organizer data
+    return events.map(event => ({
+      ...event,
+      organizer: institution
+    }));
+  } catch (error) {
+    console.error('Error getting institution events:', error);
+    return [];
+  }
+}
+
+export async function createInstitutionPost(
+  institutionId: string,
+  content: string,
+  imageUrl?: string
+): Promise<Post | null> {
+  try {
+    console.log('[Queries] Creating institution post:', institutionId);
+    
+    const { data, error } = await getSupabase()
+      .from('posts')
+      .insert({
+        author_id: institutionId,
+        author_type: 'institution',
+        content,
+        image_url: imageUrl || null,
+        visibility: 'public',
+        likes_count: 0,
+        comments_count: 0,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating institution post:', error);
+      return null;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error creating institution post:', error);
+    return null;
+  }
+}
+
+export async function createInstitutionJob(
+  institutionId: string,
+  jobData: {
+    title: string;
+    description: string;
+    requirements?: string[];
+    salary_min?: number;
+    salary_max?: number;
+    currency?: string;
+    location?: string;
+    employment_type?: string;
+    experience_level?: string;
+    remote_allowed?: boolean;
+  }
+): Promise<Job | null> {
+  try {
+    console.log('[Queries] Creating institution job:', institutionId);
+    
+    const { data, error } = await getSupabase()
+      .from('jobs')
+      .insert({
+        company_id: institutionId,
+        posted_by: institutionId,
+        ...jobData,
+        status: 'active',
+        application_deadline: null,
+        remote_allowed: jobData.remote_allowed || false,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating institution job:', error);
+      return null;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error creating institution job:', error);
+    return null;
+  }
+}
+
+export async function createInstitutionEvent(
+  institutionId: string,
+  eventData: {
+    title: string;
+    description: string;
+    start_date: string;
+    end_date: string;
+    location?: string;
+    venue?: string;
+    event_type: string;
+    max_attendees?: number;
+    registration_required?: boolean;
+    registration_deadline?: string;
+    cost?: number;
+    currency?: string;
+  }
+): Promise<Event | null> {
+  try {
+    console.log('[Queries] Creating institution event:', institutionId);
+    
+    const { data, error } = await getSupabase()
+      .from('events')
+      .insert({
+        organizer_id: institutionId,
+        organizer_type: 'institution',
+        ...eventData,
+        status: 'active',
+        registration_required: eventData.registration_required || false,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating institution event:', error);
+      return null;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error creating institution event:', error);
+    return null;
+  }
 }
 

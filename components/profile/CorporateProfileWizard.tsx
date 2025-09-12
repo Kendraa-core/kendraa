@@ -170,7 +170,11 @@ export default function CorporateProfileWizard() {
         accreditation: null,
         established_year: parseInt(profileData.yearEstablished) || null,
         size: 'medium' as const,
-        verified: false
+        verified: false,
+        short_description: profileData.overview ? profileData.overview.substring(0, 200) : null,
+        short_tagline: null,
+        theme_color: null,
+        social_media_links: null
       };
 
       const result = await createInstitution(institutionData);

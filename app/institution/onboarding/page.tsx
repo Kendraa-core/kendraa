@@ -56,6 +56,90 @@ const EMPLOYEE_COUNT_OPTIONS = [
   '10000+'
 ];
 
+// Map institution type from UI to database-compatible values
+const mapInstitutionType = (type: string): string => {
+  switch (type) {
+    case 'Hospital':
+      return 'hospital';
+    case 'Medical Center':
+      return 'hospital';
+    case 'Clinic':
+      return 'clinic';
+    case 'Research Institute':
+      return 'research_center';
+    case 'Medical School/University':
+      return 'university';
+    case 'Pharmaceutical Company':
+      return 'pharmaceutical';
+    case 'Medical Device Company':
+      return 'medical_device';
+    case 'Healthcare Technology':
+      return 'other';
+    case 'Government Health Agency':
+      return 'other';
+    case 'Non-Profit Health Organization':
+      return 'other';
+    case 'Other':
+      return 'other';
+    default:
+      return 'hospital';
+  }
+};
+
+// Map employee count from UI to database-compatible size values
+const mapEmployeeCountToSize = (employeeCount: string): string => {
+  switch (employeeCount) {
+    case '0 - 10':
+      return 'small';
+    case '10 - 100':
+      return 'small';
+    case '100 - 1000':
+      return 'medium';
+    case '1000 - 10000':
+      return 'large';
+    case '10000+':
+      return 'enterprise';
+    default:
+      return 'medium';
+  }
+};
+
+// Map database type values back to UI values for prefill
+const mapDatabaseTypeToUI = (dbType: string): string => {
+  switch (dbType) {
+    case 'hospital':
+      return 'Hospital';
+    case 'clinic':
+      return 'Clinic';
+    case 'research_center':
+      return 'Research Institute';
+    case 'university':
+      return 'Medical School/University';
+    case 'pharmaceutical':
+      return 'Pharmaceutical Company';
+    case 'medical_device':
+      return 'Medical Device Company';
+    default:
+      return 'Other';
+  }
+};
+
+// Map database size values back to UI values for prefill
+const mapDatabaseSizeToUI = (dbSize: string): string => {
+  switch (dbSize) {
+    case 'small':
+      return '10 - 100'; // Default to a reasonable small size
+    case 'medium':
+      return '100 - 1000';
+    case 'large':
+      return '1000 - 10000';
+    case 'enterprise':
+      return '10000+';
+    default:
+      return '100 - 1000'; // Default to medium
+  }
+};
+
 const ONBOARDING_STEPS = [
   {
     id: 'basic_info',
@@ -153,11 +237,11 @@ export default function InstitutionOnboardingPage() {
       if (profile) {
         setFormData(prev => ({
           ...prev,
-          institutionName: profile.full_name || prev.institutionName,
-          shortDescription: profile.bio || prev.shortDescription,
-          headquarters: profile.location || prev.headquarters,
-          website: profile.website || prev.website,
-          contactEmail: profile.email || prev.contactEmail,
+          institutionName: profile.full_name || prev.institutionName || '',
+          shortDescription: profile.bio || prev.shortDescription || '',
+          headquarters: profile.location || prev.headquarters || '',
+          website: profile.website || prev.website || '',
+          contactEmail: profile.email || prev.contactEmail || '',
         }));
       }
 
@@ -174,22 +258,22 @@ export default function InstitutionOnboardingPage() {
           // Load existing institution data to continue onboarding
           setFormData(prev => ({
             ...prev,
-            institutionName: existing.name || prev.institutionName,
-            shortTagline: (existing as any).short_tagline || prev.shortTagline,
-            institutionType: existing.type || prev.institutionType,
-            establishmentYear: existing.established_year?.toString() || prev.establishmentYear,
-            accreditation: Array.isArray(existing.accreditation) ? existing.accreditation.join(', ') : (existing.accreditation || prev.accreditation),
-            logoUrl: existing.logo_url || prev.logoUrl,
-            bannerUrl: existing.banner_url || prev.bannerUrl,
-            themeColor: (existing as any).theme_color || prev.themeColor,
-            shortDescription: (existing as any).short_description || prev.shortDescription,
-            detailedDescription: existing.description || prev.detailedDescription,
-            website: existing.website || prev.website,
-            socialMediaLinks: (existing as any).social_media_links ? JSON.stringify((existing as any).social_media_links) : prev.socialMediaLinks,
-            headquarters: existing.location || prev.headquarters,
-            employeeCount: existing.size || prev.employeeCount,
-            contactEmail: existing.email || prev.contactEmail,
-            contactPhone: existing.phone || prev.contactPhone,
+            institutionName: existing.name || prev.institutionName || '',
+            shortTagline: (existing as any).short_tagline || prev.shortTagline || '',
+            institutionType: existing.type ? mapDatabaseTypeToUI(existing.type) : prev.institutionType || '',
+            establishmentYear: existing.established_year?.toString() || prev.establishmentYear || '',
+            accreditation: Array.isArray(existing.accreditation) ? existing.accreditation.join(', ') : (existing.accreditation || prev.accreditation || ''),
+            logoUrl: existing.logo_url || prev.logoUrl || '',
+            bannerUrl: existing.banner_url || prev.bannerUrl || '',
+            themeColor: (existing as any).theme_color || prev.themeColor || '#007fff',
+            shortDescription: (existing as any).short_description || prev.shortDescription || '',
+            detailedDescription: existing.description || prev.detailedDescription || '',
+            website: existing.website || prev.website || '',
+            socialMediaLinks: (existing as any).social_media_links ? JSON.stringify((existing as any).social_media_links) : prev.socialMediaLinks || '',
+            headquarters: existing.location || prev.headquarters || '',
+            employeeCount: existing.size ? mapDatabaseSizeToUI(existing.size) : prev.employeeCount || '',
+            contactEmail: existing.email || prev.contactEmail || '',
+            contactPhone: existing.phone || prev.contactPhone || '',
           }));
         }
       } catch {
@@ -268,7 +352,7 @@ export default function InstitutionOnboardingPage() {
     let currentBannerUrl = formData.bannerUrl;
     
     try {
-      const categorySlug = (formData.institutionType || '').toLowerCase().replace(/\s+/g, '_');
+      const categorySlug = mapInstitutionType(formData.institutionType);
 
       // Upload logo if a new file is selected
       if (logoFile) {
@@ -300,13 +384,13 @@ export default function InstitutionOnboardingPage() {
         location: formData.headquarters || null,
         website: formData.website || null,
         established_year: formData.establishmentYear ? parseInt(formData.establishmentYear) : null,
-        size: formData.employeeCount || null,
+        size: formData.employeeCount ? mapEmployeeCountToSize(formData.employeeCount) : null,
         admin_user_id: user.id,
         email: formData.contactEmail || user.email || null,
         verified: false,
         // Additional fields
         short_tagline: formData.shortTagline || null,
-        accreditation: formData.accreditation || null,
+        accreditation: formData.accreditation?.trim() ? formData.accreditation.trim().split(',').map(item => item.trim()).filter(item => item.length > 0) : null,
         logo_url: currentLogoUrl || null,
         banner_url: currentBannerUrl || null,
         theme_color: formData.themeColor || '#007fff',
@@ -402,7 +486,7 @@ export default function InstitutionOnboardingPage() {
     let currentBannerUrl = formData.bannerUrl;
     
     try {
-      const categorySlug = (formData.institutionType || '').toLowerCase().replace(/\s+/g, '_');
+      const categorySlug = mapInstitutionType(formData.institutionType);
 
       // Upload logo if a new file is selected
       if (logoFile) {
@@ -434,13 +518,13 @@ export default function InstitutionOnboardingPage() {
         location: formData.headquarters || null,
         website: formData.website || null,
         established_year: formData.establishmentYear ? parseInt(formData.establishmentYear) : null,
-        size: formData.employeeCount || null,
+        size: formData.employeeCount ? mapEmployeeCountToSize(formData.employeeCount) : null,
         admin_user_id: user.id,
         email: formData.contactEmail || user.email || null,
         verified: false,
         // Additional fields
         short_tagline: formData.shortTagline,
-        accreditation: formData.accreditation,
+        accreditation: formData.accreditation?.trim() ? formData.accreditation.trim().split(',').map(item => item.trim()).filter(item => item.length > 0) : null,
         logo_url: currentLogoUrl,
         banner_url: currentBannerUrl,
         theme_color: formData.themeColor,

@@ -64,6 +64,13 @@ export default function DashboardLayout({
           updateProfile(userProfile);
         }
 
+        // Check if user is an institution and redirect to institution pages
+        const isInstitution = userProfile?.user_type === 'institution' || userProfile?.profile_type === 'institution';
+        if (isInstitution) {
+          router.push('/institution/feed');
+          return;
+        }
+
         // The onboarding check is now handled by the useOnboardingProtection hook.
         // This useEffect is now only responsible for fetching sidebar data.
         

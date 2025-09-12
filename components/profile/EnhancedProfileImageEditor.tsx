@@ -262,7 +262,16 @@ export default function EnhancedProfileImageEditor({
       const result = await uploadToSupabaseStorage(bucket, filePath, file);
 
       if (result.error) {
-        throw new Error(result.error);
+        // Provide more specific error messages
+        if (result.error.includes('row-level security policy')) {
+          throw new Error('Storage access denied. Please contact support to configure storage permissions.');
+        } else if (result.error.includes('Bucket') && result.error.includes('not found')) {
+          throw new Error('Storage bucket not configured. Please contact support.');
+        } else if (result.error.includes('Failed to check buckets')) {
+          throw new Error('Unable to connect to storage. Please check your internet connection and try again.');
+        } else {
+          throw new Error(result.error);
+        }
       }
 
       // Update profile
@@ -297,7 +306,15 @@ export default function EnhancedProfileImageEditor({
       if (avatarFile) {
         const avatarPath = generateFilePath(user.id, avatarFile.name, 'avatars');
         const avatarResult = await uploadToSupabaseStorage('avatars', avatarPath, avatarFile);
-        if (avatarResult.error) throw new Error(avatarResult.error);
+        if (avatarResult.error) {
+          if (avatarResult.error.includes('row-level security policy')) {
+            throw new Error('Storage access denied. Please contact support to configure storage permissions.');
+          } else if (avatarResult.error.includes('Bucket') && avatarResult.error.includes('not found')) {
+            throw new Error('Storage bucket not configured. Please contact support.');
+          } else {
+            throw new Error(avatarResult.error);
+          }
+        }
         updates.avatar_url = avatarResult.url;
       }
 
@@ -305,7 +322,15 @@ export default function EnhancedProfileImageEditor({
       if (bannerFile) {
         const bannerPath = generateFilePath(user.id, bannerFile.name, 'banners');
         const bannerResult = await uploadToSupabaseStorage('banners', bannerPath, bannerFile);
-        if (bannerResult.error) throw new Error(bannerResult.error);
+        if (bannerResult.error) {
+          if (bannerResult.error.includes('row-level security policy')) {
+            throw new Error('Storage access denied. Please contact support to configure storage permissions.');
+          } else if (bannerResult.error.includes('Bucket') && bannerResult.error.includes('not found')) {
+            throw new Error('Storage bucket not configured. Please contact support.');
+          } else {
+            throw new Error(bannerResult.error);
+          }
+        }
         updates.banner_url = bannerResult.url;
       }
 
