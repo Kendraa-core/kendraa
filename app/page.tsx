@@ -7,7 +7,7 @@ import { useIsClient } from '@/hooks/useIsClient';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { ArrowRightIcon, CheckCircleIcon, UsersIcon, GlobeAltIcon, AcademicCapIcon, BuildingOfficeIcon, HeartIcon, BeakerIcon, CpuChipIcon, SparklesIcon, StarIcon } from '@heroicons/react/24/outline';
+import { ArrowRightIcon, CheckCircleIcon, UsersIcon, GlobeAltIcon, AcademicCapIcon, BuildingOfficeIcon, HeartIcon, BeakerIcon, CpuChipIcon, SparklesIcon } from '@heroicons/react/24/outline';
 
 export default function LandingPage() {
   const isClient = useIsClient();
@@ -416,7 +416,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
+      {/* Why Choose kendraa Section */}
       <section className="py-24 bg-gradient-to-br from-gray-50 to-blue-50/30">
         <div className="max-w-7xl mx-auto px-6">
           <motion.div
@@ -427,85 +427,59 @@ export default function LandingPage() {
             className="text-center mb-20"
           >
             <h2 className="text-4xl md:text-5xl font-bold text-black mb-8">
-              Trusted by Healthcare Professionals Worldwide
+              Why Choose kendraa?
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Join thousands of medical science professionals who are already building their networks on kendraa
+              A purpose-built platform designed specifically for the medical science community
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
-                name: "Dr. Sarah Chen",
-                role: "Cardiologist, Johns Hopkins",
-                content: "kendraa has revolutionized how I connect with fellow researchers. The platform's focus on medical sciences makes networking so much more meaningful.",
-                avatar: "SC"
+                icon: UsersIcon,
+                title: "Medical-Focused Community",
+                description: "Connect with professionals who share your passion for advancing healthcare and medical sciences."
               },
               {
-                name: "Prof. Michael Rodriguez",
-                role: "Biomedical Engineering, MIT",
-                content: "The collaboration opportunities I've found through kendraa have led to breakthrough research projects. It's the future of scientific networking.",
-                avatar: "MR"
+                icon: AcademicCapIcon,
+                title: "Knowledge Sharing",
+                description: "Share research, insights, and best practices with a community that values evidence-based medicine."
               },
               {
-                name: "Dr. Aisha Patel",
-                role: "Pharmaceutical Research, Pfizer",
-                content: "Finally, a platform that understands the unique needs of healthcare professionals. The quality of connections here is unmatched.",
-                avatar: "AP"
+                icon: BuildingOfficeIcon,
+                title: "Institution Partnerships",
+                description: "Build relationships between hospitals, universities, research labs, and healthcare organizations."
+              },
+              {
+                icon: HeartIcon,
+                title: "Patient-Centered Focus",
+                description: "Every connection and collaboration ultimately serves to improve patient care and outcomes."
+              },
+              {
+                icon: BeakerIcon,
+                title: "Research Collaboration",
+                description: "Find partners for clinical trials, research projects, and innovative medical solutions."
+              },
+              {
+                icon: GlobeAltIcon,
+                title: "Global Reach",
+                description: "Connect with healthcare professionals and institutions from around the world."
               }
-            ].map((testimonial, index) => (
+            ].map((feature, index) => (
               <motion.div
-                key={testimonial.name}
+                key={feature.title}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
-                viewport={{ once: true }}
-                className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100"
-              >
-                <div className="flex items-center mb-6">
-                  <div className="w-12 h-12 bg-gradient-to-br from-[#007fff] to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                    {testimonial.avatar}
-                  </div>
-                  <div className="ml-4">
-                    <h4 className="font-bold text-black text-lg">{testimonial.name}</h4>
-                    <p className="text-gray-600 text-sm">{testimonial.role}</p>
-                  </div>
-                </div>
-                <p className="text-gray-700 leading-relaxed italic">
-                  &ldquo;{testimonial.content}&rdquo;
-                </p>
-                <div className="flex mt-4">
-                  {[...Array(5)].map((_, i) => (
-                    <StarIcon key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-                  ))}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {[
-              { number: "10K+", label: "Active Professionals" },
-              { number: "50+", label: "Countries" },
-              { number: "500+", label: "Institutions" },
-              { number: "1M+", label: "Connections Made" }
-            ].map((stat, index) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="text-center"
+                className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 group"
               >
-                <div className="text-4xl md:text-5xl font-bold text-[#007fff] mb-2">{stat.number}</div>
-                <div className="text-gray-600 font-medium">{stat.label}</div>
+                <div className="w-16 h-16 bg-gradient-to-br from-[#007fff] to-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <feature.icon className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-black mb-4">{feature.title}</h3>
+                <p className="text-gray-600 leading-relaxed">{feature.description}</p>
               </motion.div>
             ))}
           </div>
@@ -531,7 +505,7 @@ export default function LandingPage() {
               Ready to Join the Future of Healthcare Networking?
             </h2>
             <p className="text-xl md:text-2xl text-blue-100 mb-12 leading-relaxed max-w-3xl mx-auto">
-              Connect with thousands of medical science professionals and start building your network today.
+              Join the medical science community and start building meaningful professional connections today.
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <Link 
