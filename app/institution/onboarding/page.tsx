@@ -56,45 +56,31 @@ const EMPLOYEE_COUNT_OPTIONS = [
 
 const ONBOARDING_STEPS = [
   {
-    id: 'about',
-    title: 'About Your Institution',
+    id: 'basic_info',
+    title: 'Basic Information',
     subtitle: 'Tell us about your healthcare organization',
-    type: 'about',
+    type: 'basic_info',
     required: true
   },
   {
-    id: 'focus',
-    title: 'Institution Type & Focus Area',
-    subtitle: 'What type of healthcare institution are you and what do you focus on?',
-    type: 'focus',
+    id: 'institution_details',
+    title: 'Institution / Organization Details',
+    subtitle: 'Provide detailed information about your institution',
+    type: 'institution_details',
     required: true
   },
   {
-    id: 'establishment',
-    title: 'Year of Establishment',
-    subtitle: 'When was your institution founded?',
-    type: 'establishment',
+    id: 'branding',
+    title: 'Branding & Visual Identity',
+    subtitle: 'Upload your logo and customize your visual identity',
+    type: 'branding',
     required: true
   },
   {
-    id: 'nerve_centre',
-    title: 'Main Office Location',
-    subtitle: 'Where is your primary headquarters located?',
-    type: 'nerve_centre',
-    required: true
-  },
-  {
-    id: 'url',
-    title: 'Website URL',
-    subtitle: 'Your institution\'s official website',
-    type: 'url',
-    required: true
-  },
-  {
-    id: 'employees',
-    title: 'Organization Size',
-    subtitle: 'How many employees work at your institution?',
-    type: 'employees',
+    id: 'about_institution',
+    title: 'About the Institution / Organization',
+    subtitle: 'Share your mission, services, and contact information',
+    type: 'about_institution',
     required: true
   },
   {
@@ -112,14 +98,30 @@ export default function InstitutionOnboardingPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
+    // Basic Info
     institutionName: '',
-    description: '',
+    shortTagline: '',
+    
+    // Institution Details
     institutionType: '',
-    focusArea: '',
     establishmentYear: '',
-    location: '',
+    accreditation: '',
+    
+    // Branding
+    logoUrl: '',
+    bannerUrl: '',
+    themeColor: '#007fff',
+    
+    // About Institution
+    shortDescription: '',
+    detailedDescription: '',
     website: '',
-    employeeCount: ''
+    socialMediaLinks: '',
+    headquarters: '',
+    employeeCount: '',
+    contactEmail: '',
+    contactPhone: '',
+    googleMapsPin: ''
   });
 
   // Redirect if not logged in or not an institution user
@@ -146,9 +148,10 @@ export default function InstitutionOnboardingPage() {
         setFormData(prev => ({
           ...prev,
           institutionName: profile.full_name || prev.institutionName,
-          description: profile.bio || prev.description,
-          location: profile.location || prev.location,
+          shortDescription: profile.bio || prev.shortDescription,
+          headquarters: profile.location || prev.headquarters,
           website: profile.website || prev.website,
+          contactEmail: profile.email || prev.contactEmail,
         }));
       }
 
@@ -188,18 +191,14 @@ export default function InstitutionOnboardingPage() {
   const isStepCompleted = (stepIndex: number) => {
     const step = ONBOARDING_STEPS[stepIndex];
     switch (step.type) {
-      case 'about':
-        return formData.institutionName.trim() !== '' && formData.description.trim() !== '';
-      case 'focus':
-        return formData.institutionType !== '' && formData.focusArea !== '';
-      case 'establishment':
-        return formData.establishmentYear !== '';
-      case 'nerve_centre':
-        return formData.location.trim() !== '';
-      case 'url':
-        return formData.website.trim() !== '';
-      case 'employees':
-        return formData.employeeCount !== '';
+      case 'basic_info':
+        return formData.institutionName.trim() !== '' && formData.shortTagline.trim() !== '';
+      case 'institution_details':
+        return formData.institutionType !== '' && formData.establishmentYear !== '';
+      case 'branding':
+        return formData.logoUrl.trim() !== '' && formData.bannerUrl.trim() !== '';
+      case 'about_institution':
+        return formData.shortDescription.trim() !== '' && formData.detailedDescription.trim() !== '' && formData.headquarters.trim() !== '';
       default:
         return false;
     }
@@ -229,15 +228,25 @@ export default function InstitutionOnboardingPage() {
       // Build institution payload
       const institutionPayload: any = {
         name: formData.institutionName,
-        description: formData.description,
+        description: formData.detailedDescription,
         type: categorySlug || 'hospital',
-        location: formData.location || null,
+        location: formData.headquarters || null,
         website: formData.website || null,
         established_year: formData.establishmentYear ? parseInt(formData.establishmentYear) : null,
         size: formData.employeeCount || null,
         admin_user_id: user.id,
-        email: user.email || null,
-        verified: false
+        email: formData.contactEmail || user.email || null,
+        verified: false,
+        // Additional fields
+        short_tagline: formData.shortTagline,
+        accreditation: formData.accreditation,
+        logo_url: formData.logoUrl,
+        banner_url: formData.bannerUrl,
+        theme_color: formData.themeColor,
+        short_description: formData.shortDescription,
+        social_media_links: formData.socialMediaLinks,
+        contact_phone: formData.contactPhone,
+        google_maps_pin: formData.googleMapsPin
       };
 
       // Check if institution exists for this admin
@@ -278,9 +287,10 @@ export default function InstitutionOnboardingPage() {
         .update({ 
           onboarding_completed: true,
           full_name: formData.institutionName,
-          bio: formData.description,
-          location: formData.location,
-          website: formData.website
+          bio: formData.shortDescription,
+          location: formData.headquarters,
+          website: formData.website,
+          phone: formData.contactPhone
         })
         .eq('id', user.id);
 
@@ -303,12 +313,12 @@ export default function InstitutionOnboardingPage() {
 
   const renderStepContent = () => {
     switch (currentStepData.type) {
-      case 'about':
+      case 'basic_info':
         return (
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Institution Name *
+                Institution Name (Official Legal Name) *
               </label>
               <input
                 type="text"
@@ -320,24 +330,29 @@ export default function InstitutionOnboardingPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Institution Description *
+                Short Tagline *
               </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent h-32 resize-none"
-                placeholder="Describe your institution's mission, services, and what makes you unique in healthcare..."
+              <input
+                type="text"
+                value={formData.shortTagline}
+                onChange={(e) => setFormData(prev => ({ ...prev, shortTagline: e.target.value }))}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
+                placeholder="One line about your institution"
+                maxLength={100}
               />
+              <p className="text-sm text-gray-500 mt-1">
+                A brief, compelling description of your institution (max 100 characters)
+              </p>
             </div>
           </div>
         );
 
-      case 'focus':
+      case 'institution_details':
         return (
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
-                Institution Type *
+                Type *
               </label>
               <div className="grid grid-cols-1 gap-3">
                 {INSTITUTION_TYPES.map((option) => (
@@ -356,32 +371,6 @@ export default function InstitutionOnboardingPage() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Focus Area *
-              </label>
-              <div className="grid grid-cols-1 gap-3">
-                {INSTITUTION_FOCUS_AREAS.map((option) => (
-                  <button
-                    key={option}
-                    onClick={() => setFormData(prev => ({ ...prev, focusArea: option }))}
-                    className={`p-4 text-left border rounded-lg transition-all ${
-                      formData.focusArea === option
-                        ? 'border-[#007fff] bg-[#007fff]/5 text-[#007fff]'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    {option}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        );
-
-      case 'establishment':
-        return (
-          <div className="space-y-6">
-            <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Year of Establishment *
               </label>
@@ -394,40 +383,116 @@ export default function InstitutionOnboardingPage() {
                 min="1800"
                 max={new Date().getFullYear()}
               />
-              <p className="text-sm text-gray-500 mt-1">
-                When was your institution first established or founded?
-              </p>
             </div>
-          </div>
-        );
-
-      case 'nerve_centre':
-        return (
-          <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Main Office Location *
+                Accreditation
               </label>
               <input
                 type="text"
-                value={formData.location}
-                onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                value={formData.accreditation}
+                onChange={(e) => setFormData(prev => ({ ...prev, accreditation: e.target.value }))}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
-                placeholder="e.g., New York, NY, USA"
+                placeholder="e.g., NABH, ISO, NABL, etc."
               />
               <p className="text-sm text-gray-500 mt-1">
-                Where is your institution&apos;s main headquarters or primary location?
+                List any accreditations or certifications your institution holds
               </p>
             </div>
           </div>
         );
 
-      case 'url':
+      case 'branding':
         return (
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Website URL *
+                Upload Logo (Square, High-Res) *
+              </label>
+              <input
+                type="url"
+                value={formData.logoUrl}
+                onChange={(e) => setFormData(prev => ({ ...prev, logoUrl: e.target.value }))}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
+                placeholder="https://example.com/logo.png"
+              />
+              <p className="text-sm text-gray-500 mt-1">
+                Upload a square, high-resolution logo for your institution
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Upload Cover Banner (Wide, Professional Image) *
+              </label>
+              <input
+                type="url"
+                value={formData.bannerUrl}
+                onChange={(e) => setFormData(prev => ({ ...prev, bannerUrl: e.target.value }))}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
+                placeholder="https://example.com/banner.jpg"
+              />
+              <p className="text-sm text-gray-500 mt-1">
+                Upload a wide, professional banner image for your profile
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Select Theme Color (Optional)
+              </label>
+              <div className="flex items-center gap-4">
+                <input
+                  type="color"
+                  value={formData.themeColor}
+                  onChange={(e) => setFormData(prev => ({ ...prev, themeColor: e.target.value }))}
+                  className="w-12 h-12 border border-gray-300 rounded-lg cursor-pointer"
+                />
+                <input
+                  type="text"
+                  value={formData.themeColor}
+                  onChange={(e) => setFormData(prev => ({ ...prev, themeColor: e.target.value }))}
+                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
+                  placeholder="#007fff"
+                />
+              </div>
+              <p className="text-sm text-gray-500 mt-1">
+                Choose a theme color for your institution&apos;s page styling
+              </p>
+            </div>
+          </div>
+        );
+
+      case 'about_institution':
+        return (
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Short Description (Max 200 Characters) *
+              </label>
+              <textarea
+                value={formData.shortDescription}
+                onChange={(e) => setFormData(prev => ({ ...prev, shortDescription: e.target.value }))}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent h-20 resize-none"
+                placeholder="Brief description shown in search results..."
+                maxLength={200}
+              />
+              <p className="text-sm text-gray-500 mt-1">
+                {formData.shortDescription.length}/200 characters - This will be shown in search results
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Detailed &quot;About Us&quot; (Mission, Services, Specialties) *
+              </label>
+              <textarea
+                value={formData.detailedDescription}
+                onChange={(e) => setFormData(prev => ({ ...prev, detailedDescription: e.target.value }))}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent h-32 resize-none"
+                placeholder="Describe your mission, services, specialties, and what makes your institution unique..."
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Website URL
               </label>
               <input
                 type="url"
@@ -436,19 +501,33 @@ export default function InstitutionOnboardingPage() {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
                 placeholder="https://www.yourinstitution.com"
               />
-              <p className="text-sm text-gray-500 mt-1">
-                Your institution&apos;s official website URL (optional but recommended)
-              </p>
             </div>
-          </div>
-        );
-
-      case 'employees':
-        return (
-          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Social Media Links
+              </label>
+              <textarea
+                value={formData.socialMediaLinks}
+                onChange={(e) => setFormData(prev => ({ ...prev, socialMediaLinks: e.target.value }))}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent h-20 resize-none"
+                placeholder="LinkedIn: https://linkedin.com/company/yourinstitution&#10;Twitter: https://twitter.com/yourinstitution"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Headquarters *
+              </label>
+              <input
+                type="text"
+                value={formData.headquarters}
+                onChange={(e) => setFormData(prev => ({ ...prev, headquarters: e.target.value }))}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
+                placeholder="e.g., New York, NY, USA"
+              />
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
-                Organization Size *
+                Number of Employees
               </label>
               <div className="grid grid-cols-1 gap-3">
                 {EMPLOYEE_COUNT_OPTIONS.map((option) => (
@@ -465,6 +544,47 @@ export default function InstitutionOnboardingPage() {
                   </button>
                 ))}
               </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Contact Email
+                </label>
+                <input
+                  type="email"
+                  value={formData.contactEmail}
+                  onChange={(e) => setFormData(prev => ({ ...prev, contactEmail: e.target.value }))}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
+                  placeholder="contact@yourinstitution.com"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Contact Phone Number
+                </label>
+                <input
+                  type="tel"
+                  value={formData.contactPhone}
+                  onChange={(e) => setFormData(prev => ({ ...prev, contactPhone: e.target.value }))}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
+                  placeholder="+1 (555) 123-4567"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Google Maps Pin (Embed)
+              </label>
+              <input
+                type="url"
+                value={formData.googleMapsPin}
+                onChange={(e) => setFormData(prev => ({ ...prev, googleMapsPin: e.target.value }))}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
+                placeholder="https://maps.google.com/embed?pb=..."
+              />
+              <p className="text-sm text-gray-500 mt-1">
+                Google Maps embed URL for your institution&apos;s location
+              </p>
             </div>
           </div>
         );
