@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import Logo from '@/components/common/Logo';
 import { useIsClient } from '@/hooks/useIsClient';
@@ -110,16 +111,21 @@ export default function LandingPage() {
               {/* Medical Science Icon */}
               <div className="w-16 h-16 bg-gradient-to-br from-[#007fff] to-blue-600 rounded-2xl flex items-center justify-center mb-8">
                 <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                  <path d="M8 12h8M12 8v8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                 </svg>
               </div>
               
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-gray-900 leading-tight tracking-tight mb-8">
-                Bringing medical professionals together
-              </h1>
+                Bringing <span className="relative">
+                  <span className="relative z-10">medical professionals</span>
+                  <span className="absolute bottom-2 left-0 right-0 h-3 bg-[#007fff]/20 rounded-sm"></span>
+                </span> together
+               </h1>
               <p className="text-xl md:text-2xl text-gray-600 leading-relaxed mb-8">
-                kendraa connects physicians, researchers, and healthcare institutions worldwide to collaborate, share knowledge, and advance medical science together.
+                kendraa connects <span className="relative">
+                  <span className="relative z-10">physicians, researchers, and healthcare institutions</span>
+                  <span className="absolute bottom-1 left-0 right-0 h-2 bg-[#007fff]/20 rounded-sm"></span>
+                </span> worldwide to collaborate, share knowledge, and advance medical science together.
               </p>
               
               <Link 
@@ -162,135 +168,23 @@ export default function LandingPage() {
               </div>
             </motion.div>
 
-            {/* Right Column - Medical Professionals Grid */}
+            {/* Right Column - Medical Professionals Illustration */}
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
               className="relative"
             >
-              <div className="grid grid-cols-3 gap-4">
-                {/* Row 1 */}
-                <div className="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl p-6 aspect-square flex flex-col items-center justify-center relative overflow-hidden">
-                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4">
-                    <HeartIcon className="w-8 h-8 text-red-500" />
-                  </div>
-                  <div className="text-white text-center">
-                    <div className="text-lg font-bold">Healthcare</div>
-                    <div className="text-sm opacity-90">Love & Care</div>
-                  </div>
-                  <div className="absolute top-2 right-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
-                    <span className="text-xs font-semibold text-white">Caring</span>
-                  </div>
-                </div>
-                
-                <div className="bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl p-6 aspect-square flex flex-col items-center justify-center relative overflow-hidden">
-                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4">
-                    <AcademicCapIcon className="w-8 h-8 text-blue-600" />
-                  </div>
-                  <div className="text-white text-center">
-                    <div className="text-lg font-bold">Research</div>
-                    <div className="text-sm opacity-90">Innovation</div>
-                  </div>
-                  <div className="absolute top-2 right-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
-                    <span className="text-xs font-semibold text-white">Innovative</span>
-                  </div>
-                </div>
-                
-                <div className="bg-gradient-to-br from-pink-400 to-rose-500 rounded-2xl p-6 aspect-square flex flex-col items-center justify-center relative overflow-hidden">
-                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4">
-                    <UsersIcon className="w-8 h-8 text-pink-600" />
-                  </div>
-                  <div className="text-white text-center">
-                    <div className="text-lg font-bold">Community</div>
-                    <div className="text-sm opacity-90">Together</div>
-                  </div>
-                  <div className="absolute top-2 right-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
-                    <span className="text-xs font-semibold text-white">Inclusive</span>
-                  </div>
-                </div>
-                
-                {/* Row 2 */}
-                <div className="bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl p-6 aspect-square flex flex-col items-center justify-center relative overflow-hidden">
-                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4">
-                    <BeakerIcon className="w-8 h-8 text-purple-600" />
-                  </div>
-                  <div className="text-white text-center">
-                    <div className="text-lg font-bold">Science</div>
-                    <div className="text-sm opacity-90">Discovery</div>
-                  </div>
-                  <div className="absolute top-2 right-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
-                    <span className="text-xs font-semibold text-white">Creative</span>
-                  </div>
-                </div>
-                
-                <div className="bg-gradient-to-br from-green-400 to-emerald-600 rounded-2xl p-6 aspect-square flex flex-col items-center justify-center relative overflow-hidden">
-                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4">
-                    <BuildingOfficeIcon className="w-8 h-8 text-green-600" />
-                  </div>
-                  <div className="text-white text-center">
-                    <div className="text-lg font-bold">Institutions</div>
-                    <div className="text-sm opacity-90">Partnership</div>
-                  </div>
-                  <div className="absolute top-2 right-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
-                    <span className="text-xs font-semibold text-white">Diverse</span>
-                  </div>
-                </div>
-                
-                <div className="bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-2xl p-6 aspect-square flex flex-col items-center justify-center relative overflow-hidden">
-                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4">
-                    <CpuChipIcon className="w-8 h-8 text-indigo-600" />
-                  </div>
-                  <div className="text-white text-center">
-                    <div className="text-lg font-bold">Technology</div>
-                    <div className="text-sm opacity-90">Future</div>
-                  </div>
-                  <div className="absolute top-2 right-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
-                    <span className="text-xs font-semibold text-white">Advanced</span>
-                  </div>
-                </div>
-                
-                {/* Row 3 */}
-                <div className="bg-gradient-to-br from-teal-400 to-cyan-600 rounded-2xl p-6 aspect-square flex flex-col items-center justify-center relative overflow-hidden">
-                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4">
-                    <GlobeAltIcon className="w-8 h-8 text-teal-600" />
-                  </div>
-                  <div className="text-white text-center">
-                    <div className="text-lg font-bold">Global</div>
-                    <div className="text-sm opacity-90">Network</div>
-                  </div>
-                  <div className="absolute top-2 right-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
-                    <span className="text-xs font-semibold text-white">Connected</span>
-                  </div>
-                </div>
-                
-                <div className="bg-gradient-to-br from-red-400 to-red-600 rounded-2xl p-6 aspect-square flex flex-col items-center justify-center relative overflow-hidden">
-                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4">
-                    <SparklesIcon className="w-8 h-8 text-red-600" />
-                  </div>
-                  <div className="text-white text-center">
-                    <div className="text-lg font-bold">Excellence</div>
-                    <div className="text-sm opacity-90">Quality</div>
-                  </div>
-                  <div className="absolute top-2 right-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
-                    <span className="text-xs font-semibold text-white">Excellence</span>
-                  </div>
-                </div>
-                
-                <div className="bg-gradient-to-br from-gray-600 to-gray-800 rounded-2xl p-6 aspect-square flex flex-col items-center justify-center relative overflow-hidden">
-                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4">
-                    <svg className="w-8 h-8 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                    </svg>
-                  </div>
-                  <div className="text-white text-center">
-                    <div className="text-lg font-bold">Verified</div>
-                    <div className="text-sm opacity-90">Trusted</div>
-                  </div>
-                  <div className="absolute top-2 right-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
-                    <span className="text-xs font-semibold text-white">Trusted</span>
-                  </div>
-                </div>
+              <div className="relative w-full h-96 lg:h-[500px] rounded-2xl overflow-hidden shadow-2xl">
+                <Image
+                  src="/5551.jpg"
+                  alt="Medical professionals collaborating and networking"
+                  fill
+                  className="object-cover"
+                  priority
+                />
+                {/* Hidden accreditation comment */}
+                {/* <a href="http://www.freepik.com">Designed by pch.vector / Freepik</a> */}
               </div>
             </motion.div>
           </div>
@@ -454,124 +348,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing & Signup Section */}
-      <section className="py-24 bg-gray-100">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-            {/* Left Side - Pricing */}
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-              className="space-y-8"
-            >
-              <h2 className="text-4xl md:text-5xl font-bold text-black mb-8">
-                Free for Medical Professionals
-              </h2>
-              
-              <ul className="space-y-4 text-lg text-gray-700">
-                <li className="flex items-center space-x-3">
-                  <CheckCircleIcon className="w-6 h-6 text-[#007fff] flex-shrink-0" />
-                  <span>Unlimited Medical Professional Connections</span>
-                </li>
-                <li className="flex items-center space-x-3">
-                  <CheckCircleIcon className="w-6 h-6 text-[#007fff] flex-shrink-0" />
-                  <span>Access to Medical Research Communities</span>
-                </li>
-                <li className="flex items-center space-x-3">
-                  <CheckCircleIcon className="w-6 h-6 text-[#007fff] flex-shrink-0" />
-                  <span>Clinical Research Collaboration Tools</span>
-                </li>
-                <li className="flex items-center space-x-3">
-                  <CheckCircleIcon className="w-6 h-6 text-[#007fff] flex-shrink-0" />
-                  <span>Healthcare Institution Partnership Features</span>
-                </li>
-                <li className="flex items-center space-x-3">
-                  <CheckCircleIcon className="w-6 h-6 text-[#007fff] flex-shrink-0" />
-                  <span>Medical Job Opportunities & Career Development</span>
-                </li>
-              </ul>
-              
-              <Link 
-                href="/signup" 
-                className="inline-flex items-center text-lg font-semibold text-[#007fff] hover:text-blue-600 transition-colors"
-              >
-                See Pricing Table »
-              </Link>
-            </motion.div>
-
-            {/* Right Side - Free Trial Form */}
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              viewport={{ once: true }}
-              className="bg-white rounded-3xl p-8 shadow-xl"
-            >
-              <h3 className="text-2xl font-bold text-black mb-4">
-                Join the Medical Science Community
-              </h3>
-              <p className="text-gray-600 mb-8">
-                Create your professional profile and start connecting with medical professionals, researchers, and healthcare institutions worldwide.
-              </p>
-              
-              <form className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
-                    placeholder="Enter your full name"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
-                    placeholder="Enter your email address"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Healthcare Institution/Organization
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
-                    placeholder="e.g., Johns Hopkins Hospital, Harvard Medical School"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Medical Specialty/Role
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
-                    placeholder="e.g., Cardiologist, Medical Researcher, Healthcare Administrator"
-                  />
-                </div>
-                
-                <Link 
-                  href="/signup" 
-                  className="w-full inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-[#007fff] hover:bg-[#007fff]/90 rounded-xl transition-all duration-200"
-                >
-                  Join kendraa
-                </Link>
-              </form>
-            </motion.div>
-          </div>
-        </div>
-      </section>
 
       {/* CTA Section */}
       <section className="py-24 bg-gradient-to-br from-[#007fff] to-blue-600 relative overflow-hidden">
