@@ -186,11 +186,11 @@ export default function InstitutionOnboardingPage() {
             shortDescription: (existing as any).short_description || prev.shortDescription,
             detailedDescription: existing.description || prev.detailedDescription,
             website: existing.website || prev.website,
-            socialMediaLinks: (existing as any).social_media_links || prev.socialMediaLinks,
+            socialMediaLinks: (existing as any).social_media_links ? JSON.stringify((existing as any).social_media_links) : prev.socialMediaLinks,
             headquarters: existing.location || prev.headquarters,
             employeeCount: existing.size || prev.employeeCount,
             contactEmail: existing.email || prev.contactEmail,
-            contactPhone: (existing as any).contact_phone || prev.contactPhone,
+            contactPhone: existing.phone || prev.contactPhone,
             googleMapsPin: (existing as any).google_maps_pin || prev.googleMapsPin,
           }));
         }
@@ -313,8 +313,14 @@ export default function InstitutionOnboardingPage() {
         banner_url: currentBannerUrl || null,
         theme_color: formData.themeColor || '#007fff',
         short_description: formData.shortDescription || null,
-        social_media_links: formData.socialMediaLinks || null,
-        contact_phone: formData.contactPhone || null,
+        social_media_links: formData.socialMediaLinks ? (() => {
+          try {
+            return JSON.parse(formData.socialMediaLinks);
+          } catch {
+            return null;
+          }
+        })() : null,
+        phone: formData.contactPhone || null,
         google_maps_pin: formData.googleMapsPin || null
       };
 
@@ -442,8 +448,14 @@ export default function InstitutionOnboardingPage() {
         banner_url: currentBannerUrl,
         theme_color: formData.themeColor,
         short_description: formData.shortDescription,
-        social_media_links: formData.socialMediaLinks,
-        contact_phone: formData.contactPhone,
+        social_media_links: formData.socialMediaLinks ? (() => {
+          try {
+            return JSON.parse(formData.socialMediaLinks);
+          } catch {
+            return null;
+          }
+        })() : null,
+        phone: formData.contactPhone,
         google_maps_pin: formData.googleMapsPin
       };
 
