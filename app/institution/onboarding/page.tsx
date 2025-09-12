@@ -14,6 +14,8 @@ import {
   UserGroupIcon,
   CalendarIcon
 } from '@heroicons/react/24/outline';
+import Image from 'next/image';
+import { v4 as uuidv4 } from 'uuid';
 import toast from 'react-hot-toast';
 import Logo from '@/components/common/Logo';
 import { getInstitutionByAdminId } from '@/lib/queries';
@@ -98,6 +100,10 @@ export default function InstitutionOnboardingPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
   const [formData, setFormData] = useState({
     // Basic Info
     institutionName: '',
@@ -216,7 +222,7 @@ export default function InstitutionOnboardingPage() {
       case 'institution_details':
         return formData.institutionType !== '' && formData.establishmentYear !== '';
       case 'branding':
-        return formData.logoUrl.trim() !== '' && formData.bannerUrl.trim() !== '';
+        return (logoFile !== null || formData.logoUrl.trim() !== '') && (bannerFile !== null || formData.bannerUrl.trim() !== '');
       case 'about_institution':
         return formData.shortDescription.trim() !== '' && formData.detailedDescription.trim() !== '' && formData.headquarters.trim() !== '';
       default:
@@ -224,12 +230,69 @@ export default function InstitutionOnboardingPage() {
     }
   };
 
+  const uploadFile = async (file: File, bucketName: string) => {
+    if (!supabase || !user?.id) {
+      toast.error('Supabase client or user not available.');
+      return null;
+    }
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${uuidv4()}.${fileExt}`;
+    const filePath = `${user.id}/${fileName}`;
+
+    try {
+      const { error: uploadError } = await supabase.storage
+        .from(bucketName)
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false,
+        });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data } = supabase.storage.from(bucketName).getPublicUrl(filePath);
+      return data.publicUrl;
+
+    } catch (error: any) {
+      console.error(`Error uploading file to ${bucketName}:`, error);
+      toast.error(`Error uploading ${bucketName.slice(0, -1)}: ${error.message}`);
+      return null;
+    }
+  };
+
   const savePartialData = async () => {
     if (!user?.id || !supabase) return;
 
     setSaving(true);
+    let currentLogoUrl = formData.logoUrl;
+    let currentBannerUrl = formData.bannerUrl;
+    
     try {
       const categorySlug = (formData.institutionType || '').toLowerCase().replace(/\s+/g, '_');
+
+      // Upload logo if a new file is selected
+      if (logoFile) {
+        setUploadingLogo(true);
+        const publicUrl = await uploadFile(logoFile, 'avatars');
+        if (publicUrl) {
+          currentLogoUrl = publicUrl;
+          setFormData(prev => ({ ...prev, logoUrl: publicUrl }));
+        }
+        setUploadingLogo(false);
+      }
+
+      // Upload banner if a new file is selected
+      if (bannerFile) {
+        setUploadingBanner(true);
+        const publicUrl = await uploadFile(bannerFile, 'banners');
+        if (publicUrl) {
+          currentBannerUrl = publicUrl;
+          setFormData(prev => ({ ...prev, bannerUrl: publicUrl }));
+        }
+        setUploadingBanner(false);
+      }
 
       // Build partial institution payload
       const institutionPayload: any = {
@@ -246,8 +309,8 @@ export default function InstitutionOnboardingPage() {
         // Additional fields
         short_tagline: formData.shortTagline || null,
         accreditation: formData.accreditation || null,
-        logo_url: formData.logoUrl || null,
-        banner_url: formData.bannerUrl || null,
+        logo_url: currentLogoUrl || null,
+        banner_url: currentBannerUrl || null,
         theme_color: formData.themeColor || '#007fff',
         short_description: formData.shortDescription || null,
         social_media_links: formData.socialMediaLinks || null,
@@ -331,9 +394,34 @@ export default function InstitutionOnboardingPage() {
   const handleComplete = async () => {
     if (!user?.id || !supabase) return;
 
-        setLoading(true);
+    setLoading(true);
+    let currentLogoUrl = formData.logoUrl;
+    let currentBannerUrl = formData.bannerUrl;
+    
     try {
       const categorySlug = (formData.institutionType || '').toLowerCase().replace(/\s+/g, '_');
+
+      // Upload logo if a new file is selected
+      if (logoFile) {
+        setUploadingLogo(true);
+        const publicUrl = await uploadFile(logoFile, 'avatars');
+        if (publicUrl) {
+          currentLogoUrl = publicUrl;
+          setFormData(prev => ({ ...prev, logoUrl: publicUrl }));
+        }
+        setUploadingLogo(false);
+      }
+
+      // Upload banner if a new file is selected
+      if (bannerFile) {
+        setUploadingBanner(true);
+        const publicUrl = await uploadFile(bannerFile, 'banners');
+        if (publicUrl) {
+          currentBannerUrl = publicUrl;
+          setFormData(prev => ({ ...prev, bannerUrl: publicUrl }));
+        }
+        setUploadingBanner(false);
+      }
 
       // Build institution payload
       const institutionPayload: any = {
@@ -350,8 +438,8 @@ export default function InstitutionOnboardingPage() {
         // Additional fields
         short_tagline: formData.shortTagline,
         accreditation: formData.accreditation,
-        logo_url: formData.logoUrl,
-        banner_url: formData.bannerUrl,
+        logo_url: currentLogoUrl,
+        banner_url: currentBannerUrl,
         theme_color: formData.themeColor,
         short_description: formData.shortDescription,
         social_media_links: formData.socialMediaLinks,
@@ -520,12 +608,26 @@ export default function InstitutionOnboardingPage() {
                 Upload Logo (Square, High-Res) *
               </label>
               <input
-                type="url"
-                value={formData.logoUrl}
-                onChange={(e) => setFormData(prev => ({ ...prev, logoUrl: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
-                placeholder="https://example.com/logo.png"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  if (e.target.files && e.target.files.length > 0) {
+                    const file = e.target.files[0];
+                    setLogoFile(file);
+                    setFormData(prev => ({ ...prev, logoUrl: URL.createObjectURL(file) }));
+                  } else {
+                    setLogoFile(null);
+                    setFormData(prev => ({ ...prev, logoUrl: '' }));
+                  }
+                }}
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#007fff]/10 file:text-[#007fff] hover:file:bg-[#007fff]/20"
               />
+              {uploadingLogo && <p className="text-sm text-gray-500 mt-2">Uploading logo...</p>}
+              {(formData.logoUrl && !uploadingLogo) && (
+                <div className="mt-4 w-24 h-24 relative rounded-full overflow-hidden border border-gray-200">
+                  <Image src={formData.logoUrl} alt="Logo Preview" fill className="object-cover" />
+                </div>
+              )}
               <p className="text-sm text-gray-500 mt-1">
                 Upload a square, high-resolution logo for your institution
               </p>
@@ -535,12 +637,26 @@ export default function InstitutionOnboardingPage() {
                 Upload Cover Banner (Wide, Professional Image) *
               </label>
               <input
-                type="url"
-                value={formData.bannerUrl}
-                onChange={(e) => setFormData(prev => ({ ...prev, bannerUrl: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
-                placeholder="https://example.com/banner.jpg"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  if (e.target.files && e.target.files.length > 0) {
+                    const file = e.target.files[0];
+                    setBannerFile(file);
+                    setFormData(prev => ({ ...prev, bannerUrl: URL.createObjectURL(file) }));
+                  } else {
+                    setBannerFile(null);
+                    setFormData(prev => ({ ...prev, bannerUrl: '' }));
+                  }
+                }}
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#007fff]/10 file:text-[#007fff] hover:file:bg-[#007fff]/20"
               />
+              {uploadingBanner && <p className="text-sm text-gray-500 mt-2">Uploading banner...</p>}
+              {(formData.bannerUrl && !uploadingBanner) && (
+                <div className="mt-4 w-full h-32 relative rounded-lg overflow-hidden border border-gray-200">
+                  <Image src={formData.bannerUrl} alt="Banner Preview" fill className="object-cover" />
+                </div>
+              )}
               <p className="text-sm text-gray-500 mt-1">
                 Upload a wide, professional banner image for your profile
               </p>

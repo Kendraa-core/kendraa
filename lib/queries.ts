@@ -1231,7 +1231,7 @@ export async function getInstitutionByAdminId(adminUserId: string): Promise<Inst
       .from('institutions')
       .select('*')
       .eq('admin_user_id', adminUserId)
-      .single();
+      .limit(1);
 
     if (error) {
       console.log('Error fetching institution by admin user ID', error);
@@ -1239,7 +1239,7 @@ export async function getInstitutionByAdminId(adminUserId: string): Promise<Inst
     }
     
     console.log('Institution fetched successfully', data);
-    return data;
+    return data && data.length > 0 ? data[0] : null;
   } catch (error) {
     console.log('Error fetching institution by admin user ID', error);
     return null;
