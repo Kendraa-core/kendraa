@@ -1342,90 +1342,6 @@ export async function getJobs(): Promise<JobWithCompany[]> {
   }
 }
 
-export async function applyToJob(application: Omit<JobApplication, 'id' | 'created_at' | 'updated_at'>): Promise<JobApplication | null> {
-  try {
-    console.log('Applying to job', application);
-    
-    const schemaExists = await true;
-    if (!schemaExists) {
-      console.log('Database schema not found, cannot apply to job');
-      return null;
-    }
-    
-    // First, create the job application
-    const { data: jobApplication, error: applicationError } = await getSupabase()
-      .from('job_applications')
-      .insert({
-        ...application,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
-
-    if (applicationError) {
-      // Handle duplicate application error
-      if (applicationError.code === '23505' && applicationError.message?.includes('job_applications_job_id_applicant_id_key')) {
-        console.log('User has already applied to this job');
-        throw new Error('You have already applied to this job');
-      }
-      throw applicationError;
-    }
-    
-    console.log('Job application submitted successfully', jobApplication);
-
-    // Get job details to create notifications
-    const { data: job, error: jobError } = await getSupabase()
-      .from('jobs')
-      .select('*, company:institutions(*)')
-      .eq('id', application.job_id)
-      .single();
-
-    if (jobError) {
-      console.log('Error fetching job details for notification', jobError);
-    } else {
-      // Create notification for the job poster (institution)
-      if (job.posted_by) {
-        await createNotification({
-          user_id: job.posted_by,
-          type: 'job_application',
-          title: 'New Job Application',
-          message: `A new application has been submitted for the position "${job.title}"`,
-          read: false,
-          data: {
-            jobId: job.id,
-            jobTitle: job.title,
-            applicantId: application.applicant_id,
-            applicationId: jobApplication.id,
-            companyName: job.company?.name || 'Unknown Company'
-          },
-          action_url: `/jobs/${job.id}/applications`
-        });
-      }
-
-      // Create notification for the applicant (confirmation)
-      await createNotification({
-        user_id: application.applicant_id,
-        type: 'job_application',
-        title: 'Application Submitted',
-        message: `Your application for "${job.title}" at ${job.company?.name || 'Unknown Company'} has been submitted successfully.`,
-        read: false,
-        data: {
-          jobId: job.id,
-          jobTitle: job.title,
-          companyName: job.company?.name || 'Unknown Company',
-          applicationId: jobApplication.id
-        },
-        action_url: `/jobs/${job.id}`
-      });
-    }
-
-    return jobApplication;
-  } catch (error) {
-    console.log('Error applying to job', error);
-    throw error; // Re-throw to handle in the UI
-  }
-}
 
  
 
@@ -1710,32 +1626,6 @@ export async function updateJobApplicationStatus(
   }
 }
 
-// Get job applications for a specific job (for institutions)
-export async function getJobApplications(jobId: string): Promise<JobApplication[]> {
-  try {
-    console.log('Getting job applications', { jobId });
-    
-    const schemaExists = await true;
-    if (!schemaExists) {
-      console.log('Database schema not found, returning empty applications');
-      return [];
-    }
-    
-    const { data, error } = await getSupabase()
-      .from('job_applications')
-      .select('*, applicant:profiles!job_applications_applicant_id_fkey(*)')
-      .eq('job_id', jobId)
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-    
-    console.log('Job applications fetched successfully', data);
-    return data || [];
-  } catch (error) {
-    console.log('Error fetching job applications', error);
-    return [];
-  }
-}
 
 // Get applications submitted by a user
 export async function getUserApplications(userId: string): Promise<(JobApplication & { job?: { id: string; title: string; company?: { name: string } } })[]> {
@@ -2372,64 +2262,6 @@ export async function createEvent(eventData: Omit<Event, 'id' | 'created_at' | '
   }
 }
 
-export async function registerForEvent(eventId: string, userId: string): Promise<boolean> {
-  try {
-    console.log('[Queries] Registering for event:', eventId, 'by user:', userId);
-    
-    // Check if already registered
-    const { data: existingRegistration } = await getSupabase()
-      .from('event_attendees')
-      .select('id')
-      .eq('event_id', eventId)
-      .eq('attendee_id', userId)
-      .single();
-
-    if (existingRegistration) {
-      console.log('[Queries] User already registered for event');
-      return false;
-    }
-    
-    // Add registration
-    const { error: registrationError } = await getSupabase()
-      .from('event_attendees')
-      .insert({
-        event_id: eventId,
-        attendee_id: userId,
-        attendee_type: 'individual',
-        status: 'registered',
-        registration_date: new Date().toISOString(),
-      });
-
-    if (registrationError) {
-      console.error('[Queries] Error registering for event:', registrationError);
-      throw registrationError;
-    }
-
-    // Update event attendees count
-    const { data: event } = await getSupabase()
-      .from('events')
-      .select('attendees_count')
-      .eq('id', eventId)
-      .single();
-
-    if (event) {
-      const { error: updateError } = await getSupabase()
-        .from('events')
-        .update({ attendees_count: (event.attendees_count || 0) + 1 })
-        .eq('id', eventId);
-
-      if (updateError) {
-        console.error('[Queries] Error updating attendees count:', updateError);
-      }
-    }
-
-    console.log('[Queries] Event registration successful');
-    return true;
-  } catch (error) {
-    console.error('[Queries] Error in registerForEvent:', error);
-    return false;
-  }
-}
 
 export async function unregisterFromEvent(eventId: string, userId: string): Promise<boolean> {
   try {
@@ -3763,6 +3595,208 @@ export async function createInstitutionEvent(
     return data;
   } catch (error) {
     console.error('Error creating institution event:', error);
+    return null;
+  }
+}
+
+// Job Applications
+export async function getJobApplications(jobId: string): Promise<any[]> {
+  try {
+    console.log('[Queries] Getting job applications for job:', jobId);
+    
+    const { data: applications, error } = await getSupabase()
+      .from('job_applications')
+      .select(`
+        *,
+        applicant:profiles(
+          id,
+          full_name,
+          avatar_url,
+          email,
+          location,
+          specializations,
+          experience_years,
+          bio
+        )
+      `)
+      .eq('job_id', jobId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching job applications:', error);
+      return [];
+    }
+
+    return applications || [];
+  } catch (error) {
+    console.error('Error getting job applications:', error);
+    return [];
+  }
+}
+
+export async function applyToJob(jobId: string, applicantId: string, coverLetter?: string): Promise<boolean> {
+  try {
+    console.log('[Queries] Applying to job:', jobId, 'by applicant:', applicantId);
+    
+    const { error } = await getSupabase()
+      .from('job_applications')
+      .insert({
+        job_id: jobId,
+        applicant_id: applicantId,
+        cover_letter: coverLetter || null,
+        status: 'pending',
+        applied_at: new Date().toISOString()
+      });
+
+    if (error) {
+      console.error('Error applying to job:', error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error applying to job:', error);
+    return false;
+  }
+}
+
+// Event Attendees
+export async function getEventAttendees(eventId: string): Promise<any[]> {
+  try {
+    console.log('[Queries] Getting event attendees for event:', eventId);
+    
+    const { data: attendees, error } = await getSupabase()
+      .from('event_attendees')
+      .select(`
+        *,
+        attendee:profiles(
+          id,
+          full_name,
+          avatar_url,
+          email,
+          location,
+          specializations,
+          bio
+        )
+      `)
+      .eq('event_id', eventId)
+      .order('registered_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching event attendees:', error);
+      return [];
+    }
+
+    return attendees || [];
+  } catch (error) {
+    console.error('Error getting event attendees:', error);
+    return [];
+  }
+}
+
+export async function registerForEvent(eventId: string, attendeeId: string): Promise<boolean> {
+  try {
+    console.log('[Queries] Registering for event:', eventId, 'by attendee:', attendeeId);
+    
+    const { error } = await getSupabase()
+      .from('event_attendees')
+      .insert({
+        event_id: eventId,
+        attendee_id: attendeeId,
+        status: 'registered',
+        registered_at: new Date().toISOString()
+      });
+
+    if (error) {
+      console.error('Error registering for event:', error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error registering for event:', error);
+    return false;
+  }
+}
+
+// Global Feed
+export async function getGlobalFeed(limit = 20, offset = 0): Promise<PostWithAuthor[]> {
+  try {
+    console.log('[Queries] Getting global feed, limit:', limit, 'offset:', offset);
+    
+    // Get all posts with author information
+    const { data: posts, error } = await getSupabase()
+      .from('posts')
+      .select(`
+        *,
+        author:profiles(
+          id,
+          full_name,
+          name,
+          avatar_url,
+          role,
+          user_type,
+          verified,
+          location,
+          specializations
+        )
+      `)
+      .eq('visibility', 'public')
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      console.error('Error fetching global feed:', error);
+      return [];
+    }
+
+    if (!posts || posts.length === 0) {
+      console.log('[Queries] No posts found in global feed');
+      return [];
+    }
+
+    console.log('[Queries] Global feed loaded:', posts.length, 'posts');
+    
+    // Transform the data to match PostWithAuthor interface
+    return posts.map(post => ({
+      ...post,
+      author: post.author || {
+        id: post.author_id,
+        full_name: 'Unknown User',
+        name: 'Unknown User',
+        avatar_url: null,
+        role: null,
+        user_type: 'individual',
+        verified: false,
+        location: null,
+        specializations: null
+      }
+    }));
+  } catch (error) {
+    console.error('Error getting global feed:', error);
+    return [];
+  }
+}
+
+// Get single event
+export async function getEvent(eventId: string): Promise<Event | null> {
+  try {
+    console.log('[Queries] Getting event:', eventId);
+    
+    const { data: event, error } = await getSupabase()
+      .from('events')
+      .select('*')
+      .eq('id', eventId)
+      .single();
+
+    if (error) {
+      console.error('Error fetching event:', error);
+      return null;
+    }
+
+    return event;
+  } catch (error) {
+    console.error('Error getting event:', error);
     return null;
   }
 }

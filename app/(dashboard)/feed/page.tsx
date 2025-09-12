@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { getPosts, createPost, getConnections, getSuggestedConnections, getProfile } from '@/lib/queries';
-import type { Post, Profile } from '@/types/database.types';
+import { getPosts, createPost, getConnections, getSuggestedConnections, getProfile, getGlobalFeed } from '@/lib/queries';
+import type { Post, Profile, PostWithAuthor } from '@/types/database.types';
 import { 
   PhotoIcon,
   DocumentIcon,
@@ -16,17 +16,16 @@ import MedicalFeed from '@/components/feed/MedicalFeed';
 
 export default function FeedPage() {
   const { user, profile } = useAuth();
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<PostWithAuthor[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'posts' | 'medical'>('posts');
   const [postContent, setPostContent] = useState('');
 
   const fetchPosts = useCallback(async () => {
-    if (!user?.id) return;
-
     setLoading(true);
     try {
-      const postsData = await getPosts(10, 0);
+      // Get global feed with posts from all users
+      const postsData = await getGlobalFeed(20, 0);
       setPosts(postsData);
     } catch (error) {
       console.error('Error fetching posts:', error);
@@ -34,7 +33,7 @@ export default function FeedPage() {
     } finally {
       setLoading(false);
     }
-  }, [user?.id]);
+  }, []);
 
   const handleCreatePost = useCallback(async (content: string, imageUrl?: string) => {
     if (!user?.id) return;
@@ -42,7 +41,8 @@ export default function FeedPage() {
     try {
       const post = await createPost(user.id, content, imageUrl);
       if (post) {
-        setPosts(prev => [post, ...prev]);
+        // Refresh the feed to show the new post with author info
+        fetchPosts();
         setPostContent('');
         toast.success('Post created successfully!');
       }
@@ -50,7 +50,7 @@ export default function FeedPage() {
       console.error('Error creating post:', error);
       toast.error('Failed to create post');
     }
-  }, [user?.id]);
+  }, [user?.id, fetchPosts]);
 
   useEffect(() => {
     fetchPosts();

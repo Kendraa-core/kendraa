@@ -150,8 +150,7 @@ export default function InstitutionJobsPage() {
   };
 
   const handleViewApplicants = (jobId: string) => {
-    // Here you would typically navigate to applicants page
-    toast.success('View applicants functionality coming soon!');
+    router.push(`/jobs/${jobId}/applications`);
   };
 
   return (

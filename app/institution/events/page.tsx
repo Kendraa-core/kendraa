@@ -174,6 +174,10 @@ export default function InstitutionEventsPage() {
     toast.success('Event deleted successfully!');
   };
 
+  const handleViewAttendees = (eventId: string) => {
+    router.push(`/events/${eventId}/attendees`);
+  };
+
   const handleViewEvent = (eventId: string) => {
     // Here you would typically navigate to event details page
     toast.success('View event functionality coming soon!');
@@ -453,6 +457,13 @@ export default function InstitutionEventsPage() {
                     title="View Event"
                   >
                     <EyeIcon className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleViewAttendees(event.id)}
+                    className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                    title="View Attendees"
+                  >
+                    <UserGroupIcon className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleEditEvent(event.id)}

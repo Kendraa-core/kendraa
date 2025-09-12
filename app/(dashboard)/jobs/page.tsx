@@ -212,16 +212,7 @@ export default function JobsPage() {
     if (!user?.id || !selectedJob) return;
 
     try {
-      const result = await applyToJob({
-        job_id: selectedJob.id,
-        applicant_id: user.id,
-        cover_letter: coverLetter,
-        resume_url: null,
-        status: 'pending',
-        reviewed_by: null,
-        reviewed_at: null,
-        notes: null,
-      });
+      const result = await applyToJob(selectedJob.id, user.id, coverLetter);
 
       if (result) {
         toast.success('Application submitted successfully!');
