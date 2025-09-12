@@ -97,7 +97,7 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative pt-20 pb-24 bg-gradient-to-br from-[#007fff] to-blue-600 overflow-hidden">
+      <section className="relative pt-20 pb-24 bg-white overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 pt-16">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             {/* Left Column - Text Content */}
@@ -107,115 +107,190 @@ export default function LandingPage() {
               transition={{ duration: 0.8, ease: "easeOut" }}
               className="text-left"
             >
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-white leading-tight tracking-tight mb-8">
-                Let&apos;s make medical networking easier.
-               </h1>
-              <p className="text-xl md:text-2xl text-blue-100 leading-relaxed mb-8">
-                kendraa is a professional networking platform made for medical science professionals and healthcare institutions.
-               </p>
+              {/* Medical Science Icon */}
+              <div className="w-16 h-16 bg-gradient-to-br from-[#007fff] to-blue-600 rounded-2xl flex items-center justify-center mb-8">
+                <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  <path d="M8 12h8M12 8v8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+              </div>
+              
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-gray-900 leading-tight tracking-tight mb-8">
+                Bringing medical professionals together
+              </h1>
+              <p className="text-xl md:text-2xl text-gray-600 leading-relaxed mb-8">
+                kendraa connects physicians, researchers, and healthcare institutions worldwide to collaborate, share knowledge, and advance medical science together.
+              </p>
+              
+              <Link 
+                href="/signup" 
+                className="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-[#007fff] hover:bg-[#007fff]/90 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                Get started
+              </Link>
+              
+              {/* Quote Section */}
+              <div className="mt-12 p-6 bg-gray-50 rounded-2xl border-l-4 border-[#007fff]">
+                <p className="text-gray-700 italic leading-relaxed">
+                  &ldquo;The future of healthcare lies in collaboration. kendraa provides the platform where medical professionals can connect, share insights, and work together to improve patient outcomes worldwide.&rdquo;
+                </p>
+                <p className="text-sm text-gray-500 mt-3">— Medical Science Community</p>
+              </div>
+              
+              {/* Social Links */}
+              <div className="flex space-x-4 mt-8">
+                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center hover:bg-[#007fff] hover:text-white transition-colors cursor-pointer">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
+                  </svg>
+                </div>
+                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center hover:bg-[#007fff] hover:text-white transition-colors cursor-pointer">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15 0 1.49.75 2.81 1.91 3.56-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.22 4.22 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.98 8.521 8.521 0 0 1-5.33 1.84c-.34 0-.68-.02-1.02-.06C3.44 20.29 5.7 21 8.12 21 16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56.84-.6 1.56-1.36 2.14-2.23z"/>
+                  </svg>
+                </div>
+                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center hover:bg-[#007fff] hover:text-white transition-colors cursor-pointer">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.174-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.402.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.357-.629-2.746-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24.009 12.017 24.009c6.624 0 11.99-5.367 11.99-11.988C24.007 5.367 18.641.001.012.001z"/>
+                  </svg>
+                </div>
+                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center hover:bg-[#007fff] hover:text-white transition-colors cursor-pointer">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                  </svg>
+                </div>
+              </div>
             </motion.div>
 
-            {/* Right Column - Medical Science Illustration */}
+            {/* Right Column - Medical Professionals Grid */}
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
               className="relative"
             >
-              <div className="relative w-full h-96 lg:h-[500px]">
-                <svg viewBox="0 0 600 400" className="w-full h-full">
-                  <defs>
-                    <linearGradient id="deskGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#f8fafc" />
-                      <stop offset="100%" stopColor="#e2e8f0" />
-                    </linearGradient>
-                    <linearGradient id="screenGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#1e293b" />
-                      <stop offset="100%" stopColor="#334155" />
-                    </linearGradient>
-                  </defs>
-                  
-                  {/* Desk */}
-                  <rect x="50" y="250" width="500" height="20" fill="url(#deskGradient)" rx="10" />
-                  
-                  {/* Laptop */}
-                  <rect x="200" y="200" width="200" height="120" fill="url(#screenGradient)" rx="8" />
-                  <rect x="210" y="210" width="180" height="100" fill="#ffffff" rx="4" />
-                  
-                  {/* Medical Icons Floating Around */}
-                  {/* Heart Icon */}
-                  <g transform="translate(100, 120)">
-                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#ef4444" />
-                  </g>
-                  
-                  {/* Calendar Icon */}
-                  <g transform="translate(450, 100)">
-                    <rect x="2" y="4" width="20" height="18" fill="white" stroke="#007fff" strokeWidth="2" rx="2" />
-                    <rect x="2" y="2" width="20" height="4" fill="#007fff" />
-                    <text x="12" y="6" textAnchor="middle" className="text-xs font-bold fill-white">15</text>
-                  </g>
-                  
-                  {/* Chat Bubble with Question */}
-                  <g transform="translate(80, 180)">
-                    <ellipse cx="15" cy="15" rx="12" ry="10" fill="white" stroke="#007fff" strokeWidth="2" />
-                    <text x="15" y="12" textAnchor="middle" className="text-xs font-bold fill-gray-600">?</text>
-                    <path d="M8 20 L15 15 L22 20" fill="white" stroke="#007fff" strokeWidth="2" />
-                  </g>
-                  
-                  {/* Chat Bubble with Exclamation */}
-                  <g transform="translate(480, 200)">
-                    <ellipse cx="15" cy="15" rx="12" ry="10" fill="white" stroke="#007fff" strokeWidth="2" />
-                    <text x="15" y="12" textAnchor="middle" className="text-xs font-bold fill-gray-600">!</text>
-                    <path d="M8 20 L15 15 L22 20" fill="white" stroke="#007fff" strokeWidth="2" />
-                  </g>
-                  
-                  {/* Chart Icon */}
-                  <g transform="translate(120, 80)">
-                    <rect x="2" y="2" width="20" height="16" fill="white" stroke="#007fff" strokeWidth="2" rx="2" />
-                    <rect x="6" y="12" width="3" height="4" fill="#007fff" />
-                    <rect x="10" y="8" width="3" height="8" fill="#007fff" />
-                    <rect x="14" y="4" width="3" height="12" fill="#007fff" />
-                  </g>
-                  
-                  {/* Photo/Research Icon */}
-                  <g transform="translate(420, 60)">
-                    <rect x="2" y="6" width="16" height="12" fill="white" stroke="#007fff" strokeWidth="2" rx="2" />
-                    <circle cx="8" cy="10" r="2" fill="#007fff" />
-                    <path d="M2 18 L6 14 L10 16 L18 8" stroke="#007fff" strokeWidth="2" fill="none" />
-                  </g>
-                  
-                  {/* Users/Network Icon */}
-                  <g transform="translate(350, 80)">
-                    <circle cx="8" cy="8" r="6" fill="white" stroke="#007fff" strokeWidth="2" />
-                    <circle cx="8" cy="6" r="2" fill="#007fff" />
-                    <path d="M4 12 Q8 8 12 12" stroke="#007fff" strokeWidth="2" fill="none" />
-                    <circle cx="20" cy="8" r="6" fill="white" stroke="#007fff" strokeWidth="2" />
-                    <circle cx="20" cy="6" r="2" fill="#007fff" />
-                    <path d="M16 12 Q20 8 24 12" stroke="#007fff" strokeWidth="2" fill="none" />
-                  </g>
-                  
-                  {/* Plant on Desk */}
-                  <g transform="translate(150, 230)">
-                    <rect x="8" y="0" width="4" height="20" fill="#8b5cf6" />
-                    <circle cx="10" cy="5" r="8" fill="#10b981" />
-                    <circle cx="6" cy="8" r="6" fill="#059669" />
-                    <circle cx="14" cy="7" r="5" fill="#047857" />
-                  </g>
-                  
-                  {/* Coffee Cup */}
-                  <g transform="translate(400, 220)">
-                    <rect x="2" y="0" width="12" height="16" fill="white" stroke="#007fff" strokeWidth="2" rx="2" />
-                    <rect x="0" y="2" width="16" height="2" fill="#8b4513" />
-                    <rect x="14" y="4" width="2" height="8" fill="#8b4513" />
-                  </g>
-                  
-                  {/* Lamp */}
-                  <g transform="translate(500, 200)">
-                    <rect x="8" y="0" width="4" height="30" fill="#6b7280" />
-                    <rect x="2" y="30" width="16" height="4" fill="#6b7280" />
-                    <circle cx="10" cy="25" r="8" fill="#fbbf24" opacity="0.8" />
-                  </g>
-                </svg>
+              <div className="grid grid-cols-3 gap-4">
+                {/* Row 1 */}
+                <div className="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl p-6 aspect-square flex flex-col items-center justify-center relative overflow-hidden">
+                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4">
+                    <HeartIcon className="w-8 h-8 text-red-500" />
+                  </div>
+                  <div className="text-white text-center">
+                    <div className="text-lg font-bold">Healthcare</div>
+                    <div className="text-sm opacity-90">Love & Care</div>
+                  </div>
+                  <div className="absolute top-2 right-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
+                    <span className="text-xs font-semibold text-white">Caring</span>
+                  </div>
+                </div>
+                
+                <div className="bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl p-6 aspect-square flex flex-col items-center justify-center relative overflow-hidden">
+                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4">
+                    <AcademicCapIcon className="w-8 h-8 text-blue-600" />
+                  </div>
+                  <div className="text-white text-center">
+                    <div className="text-lg font-bold">Research</div>
+                    <div className="text-sm opacity-90">Innovation</div>
+                  </div>
+                  <div className="absolute top-2 right-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
+                    <span className="text-xs font-semibold text-white">Innovative</span>
+                  </div>
+                </div>
+                
+                <div className="bg-gradient-to-br from-pink-400 to-rose-500 rounded-2xl p-6 aspect-square flex flex-col items-center justify-center relative overflow-hidden">
+                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4">
+                    <UsersIcon className="w-8 h-8 text-pink-600" />
+                  </div>
+                  <div className="text-white text-center">
+                    <div className="text-lg font-bold">Community</div>
+                    <div className="text-sm opacity-90">Together</div>
+                  </div>
+                  <div className="absolute top-2 right-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
+                    <span className="text-xs font-semibold text-white">Inclusive</span>
+                  </div>
+                </div>
+                
+                {/* Row 2 */}
+                <div className="bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl p-6 aspect-square flex flex-col items-center justify-center relative overflow-hidden">
+                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4">
+                    <BeakerIcon className="w-8 h-8 text-purple-600" />
+                  </div>
+                  <div className="text-white text-center">
+                    <div className="text-lg font-bold">Science</div>
+                    <div className="text-sm opacity-90">Discovery</div>
+                  </div>
+                  <div className="absolute top-2 right-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
+                    <span className="text-xs font-semibold text-white">Creative</span>
+                  </div>
+                </div>
+                
+                <div className="bg-gradient-to-br from-green-400 to-emerald-600 rounded-2xl p-6 aspect-square flex flex-col items-center justify-center relative overflow-hidden">
+                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4">
+                    <BuildingOfficeIcon className="w-8 h-8 text-green-600" />
+                  </div>
+                  <div className="text-white text-center">
+                    <div className="text-lg font-bold">Institutions</div>
+                    <div className="text-sm opacity-90">Partnership</div>
+                  </div>
+                  <div className="absolute top-2 right-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
+                    <span className="text-xs font-semibold text-white">Diverse</span>
+                  </div>
+                </div>
+                
+                <div className="bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-2xl p-6 aspect-square flex flex-col items-center justify-center relative overflow-hidden">
+                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4">
+                    <CpuChipIcon className="w-8 h-8 text-indigo-600" />
+                  </div>
+                  <div className="text-white text-center">
+                    <div className="text-lg font-bold">Technology</div>
+                    <div className="text-sm opacity-90">Future</div>
+                  </div>
+                  <div className="absolute top-2 right-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
+                    <span className="text-xs font-semibold text-white">Advanced</span>
+                  </div>
+                </div>
+                
+                {/* Row 3 */}
+                <div className="bg-gradient-to-br from-teal-400 to-cyan-600 rounded-2xl p-6 aspect-square flex flex-col items-center justify-center relative overflow-hidden">
+                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4">
+                    <GlobeAltIcon className="w-8 h-8 text-teal-600" />
+                  </div>
+                  <div className="text-white text-center">
+                    <div className="text-lg font-bold">Global</div>
+                    <div className="text-sm opacity-90">Network</div>
+                  </div>
+                  <div className="absolute top-2 right-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
+                    <span className="text-xs font-semibold text-white">Connected</span>
+                  </div>
+                </div>
+                
+                <div className="bg-gradient-to-br from-red-400 to-red-600 rounded-2xl p-6 aspect-square flex flex-col items-center justify-center relative overflow-hidden">
+                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4">
+                    <SparklesIcon className="w-8 h-8 text-red-600" />
+                  </div>
+                  <div className="text-white text-center">
+                    <div className="text-lg font-bold">Excellence</div>
+                    <div className="text-sm opacity-90">Quality</div>
+                  </div>
+                  <div className="absolute top-2 right-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
+                    <span className="text-xs font-semibold text-white">Excellence</span>
+                  </div>
+                </div>
+                
+                <div className="bg-gradient-to-br from-gray-600 to-gray-800 rounded-2xl p-6 aspect-square flex flex-col items-center justify-center relative overflow-hidden">
+                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4">
+                    <svg className="w-8 h-8 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                  </div>
+                  <div className="text-white text-center">
+                    <div className="text-lg font-bold">Verified</div>
+                    <div className="text-sm opacity-90">Trusted</div>
+                  </div>
+                  <div className="absolute top-2 right-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
+                    <span className="text-xs font-semibold text-white">Trusted</span>
+                  </div>
+                </div>
               </div>
             </motion.div>
           </div>
@@ -232,7 +307,7 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="text-xl md:text-2xl text-gray-700 leading-relaxed"
           >
-            Whether you&apos;re a healthcare professional looking to expand your network, a researcher seeking collaboration opportunities, or an institution building partnerships - we&apos;ve got you covered.
+            Whether you&apos;re a physician seeking research collaborations, a medical researcher looking for clinical partners, a healthcare administrator building institutional networks, or a medical device company finding innovation partners - kendraa connects the entire medical science ecosystem.
           </motion.p>
         </div>
       </section>
@@ -257,25 +332,25 @@ export default function LandingPage() {
               </div>
               
               <p className="text-lg text-gray-600 leading-relaxed">
-                Connect with healthcare professionals, researchers, and medical institutions worldwide. Build meaningful relationships, share knowledge, and discover collaboration opportunities across the entire medical science ecosystem.
+                Connect with physicians, researchers, medical professionals, and healthcare institutions worldwide. Build meaningful relationships, share clinical insights, and discover collaboration opportunities across the entire medical science ecosystem.
               </p>
               
               <ul className="space-y-3 text-gray-600">
                 <li className="flex items-center space-x-3">
                   <CheckCircleIcon className="w-5 h-5 text-[#007fff] flex-shrink-0" />
-                  <span>Connect with professionals from hospitals, research labs, and universities</span>
+                  <span>Connect with physicians, researchers, and medical professionals globally</span>
                 </li>
                 <li className="flex items-center space-x-3">
                   <CheckCircleIcon className="w-5 h-5 text-[#007fff] flex-shrink-0" />
-                  <span>Share research findings and clinical insights</span>
+                  <span>Share clinical research findings and medical insights</span>
                 </li>
                 <li className="flex items-center space-x-3">
                   <CheckCircleIcon className="w-5 h-5 text-[#007fff] flex-shrink-0" />
-                  <span>Discover career opportunities and research collaborations</span>
+                  <span>Discover medical career opportunities and research collaborations</span>
                 </li>
                 <li className="flex items-center space-x-3">
                   <CheckCircleIcon className="w-5 h-5 text-[#007fff] flex-shrink-0" />
-                  <span>Join specialized groups and communities</span>
+                  <span>Join specialized medical communities and professional groups</span>
                 </li>
               </ul>
               
@@ -299,29 +374,29 @@ export default function LandingPage() {
                 <div className="w-16 h-16 bg-gradient-to-br from-[#007fff] to-blue-600 rounded-2xl flex items-center justify-center">
                   <BuildingOfficeIcon className="w-8 h-8 text-white" />
                 </div>
-                <h2 className="text-3xl font-bold text-black">Institution Partnerships & Collaboration</h2>
+                <h2 className="text-3xl font-bold text-black">Healthcare Institution Partnerships</h2>
               </div>
               
               <p className="text-lg text-gray-600 leading-relaxed">
-                Build strategic partnerships between hospitals, universities, research institutions, and healthcare organizations. Facilitate cross-institutional collaboration and knowledge sharing.
+                Build strategic partnerships between hospitals, medical schools, research institutions, and healthcare organizations. Facilitate cross-institutional collaboration, clinical trials, and medical innovation.
               </p>
               
               <ul className="space-y-3 text-gray-600">
                 <li className="flex items-center space-x-3">
                   <CheckCircleIcon className="w-5 h-5 text-[#007fff] flex-shrink-0" />
-                  <span>Connect institutions across different healthcare sectors</span>
+                  <span>Connect hospitals, medical schools, and research institutions</span>
                 </li>
                 <li className="flex items-center space-x-3">
                   <CheckCircleIcon className="w-5 h-5 text-[#007fff] flex-shrink-0" />
-                  <span>Facilitate research partnerships and clinical trials</span>
+                  <span>Facilitate clinical research partnerships and medical trials</span>
                 </li>
                 <li className="flex items-center space-x-3">
                   <CheckCircleIcon className="w-5 h-5 text-[#007fff] flex-shrink-0" />
-                  <span>Share best practices and institutional knowledge</span>
+                  <span>Share medical best practices and clinical protocols</span>
                 </li>
                 <li className="flex items-center space-x-3">
                   <CheckCircleIcon className="w-5 h-5 text-[#007fff] flex-shrink-0" />
-                  <span>Create joint educational and training programs</span>
+                  <span>Create joint medical education and training programs</span>
                 </li>
               </ul>
               
@@ -347,16 +422,16 @@ export default function LandingPage() {
             className="text-center mb-16"
           >
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-8">
-              These medical institutions already rely on kendraa:
+              Trusted by healthcare professionals worldwide:
             </h2>
           </motion.div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-12 items-center">
             {[
-              { name: 'Johns Hopkins', type: 'Hospital' },
-              { name: 'Mayo Clinic', type: 'Medical Center' },
-              { name: 'Cleveland Clinic', type: 'Hospital' },
-              { name: 'Mass General', type: 'Hospital' }
+              { name: 'Medical Professionals', type: 'Physicians & Researchers' },
+              { name: 'Healthcare Institutions', type: 'Hospitals & Clinics' },
+              { name: 'Research Organizations', type: 'Medical Research Labs' },
+              { name: 'Medical Schools', type: 'Academic Institutions' }
             ].map((institution, index) => (
               <motion.div
                 key={institution.name}
@@ -369,7 +444,7 @@ export default function LandingPage() {
                 <div className="bg-white rounded-2xl p-8 hover:shadow-2xl transition-all duration-500">
                   <div className="w-16 h-16 bg-gradient-to-br from-[#007fff] to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <BuildingOfficeIcon className="w-8 h-8 text-white" />
-                  </div>
+                </div>
                   <h3 className="text-lg font-bold text-gray-900 mb-2">{institution.name}</h3>
                   <p className="text-sm text-gray-600">{institution.type}</p>
                 </div>
@@ -392,29 +467,29 @@ export default function LandingPage() {
               className="space-y-8"
             >
               <h2 className="text-4xl md:text-5xl font-bold text-black mb-8">
-                Starting at Free
+                Free for Medical Professionals
               </h2>
               
               <ul className="space-y-4 text-lg text-gray-700">
                 <li className="flex items-center space-x-3">
                   <CheckCircleIcon className="w-6 h-6 text-[#007fff] flex-shrink-0" />
-                  <span>Unlimited Professional Connections</span>
+                  <span>Unlimited Medical Professional Connections</span>
                 </li>
                 <li className="flex items-center space-x-3">
                   <CheckCircleIcon className="w-6 h-6 text-[#007fff] flex-shrink-0" />
-                  <span>Access to Medical Science Communities</span>
+                  <span>Access to Medical Research Communities</span>
                 </li>
                 <li className="flex items-center space-x-3">
                   <CheckCircleIcon className="w-6 h-6 text-[#007fff] flex-shrink-0" />
-                  <span>Research Collaboration Tools</span>
+                  <span>Clinical Research Collaboration Tools</span>
                 </li>
                 <li className="flex items-center space-x-3">
                   <CheckCircleIcon className="w-6 h-6 text-[#007fff] flex-shrink-0" />
-                  <span>Institution Partnership Features</span>
+                  <span>Healthcare Institution Partnership Features</span>
                 </li>
                 <li className="flex items-center space-x-3">
                   <CheckCircleIcon className="w-6 h-6 text-[#007fff] flex-shrink-0" />
-                  <span>Simple, Transparent Pricing</span>
+                  <span>Medical Job Opportunities & Career Development</span>
                 </li>
               </ul>
               
@@ -435,10 +510,10 @@ export default function LandingPage() {
               className="bg-white rounded-3xl p-8 shadow-xl"
             >
               <h3 className="text-2xl font-bold text-black mb-4">
-                Request Free Access
+                Join the Medical Science Community
               </h3>
               <p className="text-gray-600 mb-8">
-                Join kendraa for free and start building your medical science network today.
+                Create your professional profile and start connecting with medical professionals, researchers, and healthcare institutions worldwide.
               </p>
               
               <form className="space-y-6">
@@ -466,23 +541,23 @@ export default function LandingPage() {
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Institution/Organization
+                    Healthcare Institution/Organization
                   </label>
                   <input
                     type="text"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
-                    placeholder="Enter your institution name"
+                    placeholder="e.g., Johns Hopkins Hospital, Harvard Medical School"
                   />
                 </div>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Professional Role
+                    Medical Specialty/Role
                   </label>
                   <input
                     type="text"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
-                    placeholder="e.g., Doctor, Researcher, Administrator"
+                    placeholder="e.g., Cardiologist, Medical Researcher, Healthcare Administrator"
                   />
                 </div>
                 
@@ -490,7 +565,7 @@ export default function LandingPage() {
                   href="/signup" 
                   className="w-full inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-[#007fff] hover:bg-[#007fff]/90 rounded-xl transition-all duration-200"
                 >
-                  Request Access
+                  Join kendraa
                 </Link>
               </form>
             </motion.div>
@@ -514,10 +589,10 @@ export default function LandingPage() {
             viewport={{ once: true }}
           >
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-8">
-              Ready to Join the Future of Healthcare Networking?
+              Ready to Connect with Medical Professionals Worldwide?
             </h2>
             <p className="text-xl md:text-2xl text-blue-100 mb-12 leading-relaxed max-w-3xl mx-auto">
-              Join the medical science community and start building meaningful professional connections today.
+              Join thousands of physicians, researchers, and healthcare professionals who are already building their networks on kendraa.
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <Link 
