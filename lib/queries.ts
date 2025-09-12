@@ -3385,7 +3385,6 @@ export async function getInstitutionPosts(institutionId: string, limit = 10, off
       .from('posts')
       .select('*')
       .eq('author_id', institutionId)
-      .eq('author_type', 'institution')
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -3559,9 +3558,8 @@ export async function createInstitutionJob(
     salary_max?: number;
     currency?: string;
     location?: string;
-    employment_type?: string;
+    job_type?: string;
     experience_level?: string;
-    remote_allowed?: boolean;
   }
 ): Promise<Job | null> {
   try {
@@ -3572,10 +3570,19 @@ export async function createInstitutionJob(
       .insert({
         company_id: institutionId,
         posted_by: institutionId,
-        ...jobData,
+        title: jobData.title,
+        description: jobData.description,
+        requirements: jobData.requirements || null,
+        salary_min: jobData.salary_min || null,
+        salary_max: jobData.salary_max || null,
+        currency: jobData.currency || null,
+        location: jobData.location || null,
+        job_type: (jobData.job_type as any) || 'full_time',
+        experience_level: (jobData.experience_level as any) || 'entry',
+        specializations: null,
         status: 'active',
         application_deadline: null,
-        remote_allowed: jobData.remote_allowed || false,
+        applications_count: 0,
       })
       .select()
       .single();
@@ -3603,9 +3610,7 @@ export async function createInstitutionEvent(
     venue?: string;
     event_type: string;
     max_attendees?: number;
-    registration_required?: boolean;
-    registration_deadline?: string;
-    cost?: number;
+    registration_fee?: number;
     currency?: string;
   }
 ): Promise<Event | null> {
@@ -3617,9 +3622,22 @@ export async function createInstitutionEvent(
       .insert({
         organizer_id: institutionId,
         organizer_type: 'institution',
-        ...eventData,
-        status: 'active',
-        registration_required: eventData.registration_required || false,
+        title: eventData.title,
+        description: eventData.description,
+        start_date: eventData.start_date,
+        end_date: eventData.end_date,
+        location: eventData.location || null,
+        venue: eventData.venue || null,
+        event_type: eventData.event_type as any,
+        max_attendees: eventData.max_attendees || null,
+        registration_fee: eventData.registration_fee || null,
+        currency: eventData.currency || null,
+        status: 'upcoming',
+        is_virtual: false,
+        meeting_link: null,
+        banner_url: null,
+        attendees_count: 0,
+        specializations: null,
       })
       .select()
       .single();
