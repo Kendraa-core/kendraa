@@ -79,23 +79,19 @@ export default function LandingPage() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="flex items-center space-x-8"
+              className="flex items-center space-x-4"
             >
-              <Link href="/feed" className="text-gray-700 hover:text-[#007fff] transition-colors font-medium">Network</Link>
-              <Link href="/jobs" className="text-gray-700 hover:text-[#007fff] transition-colors font-medium">Jobs</Link>
-              <Link href="/events" className="text-gray-700 hover:text-[#007fff] transition-colors font-medium">Events</Link>
-              <Link href="/groups" className="text-gray-700 hover:text-[#007fff] transition-colors font-medium">Groups</Link>
+              <Link 
+                href="/signin" 
+                className="px-6 py-2 text-sm font-medium text-[#007fff] border border-[#007fff] hover:bg-[#007fff] hover:text-white rounded-lg transition-all duration-200"
+              >
+                Sign In
+              </Link>
               <Link 
                 href="/signup" 
                 className="px-6 py-2 text-sm font-medium text-white bg-[#007fff] hover:bg-[#007fff]/90 rounded-lg transition-all duration-200"
               >
                 Sign Up
-              </Link>
-              <Link 
-                href="/signin" 
-                className="text-gray-700 hover:text-[#007fff] transition-colors font-medium"
-              >
-                Login
               </Link>
             </motion.div>
           </div>
