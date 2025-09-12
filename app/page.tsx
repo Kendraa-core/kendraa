@@ -108,13 +108,6 @@ export default function LandingPage() {
               transition={{ duration: 0.8, ease: "easeOut" }}
               className="text-left"
             >
-              {/* Medical Science Icon */}
-              <div className="w-16 h-16 bg-gradient-to-br from-[#007fff] to-blue-600 rounded-2xl flex items-center justify-center mb-8">
-                <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                </svg>
-              </div>
-              
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-gray-900 leading-tight tracking-tight mb-8">
                 Bringing <span className="relative">
                   <span className="relative z-10">medical professionals</span>
@@ -175,14 +168,16 @@ export default function LandingPage() {
               transition={{ duration: 0.8, delay: 0.2 }}
               className="relative"
             >
-              <div className="relative w-full h-96 lg:h-[500px] rounded-2xl overflow-hidden shadow-2xl">
+              <div className="relative w-full h-96 lg:h-[500px] rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-blue-50 to-indigo-100">
                 <Image
                   src="/5551.jpg"
                   alt="Medical professionals collaborating and networking"
                   fill
-                  className="object-cover"
+                  className="object-cover object-center"
                   priority
                 />
+                {/* Subtle overlay for better blending */}
+                <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-blue-900/5"></div>
                 {/* Hidden accreditation comment */}
                 {/* <a href="http://www.freepik.com">Designed by pch.vector / Freepik</a> */}
               </div>
