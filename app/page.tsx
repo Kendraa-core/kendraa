@@ -24,7 +24,7 @@ export default function LandingPage() {
         if (profile.user_type === 'institution' || profile.profile_type === 'institution') {
           router.push('/institution/onboarding');
         } else {
-          router.push('/onboarding');
+        router.push('/onboarding');
         }
       }
     }
@@ -101,13 +101,45 @@ export default function LandingPage() {
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-[#007fff]/5 to-blue-100/10 rounded-full blur-3xl"></div>
         </div>
 
+        {/* Custom Networking SVG Illustration */}
+        <div className="absolute top-20 right-10 w-96 h-96 opacity-10">
+          <svg viewBox="0 0 400 400" className="w-full h-full">
+            <defs>
+              <linearGradient id="networkGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#007fff" />
+                <stop offset="100%" stopColor="#0056b3" />
+              </linearGradient>
+            </defs>
+            {/* Network Nodes */}
+            <circle cx="100" cy="100" r="8" fill="url(#networkGradient)" />
+            <circle cx="300" cy="120" r="8" fill="url(#networkGradient)" />
+            <circle cx="200" cy="200" r="12" fill="url(#networkGradient)" />
+            <circle cx="80" cy="300" r="8" fill="url(#networkGradient)" />
+            <circle cx="320" cy="280" r="8" fill="url(#networkGradient)" />
+            <circle cx="150" cy="350" r="8" fill="url(#networkGradient)" />
+            <circle cx="250" cy="80" r="8" fill="url(#networkGradient)" />
+            <circle cx="350" cy="200" r="8" fill="url(#networkGradient)" />
+            
+            {/* Connection Lines */}
+            <line x1="100" y1="100" x2="200" y2="200" stroke="url(#networkGradient)" strokeWidth="2" opacity="0.6" />
+            <line x1="300" y1="120" x2="200" y2="200" stroke="url(#networkGradient)" strokeWidth="2" opacity="0.6" />
+            <line x1="200" y1="200" x2="80" y2="300" stroke="url(#networkGradient)" strokeWidth="2" opacity="0.6" />
+            <line x1="200" y1="200" x2="320" y2="280" stroke="url(#networkGradient)" strokeWidth="2" opacity="0.6" />
+            <line x1="80" y1="300" x2="150" y2="350" stroke="url(#networkGradient)" strokeWidth="2" opacity="0.6" />
+            <line x1="320" y1="280" x2="150" y2="350" stroke="url(#networkGradient)" strokeWidth="2" opacity="0.6" />
+            <line x1="250" y1="80" x2="200" y2="200" stroke="url(#networkGradient)" strokeWidth="2" opacity="0.6" />
+            <line x1="350" y1="200" x2="200" y2="200" stroke="url(#networkGradient)" strokeWidth="2" opacity="0.6" />
+          </svg>
+        </div>
+
         <div className="relative max-w-7xl mx-auto px-6 pt-16">
-          <div className="text-center max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            {/* Left Column - Text Content */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, ease: "easeOut" }}
-              className="mb-12"
+              className="text-left lg:text-left"
             >
                <h1 className="text-6xl md:text-7xl lg:text-8xl font-black text-[#007fff] leading-tight tracking-tight mulish-bold mb-8">
                  kendraa
@@ -115,27 +147,19 @@ export default function LandingPage() {
                <p className="text-2xl md:text-3xl lg:text-4xl font-bold text-black mb-8 leading-relaxed">
                  Professional Networking for Global Medical Science Professionals
                </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="mb-16"
-            >
-              <p className="text-xl md:text-2xl text-gray-600 leading-relaxed max-w-4xl mx-auto mb-8">
+               
+               <p className="text-xl md:text-2xl text-gray-600 leading-relaxed mb-8">
                 Welcome to a dedicated platform designed to connect, collaborate, and innovate across the vast ecosystem of medical sciences.
               </p>
-              <p className="text-xl md:text-2xl font-semibold text-[#007fff] leading-relaxed max-w-4xl mx-auto">
+               <p className="text-xl md:text-2xl font-semibold text-[#007fff] leading-relaxed mb-12">
                 From Hospitals and Academia to Pharmaceuticals, Medtech, Medical Devices, Research, Medical Engineering, Genetics, Healthcare Entrepreneurs, Universities and Wellness.
               </p>
-            </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16"
+                 className="flex flex-col sm:flex-row gap-4"
             >
                 <Link 
                   href="/signup" 
@@ -151,8 +175,116 @@ export default function LandingPage() {
                 Sign In
                 </Link>
             </motion.div>
+            </motion.div>
 
+            {/* Right Column - Custom Healthcare Networking Illustration */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="relative"
+            >
+              <div className="relative w-full h-96 lg:h-[500px]">
+                <svg viewBox="0 0 600 500" className="w-full h-full">
+                  <defs>
+                    <linearGradient id="healthGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#007fff" />
+                      <stop offset="50%" stopColor="#00a8ff" />
+                      <stop offset="100%" stopColor="#0056b3" />
+                    </linearGradient>
+                    <linearGradient id="nodeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#ffffff" />
+                      <stop offset="100%" stopColor="#f0f8ff" />
+                    </linearGradient>
+                  </defs>
+                  
+                  {/* Background Network Pattern */}
+                  <g opacity="0.1">
+                    <circle cx="100" cy="100" r="4" fill="url(#healthGradient)" />
+                    <circle cx="500" cy="120" r="4" fill="url(#healthGradient)" />
+                    <circle cx="300" cy="250" r="6" fill="url(#healthGradient)" />
+                    <circle cx="80" cy="400" r="4" fill="url(#healthGradient)" />
+                    <circle cx="520" cy="380" r="4" fill="url(#healthGradient)" />
+                    <circle cx="150" cy="450" r="4" fill="url(#healthGradient)" />
+                    <circle cx="250" cy="80" r="4" fill="url(#healthGradient)" />
+                    <circle cx="450" cy="200" r="4" fill="url(#healthGradient)" />
+                  </g>
 
+                  {/* Main Healthcare Icons */}
+                  {/* Hospital */}
+                  <g transform="translate(50, 80)">
+                    <rect x="0" y="20" width="40" height="30" fill="url(#nodeGradient)" stroke="url(#healthGradient)" strokeWidth="2" rx="4" />
+                    <rect x="15" y="0" width="10" height="20" fill="url(#nodeGradient)" stroke="url(#healthGradient)" strokeWidth="2" />
+                    <circle cx="20" cy="35" r="3" fill="url(#healthGradient)" />
+                    <text x="20" y="70" textAnchor="middle" className="text-xs font-semibold fill-gray-600">Hospital</text>
+                  </g>
+
+                  {/* Research Lab */}
+                  <g transform="translate(500, 100)">
+                    <rect x="0" y="0" width="40" height="40" fill="url(#nodeGradient)" stroke="url(#healthGradient)" strokeWidth="2" rx="4" />
+                    <circle cx="20" cy="20" r="8" fill="none" stroke="url(#healthGradient)" strokeWidth="2" />
+                    <circle cx="20" cy="20" r="3" fill="url(#healthGradient)" />
+                    <text x="20" y="55" textAnchor="middle" className="text-xs font-semibold fill-gray-600">Research</text>
+                  </g>
+
+                  {/* Central Hub */}
+                  <g transform="translate(280, 220)">
+                    <circle cx="0" cy="0" r="25" fill="url(#nodeGradient)" stroke="url(#healthGradient)" strokeWidth="3" />
+                    <circle cx="0" cy="0" r="15" fill="url(#healthGradient)" opacity="0.2" />
+                    <circle cx="0" cy="0" r="8" fill="url(#healthGradient)" />
+                    <text x="0" y="45" textAnchor="middle" className="text-sm font-bold fill-[#007fff]">kendraa</text>
+                  </g>
+
+                  {/* Medical Device */}
+                  <g transform="translate(80, 380)">
+                    <rect x="0" y="10" width="30" height="20" fill="url(#nodeGradient)" stroke="url(#healthGradient)" strokeWidth="2" rx="3" />
+                    <rect x="5" y="0" width="20" height="10" fill="url(#nodeGradient)" stroke="url(#healthGradient)" strokeWidth="2" rx="2" />
+                    <circle cx="15" cy="20" r="2" fill="url(#healthGradient)" />
+                    <text x="15" y="45" textAnchor="middle" className="text-xs font-semibold fill-gray-600">MedTech</text>
+                  </g>
+
+                  {/* Pharmaceutical */}
+                  <g transform="translate(520, 360)">
+                    <rect x="0" y="0" width="30" height="30" fill="url(#nodeGradient)" stroke="url(#healthGradient)" strokeWidth="2" rx="4" />
+                    <rect x="5" y="5" width="20" height="20" fill="url(#healthGradient)" opacity="0.3" rx="2" />
+                    <circle cx="15" cy="15" r="4" fill="url(#healthGradient)" />
+                    <text x="15" y="45" textAnchor="middle" className="text-xs font-semibold fill-gray-600">Pharma</text>
+                  </g>
+
+                  {/* University */}
+                  <g transform="translate(150, 430)">
+                    <rect x="0" y="15" width="40" height="25" fill="url(#nodeGradient)" stroke="url(#healthGradient)" strokeWidth="2" rx="4" />
+                    <rect x="10" y="0" width="20" height="15" fill="url(#nodeGradient)" stroke="url(#healthGradient)" strokeWidth="2" />
+                    <rect x="15" y="5" width="10" height="5" fill="url(#healthGradient)" />
+                    <text x="20" y="55" textAnchor="middle" className="text-xs font-semibold fill-gray-600">University</text>
+                  </g>
+
+                  {/* Connection Lines */}
+                  <g opacity="0.6">
+                    <line x1="70" y1="95" x2="280" y2="220" stroke="url(#healthGradient)" strokeWidth="2" />
+                    <line x1="520" y1="120" x2="280" y2="220" stroke="url(#healthGradient)" strokeWidth="2" />
+                    <line x1="95" y1="400" x2="280" y2="220" stroke="url(#healthGradient)" strokeWidth="2" />
+                    <line x1="535" y1="375" x2="280" y2="220" stroke="url(#healthGradient)" strokeWidth="2" />
+                    <line x1="170" y1="445" x2="280" y2="220" stroke="url(#healthGradient)" strokeWidth="2" />
+                    <line x1="270" y1="95" x2="280" y2="220" stroke="url(#healthGradient)" strokeWidth="2" />
+                    <line x1="450" y1="200" x2="280" y2="220" stroke="url(#healthGradient)" strokeWidth="2" />
+                  </g>
+
+                  {/* Floating Particles */}
+                  <g opacity="0.4">
+                    <circle cx="200" cy="150" r="2" fill="url(#healthGradient)">
+                      <animate attributeName="opacity" values="0.4;0.8;0.4" dur="3s" repeatCount="indefinite" />
+                    </circle>
+                    <circle cx="400" cy="300" r="2" fill="url(#healthGradient)">
+                      <animate attributeName="opacity" values="0.8;0.4;0.8" dur="2.5s" repeatCount="indefinite" />
+                    </circle>
+                    <circle cx="150" cy="300" r="2" fill="url(#healthGradient)">
+                      <animate attributeName="opacity" values="0.4;0.8;0.4" dur="2s" repeatCount="indefinite" />
+                    </circle>
+                  </g>
+                </svg>
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -278,6 +410,102 @@ export default function LandingPage() {
                 </div>
                   <h3 className="text-sm font-bold text-black">{industry.name}</h3>
                 </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-24 bg-gradient-to-br from-gray-50 to-blue-50/30">
+        <div className="max-w-7xl mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-20"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold text-black mb-8">
+              Trusted by Healthcare Professionals Worldwide
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              Join thousands of medical science professionals who are already building their networks on kendraa
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                name: "Dr. Sarah Chen",
+                role: "Cardiologist, Johns Hopkins",
+                content: "kendraa has revolutionized how I connect with fellow researchers. The platform's focus on medical sciences makes networking so much more meaningful.",
+                avatar: "SC"
+              },
+              {
+                name: "Prof. Michael Rodriguez",
+                role: "Biomedical Engineering, MIT",
+                content: "The collaboration opportunities I've found through kendraa have led to breakthrough research projects. It's the future of scientific networking.",
+                avatar: "MR"
+              },
+              {
+                name: "Dr. Aisha Patel",
+                role: "Pharmaceutical Research, Pfizer",
+                content: "Finally, a platform that understands the unique needs of healthcare professionals. The quality of connections here is unmatched.",
+                avatar: "AP"
+              }
+            ].map((testimonial, index) => (
+              <motion.div
+                key={testimonial.name}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.2 }}
+                viewport={{ once: true }}
+                className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100"
+              >
+                <div className="flex items-center mb-6">
+                  <div className="w-12 h-12 bg-gradient-to-br from-[#007fff] to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                    {testimonial.avatar}
+                  </div>
+                  <div className="ml-4">
+                    <h4 className="font-bold text-black text-lg">{testimonial.name}</h4>
+                    <p className="text-gray-600 text-sm">{testimonial.role}</p>
+                  </div>
+                </div>
+                <p className="text-gray-700 leading-relaxed italic">
+                  &ldquo;{testimonial.content}&rdquo;
+                </p>
+                <div className="flex mt-4">
+                  {[...Array(5)].map((_, i) => (
+                    <StarIcon key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                  ))}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {[
+              { number: "10K+", label: "Active Professionals" },
+              { number: "50+", label: "Countries" },
+              { number: "500+", label: "Institutions" },
+              { number: "1M+", label: "Connections Made" }
+            ].map((stat, index) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className="text-center"
+              >
+                <div className="text-4xl md:text-5xl font-bold text-[#007fff] mb-2">{stat.number}</div>
+                <div className="text-gray-600 font-medium">{stat.label}</div>
               </motion.div>
             ))}
           </div>
