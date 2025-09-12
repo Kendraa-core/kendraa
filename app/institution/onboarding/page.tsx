@@ -97,6 +97,7 @@ export default function InstitutionOnboardingPage() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     // Basic Info
     institutionName: '',
@@ -155,18 +156,37 @@ export default function InstitutionOnboardingPage() {
         }));
       }
 
-      // If institution already exists for this user, mark onboarding complete and redirect
+      // If institution already exists for this user, load existing data
       try {
         const existing = await getInstitutionByAdminId(user.id);
         if (existing) {
-          if (supabase) {
-            await supabase
-              .from('profiles')
-              .update({ onboarding_completed: true })
-              .eq('id', user.id);
+          // If onboarding is already completed, redirect to profile
+          if (profile?.onboarding_completed) {
+            router.push('/institution/profile');
+            return;
           }
-          router.push('/institution/profile');
-          return;
+          
+          // Load existing institution data to continue onboarding
+          setFormData(prev => ({
+            ...prev,
+            institutionName: existing.name || prev.institutionName,
+            shortTagline: (existing as any).short_tagline || prev.shortTagline,
+            institutionType: existing.type || prev.institutionType,
+            establishmentYear: existing.established_year?.toString() || prev.establishmentYear,
+            accreditation: Array.isArray(existing.accreditation) ? existing.accreditation.join(', ') : (existing.accreditation || prev.accreditation),
+            logoUrl: existing.logo_url || prev.logoUrl,
+            bannerUrl: existing.banner_url || prev.bannerUrl,
+            themeColor: (existing as any).theme_color || prev.themeColor,
+            shortDescription: (existing as any).short_description || prev.shortDescription,
+            detailedDescription: existing.description || prev.detailedDescription,
+            website: existing.website || prev.website,
+            socialMediaLinks: (existing as any).social_media_links || prev.socialMediaLinks,
+            headquarters: existing.location || prev.headquarters,
+            employeeCount: existing.size || prev.employeeCount,
+            contactEmail: existing.email || prev.contactEmail,
+            contactPhone: (existing as any).contact_phone || prev.contactPhone,
+            googleMapsPin: (existing as any).google_maps_pin || prev.googleMapsPin,
+          }));
         }
       } catch {
         // silent
@@ -204,7 +224,97 @@ export default function InstitutionOnboardingPage() {
     }
   };
 
-  const handleNext = () => {
+  const savePartialData = async () => {
+    if (!user?.id || !supabase) return;
+
+    setSaving(true);
+    try {
+      const categorySlug = (formData.institutionType || '').toLowerCase().replace(/\s+/g, '_');
+
+      // Build partial institution payload
+      const institutionPayload: any = {
+        name: formData.institutionName || null,
+        description: formData.detailedDescription || null,
+        type: categorySlug || 'hospital',
+        location: formData.headquarters || null,
+        website: formData.website || null,
+        established_year: formData.establishmentYear ? parseInt(formData.establishmentYear) : null,
+        size: formData.employeeCount || null,
+        admin_user_id: user.id,
+        email: formData.contactEmail || user.email || null,
+        verified: false,
+        // Additional fields
+        short_tagline: formData.shortTagline || null,
+        accreditation: formData.accreditation || null,
+        logo_url: formData.logoUrl || null,
+        banner_url: formData.bannerUrl || null,
+        theme_color: formData.themeColor || '#007fff',
+        short_description: formData.shortDescription || null,
+        social_media_links: formData.socialMediaLinks || null,
+        contact_phone: formData.contactPhone || null,
+        google_maps_pin: formData.googleMapsPin || null
+      };
+
+      // Check if institution exists for this admin
+      let existingId: string | null = null;
+      try {
+        const existing = await getInstitutionByAdminId(user.id);
+        existingId = existing?.id ?? null;
+      } catch {
+        existingId = null;
+      }
+
+      if (existingId) {
+        // Update existing institution
+        const { error: updateError } = await supabase
+          .from('institutions')
+          .update(institutionPayload)
+          .eq('id', existingId);
+        
+        if (updateError) {
+          console.error('Error updating institution:', updateError);
+          // Don't show error to user for partial saves
+        }
+      } else {
+        // Create new institution
+        const { error: insertError } = await supabase
+          .from('institutions')
+          .insert(institutionPayload);
+        
+        if (insertError) {
+          console.error('Error creating institution:', insertError);
+          // Don't show error to user for partial saves
+        }
+      }
+
+      // Update user profile with basic fields
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ 
+          full_name: formData.institutionName || null,
+          bio: formData.shortDescription || null,
+          location: formData.headquarters || null,
+          website: formData.website || null,
+          phone: formData.contactPhone || null
+        })
+        .eq('id', user.id);
+
+      if (profileError) {
+        console.error('Error updating profile:', profileError);
+        // Don't show error to user for partial saves
+      }
+    } catch (error) {
+      console.error('Error saving partial data:', error);
+      // Don't show error to user for partial saves
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleNext = async () => {
+    // Save data before proceeding to next step
+    await savePartialData();
+    
     if (isLastStep) {
       handleComplete();
     } else {
@@ -687,15 +797,24 @@ export default function InstitutionOnboardingPage() {
 
               <button
                 onClick={handleNext}
-                disabled={!isStepCompleted(currentStep) && !isLastStep}
+                disabled={(!isStepCompleted(currentStep) && !isLastStep) || saving}
                 className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-colors ${
-                  !isStepCompleted(currentStep) && !isLastStep
+                  (!isStepCompleted(currentStep) && !isLastStep) || saving
                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     : 'bg-[#007fff] text-white hover:bg-[#007fff]/90'
                 }`}
               >
-                {isLastStep ? 'Complete Setup' : 'Next'}
-                {!isLastStep && <ChevronRightIcon className="w-5 h-5" />}
+                {saving ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    {isLastStep ? 'Complete Setup' : 'Next'}
+                    {!isLastStep && <ChevronRightIcon className="w-5 h-5" />}
+                  </>
+                )}
               </button>
             </div>
           </div>
