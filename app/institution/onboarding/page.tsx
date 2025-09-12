@@ -127,8 +127,7 @@ export default function InstitutionOnboardingPage() {
     headquarters: '',
     employeeCount: '',
     contactEmail: '',
-    contactPhone: '',
-    googleMapsPin: ''
+    contactPhone: ''
   });
 
   // Redirect if not logged in or not an institution user
@@ -191,7 +190,6 @@ export default function InstitutionOnboardingPage() {
             employeeCount: existing.size || prev.employeeCount,
             contactEmail: existing.email || prev.contactEmail,
             contactPhone: existing.phone || prev.contactPhone,
-            googleMapsPin: (existing as any).google_maps_pin || prev.googleMapsPin,
           }));
         }
       } catch {
@@ -320,8 +318,7 @@ export default function InstitutionOnboardingPage() {
             return null;
           }
         })() : null,
-        phone: formData.contactPhone || null,
-        google_maps_pin: formData.googleMapsPin || null
+        phone: formData.contactPhone || null
       };
 
       // Check if institution exists for this admin
@@ -455,8 +452,7 @@ export default function InstitutionOnboardingPage() {
             return null;
           }
         })() : null,
-        phone: formData.contactPhone,
-        google_maps_pin: formData.googleMapsPin
+        phone: formData.contactPhone
       };
 
       // Check if institution exists for this admin
@@ -808,21 +804,6 @@ export default function InstitutionOnboardingPage() {
                   placeholder="+1 (555) 123-4567"
                 />
               </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Google Maps Pin (Embed)
-              </label>
-              <input
-                type="url"
-                value={formData.googleMapsPin}
-                onChange={(e) => setFormData(prev => ({ ...prev, googleMapsPin: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
-                placeholder="https://maps.google.com/embed?pb=..."
-              />
-              <p className="text-sm text-gray-500 mt-1">
-                Google Maps embed URL for your institution&apos;s location
-              </p>
             </div>
           </div>
         );
