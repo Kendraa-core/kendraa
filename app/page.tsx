@@ -170,7 +170,7 @@ export default function LandingPage() {
             >
               <div className="relative w-full h-96 lg:h-[500px] rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-blue-50 to-indigo-100">
                 <Image
-                  src="/5551.jpg"
+                  src="/Remove Background Preview.png"
                   alt="Medical professionals collaborating and networking"
                   fill
                   className="object-cover object-center"
