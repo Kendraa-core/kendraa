@@ -201,27 +201,27 @@ export default function LandingPage() {
       {/* Features Section */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-stretch">
             {/* Left Column - Professional Networking */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
-              className="space-y-8"
+              className="flex flex-col h-full"
             >
               <div className="flex items-center space-x-4 mb-6">
-                <div className="w-16 h-16 bg-gradient-to-br from-[#007fff] to-blue-600 rounded-2xl flex items-center justify-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-[#007fff] to-blue-600 rounded-2xl flex items-center justify-center flex-shrink-0">
                   <UsersIcon className="w-8 h-8 text-white" />
                 </div>
                 <h2 className="text-3xl font-bold text-black">Professional Networking for Medical Sciences</h2>
               </div>
               
-              <p className="text-lg text-gray-600 leading-relaxed">
+              <p className="text-lg text-gray-600 leading-relaxed mb-8">
                 Connect with physicians, researchers, medical professionals, and healthcare institutions worldwide. Build meaningful relationships, share clinical insights, and discover collaboration opportunities across the entire medical science ecosystem.
               </p>
               
-              <ul className="space-y-3 text-gray-600">
+              <ul className="space-y-3 text-gray-600 mb-8 flex-grow">
                 <li className="flex items-center space-x-3">
                   <CheckCircleIcon className="w-5 h-5 text-[#007fff] flex-shrink-0" />
                   <span>Connect with physicians, researchers, and medical professionals globally</span>
@@ -242,7 +242,7 @@ export default function LandingPage() {
               
               <Link 
                 href="/signup" 
-                className="inline-flex items-center px-8 py-3 text-lg font-semibold text-white bg-[#007fff] hover:bg-[#007fff]/90 rounded-xl transition-all duration-200"
+                className="inline-flex items-center px-8 py-3 text-lg font-semibold text-white bg-[#007fff] hover:bg-[#007fff]/90 rounded-xl transition-all duration-200 mt-auto"
               >
                 Learn more about Networking
               </Link>
@@ -254,20 +254,20 @@ export default function LandingPage() {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
               viewport={{ once: true }}
-              className="space-y-8"
+              className="flex flex-col h-full"
             >
               <div className="flex items-center space-x-4 mb-6">
-                <div className="w-16 h-16 bg-gradient-to-br from-[#007fff] to-blue-600 rounded-2xl flex items-center justify-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-[#007fff] to-blue-600 rounded-2xl flex items-center justify-center flex-shrink-0">
                   <BuildingOfficeIcon className="w-8 h-8 text-white" />
                 </div>
                 <h2 className="text-3xl font-bold text-black">Healthcare Institution Partnerships</h2>
               </div>
               
-              <p className="text-lg text-gray-600 leading-relaxed">
+              <p className="text-lg text-gray-600 leading-relaxed mb-8">
                 Build strategic partnerships between hospitals, medical schools, research institutions, and healthcare organizations. Facilitate cross-institutional collaboration, clinical trials, and medical innovation.
               </p>
               
-              <ul className="space-y-3 text-gray-600">
+              <ul className="space-y-3 text-gray-600 mb-8 flex-grow">
                 <li className="flex items-center space-x-3">
                   <CheckCircleIcon className="w-5 h-5 text-[#007fff] flex-shrink-0" />
                   <span>Connect hospitals, medical schools, and research institutions</span>
@@ -288,7 +288,7 @@ export default function LandingPage() {
               
               <Link 
                 href="/signup" 
-                className="inline-flex items-center px-8 py-3 text-lg font-semibold text-white bg-[#007fff] hover:bg-[#007fff]/90 rounded-xl transition-all duration-200"
+                className="inline-flex items-center px-8 py-3 text-lg font-semibold text-white bg-[#007fff] hover:bg-[#007fff]/90 rounded-xl transition-all duration-200 mt-auto"
               >
                 Learn more about Partnerships
               </Link>
