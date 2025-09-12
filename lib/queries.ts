@@ -3379,14 +3379,49 @@ export async function isCurrentStudent(userId: string): Promise<boolean> {
 // Institution-specific queries
 export async function getInstitutionPosts(institutionId: string, limit = 10, offset = 0): Promise<PostWithAuthor[]> {
   try {
-    console.log('[Queries] Getting institution posts:', institutionId);
+    console.log('[Queries] Getting institution posts for ID:', institutionId, 'limit:', limit, 'offset:', offset);
     
-    const { data: posts, error } = await getSupabase()
+    // First, let's check if there are any posts at all in the table
+    const { data: allPosts, error: allPostsError } = await getSupabase()
+      .from('posts')
+      .select('*')
+      .limit(5);
+    
+    console.log('[Queries] All posts in database (sample):', { allPosts, allPostsError, count: allPosts?.length });
+    
+    // Try multiple queries to find posts by this institution
+    let posts: any[] = [];
+    let error: any = null;
+    
+    // Query 1: By author_id with author_type = 'institution'
+    const { data: posts1, error: error1 } = await getSupabase()
       .from('posts')
       .select('*')
       .eq('author_id', institutionId)
+      .eq('author_type', 'institution')
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
+    
+    console.log('[Queries] Query 1 (author_id + author_type):', { posts1, error1, count: posts1?.length });
+    
+    if (posts1 && posts1.length > 0) {
+      posts = posts1;
+    } else {
+      // Query 2: Just by author_id (for backwards compatibility)
+      const { data: posts2, error: error2 } = await getSupabase()
+        .from('posts')
+        .select('*')
+        .eq('author_id', institutionId)
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1);
+      
+      console.log('[Queries] Query 2 (author_id only):', { posts2, error2, count: posts2?.length });
+      
+      posts = posts2 || [];
+      error = error2;
+    }
+
+    console.log('[Queries] Institution posts query result:', { posts, error, count: posts?.length });
 
     if (error) {
       console.error('Error fetching institution posts:', error);
@@ -3394,6 +3429,7 @@ export async function getInstitutionPosts(institutionId: string, limit = 10, off
     }
     
     if (!posts || posts.length === 0) {
+      console.log('[Queries] No posts found for institution:', institutionId);
       return [];
     }
     
@@ -3422,14 +3458,48 @@ export async function getInstitutionPosts(institutionId: string, limit = 10, off
 
 export async function getInstitutionJobs(institutionId: string, limit = 10, offset = 0): Promise<JobWithCompany[]> {
   try {
-    console.log('[Queries] Getting institution jobs:', institutionId);
+    console.log('[Queries] Getting institution jobs for ID:', institutionId, 'limit:', limit, 'offset:', offset);
     
-    const { data: jobs, error } = await getSupabase()
+    // First, let's check if there are any jobs at all in the table
+    const { data: allJobs, error: allJobsError } = await getSupabase()
+      .from('jobs')
+      .select('*')
+      .limit(5);
+    
+    console.log('[Queries] All jobs in database (sample):', { allJobs, allJobsError, count: allJobs?.length });
+    
+    // Try multiple queries to find jobs by this institution
+    let jobs: any[] = [];
+    let error: any = null;
+    
+    // Query 1: By company_id
+    const { data: jobs1, error: error1 } = await getSupabase()
       .from('jobs')
       .select('*')
       .eq('company_id', institutionId)
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
+    
+    console.log('[Queries] Jobs Query 1 (company_id):', { jobs1, error1, count: jobs1?.length });
+    
+    if (jobs1 && jobs1.length > 0) {
+      jobs = jobs1;
+    } else {
+      // Query 2: By posted_by (alternative field)
+      const { data: jobs2, error: error2 } = await getSupabase()
+        .from('jobs')
+        .select('*')
+        .eq('posted_by', institutionId)
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1);
+      
+      console.log('[Queries] Jobs Query 2 (posted_by):', { jobs2, error2, count: jobs2?.length });
+      
+      jobs = jobs2 || [];
+      error = error2;
+    }
+
+    console.log('[Queries] Final jobs query result:', { jobs, error, count: jobs?.length });
 
     if (error) {
       console.error('Error fetching institution jobs:', error);
@@ -3437,6 +3507,7 @@ export async function getInstitutionJobs(institutionId: string, limit = 10, offs
     }
     
     if (!jobs || jobs.length === 0) {
+      console.log('[Queries] No jobs found for institution:', institutionId);
       return [];
     }
     
@@ -3473,14 +3544,49 @@ export async function getInstitutionJobs(institutionId: string, limit = 10, offs
 
 export async function getInstitutionEvents(institutionId: string, limit = 10, offset = 0): Promise<EventWithOrganizer[]> {
   try {
-    console.log('[Queries] Getting institution events:', institutionId);
+    console.log('[Queries] Getting institution events for ID:', institutionId, 'limit:', limit, 'offset:', offset);
     
-    const { data: events, error } = await getSupabase()
+    // First, let's check if there are any events at all in the table
+    const { data: allEvents, error: allEventsError } = await getSupabase()
+      .from('events')
+      .select('*')
+      .limit(5);
+    
+    console.log('[Queries] All events in database (sample):', { allEvents, allEventsError, count: allEvents?.length });
+    
+    // Try multiple queries to find events by this institution
+    let events: any[] = [];
+    let error: any = null;
+    
+    // Query 1: By organizer_id with organizer_type = 'institution'
+    const { data: events1, error: error1 } = await getSupabase()
       .from('events')
       .select('*')
       .eq('organizer_id', institutionId)
+      .eq('organizer_type', 'institution')
       .order('start_date', { ascending: true })
       .range(offset, offset + limit - 1);
+    
+    console.log('[Queries] Events Query 1 (organizer_id + type):', { events1, error1, count: events1?.length });
+    
+    if (events1 && events1.length > 0) {
+      events = events1;
+    } else {
+      // Query 2: Just by organizer_id (for backwards compatibility)
+      const { data: events2, error: error2 } = await getSupabase()
+        .from('events')
+        .select('*')
+        .eq('organizer_id', institutionId)
+        .order('start_date', { ascending: true })
+        .range(offset, offset + limit - 1);
+      
+      console.log('[Queries] Events Query 2 (organizer_id only):', { events2, error2, count: events2?.length });
+      
+      events = events2 || [];
+      error = error2;
+    }
+
+    console.log('[Queries] Final events query result:', { events, error, count: events?.length });
 
     if (error) {
       console.error('Error fetching institution events:', error);
@@ -3488,6 +3594,7 @@ export async function getInstitutionEvents(institutionId: string, limit = 10, of
     }
     
     if (!events || events.length === 0) {
+      console.log('[Queries] No events found for institution:', institutionId);
       return [];
     }
     
@@ -3520,19 +3627,25 @@ export async function createInstitutionPost(
   imageUrl?: string
 ): Promise<Post | null> {
   try {
-    console.log('[Queries] Creating institution post:', institutionId);
+    console.log('[Queries] Creating institution post for ID:', institutionId, 'content length:', content.length);
+    
+    const postData = {
+      author_id: institutionId,
+      author_type: 'institution',
+      content,
+      image_url: imageUrl || null,
+      visibility: 'public',
+      likes_count: 0,
+      comments_count: 0,
+      shares_count: 0,
+      images: null,
+    };
+    
+    console.log('[Queries] Post data to insert:', postData);
     
     const { data, error } = await getSupabase()
       .from('posts')
-      .insert({
-        author_id: institutionId,
-        author_type: 'institution',
-        content,
-        image_url: imageUrl || null,
-        visibility: 'public',
-        likes_count: 0,
-        comments_count: 0,
-      })
+      .insert(postData)
       .select()
       .single();
 
