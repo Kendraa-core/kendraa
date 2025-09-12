@@ -166,21 +166,17 @@ export default function LandingPage() {
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="relative"
+              className="relative w-full h-96 lg:h-[500px]"
             >
-              <div className="relative w-full h-96 lg:h-[500px] rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-blue-50 to-indigo-100">
-                <Image
-                  src="/Remove Background Preview.png"
-                  alt="Medical professionals collaborating and networking"
-                  fill
-                  className="object-cover object-center"
-                  priority
-                />
-                {/* Subtle overlay for better blending */}
-                <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-blue-900/5"></div>
-                {/* Hidden accreditation comment */}
-                {/* <a href="http://www.freepik.com">Designed by pch.vector / Freepik</a> */}
-              </div>
+              <Image
+                src="/Remove Background Preview.png"
+                alt="Medical professionals collaborating and networking"
+                fill
+                className="object-contain object-center"
+                priority
+              />
+              {/* Hidden accreditation comment */}
+              {/* <a href="http://www.freepik.com">Designed by pch.vector / Freepik</a> */}
             </motion.div>
           </div>
         </div>
