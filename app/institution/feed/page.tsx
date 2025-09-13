@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { formatNumber, getSupabaseStorageUrl } from '@/lib/utils';
-import { getInstitutionPosts, createInstitutionPost } from '@/lib/queries';
+import { getInstitutionPosts, createInstitutionPost, getGlobalFeed } from '@/lib/queries';
 import { PostWithAuthor } from '@/types/database.types';
 import {
   PencilIcon,
@@ -58,12 +58,11 @@ export default function InstitutionFeedPage() {
   // Load institution posts
   useEffect(() => {
     const loadPosts = async () => {
-      if (!profile?.id) return;
-      
       setLoading(true);
       try {
-        const institutionPosts = await getInstitutionPosts(profile.id, 20, 0);
-        setPosts(institutionPosts);
+        // Load global feed to show posts from all users
+        const globalPosts = await getGlobalFeed(20, 0);
+        setPosts(globalPosts);
       } catch (error) {
         console.error('Error loading posts:', error);
         toast.error('Failed to load posts');
@@ -73,7 +72,7 @@ export default function InstitutionFeedPage() {
     };
 
     loadPosts();
-  }, [profile?.id]);
+  }, []);
 
   const handleCreatePost = async () => {
     if (!newPost.trim() || !profile?.id) return;
@@ -82,8 +81,8 @@ export default function InstitutionFeedPage() {
     try {
       const newPostData = await createInstitutionPost(profile.id, newPost);
       if (newPostData) {
-        // Refresh posts
-        const updatedPosts = await getInstitutionPosts(profile.id, 20, 0);
+        // Refresh posts with global feed
+        const updatedPosts = await getGlobalFeed(20, 0);
         setPosts(updatedPosts);
         setNewPost('');
         setShowCreatePost(false);
@@ -116,7 +115,10 @@ export default function InstitutionFeedPage() {
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-gray-900">Institution Feed</h1>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Global Feed</h1>
+              <p className="text-sm text-gray-600">Posts from all users in the platform</p>
+            </div>
             <button
               onClick={() => setShowCreatePost(true)}
               className="flex items-center gap-2 px-4 py-2 bg-[#007fff] text-white rounded-lg hover:bg-blue-600 transition-colors"
