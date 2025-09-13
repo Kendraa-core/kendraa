@@ -153,6 +153,10 @@ export default function InstitutionJobsPage() {
     router.push(`/jobs/${jobId}/applications`);
   };
 
+  const handleViewJob = (jobId: string) => {
+    router.push(`/jobs/${jobId}`);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -390,11 +394,18 @@ export default function InstitutionJobsPage() {
                 
                 <div className="flex items-center gap-2 ml-4">
                   <button
-                    onClick={() => handleViewApplicants(job.id)}
+                    onClick={() => handleViewJob(job.id)}
                     className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                    title="View Applicants"
+                    title="View Job"
                   >
                     <EyeIcon className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleViewApplicants(job.id)}
+                    className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                    title="View Applicants"
+                  >
+                    <UserGroupIcon className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleEditJob(job.id)}

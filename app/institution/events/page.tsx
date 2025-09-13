@@ -179,8 +179,7 @@ export default function InstitutionEventsPage() {
   };
 
   const handleViewEvent = (eventId: string) => {
-    // Here you would typically navigate to event details page
-    toast.success('View event functionality coming soon!');
+    router.push(`/events/${eventId}`);
   };
 
   const formatDate = (dateString: string) => {
