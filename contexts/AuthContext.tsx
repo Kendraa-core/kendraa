@@ -159,71 +159,60 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, [loadProfile, isClient]);
 
+   // --- MODIFIED signUp FUNCTION ---
   const signUp = useCallback(async (email: string, password: string, fullName: string, profileType: 'individual' | 'institution') => {
-    if (!isClient) return;
-    
-    if (!supabase) {
-      toast.error('Supabase is not configured. Please check your environment variables.');
+    if (!isClient || !supabase) {
+      toast.error('Supabase is not configured.');
       return;
     }
     
     try {
-      const { data, error } = await supabase.auth.signUp({
+      // 1. Sign up the user. This will fire the server-side trigger you created,
+      // which automatically inserts a basic row into public.profiles.
+      const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          data: {
-            full_name: fullName,
-            profile_type: profileType,
-          },
-        },
       });
 
-      if (error) {
-        // Handle specific error types with better messages
-        if (error.message.includes('Invalid Refresh Token')) {
-          toast.error('Authentication error. Please try refreshing the page and try again.');
-        } else if (error.message.includes('Email not confirmed')) {
-          toast.error('Please check your email and confirm your account before signing in.');
-        } else if (error.message.includes('User already registered')) {
+      if (signUpError) {
+        if (signUpError.message.includes('User already registered')) {
           toast.error('An account with this email already exists. Please sign in instead.');
-        } else if (error.message.includes('Password should be at least')) {
+        } else if (signUpError.message.includes('Password should be at least')) {
           toast.error('Password must be at least 6 characters long.');
-        } else if (error.message.includes('Invalid email')) {
-          toast.error('Please enter a valid email address.');
         } else {
-          toast.error(error.message || 'Failed to create account. Please try again.');
+          toast.error(signUpError.message || 'Failed to create account. Please try again.');
         }
-        throw error;
+        throw signUpError;
       }
 
-      if (data.user) {
-        try {
-          // Create profile with retry logic
-          await ensureProfileExists(
-            data.user.id,
-            email,
-            fullName,
-            profileType
-          );
-          
-          toast.success('Account created successfully! Please check your email to verify your account.');
-        } catch (profileError: any) {
-          // Provide specific error messages for profile creation failures
-          if (profileError.message.includes('Authentication error')) {
-            toast.error('Account created but profile setup failed due to authentication issues. Please contact support.');
-          } else if (profileError.message.includes('Database table not found')) {
-            toast.error('Account created but database setup is incomplete. Please contact support.');
-          } else if (profileError.message.includes('race condition')) {
-            toast.success('Account created successfully! Profile setup completed.');
-          } else {
-            toast.error('Account created but profile setup failed. You can complete your profile later.');
-          }
-        }
-      } else {
-        toast.success('Account creation initiated! Please check your email to verify your account.');
+      if (!data.user) {
+        // Handle a rare edge case where signup succeeds but returns no user object.
+        throw new Error("Account created, but user data not available immediately. Please try signing in.");
       }
+
+      // 2. Now, UPDATE the profile that the trigger just created.
+      // We are enriching the existing row with details from the signup form.
+      // This avoids the conflict and is the recommended pattern.
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          full_name: fullName,
+          profile_type: profileType,
+          user_type: profileType, // Assuming profile_type and user_type are the same at signup
+        })
+        .eq('id', data.user.id); // Make sure to update the correct user's profile
+
+      if (updateError) {
+        // The account was created, but the profile details couldn't be saved.
+        // This is not a critical failure. The user can update their profile later.
+        console.error("Error updating profile after signup:", updateError);
+        toast.error('Account created, but failed to set profile details. You can update your profile later.');
+      } else {
+        toast.success('Account created successfully! Please check your email to verify your account.');
+      }
+      
     } catch (error: any) {
+      // Re-throw the error so the component can handle its loading state
       throw error;
     }
   }, [isClient]);
