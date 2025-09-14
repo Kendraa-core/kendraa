@@ -42,22 +42,8 @@ export async function uploadToSupabaseStorage(
     
     console.log(`Uploading to bucket: ${bucket}, path: ${path}`);
     
-    // Check if bucket exists first
-    const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
-    
-    if (bucketsError) {
-      console.error('Error listing buckets:', bucketsError);
-      return { url: '', error: `Failed to check buckets: ${bucketsError.message}` };
-    }
-    
-    const bucketExists = buckets?.some(b => b.name === bucket);
-    if (!bucketExists) {
-      console.error(`Bucket '${bucket}' not found. Available buckets:`, buckets?.map(b => b.name));
-      return { 
-        url: '', 
-        error: `Bucket '${bucket}' not found. Available buckets: ${buckets?.map(b => b.name).join(', ') || 'none'}` 
-      };
-    }
+    // Skip bucket existence check since it requires admin permissions
+    // The buckets exist as confirmed in the Supabase dashboard
     
     // Upload the file
     const { error: uploadError } = await supabase.storage

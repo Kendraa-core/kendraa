@@ -3724,7 +3724,7 @@ export async function getGlobalFeed(limit = 20, offset = 0): Promise<PostWithAut
   try {
     console.log('[Queries] Getting global feed, limit:', limit, 'offset:', offset);
     
-    // Get all posts with author information
+    // Get all posts with author information (no visibility filter to show all posts)
     const { data: posts, error } = await getSupabase()
       .from('posts')
       .select(`
@@ -3741,7 +3741,6 @@ export async function getGlobalFeed(limit = 20, offset = 0): Promise<PostWithAut
           specializations
         )
       `)
-      .eq('visibility', 'public')
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -3749,13 +3748,20 @@ export async function getGlobalFeed(limit = 20, offset = 0): Promise<PostWithAut
       console.error('Error fetching global feed:', error);
       return [];
     }
-
+    
     if (!posts || posts.length === 0) {
       console.log('[Queries] No posts found in global feed');
       return [];
     }
-
+    
     console.log('[Queries] Global feed loaded:', posts.length, 'posts');
+    console.log('[Queries] Posts details:', posts.map(p => ({ 
+      id: p.id, 
+      author_id: p.author_id, 
+      author_name: p.author?.full_name || p.author?.name,
+      content: p.content?.substring(0, 50) + '...',
+      visibility: p.visibility 
+    })));
     
     // Transform the data to match PostWithAuthor interface
     return posts.map(post => ({
