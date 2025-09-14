@@ -43,9 +43,17 @@ export default function SignUp() {
     if (user && profile && !loading) {
       // Redirect based on user type
       if (profile.user_type === 'institution' || profile.profile_type === 'institution') {
-        router.push('/institution/onboarding');
+        if (profile.onboarding_completed) {
+          router.push('/institution/dashboard');
+        } else {
+          router.push('/institution/onboarding');
+        }
       } else {
-        router.push('/onboarding');
+        if (profile.onboarding_completed) {
+          router.push('/feed');
+        } else {
+          router.push('/onboarding');
+        }
       }
     }
   }, [user, profile, loading, router]);

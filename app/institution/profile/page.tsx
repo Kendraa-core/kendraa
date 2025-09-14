@@ -62,10 +62,12 @@ import {
   updateExperience,
   createEducation,
   updateEducation,
+  getInstitutionByAdminId,
   type Profile,
   type Experience,
   type Education,
   type PostWithAuthor,
+  type Institution,
 } from '@/lib/queries';
 
 // Helper function to format dates to month/year
@@ -73,6 +75,23 @@ const formatDateToMonthYear = (dateString: string | null): string => {
   if (!dateString) return '';
   const date = new Date(dateString);
   return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+};
+
+// Helper function to format institution type as headline
+const formatInstitutionTypeAsHeadline = (type: string | null | undefined): string => {
+  if (!type) return 'Healthcare Organization';
+  
+  const typeMap: Record<string, string> = {
+    'hospital': 'Hospital',
+    'clinic': 'Medical Clinic',
+    'research_center': 'Research Center',
+    'university': 'University',
+    'pharmaceutical': 'Pharmaceutical Company',
+    'medical_device': 'Medical Device Company',
+    'other': 'Healthcare Organization'
+  };
+  
+  return typeMap[type] || 'Healthcare Organization';
 };
 
 // AboutCard Component for Institution
@@ -247,6 +266,7 @@ export default function InstitutionProfilePage() {
   const { user } = useAuth();
 
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [institution, setInstitution] = useState<Institution | null>(null);
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [education, setEducation] = useState<Education[]>([]);
   const [posts, setPosts] = useState<PostWithAuthor[]>([]);
@@ -284,8 +304,9 @@ export default function InstitutionProfilePage() {
 
     try {
       setLoading(true);
-      const [profileData, experiencesData, educationData, postsData, connectionCountData] = await Promise.all([
+      const [profileData, institutionData, experiencesData, educationData, postsData, connectionCountData] = await Promise.all([
         getProfile(user.id),
+        getInstitutionByAdminId(user.id),
         getExperiences(user.id),
         getEducation(user.id),
         getPostsByAuthor(user.id),
@@ -293,6 +314,7 @@ export default function InstitutionProfilePage() {
       ]);
 
       setProfile(profileData);
+      setInstitution(institutionData);
       setExperiences(experiencesData);
       setEducation(educationData);
       setPosts(postsData);
@@ -423,7 +445,7 @@ export default function InstitutionProfilePage() {
                 <div className="relative">
                   <Avatar
                     src={profile.avatar_url}
-                    alt={profile.full_name || 'Institution'}
+                    name={profile.full_name || 'Institution'}
                     size="2xl"
                     className="border-4 border-white shadow-2xl ring-4 ring-[#007fff]/20 w-32 h-32"
                   />
@@ -451,7 +473,7 @@ export default function InstitutionProfilePage() {
                     
                     {/* Headline */}
                     <p className="text-lg sm:text-xl text-gray-700 font-medium leading-relaxed">
-                      {profile.headline || 'Healthcare Organization'}
+                      {formatInstitutionTypeAsHeadline(institution?.type)}
                     </p>
                   </div>
 
@@ -467,20 +489,8 @@ export default function InstitutionProfilePage() {
                     </div>
                   </div>
 
-                  {/* Connections and Followers */}
+                  {/* Contact Information */}
                   <div className="flex items-center gap-6 pt-2 text-sm text-gray-600">
-                    <button 
-                      onClick={() => router.push(`/profile/${profile.id}/connections`)}
-                      className="hover:text-[#007fff] transition-colors duration-200"
-                    >
-                      <span className="font-semibold text-[#007fff]">{formatNumber(connectionCount)}</span> connections
-                    </button>
-                    <button 
-                      onClick={() => router.push(`/profile/${profile.id}/followers`)}
-                      className="hover:text-[#007fff] transition-colors duration-200"
-                    >
-                      <span className="font-semibold text-[#007fff]">{formatNumber(connectionCount)}</span> followers
-                    </button>
                     <button 
                       onClick={handleViewContactInfo}
                       className="text-[#007fff] hover:text-[#007fff]/80 hover:underline font-semibold transition-all duration-200 flex items-center gap-2 group"
@@ -555,7 +565,8 @@ export default function InstitutionProfilePage() {
       )}
 
       {/* Contact Info Modal */}
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      {showContactModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
           <h3 className="text-lg font-bold text-gray-900 mb-4">Contact Information</h3>
           <div className="space-y-3">
@@ -586,6 +597,7 @@ export default function InstitutionProfilePage() {
           </button>
         </div>
       </div>
+      )}
     </div>
   );
 }

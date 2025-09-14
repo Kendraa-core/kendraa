@@ -17,9 +17,7 @@ import {
 } from '@heroicons/react/24/outline';
 import type { JobApplication, Profile } from '@/types/database.types';
 
-interface JobApplicationWithApplicant extends JobApplication {
-  applicant: Profile;
-}
+type JobApplicationWithApplicant = JobApplication & { applicant: Profile };
 
 export default function JobApplicationsPage() {
   const { id: jobId } = useParams();
@@ -52,7 +50,7 @@ export default function JobApplicationsPage() {
     try {
       setLoading(true);
       const data = await getJobApplications(jobId as string);
-      setApplications(data as JobApplicationWithApplicant[]);
+      setApplications(data);
     } catch (error) {
       console.error('Error fetching applications:', error);
       toast.error('Failed to load applications');

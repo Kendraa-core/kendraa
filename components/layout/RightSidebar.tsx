@@ -21,7 +21,12 @@ interface NewsItem {
   readers: number;
 }
 
-export default function RightSidebar() {
+interface RightSidebarProps {
+  connectionCount?: number;
+  isInstitution?: boolean;
+}
+
+export default function RightSidebar({ connectionCount = 0, isInstitution = false }: RightSidebarProps) {
   const { user } = useAuth();
   const [topNews, setTopNews] = useState<NewsItem[]>([]);
   const [suggestedConnections, setSuggestedConnections] = useState<Profile[]>([]);
@@ -34,14 +39,14 @@ export default function RightSidebar() {
       try {
         setLoading(true);
         
-        // Load data in parallel
-        const [news, connections] = await Promise.all([
-          fetchTopHealthcareNews(),
-          getSuggestedConnections(user.id, 3)
-        ]);
-        
+        // Load data in parallel, but only fetch connections for non-institution users
+        const news = await fetchTopHealthcareNews();
         setTopNews(news);
-        setSuggestedConnections(connections);
+        
+        if (!isInstitution) {
+          const connections = await getSuggestedConnections(user.id, 3);
+          setSuggestedConnections(connections);
+        }
       } catch (error) {
         console.error('Error loading right sidebar data:', error);
       } finally {
@@ -50,7 +55,7 @@ export default function RightSidebar() {
     };
 
     loadData();
-  }, [user?.id]);
+  }, [user?.id, isInstitution]);
 
   const fetchTopHealthcareNews = async (): Promise<NewsItem[]> => {
     try {
@@ -218,57 +223,59 @@ export default function RightSidebar() {
         )}
       </div>
 
-      {/* People You May Know */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-gray-900">People You May Know</h3>
-          <Link href="/network" className="text-xs text-azure-500 hover:text-azure-600 font-medium">
-            See all
-          </Link>
-        </div>
-        
-        {suggestedConnections.length > 0 ? (
-          <div className="space-y-3">
-            {suggestedConnections.map((connection) => (
-              <Link key={connection.id} href={`/profile/${connection.id}`} className="block">
-                <div className="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all duration-200 cursor-pointer">
-                  <Avatar
-                    src={connection.avatar_url}
-                    alt={connection.full_name || 'User'}
-                    size="sm"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate hover:text-[#007fff] transition-colors">
-                      {connection.full_name || 'Unknown User'}
-                    </p>
-                    <p className="text-xs text-gray-500 truncate">
-                      {connection.headline || 'Healthcare Professional'}
-                    </p>
+      {/* People You May Know - Only for individual users */}
+      {!isInstitution && (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-gray-900">People You May Know</h3>
+            <Link href="/network" className="text-xs text-azure-500 hover:text-azure-600 font-medium">
+              See all
+            </Link>
+          </div>
+          
+          {suggestedConnections.length > 0 ? (
+            <div className="space-y-3">
+              {suggestedConnections.map((connection) => (
+                <Link key={connection.id} href={`/profile/${connection.id}`} className="block">
+                  <div className="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all duration-200 cursor-pointer">
+                    <Avatar
+                      src={connection.avatar_url}
+                      name={connection.full_name || 'User'}
+                      size="sm"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate hover:text-[#007fff] transition-colors">
+                        {connection.full_name || 'Unknown User'}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {connection.headline || 'Healthcare Professional'}
+                      </p>
+                    </div>
+                    <button 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        // TODO: Implement connection request
+                      }}
+                      className="text-xs font-medium text-azure-500 hover:text-azure-600 bg-white px-2 py-1 rounded-lg border border-azure-200 hover:border-azure-300 transition-all duration-200"
+                    >
+                      Connect
+                    </button>
                   </div>
-                  <button 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      // TODO: Implement connection request
-                    }}
-                    className="text-xs font-medium text-azure-500 hover:text-azure-600 bg-white px-2 py-1 rounded-lg border border-azure-200 hover:border-azure-300 transition-all duration-200"
-                  >
-                    Connect
-                  </button>
-                </div>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-4">
-            <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-              <UserCircleIcon className="w-4 h-4 text-gray-400" />
+                </Link>
+              ))}
             </div>
-            <p className="text-xs text-gray-500">No suggestions available</p>
-            <p className="text-xs text-gray-400 mt-1">Expand your network</p>
-          </div>
-        )}
-      </div>
+          ) : (
+            <div className="text-center py-4">
+              <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                <UserCircleIcon className="w-4 h-4 text-gray-400" />
+              </div>
+              <p className="text-xs text-gray-500">No suggestions available</p>
+              <p className="text-xs text-gray-400 mt-1">Expand your network</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 } 

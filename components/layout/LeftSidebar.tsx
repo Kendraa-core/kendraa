@@ -14,14 +14,32 @@ import { useAuth } from '@/contexts/AuthContext';
 import { 
   getConnectionCount, 
   getEventsByOrganizer,
-  getEventOrganizer
+  getEventOrganizer,
+  getInstitutionByAdminId
 } from '@/lib/queries';
 import { formatNumber } from '@/lib/utils';
 
-export default function LeftSidebar() {
+interface LeftSidebarProps {
+  connectionCount?: number;
+  groupsCount?: number;
+  eventsCount?: number;
+  pagesCount?: number;
+  newslettersCount?: number;
+  isInstitution?: boolean;
+}
+
+export default function LeftSidebar({ 
+  connectionCount: propConnectionCount = 0,
+  groupsCount = 0,
+  eventsCount = 0,
+  pagesCount = 0,
+  newslettersCount = 0,
+  isInstitution = false 
+}: LeftSidebarProps) {
   const { user, profile } = useAuth();
-  const [connectionCount, setConnectionCount] = useState(0);
+  const [connectionCount, setConnectionCount] = useState(propConnectionCount);
   const [userEvents, setUserEvents] = useState<any[]>([]);
+  const [institution, setInstitution] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,10 +50,15 @@ export default function LeftSidebar() {
         setLoading(true);
         
         // Load data in parallel
-        const [connectionsCount, events] = await Promise.all([
-          getConnectionCount(user.id),
-          getEventsByOrganizer(user.id)
-        ]);
+        const events = await getEventsByOrganizer(user.id);
+        
+        if (!isInstitution) {
+          const connectionsCount = await getConnectionCount(user.id);
+          setConnectionCount(connectionsCount);
+        } else {
+          const institutionData = await getInstitutionByAdminId(user.id);
+          setInstitution(institutionData);
+        }
         
         // Fetch organizer information for events
         const eventsWithOrganizers = await Promise.all(
@@ -68,7 +91,6 @@ export default function LeftSidebar() {
           })
         );
         
-        setConnectionCount(connectionsCount);
         setUserEvents(eventsWithOrganizers);
           } catch (error) {
       // Silent error handling for left sidebar data
@@ -78,7 +100,21 @@ export default function LeftSidebar() {
     };
 
     loadData();
-  }, [user?.id]);
+  }, [user?.id, isInstitution]);
+
+  const formatInstitutionTypeAsHeadline = (type: string | null | undefined): string => {
+    if (!type) return 'Healthcare Organization';
+    const typeMap: Record<string, string> = {
+      'hospital': 'Hospital',
+      'clinic': 'Medical Clinic',
+      'research_center': 'Research Center',
+      'university': 'University',
+      'pharmaceutical': 'Pharmaceutical Company',
+      'medical_device': 'Medical Device Company',
+      'other': 'Healthcare Organization'
+    };
+    return typeMap[type] || 'Healthcare Organization';
+  };
 
   if (loading) {
     return (
@@ -119,7 +155,10 @@ export default function LeftSidebar() {
             {profile?.full_name || 'Your Name'}
           </h3>
           <p className="text-sm text-gray-600 mb-3">
-            {profile?.headline || 'Professional Headline'}
+            {isInstitution 
+              ? formatInstitutionTypeAsHeadline(institution?.type)
+              : (profile?.headline || 'Professional Headline')
+            }
           </p>
           {profile?.location && (
             <div className="flex items-center justify-center text-xs text-gray-500 mb-3">
@@ -127,10 +166,12 @@ export default function LeftSidebar() {
               {profile.location}
             </div>
           )}
-          <div className="flex items-center justify-center text-xs text-gray-500 mb-5">
-            <UserGroupIcon className="w-3 h-3 mr-1" />
-            {formatNumber(connectionCount)} connections
-          </div>
+          {!isInstitution && (
+            <div className="flex items-center justify-center text-xs text-gray-500 mb-5">
+              <UserGroupIcon className="w-3 h-3 mr-1" />
+              {formatNumber(connectionCount)} connections
+            </div>
+          )}
           <Link 
             href={profile?.user_type === 'institution' || profile?.profile_type === 'institution' ? '/institution/profile' : `/profile/${user?.id}`}
             className="inline-block bg-azure-500 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-azure-600 transition-colors"

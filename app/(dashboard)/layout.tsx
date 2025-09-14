@@ -45,6 +45,41 @@ export default function DashboardLayout({
   // Use the new, cleaner onboarding protection hook
   const { isProtected, isLoading: isOnboardingLoading } = useOnboardingProtection();
 
+  // Redirect institution users to institution pages
+  useEffect(() => {
+    if (!authLoading && user && profile) {
+      if (profile.user_type === 'institution' || profile.profile_type === 'institution') {
+        // Redirect to appropriate institution page based on current path
+        if (pathname === '/dashboard' || pathname.startsWith('/dashboard/')) {
+          router.push('/institution/dashboard');
+        } else if (pathname.startsWith('/jobs')) {
+          router.push('/institution/jobs');
+        } else if (pathname.startsWith('/events')) {
+          router.push('/institution/events');
+        } else if (pathname.startsWith('/network')) {
+          router.push('/institution/network');
+        } else if (pathname.startsWith('/notifications')) {
+          router.push('/institution/notifications');
+        } else if (pathname.startsWith('/feed')) {
+          router.push('/institution/feed');
+        } else if (pathname.startsWith('/applications')) {
+          router.push('/institution/jobs');
+        } else if (pathname.startsWith('/specializations')) {
+          router.push('/institution/dashboard');
+        } else if (pathname.startsWith('/saved-items')) {
+          router.push('/institution/dashboard');
+        } else if (pathname.startsWith('/reviews')) {
+          router.push('/institution/dashboard');
+        } else if (pathname.startsWith('/newsletters')) {
+          router.push('/institution/dashboard');
+        } else {
+          router.push('/institution/dashboard');
+        }
+        return;
+      }
+    }
+  }, [user, profile, authLoading, pathname, router]);
+
   useEffect(() => {
     const loadData = async () => {
       if (!user?.id) {
@@ -189,7 +224,14 @@ export default function DashboardLayout({
                 </div>
               </div>
             ) : (
-              <LeftSidebar />
+              <LeftSidebar 
+                connectionCount={connectionCount}
+                groupsCount={groupsCount}
+                eventsCount={eventsCount}
+                pagesCount={pagesCount}
+                newslettersCount={newslettersCount}
+                isInstitution={false}
+              />
             )}
           </div>
         </div>
@@ -209,7 +251,7 @@ export default function DashboardLayout({
         {!isNetworkPage && (
           <div className="hidden xl:block xl:w-80 xl:flex-shrink-0">
             <div className="p-6 h-full">
-              <RightSidebar />
+              <RightSidebar connectionCount={connectionCount} isInstitution={false} />
             </div>
           </div>
         )}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { getPosts, createPost, getConnections, getSuggestedConnections, getProfile } from '@/lib/queries';
 import type { Post, Profile } from '@/types/database.types';
@@ -16,10 +17,18 @@ import MedicalFeed from '@/components/feed/MedicalFeed';
 
 export default function FeedPage() {
   const { user, profile } = useAuth();
+  const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'posts' | 'medical'>('posts');
   const [postContent, setPostContent] = useState('');
+
+  // Redirect institution users to their dedicated feed
+  useEffect(() => {
+    if (profile && (profile.user_type === 'institution' || profile.profile_type === 'institution')) {
+      router.push('/institution/feed');
+    }
+  }, [profile, router]);
 
   const fetchPosts = useCallback(async () => {
     if (!user?.id) return;
@@ -63,7 +72,7 @@ export default function FeedPage() {
         <div className="flex items-start space-x-4">
           <Avatar
             src={profile?.avatar_url}
-            alt={profile?.full_name || user?.email || 'User'}
+            name={profile?.full_name || user?.email || 'User'}
             size="md"
           />
           <div className="flex-1">

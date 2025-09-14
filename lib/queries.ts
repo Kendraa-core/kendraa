@@ -1916,15 +1916,9 @@ export async function updateJobApplicationStatus(
 }
 
 // Get job applications for a specific job (for institutions)
-export async function getJobApplications(jobId: string): Promise<JobApplication[]> {
+export async function getJobApplications(jobId: string): Promise<(JobApplication & { applicant: Profile })[]> {
   try {
     console.log('Getting job applications', { jobId });
-    
-    const schemaExists = await true;
-    if (!schemaExists) {
-      console.log('Database schema not found, returning empty applications');
-      return [];
-    }
     
     const { data, error } = await getSupabase()
       .from('job_applications')
@@ -1932,12 +1926,15 @@ export async function getJobApplications(jobId: string): Promise<JobApplication[
       .eq('job_id', jobId)
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching job applications:', error);
+      throw error;
+    }
     
     console.log('Job applications fetched successfully', data);
-    return data || [];
+    return (data || []) as (JobApplication & { applicant: Profile })[];
   } catch (error) {
-    console.log('Error fetching job applications', error);
+    console.error('Error fetching job applications:', error);
     return [];
   }
 }

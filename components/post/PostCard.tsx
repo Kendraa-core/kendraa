@@ -240,7 +240,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
         <div className="flex items-center space-x-3 min-w-0 flex-1">
           <Avatar
             src={getAuthorAvatar()}
-            alt={getAuthorName()}
+            name={getAuthorName()}
             size="md"
           />
           <div className="flex-1 min-w-0">
@@ -323,7 +323,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
           {/* Add Comment */}
           {showCommentBox && (
             <div className="flex items-start space-x-3">
-              <Avatar src={user?.user_metadata?.avatar_url} alt={user?.user_metadata?.full_name || 'User'} size="sm" />
+              <Avatar src={user?.user_metadata?.avatar_url} name={user?.user_metadata?.full_name || 'User'} size="sm" />
               <div className="flex-1">
                 <textarea
                   value={newComment}

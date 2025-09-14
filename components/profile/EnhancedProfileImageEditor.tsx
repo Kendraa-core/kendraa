@@ -259,7 +259,7 @@ const handleSaveImage = async (type: 'avatar' | 'banner') => {
 
   try {
     const folder = isAvatar ? 'avatars' : 'banners';
-    const filePath = generateFilePath(user.id, file.name, folder);
+    const filePath = generateFilePath(user.id, file.name);
     
     // 1. Call your helper function
     const result = await uploadToSupabaseStorage(folder, filePath, file);
@@ -308,7 +308,7 @@ const handleSaveAll = async () => {
     if (avatarFile) {
       const result = await uploadToSupabaseStorage(
         'avatars',
-        generateFilePath(user.id, avatarFile.name, 'avatars'),
+        generateFilePath(user.id, avatarFile.name),
         avatarFile
       );
       if (result.error) throw new Error(`Avatar upload failed: ${result.error}`);
@@ -319,7 +319,7 @@ const handleSaveAll = async () => {
     if (bannerFile) {
       const result = await uploadToSupabaseStorage(
         'banners',
-        generateFilePath(user.id, bannerFile.name, 'banners'),
+        generateFilePath(user.id, bannerFile.name),
         bannerFile
       );
       if (result.error) throw new Error(`Banner upload failed: ${result.error}`);

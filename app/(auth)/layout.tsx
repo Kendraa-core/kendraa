@@ -17,15 +17,19 @@ export default function AuthLayout({
     // This logic is now simpler and more targeted.
     // It should ONLY redirect if a user is logged in AND they are trying
     // to access the signin or signup pages.
-    if (!loading && user) {
-
+    if (!loading && user && profile) {
       if (pathname === '/signin' || pathname === '/signup') {
-        router.push('/feed');
+        // Redirect based on user type
+        if (profile.user_type === 'institution' || profile.profile_type === 'institution') {
+          router.push('/institution/feed');
+        } else {
+          router.push('/feed');
+        }
       }
       // It will NOT redirect if the user is on /reset-password,
       // allowing that page to load correctly regardless of race conditions.
     }
-  }, [user, loading, router, pathname]);
+  }, [user, profile, loading, router, pathname]);
 
 
   if (loading) {

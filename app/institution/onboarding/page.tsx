@@ -143,9 +143,9 @@ export default function InstitutionOnboardingPage() {
         return;
       }
 
-      // If onboarding already completed, go to institution profile
+      // If onboarding already completed, go to institution dashboard
       if (profile?.onboarding_completed) {
-        router.push('/institution/profile');
+        router.push('/institution/dashboard');
         return;
       }
 
@@ -167,7 +167,7 @@ export default function InstitutionOnboardingPage() {
         if (existing) {
           // If onboarding is already completed, redirect to profile
           if (profile?.onboarding_completed) {
-            router.push('/institution/profile');
+            router.push('/institution/dashboard');
             return;
           }
           
