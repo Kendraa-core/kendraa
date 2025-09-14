@@ -16,7 +16,7 @@ export function getSupabaseStorageUrl(bucket: string, path: string): string {
       return path;
     }
     
-    // Clean the path - only remove leading slashes, keep the full path structure
+    
     const cleanPath = path.replace(/^\/+/, '');
     
     const { data } = supabase.storage.from(bucket).getPublicUrl(cleanPath);
@@ -27,25 +27,14 @@ export function getSupabaseStorageUrl(bucket: string, path: string): string {
   }
 }
 
-// Utility function to upload file to Supabase storage
+// This helper is now correct and will work with the new RLS policies
 export async function uploadToSupabaseStorage(
   bucket: string,
   path: string,
   file: File
-): Promise<{ url: string; error: string | null }> {
+): Promise<{ url: string; error: any | null }> {
   try {
     const supabase = getSupabase();
-    
-    if (!supabase) {
-      return { url: '', error: 'Supabase client not available' };
-    }
-    
-    console.log(`Uploading to bucket: ${bucket}, path: ${path}`);
-    
-    // Skip bucket existence check since it requires admin permissions
-    // The buckets exist as confirmed in the Supabase dashboard
-    
-    // Upload the file
     const { error: uploadError } = await supabase.storage
       .from(bucket)
       .upload(path, file, {
@@ -54,18 +43,23 @@ export async function uploadToSupabaseStorage(
       });
 
     if (uploadError) {
-      console.error('Upload error:', uploadError);
-      return { url: '', error: `Upload failed: ${uploadError.message}` };
+      console.error('Supabase upload error:', uploadError);
+      return { url: '', error: uploadError };
     }
 
-    // Get the public URL
     const { data } = supabase.storage.from(bucket).getPublicUrl(path);
     
-    console.log('Upload successful, public URL:', data.publicUrl);
+    if (!data.publicUrl) {
+      const urlError = new Error('Upload successful, but could not get public URL.');
+      console.error(urlError.message);
+      return { url: '', error: urlError };
+    }
+
     return { url: data.publicUrl, error: null };
+    
   } catch (error) {
-    console.error('Upload exception:', error);
-    return { url: '', error: error instanceof Error ? error.message : 'Upload failed' };
+    console.error('Unexpected error in uploadToSupabaseStorage:', error);
+    return { url: '', error: error instanceof Error ? error : new Error('An unexpected error occurred during upload.') };
   }
 }
 
@@ -76,7 +70,6 @@ export async function deleteFromSupabaseStorage(
 ): Promise<{ error: string | null }> {
   try {
     const supabase = getSupabase();
-    
     const { error } = await supabase.storage
       .from(bucket)
       .remove([path]);
@@ -89,24 +82,27 @@ export async function deleteFromSupabaseStorage(
 
 // Utility function to validate file size and type
 export function validateFile(file: File, maxSizeMB: number = 5): { valid: boolean; error?: string } {
-  // Check file size
   if (file.size > maxSizeMB * 1024 * 1024) {
     return { valid: false, error: `File size must be less than ${maxSizeMB}MB` };
   }
-
-  // Check file type
   if (!file.type.startsWith('image/')) {
     return { valid: false, error: 'Please select a valid image file' };
   }
-
   return { valid: true };
 }
 
-// Utility function to generate unique file path
-export function generateFilePath(userId: string, fileName: string, folder: string = 'avatars'): string {
+// --- THIS IS THE CORRECTED HELPER FUNCTION ---
+/**
+ * Generates a unique file path for Supabase storage.
+ * The path is structured as: `userId/userId_timestamp.extension`
+ * This structure is required for the Storage RLS policies to work correctly.
+ */
+export function generateFilePath(userId: string, fileName: string): string {
   const timestamp = Date.now();
   const extension = fileName.split('.').pop();
-  return `${folder}/${userId}_${timestamp}.${extension}`;
+  // The 'folder' or bucket name should not be part of the path itself.
+  // It is handled by the `.from(bucket)` call in the upload function.
+  return `${userId}/${userId}_${timestamp}.${extension}`;
 }
 
 // Utility function to format file size
@@ -255,4 +251,5 @@ export function formatNumber(num: number): string {
     return (num / 1000).toFixed(1) + 'K';
   }
   return num.toString();
-} 
+}
+

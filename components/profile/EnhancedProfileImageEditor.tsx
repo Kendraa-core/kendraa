@@ -83,61 +83,56 @@ export default function EnhancedProfileImageEditor({
     rotation = 0
   ): Promise<Blob> => {
     const image = await createImage(imageSrc);
+    const outputSize = cropType === 'avatar' ? 400 : 1600;
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('No 2d context');
 
-    if (!ctx) {
-      throw new Error('No 2d context');
+    if (cropType === 'avatar') {
+      canvas.width = outputSize;
+      canvas.height = outputSize;
+    } else {
+      canvas.width = outputSize;
+      canvas.height = Math.round(outputSize * 9 / 16);
     }
 
-    const maxSize = cropType === 'avatar' ? 400 : 1200;
-    const canvasSize = maxSize;
-    canvas.width = canvasSize;
-    canvas.height = canvasSize;
-
-    // Apply rotation
     if (rotation !== 0) {
-      ctx.translate(canvasSize / 2, canvasSize / 2);
+      ctx.translate(canvas.width / 2, canvas.height / 2);
       ctx.rotate((rotation * Math.PI) / 180);
-      ctx.translate(-canvasSize / 2, -canvasSize / 2);
+      ctx.translate(-canvas.width / 2, -canvas.height / 2);
     }
 
-    // Calculate crop dimensions
-    const scaleX = image.naturalWidth / image.width;
-    const scaleY = image.naturalHeight / image.height;
-    const cropX = pixelCrop.x * scaleX;
-    const cropY = pixelCrop.y * scaleY;
-    const cropWidth = pixelCrop.width * scaleX;
-    const cropHeight = pixelCrop.height * scaleY;
+    const sx = pixelCrop.x;
+    const sy = pixelCrop.y;
+    const sWidth = pixelCrop.width;
+    const sHeight = pixelCrop.height;
 
-    // Draw cropped image
     ctx.drawImage(
       image,
-      cropX,
-      cropY,
-      cropWidth,
-      cropHeight,
+      sx,
+      sy,
+      sWidth,
+      sHeight,
       0,
       0,
-      canvasSize,
-      canvasSize
+      canvas.width,
+      canvas.height
     );
 
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       canvas.toBlob((blob) => {
-        if (blob) {
-          resolve(blob);
-        }
-      }, 'image/jpeg', 0.9);
+        if (!blob) return reject(new Error('Canvas is empty'));
+        resolve(blob);
+      }, 'image/jpeg', 0.92);
     });
   };
+
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'banner') => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file
-    const maxSizeMB = type === 'avatar' ? 5 : 10; // Increased limits for better quality
+    const maxSizeMB = type === 'avatar' ? 5 : 10;
     const validation = validateFile(file, maxSizeMB);
 
     if (!validation.valid) {
@@ -145,7 +140,6 @@ export default function EnhancedProfileImageEditor({
       return;
     }
 
-    // Create preview and show cropper
     const reader = new FileReader();
     reader.onloadend = () => {
       setImageToCrop(reader.result as string);
@@ -167,24 +161,18 @@ export default function EnhancedProfileImageEditor({
 
     try {
       setLoading(true);
-      const croppedImageBlob = await getCroppedImg(
-        imageToCrop,
-        croppedAreaPixels,
-        rotation
-      );
-
-      // Convert blob to file
-      const file = new File([croppedImageBlob], 'cropped-image.jpg', {
-        type: 'image/jpeg',
-      });
-
-      // Create preview
+      const croppedImageBlob = await getCroppedImg(imageToCrop, croppedAreaPixels, rotation);
+      const ext = 'jpg';
+      const filename = `${user?.id || 'anon'}-${cropType}-${Date.now()}.${ext}`;
+      const file = new File([croppedImageBlob], filename, { type: 'image/jpeg' });
       const previewUrl = URL.createObjectURL(croppedImageBlob);
 
       if (cropType === 'avatar') {
+        if (avatarPreview) URL.revokeObjectURL(avatarPreview);
         setAvatarFile(file);
         setAvatarPreview(previewUrl);
       } else {
+        if (bannerPreview) URL.revokeObjectURL(bannerPreview);
         setBannerFile(file);
         setBannerPreview(previewUrl);
       }
@@ -200,6 +188,7 @@ export default function EnhancedProfileImageEditor({
     }
   };
 
+
   const handleRemoveImage = async (type: 'avatar' | 'banner') => {
     if (!user?.id) return;
 
@@ -211,20 +200,20 @@ export default function EnhancedProfileImageEditor({
 
     setLoadingState(true);
     try {
-      // Extract bucket and path from URL
       const bucket = isAvatar ? 'avatars' : 'banners';
-      const urlParts = currentUrl.split('/');
-      const path = urlParts.slice(-2).join('/'); // Get last two parts (folder/filename)
+      // The path is everything after the bucket name in the URL
+      const path = currentUrl.split(`/${bucket}/`)[1];
+      
+      if (!path) {
+        throw new Error("Could not extract file path from URL.");
+      }
 
-      // Delete from storage
       await deleteFromSupabaseStorage(bucket, path);
 
-      // Update profile
       await updateProfile(user.id, {
         [isAvatar ? 'avatar_url' : 'banner_url']: null,
       });
 
-      // Clear preview
       if (isAvatar) {
         setAvatarPreview(null);
         setAvatarFile(null);
@@ -235,119 +224,103 @@ export default function EnhancedProfileImageEditor({
 
       toast.success(`${type === 'avatar' ? 'Profile picture' : 'Cover photo'} removed successfully`);
       onUpdate();
-    } catch (error) {
-      toast.error(`Failed to remove ${type === 'avatar' ? 'profile picture' : 'cover photo'}`);
+    } catch (error: any) {
+      console.error(`Failed to remove image:`, error);
+      toast.error(`Failed to remove ${type === 'avatar' ? 'profile picture' : 'cover photo'}: ${error.message}`);
     } finally {
       setLoadingState(false);
     }
   };
 
   const handleSaveImage = async (type: 'avatar' | 'banner') => {
-    if (!user?.id) return;
+    if (!user?.id) return toast.error('User not found');
 
     const file = type === 'avatar' ? avatarFile : bannerFile;
-    if (!file) return;
+    if (!file) return toast.error('No file to upload');
 
     const isAvatar = type === 'avatar';
     const setLoadingState = isAvatar ? setAvatarLoading : setBannerLoading;
-
     setLoadingState(true);
-    try {
-      // Generate file path
-      const folder = isAvatar ? 'avatars' : 'banners';
-      const filePath = generateFilePath(user.id, file.name, folder);
 
-      // Upload to Supabase storage
-      const bucket = isAvatar ? 'avatars' : 'banners';
-      const result = await uploadToSupabaseStorage(bucket, filePath, file);
+    try {
+      const folder = isAvatar ? 'avatars' : 'banners';
+      // Use the corrected generateFilePath function
+      const filePath = generateFilePath(user.id, file.name);
+      
+      const result = await uploadToSupabaseStorage(folder, filePath, file);
 
       if (result.error) {
-        // Provide more specific error messages
-        if (result.error.includes('row-level security policy')) {
-          throw new Error('Storage access denied. Please contact support to configure storage permissions.');
-        } else if (result.error.includes('Bucket') && result.error.includes('not found')) {
-          throw new Error('Storage bucket not configured. Please contact support.');
-        } else if (result.error.includes('Failed to check buckets')) {
-          throw new Error('Unable to connect to storage. Please check your internet connection and try again.');
-        } else {
-          throw new Error(result.error);
-        }
+        // The error object from Supabase might have a 'message' property
+        const errorMessage = result.error.message || String(result.error);
+        throw new Error(errorMessage);
       }
-
-      // Update profile
+      
+      const uploadedUrl = result.url;
+      if (!uploadedUrl) {
+        throw new Error('Upload succeeded but no URL was returned.');
+      }
+      
       await updateProfile(user.id, {
-        [isAvatar ? 'avatar_url' : 'banner_url']: result.url,
+        [isAvatar ? 'avatar_url' : 'banner_url']: uploadedUrl,
       });
 
-      // Clear file state but keep preview
-      if (isAvatar) {
-        setAvatarFile(null);
-      } else {
-        setBannerFile(null);
-      }
+      if (isAvatar) setAvatarFile(null);
+      else setBannerFile(null);
 
-      toast.success(`${type === 'avatar' ? 'Profile picture' : 'Cover photo'} updated successfully`);
+      toast.success(`${isAvatar ? 'Profile picture' : 'Cover photo'} updated successfully`);
       onUpdate();
-    } catch (error) {
-      toast.error(`Failed to save ${type === 'avatar' ? 'profile picture' : 'cover photo'}`);
+    } catch (err: any) {
+      console.error(`[handleSaveImage Error]`, err);
+      toast.error(`Upload failed: ${err.message}`);
     } finally {
       setLoadingState(false);
     }
   };
 
   const handleSaveAll = async () => {
-    if (!user?.id) return;
+    if (!user?.id) return toast.error('User not found');
 
     setLoading(true);
     try {
-      const updates: any = {};
+      const updates: { avatar_url?: string; banner_url?: string } = {};
 
-      // Save avatar if changed
       if (avatarFile) {
-        const avatarPath = generateFilePath(user.id, avatarFile.name, 'avatars');
-        const avatarResult = await uploadToSupabaseStorage('avatars', avatarPath, avatarFile);
-        if (avatarResult.error) {
-          if (avatarResult.error.includes('row-level security policy')) {
-            throw new Error('Storage access denied. Please contact support to configure storage permissions.');
-          } else if (avatarResult.error.includes('Bucket') && avatarResult.error.includes('not found')) {
-            throw new Error('Storage bucket not configured. Please contact support.');
-          } else {
-            throw new Error(avatarResult.error);
-          }
-        }
-        updates.avatar_url = avatarResult.url;
+        const result = await uploadToSupabaseStorage(
+          'avatars',
+          generateFilePath(user.id, avatarFile.name),
+          avatarFile
+        );
+        const errorMessage = result.error?.message || result.error;
+        if (errorMessage) throw new Error(`Avatar upload failed: ${errorMessage}`);
+        if (!result.url) throw new Error('Avatar upload succeeded but no URL was returned.');
+        updates.avatar_url = result.url;
       }
 
-      // Save banner if changed
       if (bannerFile) {
-        const bannerPath = generateFilePath(user.id, bannerFile.name, 'banners');
-        const bannerResult = await uploadToSupabaseStorage('banners', bannerPath, bannerFile);
-        if (bannerResult.error) {
-          if (bannerResult.error.includes('row-level security policy')) {
-            throw new Error('Storage access denied. Please contact support to configure storage permissions.');
-          } else if (bannerResult.error.includes('Bucket') && bannerResult.error.includes('not found')) {
-            throw new Error('Storage bucket not configured. Please contact support.');
-          } else {
-            throw new Error(bannerResult.error);
-          }
-        }
-        updates.banner_url = bannerResult.url;
+        const result = await uploadToSupabaseStorage(
+          'banners',
+          generateFilePath(user.id, bannerFile.name),
+          bannerFile
+        );
+        const errorMessage = result.error?.message || result.error;
+        if (errorMessage) throw new Error(`Banner upload failed: ${errorMessage}`);
+        if (!result.url) throw new Error('Banner upload succeeded but no URL was returned.');
+        updates.banner_url = result.url;
       }
 
-      // Update profile
       if (Object.keys(updates).length > 0) {
         await updateProfile(user.id, updates);
       }
 
-      // Clear file states
       setAvatarFile(null);
       setBannerFile(null);
 
       toast.success('Profile images updated successfully');
       onUpdate();
       onClose();
-    } catch (error) {
-      toast.error('Failed to save profile images');
+    } catch (err: any) {
+      console.error('[handleSaveAll] failed', err);
+      toast.error(`Failed to save images: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -374,11 +347,11 @@ export default function EnhancedProfileImageEditor({
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
-          className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden"
+          className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <div className="flex-shrink-0 flex items-center justify-between p-6 border-b border-gray-200">
             <div className="flex items-center space-x-4">
               <div className="p-2 bg-[#007fff]/10 rounded-lg">
                 <CameraIcon className="w-6 h-6 text-[#007fff]" />
@@ -397,7 +370,7 @@ export default function EnhancedProfileImageEditor({
           </div>
 
           {/* Content */}
-          <div className="p-6">
+          <div className="flex-1 p-6 overflow-y-auto">
             {showCropper ? (
               /* Cropper Interface */
               <div className="space-y-6">
@@ -410,32 +383,22 @@ export default function EnhancedProfileImageEditor({
                   </p>
                 </div>
 
-                {/* Cropper Container */}
                 <div className="relative w-full h-96 bg-gray-100 rounded-lg overflow-hidden">
                   <Cropper
                     image={imageToCrop || ''}
                     crop={crop}
                     zoom={zoom}
                     rotation={rotation}
-                    aspect={cropType === 'avatar' ? 1 : 16/9}
+                    aspect={cropType === 'avatar' ? 1 : 16 / 9}
                     onCropChange={setCrop}
                     onCropComplete={handleCropComplete}
                     onZoomChange={setZoom}
                     onRotationChange={setRotation}
                     showGrid={true}
-                    style={{
-                      containerStyle: {
-                        width: '100%',
-                        height: '100%',
-                        position: 'relative',
-                      },
-                    }}
                   />
                 </div>
 
-                {/* Crop Controls */}
                 <div className="space-y-4">
-                  {/* Zoom Control */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Zoom: {Math.round(zoom * 100)}%
@@ -449,13 +412,12 @@ export default function EnhancedProfileImageEditor({
                         step={0.1}
                         value={zoom}
                         onChange={(e) => setZoom(Number(e.target.value))}
-                        className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                        className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                       />
                       <MagnifyingGlassPlusIcon className="w-5 h-5 text-gray-400" />
                     </div>
                   </div>
 
-                  {/* Rotation Control */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Rotation: {rotation}°
@@ -469,14 +431,13 @@ export default function EnhancedProfileImageEditor({
                         step={1}
                         value={rotation}
                         onChange={(e) => setRotation(Number(e.target.value))}
-                        className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                        className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                       />
                       <ArrowsPointingOutIcon className="w-5 h-5 text-gray-400" />
                     </div>
                   </div>
                 </div>
 
-                {/* Crop Actions */}
                 <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                   <div className="flex space-x-3">
                     <button
@@ -509,7 +470,6 @@ export default function EnhancedProfileImageEditor({
             ) : (
               /* Main Editor Interface */
               <div className="space-y-6">
-                {/* Tabs */}
                 <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
                   <button
                     onClick={() => setActiveTab('avatar')}
@@ -533,7 +493,6 @@ export default function EnhancedProfileImageEditor({
                   </button>
                 </div>
 
-                {/* Avatar Editor */}
                 {activeTab === 'avatar' && (
                   <div className="space-y-6">
                     <div className="text-center">
@@ -560,14 +519,21 @@ export default function EnhancedProfileImageEditor({
                             <PhotoIcon className="w-16 h-16 text-[#007fff]/40" />
                           </div>
                         )}
-                        <button className="absolute -bottom-1 -right-1 bg-[#007fff] text-white p-2 rounded-full hover:bg-[#007fff]/90 transition-colors">
+                        <label className="absolute -bottom-1 -right-1 bg-[#007fff] text-white p-2 rounded-full hover:bg-[#007fff]/90 transition-colors cursor-pointer">
                           <CameraIcon className="w-4 h-4" />
-                        </button>
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleImageChange(e, 'avatar')}
+                            className="hidden"
+                          />
+                        </label>
                       </div>
 
                       <div className="flex space-x-3">
                         <label className="cursor-pointer">
-                          <span className="px-6 py-3 bg-[#007fff] text-white rounded-xl hover:bg-[#007fff]/90 transition-colors font-medium">
+                          <span className="px-6 py-3 bg-[#007fff]/10 text-[#007fff] rounded-xl hover:bg-[#007fff]/20 transition-colors font-medium">
                             {avatarPreview ? 'Change Photo' : 'Upload Photo'}
                           </span>
                           <input
@@ -607,7 +573,6 @@ export default function EnhancedProfileImageEditor({
                   </div>
                 )}
 
-                {/* Banner Editor */}
                 {activeTab === 'banner' && (
                   <div className="space-y-6">
                     <div className="text-center">
@@ -623,9 +588,9 @@ export default function EnhancedProfileImageEditor({
                           <Image
                             src={bannerPreview}
                             alt="Banner preview"
-                            width={400}
-                            height={192}
-                            className="w-full h-full object-cover"
+                            layout="fill"
+                            objectFit="cover"
+                            className="w-full h-full"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
@@ -636,7 +601,7 @@ export default function EnhancedProfileImageEditor({
 
                       <div className="flex space-x-3 justify-center">
                         <label className="cursor-pointer">
-                          <span className="px-6 py-3 bg-[#007fff] text-white rounded-xl hover:bg-[#007fff]/90 transition-colors font-medium">
+                          <span className="px-6 py-3 bg-[#007fff]/10 text-[#007fff] rounded-xl hover:bg-[#007fff]/20 transition-colors font-medium">
                             {bannerPreview ? 'Change Photo' : 'Upload Photo'}
                           </span>
                           <input
@@ -682,7 +647,7 @@ export default function EnhancedProfileImageEditor({
 
           {/* Footer */}
           {!showCropper && (
-            <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
+            <div className="flex-shrink-0 flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
               <div className="text-sm text-gray-600">
                 {avatarFile || bannerFile ? 'You have unsaved changes' : 'All changes saved'}
               </div>
