@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getSupabaseStorageUrl } from '@/lib/utils';
+import Logo from '@/components/common/Logo';
 import {
   HomeIcon,
   PencilIcon,
@@ -115,12 +116,9 @@ export default function InstitutionLayout({
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
         <div className="fixed inset-y-0 left-0 flex w-64 flex-col bg-white">
           <div className="flex h-16 items-center justify-between px-4 border-b border-gray-200">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-[#007fff] rounded-lg flex items-center justify-center">
-                <BuildingOfficeIcon className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-lg font-bold text-gray-900">Kendraa</span>
-            </div>
+            <Link href="/institution/feed" className="flex items-center">
+              <Logo size="sm" className="h-8" />
+            </Link>
             <button
               onClick={() => setSidebarOpen(false)}
               className="text-gray-400 hover:text-gray-600"
@@ -157,11 +155,8 @@ export default function InstitutionLayout({
         <div className="flex flex-col flex-grow bg-white border-r border-gray-200">
           {/* Logo */}
           <div className="flex h-16 items-center px-4 border-b border-gray-200">
-            <Link href="/institution/feed" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-[#007fff] rounded-lg flex items-center justify-center">
-                <BuildingOfficeIcon className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-lg font-bold text-gray-900">Kendraa</span>
+            <Link href="/institution/feed" className="flex items-center">
+              <Logo size="sm" className="h-8" />
             </Link>
           </div>
 
