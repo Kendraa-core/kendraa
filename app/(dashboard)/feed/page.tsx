@@ -42,7 +42,7 @@ export default function FeedPage() {
       const post = await createPost(user.id, content, imageUrl);
       if (post) {
         // Refresh the feed to show the new post with author info
-        fetchPosts();
+        await fetchPosts();
         setPostContent('');
         toast.success('Post created successfully!');
       }
@@ -53,8 +53,10 @@ export default function FeedPage() {
   }, [user?.id, fetchPosts]);
 
   useEffect(() => {
-    fetchPosts();
-  }, [fetchPosts]);
+    if (user?.id) {
+      fetchPosts();
+    }
+  }, [user?.id]); // Only depend on user.id, not fetchPosts
 
   return (
     <div className="space-y-8">

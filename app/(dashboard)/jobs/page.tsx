@@ -114,7 +114,7 @@ export default function JobsPage() {
 
   // Check application status for all jobs
   const checkApplicationStatuses = useCallback(async () => {
-    if (!user?.id) return;
+    if (!user?.id || jobs.length === 0) return;
     
     try {
       const statuses: Record<string, boolean> = {};
@@ -129,7 +129,7 @@ export default function JobsPage() {
 
   // Fetch applications for jobs posted by the current user
   const fetchJobApplications = useCallback(async () => {
-    if (!user?.id || !profile) return;
+    if (!user?.id || !profile || jobs.length === 0) return;
     
     try {
       const applications: Record<string, JobApplication[]> = {};
@@ -146,21 +146,23 @@ export default function JobsPage() {
   }, [user?.id, profile, jobs]);
 
   useEffect(() => {
-    fetchProfile();
-    fetchJobs();
-  }, [fetchProfile, fetchJobs]);
+    if (user?.id) {
+      fetchProfile();
+      fetchJobs();
+    }
+  }, [user?.id]); // Only depend on user.id
 
   useEffect(() => {
-    if (jobs.length > 0) {
+    if (jobs.length > 0 && user?.id) {
       checkApplicationStatuses();
     }
-  }, [jobs, checkApplicationStatuses]);
+  }, [jobs.length, user?.id]); // Only depend on jobs.length and user.id
 
   useEffect(() => {
-    if (jobs.length > 0 && profile) {
+    if (jobs.length > 0 && profile && user?.id) {
       fetchJobApplications();
     }
-  }, [jobs, profile, fetchJobApplications]);
+  }, [jobs.length, profile?.id, user?.id]); // Only depend on essential values
 
   const filterJobs = useCallback(() => {
     let filtered = jobs;
@@ -195,8 +197,10 @@ export default function JobsPage() {
   }, [jobs, searchQuery, selectedType, selectedLevel, selectedLocation]);
 
   useEffect(() => {
-    filterJobs();
-  }, [filterJobs]);
+    if (jobs.length > 0) {
+      filterJobs();
+    }
+  }, [jobs.length, searchQuery, selectedType, selectedLevel, selectedLocation]); // Direct dependencies instead of filterJobs
 
   const handleApply = async (job: JobWithCompany) => {
     if (!user?.id) {
