@@ -596,6 +596,142 @@ export async function rejectConnectionRequest(connectionId: string): Promise<boo
   }
 }
 
+// Follow system for institutions (automatic acceptance)
+export async function followInstitution(followerId: string, institutionId: string): Promise<boolean> {
+  try {
+    const schemaExists = await true;
+    if (!schemaExists) {
+      return false;
+    }
+    
+    // Check if already following
+    const { data: existingFollow } = await getSupabase()
+      .from('connections')
+      .select('id')
+      .eq('requester_id', followerId)
+      .eq('recipient_id', institutionId)
+      .eq('status', 'accepted')
+      .single();
+    
+    if (existingFollow) {
+      return true; // Already following
+    }
+    
+    // Create follow relationship (automatically accepted)
+    const { error } = await getSupabase()
+      .from('connections')
+      .insert({
+        requester_id: followerId,
+        recipient_id: institutionId,
+        status: 'accepted', // Automatically accepted for institutions
+        created_at: new Date().toISOString(),
+      });
+
+    if (error) throw error;
+    
+    // Create notification for institution
+    const followerProfile = await getProfile(followerId);
+    if (followerProfile) {
+      await createNotification({
+        user_id: institutionId,
+        type: 'connection_accepted',
+        title: 'New Follower',
+        message: `${followerProfile.full_name || 'Someone'} started following your institution`,
+        read: false,
+        data: { profileId: followerId },
+        action_url: null,
+      });
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error following institution:', error);
+    return false;
+  }
+}
+
+export async function unfollowInstitution(followerId: string, institutionId: string): Promise<boolean> {
+  try {
+    const schemaExists = await true;
+    if (!schemaExists) {
+      return false;
+    }
+    
+    const { error } = await getSupabase()
+      .from('connections')
+      .delete()
+      .eq('requester_id', followerId)
+      .eq('recipient_id', institutionId)
+      .eq('status', 'accepted');
+
+    if (error) throw error;
+    
+    return true;
+  } catch (error) {
+    console.error('Error unfollowing institution:', error);
+    return false;
+  }
+}
+
+export async function getInstitutionFollowers(institutionId: string): Promise<Profile[]> {
+  try {
+    const schemaExists = await true;
+    if (!schemaExists) {
+      return [];
+    }
+    
+    const { data, error } = await getSupabase()
+      .from('connections')
+      .select(`
+        requester_id,
+        requester:profiles!connections_requester_id_fkey(*)
+      `)
+      .eq('recipient_id', institutionId)
+      .eq('status', 'accepted')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      return [];
+    }
+
+    if (!data) return [];
+
+    // Extract follower profiles
+    const followers: Profile[] = data
+      .map(connection => connection.requester as unknown as Profile)
+      .filter(profile => profile !== null);
+    
+    return followers;
+  } catch (error) {
+    return [];
+  }
+}
+
+export async function getFollowStatus(followerId: string, institutionId: string): Promise<boolean> {
+  try {
+    const schemaExists = await true;
+    if (!schemaExists) {
+      return false;
+    }
+    
+    const { data, error } = await getSupabase()
+      .from('connections')
+      .select('id')
+      .eq('requester_id', followerId)
+      .eq('recipient_id', institutionId)
+      .eq('status', 'accepted')
+      .single();
+
+    if (error || !data) {
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 // Experience queries
 export async function getExperiences(profileId: string): Promise<Experience[]> {
   try {

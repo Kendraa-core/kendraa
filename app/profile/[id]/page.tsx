@@ -55,6 +55,9 @@ import {
   followUser,
   unfollowUser,
   isFollowing,
+  followInstitution,
+  unfollowInstitution,
+  getFollowStatus,
   getConnectionCount,
   getEventsByOrganizer,
   updateProfile,
@@ -859,15 +862,22 @@ export default function ProfilePage() {
       
       // Fetch connection data
       if (!isOwnProfile && user?.id) {
-        const [connectionData, followData, countData] = await Promise.all([
+        const [connectionData, countData] = await Promise.all([
           getConnectionStatus(user.id, id as string),
-          isFollowing(user.id, id as string),
           getConnectionCount(id as string)
         ]);
         
         setConnectionStatus(connectionData || 'none');
-        setFollowStatus(followData ? 'following' : 'none');
         setConnectionCount(countData);
+        
+        // Check follow status based on profile type
+        if (profileData?.profile_type === 'institution') {
+          const followData = await getFollowStatus(user.id, id as string);
+          setFollowStatus(followData ? 'following' : 'none');
+        } else {
+          const followData = await isFollowing(user.id, id as string);
+          setFollowStatus(followData ? 'following' : 'none');
+        }
         } else {
         const countData = await getConnectionCount(id as string);
         setConnectionCount(countData);
@@ -896,12 +906,12 @@ export default function ProfilePage() {
 
     try {
       if (profile.profile_type === 'institution') {
-        await followUser(user.id, profile.id, 'individual', 'institution');
-          setFollowStatus('following');
-        toast.success('Successfully followed');
-        } else {
+        await followInstitution(user.id, profile.id);
+        setFollowStatus('following');
+        toast.success('Successfully followed institution');
+      } else {
         await sendConnectionRequest(user.id, profile.id);
-          setConnectionStatus('pending');
+        setConnectionStatus('pending');
         toast.success('Connection request sent');
       }
     } catch (error) {
@@ -914,7 +924,11 @@ export default function ProfilePage() {
     if (!profile || !user) return;
     
     try {
-      await unfollowUser(user.id, profile.id);
+      if (profile.profile_type === 'institution') {
+        await unfollowInstitution(user.id, profile.id);
+      } else {
+        await unfollowUser(user.id, profile.id);
+      }
       setFollowStatus('none');
       toast.success('Unfollowed successfully');
     } catch (error) {

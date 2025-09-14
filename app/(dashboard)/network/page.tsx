@@ -32,7 +32,10 @@ import {
   rejectConnectionRequest,
   followUser,
   unfollowUser,
-  isFollowing
+  isFollowing,
+  followInstitution,
+  unfollowInstitution,
+  getFollowStatus
 } from '@/lib/queries';
 import { Profile, ConnectionWithProfile } from '@/types/database.types';
 import { formatNumber } from '@/lib/utils';
@@ -77,8 +80,8 @@ export default function NetworkPage() {
           let followStatus: 'following' | 'not_following' = 'not_following';
           
           if (profile.profile_type === 'institution') {
-            // For institutions, check follow status
-            const isFollowingUser = await isFollowing(user.id, profile.id);
+            // For institutions, check follow status using new function
+            const isFollowingUser = await getFollowStatus(user.id, profile.id);
             followStatus = isFollowingUser ? 'following' : 'not_following';
           } else {
             // For individuals, check connection status
@@ -114,8 +117,8 @@ export default function NetworkPage() {
     
     try {
       if (profileType === 'institution') {
-        // For institutions, use follow system
-        const success = await followUser(user.id, profileId, 'individual', 'institution');
+        // For institutions, use follow system (automatic acceptance)
+        const success = await followInstitution(user.id, profileId);
         
         if (success) {
           // Update local state
@@ -149,19 +152,23 @@ export default function NetworkPage() {
     if (!user?.id) return;
     
     try {
-      const success = await unfollowUser(user.id, profileId);
+      // Find the profile to determine if it's an institution
+      const profile = suggestions.find(p => p.id === profileId);
+      const success = profile?.profile_type === 'institution' 
+        ? await unfollowInstitution(user.id, profileId)
+        : await unfollowUser(user.id, profileId);
       
       if (success) {
         // Update local state
         setSuggestions(prev => prev.map(p => 
           p.id === profileId ? { ...p, follow_status: 'not_following' } : p
         ));
-        toast.success('Unfollowed institution');
+        toast.success('Unfollowed successfully');
       } else {
-        toast.error('Failed to unfollow institution');
+        toast.error('Failed to unfollow');
       }
     } catch (error) {
-      toast.error('Failed to unfollow institution');
+      toast.error('Failed to unfollow');
     }
   };
 
