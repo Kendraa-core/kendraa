@@ -3,14 +3,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { getPosts, createPost, getConnections, getSuggestedConnections, getProfile, getInstitutionByAdminId } from '@/lib/queries';
+import { getPosts, createPost, getProfile, getInstitutionByAdminId } from '@/lib/queries';
 import type { Post, Profile, Institution } from '@/types/database.types';
 import { 
   PhotoIcon,
   DocumentIcon,
   PlusIcon,
   BuildingOfficeIcon,
-  UserGroupIcon,
   ChartBarIcon,
   CalendarIcon,
   BriefcaseIcon
@@ -130,7 +129,7 @@ export default function InstitutionFeedPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <Link href="/institution/jobs/create">
                     <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center gap-2">
                       <BriefcaseIcon className="w-6 h-6 text-[#007fff]" />
@@ -142,13 +141,6 @@ export default function InstitutionFeedPage() {
                     <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center gap-2">
                       <CalendarIcon className="w-6 h-6 text-[#007fff]" />
                       <span className="text-sm font-medium">Create Event</span>
-                    </Button>
-                  </Link>
-                  
-                  <Link href="/institution/network">
-                    <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center gap-2">
-                      <UserGroupIcon className="w-6 h-6 text-[#007fff]" />
-                      <span className="text-sm font-medium">Network</span>
                     </Button>
                   </Link>
                   
