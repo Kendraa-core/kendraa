@@ -7,7 +7,7 @@ import { useIsClient } from '@/hooks/useIsClient';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { ArrowRightIcon, CheckCircleIcon, UsersIcon, BuildingOfficeIcon, HeartIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { ArrowRightIcon, CheckCircleIcon, UsersIcon, BuildingOfficeIcon, HeartIcon, SparklesIcon, AcademicCapIcon, BeakerIcon, GlobeAltIcon, ChatBubbleLeftRightIcon, LightBulbIcon, UserIcon } from '@heroicons/react/24/outline';
 
 export default function LandingPage() {
   const isClient = useIsClient();
@@ -22,14 +22,14 @@ export default function LandingPage() {
         if (profile.user_type === 'institution' || profile.profile_type === 'institution') {
           router.push('/institution/dashboard');
         } else {
-          router.push('/feed');
+        router.push('/feed');
         }
       } else {
         // Redirect based on user type
         if (profile.user_type === 'institution' || profile.profile_type === 'institution') {
           router.push('/institution/onboarding');
-        } else {
-          router.push('/onboarding');
+      } else {
+        router.push('/onboarding');
         }
       }
     }
@@ -107,21 +107,24 @@ export default function LandingPage() {
         </div>
 
         <div className="relative max-w-6xl mx-auto px-6 text-center">
-          <motion.div
+            <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
           >
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white leading-tight tracking-tight mb-8">
-              Healthcare
+              The Future of
               <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-100">
-                Connected
+                Healthcare
               </span>
-            </h1>
+              <br />
+              <span className="text-4xl md:text-5xl lg:text-6xl">Starts Here</span>
+               </h1>
             
-            <p className="text-xl md:text-2xl text-blue-100 leading-relaxed mb-12 max-w-3xl mx-auto">
-              The professional network where medical professionals, researchers, and institutions collaborate to advance healthcare.
+            <p className="text-xl md:text-2xl text-blue-100 leading-relaxed mb-12 max-w-4xl mx-auto">
+              Join the world&apos;s most innovative healthcare professionals, researchers, and institutions. 
+              Collaborate, discover, and transform medicine together.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
@@ -129,7 +132,7 @@ export default function LandingPage() {
                 href="/signup" 
                 className="group inline-flex items-center px-10 py-4 text-xl font-semibold text-[#007fff] bg-white hover:bg-gray-50 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl"
               >
-                <span>Start Networking</span>
+                <span>Start Your Journey</span>
                 <ArrowRightIcon className="w-6 h-6 ml-3 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link 
@@ -153,9 +156,9 @@ export default function LandingPage() {
             <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
               <HeartIcon className="w-8 h-8 text-white" />
             </div>
-          </motion.div>
-          
-          <motion.div
+            </motion.div>
+
+            <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.7 }}
@@ -185,12 +188,12 @@ export default function LandingPage() {
           >
             <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
               <SparklesIcon className="w-8 h-8 text-white" />
-            </div>
-          </motion.div>
+              </div>
+            </motion.div>
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* What Makes Us Different Section */}
       <section className="py-24 bg-white">
         <div className="max-w-6xl mx-auto px-6">
           <motion.div
@@ -201,47 +204,202 @@ export default function LandingPage() {
             className="text-center mb-16"
           >
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Everything you need to
+              Where Innovation Meets
               <br />
-              <span className="text-[#007fff]">advance healthcare</span>
+              <span className="text-[#007fff]">Healthcare Excellence</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Connect, collaborate, and innovate with the global healthcare community.
+              We&apos;re not just another networking platform. We&apos;re the catalyst for the next generation of healthcare breakthroughs.
             </p>
-          </motion.div>
+            </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
+                icon: LightBulbIcon,
+                title: "Breakthrough Research",
+                description: "Connect with leading researchers and discover cutting-edge studies that are shaping the future of medicine.",
+                color: "from-yellow-400 to-orange-500"
+              },
+              {
                 icon: UsersIcon,
-                title: "Professional Network",
-                description: "Connect with healthcare professionals, researchers, and medical institutions worldwide."
+                title: "Global Collaboration",
+                description: "Build meaningful relationships with healthcare professionals from every corner of the world.",
+                color: "from-blue-500 to-cyan-500"
               },
               {
                 icon: BuildingOfficeIcon,
-                title: "Institution Partnerships",
-                description: "Build strategic partnerships between hospitals, universities, and research institutions."
+                title: "Institutional Partnerships",
+                description: "Create powerful alliances between hospitals, universities, and research institutions.",
+                color: "from-purple-500 to-pink-500"
               },
               {
-                icon: SparklesIcon,
-                title: "Research Collaboration",
-                description: "Share findings, discover opportunities, and accelerate medical breakthroughs together."
+                icon: AcademicCapIcon,
+                title: "Knowledge Exchange",
+                description: "Share expertise, learn from peers, and stay ahead of the latest medical advancements.",
+                color: "from-green-500 to-emerald-500"
+              },
+              {
+                icon: BeakerIcon,
+                title: "Clinical Innovation",
+                description: "Collaborate on clinical trials, share best practices, and drive patient care forward.",
+                color: "from-red-500 to-rose-500"
+              },
+              {
+                icon: GlobeAltIcon,
+                title: "Global Impact",
+                description: "Be part of a community that&apos;s solving healthcare challenges on a global scale.",
+                color: "from-indigo-500 to-purple-500"
               }
             ].map((feature, index) => (
-              <motion.div
+            <motion.div
                 key={feature.title}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+              viewport={{ once: true }}
+                className="group"
+              >
+                <div className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-gray-100 h-full">
+                  <div className={`w-16 h-16 bg-gradient-to-br ${feature.color} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                    <feature.icon className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">{feature.title}</h3>
+                  <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                </div>
+            </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Success Stories Section */}
+      <section className="py-24 bg-gradient-to-br from-gray-50 to-blue-50/30">
+        <div className="max-w-6xl mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              Real Stories,
+              <br />
+              <span className="text-[#007fff]">Real Impact</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              See how healthcare professionals are transforming patient care through collaboration.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              {
+                quote: "Through kendraa, I connected with researchers across three continents for a groundbreaking cancer study. The collaboration that started here is now saving lives.",
+                author: "Dr. Sarah Chen",
+                role: "Oncologist, Memorial Hospital",
+                avatar: "SC"
+              },
+              {
+                quote: "The institutional partnerships we&apos;ve built have accelerated our research timeline by years. What used to take decades now happens in months.",
+                author: "Prof. Michael Rodriguez",
+                role: "Research Director, Stanford Medical",
+                avatar: "MR"
+              },
+              {
+                quote: "I found my dream research position through a connection I made here. The community is incredible - everyone is genuinely passionate about advancing healthcare.",
+                author: "Dr. Aisha Patel",
+                role: "Neuroscience Researcher",
+                avatar: "AP"
+              }
+            ].map((testimonial, index) => (
+              <motion.div
+                key={index}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.2 }}
                 viewport={{ once: true }}
-                className="text-center p-8 rounded-2xl hover:shadow-xl transition-all duration-300 group"
+                className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-300"
               >
-                <div className="w-20 h-20 bg-gradient-to-br from-[#007fff] to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <feature.icon className="w-10 h-10 text-white" />
+                <div className="flex items-center mb-6">
+                  <div className="w-12 h-12 bg-gradient-to-br from-[#007fff] to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                    {testimonial.avatar}
+                  </div>
+                  <div className="ml-4">
+                    <h4 className="font-semibold text-gray-900">{testimonial.author}</h4>
+                    <p className="text-sm text-gray-600">{testimonial.role}</p>
+                  </div>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">{feature.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                <blockquote className="text-gray-700 leading-relaxed italic">
+                  &ldquo;{testimonial.quote}&rdquo;
+                </blockquote>
               </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section className="py-24 bg-white">
+        <div className="max-w-6xl mx-auto px-6">
+            <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              Your Journey to
+              <br />
+              <span className="text-[#007fff]">Healthcare Excellence</span>
+              </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Join thousands of healthcare professionals who are already transforming medicine.
+            </p>
+            </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            {[
+              {
+                step: "01",
+                title: "Create Your Profile",
+                description: "Set up your professional profile and showcase your expertise, research interests, and achievements.",
+                icon: UserIcon
+              },
+              {
+                step: "02", 
+                title: "Connect & Collaborate",
+                description: "Discover like-minded professionals, join research groups, and start meaningful conversations.",
+                icon: ChatBubbleLeftRightIcon
+              },
+              {
+                step: "03",
+                title: "Transform Healthcare",
+                description: "Work together on groundbreaking projects, share knowledge, and make a real impact on patient care.",
+                icon: SparklesIcon
+              }
+            ].map((step, index) => (
+            <motion.div
+                key={step.step}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.2 }}
+              viewport={{ once: true }}
+                className="text-center"
+              >
+                <div className="relative mb-8">
+                  <div className="w-20 h-20 bg-gradient-to-br from-[#007fff] to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <step.icon className="w-10 h-10 text-white" />
+                </div>
+                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-gray-900 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                    {step.step}
+                </div>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">{step.title}</h3>
+                <p className="text-gray-600 leading-relaxed">{step.description}</p>
+            </motion.div>
             ))}
           </div>
         </div>
@@ -262,10 +420,10 @@ export default function LandingPage() {
             viewport={{ once: true }}
           >
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-8">
-              Ready to transform healthcare?
+              Ready to Shape the Future of Healthcare?
             </h2>
             <p className="text-xl text-gray-300 mb-12 max-w-2xl mx-auto">
-              Join thousands of healthcare professionals who are already building the future of medicine.
+              Join the community that&apos;s revolutionizing medicine. Your next breakthrough collaboration is waiting.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
@@ -273,7 +431,7 @@ export default function LandingPage() {
                 href="/signup" 
                 className="group inline-flex items-center px-10 py-4 text-xl font-semibold text-gray-900 bg-white hover:bg-gray-50 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl"
               >
-                <span>Get Started Free</span>
+                <span>Start Your Journey</span>
                 <ArrowRightIcon className="w-6 h-6 ml-3 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link 
@@ -294,7 +452,7 @@ export default function LandingPage() {
             <div className="mb-6 md:mb-0">
               <Logo size="sm" />
               <p className="text-gray-400 mt-4 max-w-md">
-                Professional networking for the global healthcare community.
+                Connecting healthcare professionals worldwide to advance medicine and improve patient care.
               </p>
             </div>
             
