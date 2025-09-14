@@ -57,6 +57,8 @@ import {
   isFollowing,
   getConnectionCount,
   getEventsByOrganizer,
+  getJobsByInstitution,
+  getEventsByInstitution,
   updateProfile,
   createExperience,
   updateExperience,
@@ -68,6 +70,8 @@ import {
   type Education,
   type PostWithAuthor,
   type Institution,
+  type JobWithCompany,
+  type EventWithOrganizer,
 } from '@/lib/queries';
 
 // Helper function to format dates to month/year
@@ -172,13 +176,84 @@ const AboutCard = React.memo(function AboutCard({
   );
 });
 
+// JobCard Component
+const JobCard = React.memo(function JobCard({ job }: { job: JobWithCompany }) {
+  const formatSalary = (min?: number | null, max?: number | null) => {
+    if (!min && !max) return 'Salary not specified';
+    if (min && max) return `$${min.toLocaleString()} - $${max.toLocaleString()}`;
+    if (min) return `From $${min.toLocaleString()}`;
+    if (max) return `Up to $${max.toLocaleString()}`;
+  };
+
+  return (
+    <Link href={`/jobs/${job.id}`} className="block">
+      <div className="bg-white border border-gray-200 rounded-lg p-4 hover:border-[#007fff]/30 hover:shadow-md transition-all duration-200">
+        <div className="flex items-start justify-between mb-2">
+          <h4 className="font-semibold text-gray-900 text-sm line-clamp-1">{job.title}</h4>
+          <span className="text-xs text-gray-500">{formatDate(job.created_at)}</span>
+        </div>
+        <p className="text-xs text-gray-600 mb-2 line-clamp-2">{job.description}</p>
+        <div className="flex items-center justify-between text-xs text-gray-500">
+          <span>{job.location}</span>
+          <span className="text-[#007fff] font-medium">{formatSalary(job.salary_min, job.salary_max)}</span>
+        </div>
+      </div>
+    </Link>
+  );
+});
+
+// EventCard Component
+const EventCard = React.memo(function EventCard({ event }: { event: EventWithOrganizer }) {
+  const formatEventDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+
+  return (
+    <Link href={`/events/${event.id}`} className="block">
+      <div className="bg-white border border-gray-200 rounded-lg p-4 hover:border-[#007fff]/30 hover:shadow-md transition-all duration-200">
+        <div className="flex items-start justify-between mb-2">
+          <h4 className="font-semibold text-gray-900 text-sm line-clamp-1">{event.title}</h4>
+          <span className="text-xs text-gray-500">{formatEventDate(event.start_date)}</span>
+        </div>
+        <p className="text-xs text-gray-600 mb-2 line-clamp-2">{event.description}</p>
+        <div className="flex items-center justify-between text-xs text-gray-500">
+          <span>{event.location}</span>
+          {event.max_attendees && (
+            <span className="text-[#007fff] font-medium">{event.max_attendees} attendees</span>
+          )}
+        </div>
+      </div>
+    </Link>
+  );
+});
+
 // ActivityCard Component for Institution
-const ActivityCard = React.memo(function ActivityCard({ posts, isOwnProfile, connectionCount, router }: { 
+const ActivityCard = React.memo(function ActivityCard({ 
+  posts, 
+  jobs, 
+  events, 
+  isOwnProfile, 
+  connectionCount, 
+  router 
+}: { 
   posts: PostWithAuthor[]; 
+  jobs: JobWithCompany[];
+  events: EventWithOrganizer[];
   isOwnProfile: boolean; 
   connectionCount: number; 
   router: any; 
 }) {
+  const allUpdates = [
+    ...posts.map(post => ({ type: 'post', data: post, date: post.created_at })),
+    ...jobs.map(job => ({ type: 'job', data: job, date: job.created_at })),
+    ...events.map(event => ({ type: 'event', data: event, date: event.created_at }))
+  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -198,26 +273,28 @@ const ActivityCard = React.memo(function ActivityCard({ posts, isOwnProfile, con
         </div>
       </div>
 
-      {/* Posts */}
-      {posts.length > 0 ? (
+      {/* All Updates */}
+      {allUpdates.length > 0 ? (
         <div>
-          <div className="flex gap-4 overflow-x-auto pb-2">
-            {posts.slice(0, 3).map((post, index) => (
+          <div className="space-y-3">
+            {allUpdates.slice(0, 5).map((update, index) => (
               <motion.div 
-                key={post.id}
+                key={`${update.type}-${update.data.id}`}
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.1 }}
-                className="flex-shrink-0 w-80 border border-gray-100 rounded-lg p-4 hover:border-[#007fff]/20 transition-colors"
+                className="border border-gray-100 rounded-lg p-3 hover:border-[#007fff]/20 transition-colors"
               >
-                <PostCard post={post} />
+                {update.type === 'post' && <PostCard post={update.data as PostWithAuthor} />}
+                {update.type === 'job' && <JobCard job={update.data as JobWithCompany} />}
+                {update.type === 'event' && <EventCard event={update.data as EventWithOrganizer} />}
               </motion.div>
             ))}
           </div>
-          {posts.length > 3 && (
+          {allUpdates.length > 5 && (
             <div className="mt-4 text-center">
               <button className="text-[#007fff] hover:text-[#007fff]/80 text-sm font-medium hover:underline transition-all duration-200">
-                Show all {posts.length} posts →
+                Show all {allUpdates.length} updates →
               </button>
             </div>
           )}
@@ -226,14 +303,28 @@ const ActivityCard = React.memo(function ActivityCard({ posts, isOwnProfile, con
         <div className="text-center py-8">
           <FireIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
           <p className="text-gray-600 text-lg mb-2">No updates yet</p>
-          <p className="text-gray-500 text-sm mb-4">Share your institution&apos;s news and updates</p>
+          <p className="text-gray-500 text-sm mb-4">Share your institution&apos;s news, jobs, and events</p>
           {isOwnProfile && (
-            <button 
-              onClick={() => router.push('/feed')}
-              className="px-4 py-2 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-colors text-sm font-medium"
-            >
-              Create Your First Post
-            </button>
+            <div className="flex gap-2 justify-center">
+              <button 
+                onClick={() => router.push('/feed')}
+                className="px-4 py-2 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-colors text-sm font-medium"
+              >
+                Create Post
+              </button>
+              <button 
+                onClick={() => router.push('/institution/jobs/create')}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+              >
+                Post Job
+              </button>
+              <button 
+                onClick={() => router.push('/institution/events/create')}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+              >
+                Create Event
+              </button>
+            </div>
           )}
         </div>
       )}
@@ -270,6 +361,8 @@ export default function InstitutionProfilePage() {
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [education, setEducation] = useState<Education[]>([]);
   const [posts, setPosts] = useState<PostWithAuthor[]>([]);
+  const [jobs, setJobs] = useState<JobWithCompany[]>([]);
+  const [events, setEvents] = useState<EventWithOrganizer[]>([]);
   const [loading, setLoading] = useState(true);
   const [connectionStatus, setConnectionStatus] = useState<string>('none');
   const [followStatus, setFollowStatus] = useState<string>('none');
@@ -319,6 +412,16 @@ export default function InstitutionProfilePage() {
       setEducation(educationData);
       setPosts(postsData);
       setConnectionCount(connectionCountData);
+
+      // Fetch jobs and events if institution exists
+      if (institutionData?.id) {
+        const [jobsData, eventsData] = await Promise.all([
+          getJobsByInstitution(institutionData.id),
+          getEventsByInstitution(institutionData.id)
+        ]);
+        setJobs(jobsData);
+        setEvents(eventsData);
+      }
     } catch (error) {
       console.error('Error fetching profile data:', error);
       toast.error('Failed to load profile data');
@@ -508,15 +611,7 @@ export default function InstitutionProfilePage() {
             {/* Profile Content */}
             <div className="px-4 py-4 border-t border-gray-100 bg-gradient-to-br from-gray-50/50 to-white">
               <div className="space-y-3">
-                {/* Activity Section */}
-                <ActivityCard 
-                  posts={posts} 
-                  isOwnProfile={isOwnProfile} 
-                  connectionCount={connectionCount} 
-                  router={router}
-                />
-
-                {/* About Section */}
+                {/* About Section - Moved to top */}
                 <AboutCard
                   profile={profile}
                   isOwnProfile={isOwnProfile}
@@ -525,6 +620,16 @@ export default function InstitutionProfilePage() {
                   onStartEdit={startEdit}
                   onSaveEdit={saveEdit}
                   onCancelEdit={cancelEdit}
+                />
+
+                {/* Activity Section - Now includes posts, jobs, and events */}
+                <ActivityCard 
+                  posts={posts} 
+                  jobs={jobs}
+                  events={events}
+                  isOwnProfile={isOwnProfile} 
+                  connectionCount={connectionCount} 
+                  router={router}
                 />
               </div>
             </div>

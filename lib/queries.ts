@@ -732,6 +732,65 @@ export async function getFollowStatus(followerId: string, institutionId: string)
   }
 }
 
+// Get jobs posted by an institution
+export async function getJobsByInstitution(institutionId: string): Promise<JobWithCompany[]> {
+  try {
+    const schemaExists = await true;
+    if (!schemaExists) {
+      return [];
+    }
+    
+    const { data, error } = await getSupabase()
+      .from('jobs')
+      .select(`
+        *,
+        company:institutions!jobs_company_id_fkey(*),
+        posted_by_user:profiles!jobs_posted_by_fkey(*)
+      `)
+      .eq('company_id', institutionId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching institution jobs:', error);
+      return [];
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Error in getJobsByInstitution:', error);
+    return [];
+  }
+}
+
+// Get events organized by an institution
+export async function getEventsByInstitution(institutionId: string): Promise<EventWithOrganizer[]> {
+  try {
+    const schemaExists = await true;
+    if (!schemaExists) {
+      return [];
+    }
+    
+    const { data, error } = await getSupabase()
+      .from('events')
+      .select(`
+        *,
+        organizer:profiles!events_organizer_id_fkey(*)
+      `)
+      .eq('organizer_id', institutionId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching institution events:', error);
+      return [];
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Error in getEventsByInstitution:', error);
+    return [];
+  }
+}
+
 // Experience queries
 export async function getExperiences(profileId: string): Promise<Experience[]> {
   try {
