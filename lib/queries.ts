@@ -2588,8 +2588,14 @@ export async function getUserNewslettersCount(userId: string): Promise<number> {
   try {
     console.log('[Queries] Getting user newsletters count:', userId);
     
+    if (!userId) {
+      console.log('[Queries] No userId provided for newsletters count');
+      return 0;
+    }
+    
     // For now, return 0 as newsletters table doesn't exist yet
     // This can be updated when newsletters functionality is implemented
+    console.log('[Queries] Newsletters count returned: 0 (table not implemented yet)');
     return 0;
   } catch (error) {
     console.error('[Queries] Error getting user newsletters count:', error);
@@ -3724,28 +3730,15 @@ export async function getGlobalFeed(limit = 20, offset = 0): Promise<PostWithAut
   try {
     console.log('[Queries] Getting global feed, limit:', limit, 'offset:', offset);
     
-    // Get all posts with author information (no visibility filter to show all posts)
+    // First get posts without joins to avoid complex query issues
     const { data: posts, error } = await getSupabase()
       .from('posts')
-      .select(`
-        *,
-        author:profiles(
-          id,
-          full_name,
-          name,
-          avatar_url,
-          role,
-          user_type,
-          verified,
-          location,
-          specializations
-        )
-      `)
+      .select('*')
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
     if (error) {
-      console.error('Error fetching global feed:', error);
+      console.error('Error fetching global feed posts:', error);
       return [];
     }
     
@@ -3754,19 +3747,31 @@ export async function getGlobalFeed(limit = 20, offset = 0): Promise<PostWithAut
       return [];
     }
     
-    console.log('[Queries] Global feed loaded:', posts.length, 'posts');
-    console.log('[Queries] Posts details:', posts.map(p => ({ 
-      id: p.id, 
-      author_id: p.author_id, 
-      author_name: p.author?.full_name || p.author?.name,
-      content: p.content?.substring(0, 50) + '...',
-      visibility: p.visibility 
-    })));
+    console.log('[Queries] Global feed posts loaded:', posts.length, 'posts');
     
-    // Transform the data to match PostWithAuthor interface
-    return posts.map(post => ({
+    // Get author IDs for the posts
+    const authorIds = [...new Set(posts.map(post => post.author_id))];
+    
+    // Fetch authors separately to avoid foreign key issues
+    const { data: authors, error: authorsError } = await getSupabase()
+      .from('profiles')
+      .select('id, full_name, name, avatar_url, role, user_type, verified, location, specializations')
+      .in('id', authorIds);
+    
+    if (authorsError) {
+      console.error('Error fetching global feed authors:', authorsError);
+      // Continue with posts even if authors fail
+    }
+    
+    console.log('[Queries] Global feed authors loaded:', authors?.length || 0, 'authors');
+    
+    // Create author lookup map
+    const authorMap = new Map(authors?.map(author => [author.id, author]) || []);
+    
+    // Combine posts with author data
+    const postsWithAuthors = posts.map(post => ({
       ...post,
-      author: post.author || {
+      author: authorMap.get(post.author_id) || {
         id: post.author_id,
         full_name: 'Unknown User',
         name: 'Unknown User',
@@ -3778,6 +3783,9 @@ export async function getGlobalFeed(limit = 20, offset = 0): Promise<PostWithAut
         specializations: null
       }
     }));
+    
+    console.log('[Queries] Global feed loaded successfully:', postsWithAuthors.length, 'posts');
+    return postsWithAuthors;
   } catch (error) {
     console.error('Error getting global feed:', error);
     return [];
