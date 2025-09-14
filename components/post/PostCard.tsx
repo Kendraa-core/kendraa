@@ -28,7 +28,7 @@ import {
   unlikePost,
   isPostLiked,
 } from '@/lib/queries';
-import type { Post, CommentWithAuthor, Profile } from '@/types/database.types';
+import type { Post, CommentWithAuthor, Profile, PostWithAuthor } from '@/types/database.types';
 import { 
   handleSupabaseError, 
   logError, 
@@ -38,9 +38,7 @@ import {
 import { cn } from '@/lib/utils';
 
 interface PostCardProps {
-  post: Post & {
-    profiles?: Profile;
-  };
+  post: PostWithAuthor;
   onInteraction?: () => void;
 }
 
@@ -222,15 +220,54 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
   };
 
   const getAuthorName = () => {
-    return post.profiles?.full_name || 'Unknown User';
+    if (!post.author) return 'Unknown User';
+    
+    // Handle both Profile and Institution types
+    if ('full_name' in post.author) {
+      return post.author.full_name || 'Unknown User';
+    } else if ('name' in post.author) {
+      return post.author.name || 'Unknown Institution';
+    }
+    
+    return 'Unknown User';
   };
 
   const getAuthorAvatar = () => {
-    return post.profiles?.avatar_url || '';
+    if (!post.author) return '';
+    
+    // Handle both Profile and Institution types
+    if ('avatar_url' in post.author) {
+      return post.author.avatar_url || '';
+    } else if ('logo_url' in post.author) {
+      return post.author.logo_url || '';
+    }
+    
+    return '';
   };
 
   const getAuthorHeadline = () => {
-    return post.profiles?.headline || 'Healthcare Professional';
+    if (!post.author) return 'Healthcare Professional';
+    
+    // Handle both Profile and Institution types
+    if ('headline' in post.author) {
+      return post.author.headline || 'Healthcare Professional';
+    } else if ('description' in post.author) {
+      return post.author.description || 'Healthcare Institution';
+    }
+    
+    return 'Healthcare Professional';
+  };
+
+  const getAuthorUserType = () => {
+    if (!post.author) return 'individual';
+    
+    // Handle both Profile and Institution types
+    if ('user_type' in post.author) {
+      return post.author.user_type || 'individual';
+    } else {
+      // Institution type - return 'institution'
+      return 'institution';
+    }
   };
 
   return (
@@ -248,7 +285,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
               <ClickableProfileName
                 userId={post.author_id}
                 name={getAuthorName()}
-                userType={post.profiles?.user_type}
+                userType={getAuthorUserType()}
               />
             </div>
             <p className="text-sm text-gray-500 truncate">{getAuthorHeadline()}</p>
