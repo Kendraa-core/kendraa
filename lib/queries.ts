@@ -3753,9 +3753,10 @@ export async function getGlobalFeed(limit = 20, offset = 0): Promise<PostWithAut
     const authorIds = [...new Set(posts.map(post => post.author_id))];
     
     // Fetch authors separately to avoid foreign key issues
+    // Only select fields that exist in the profiles table
     const { data: authors, error: authorsError } = await getSupabase()
       .from('profiles')
-      .select('id, full_name, name, avatar_url, role, user_type, verified, location, specializations')
+      .select('id, full_name, avatar_url, role, user_type, verified, location, specializations')
       .in('id', authorIds);
     
     if (authorsError) {
@@ -3774,7 +3775,6 @@ export async function getGlobalFeed(limit = 20, offset = 0): Promise<PostWithAut
       author: authorMap.get(post.author_id) || {
         id: post.author_id,
         full_name: 'Unknown User',
-        name: 'Unknown User',
         avatar_url: null,
         role: null,
         user_type: 'individual',
