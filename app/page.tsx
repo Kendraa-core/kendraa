@@ -176,8 +176,8 @@ export default function LandingPage() {
             className="absolute bottom-1/3 left-1/4"
           >
             <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-              <BuildingOfficeIcon className="w-8 h-8 text-white" />
-            </div>
+                  <BuildingOfficeIcon className="w-8 h-8 text-white" />
+                </div>
           </motion.div>
           
           <motion.div
@@ -211,7 +211,7 @@ export default function LandingPage() {
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               We&apos;re not just another networking platform. We&apos;re the catalyst for the next generation of healthcare breakthroughs.
             </p>
-            </motion.div>
+          </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
@@ -252,12 +252,12 @@ export default function LandingPage() {
                 color: "from-indigo-500 to-purple-500"
               }
             ].map((feature, index) => (
-            <motion.div
+              <motion.div
                 key={feature.title}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-              viewport={{ once: true }}
+                viewport={{ once: true }}
                 className="group"
               >
                 <div className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-gray-100 h-full">
@@ -267,78 +267,12 @@ export default function LandingPage() {
                   <h3 className="text-2xl font-bold text-gray-900 mb-4">{feature.title}</h3>
                   <p className="text-gray-600 leading-relaxed">{feature.description}</p>
                 </div>
-            </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Success Stories Section */}
-      <section className="py-24 bg-gradient-to-br from-gray-50 to-blue-50/30">
-        <div className="max-w-6xl mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Real Stories,
-              <br />
-              <span className="text-[#007fff]">Real Impact</span>
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              See how healthcare professionals are transforming patient care through collaboration.
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                quote: "Through kendraa, I connected with researchers across three continents for a groundbreaking cancer study. The collaboration that started here is now saving lives.",
-                author: "Dr. Sarah Chen",
-                role: "Oncologist, Memorial Hospital",
-                avatar: "SC"
-              },
-              {
-                quote: "The institutional partnerships we&apos;ve built have accelerated our research timeline by years. What used to take decades now happens in months.",
-                author: "Prof. Michael Rodriguez",
-                role: "Research Director, Stanford Medical",
-                avatar: "MR"
-              },
-              {
-                quote: "I found my dream research position through a connection I made here. The community is incredible - everyone is genuinely passionate about advancing healthcare.",
-                author: "Dr. Aisha Patel",
-                role: "Neuroscience Researcher",
-                avatar: "AP"
-              }
-            ].map((testimonial, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
-                viewport={{ once: true }}
-                className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                <div className="flex items-center mb-6">
-                  <div className="w-12 h-12 bg-gradient-to-br from-[#007fff] to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                    {testimonial.avatar}
-                  </div>
-                  <div className="ml-4">
-                    <h4 className="font-semibold text-gray-900">{testimonial.author}</h4>
-                    <p className="text-sm text-gray-600">{testimonial.role}</p>
-                  </div>
-                </div>
-                <blockquote className="text-gray-700 leading-relaxed italic">
-                  &ldquo;{testimonial.quote}&rdquo;
-                </blockquote>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
+
 
       {/* How It Works Section */}
       <section className="py-24 bg-white">
