@@ -243,9 +243,7 @@ export default function InstitutionFeedPage() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <h3 className="font-semibold text-gray-900">{(post.author as any).full_name || 'Unknown User'}</h3>
-                        {(post.author as any).verified && (
-                          <CheckBadgeIcon className="w-4 h-4 text-blue-600" />
-                        )}
+                        {/* Verified badge - not available in current schema */}
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-500">
                         {(post.author as any).location && (

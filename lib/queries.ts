@@ -3756,7 +3756,7 @@ export async function getGlobalFeed(limit = 20, offset = 0): Promise<PostWithAut
     // Only select fields that exist in the profiles table
     const { data: authors, error: authorsError } = await getSupabase()
       .from('profiles')
-      .select('id, full_name, avatar_url, role, user_type, verified, location, specializations')
+      .select('id, full_name, avatar_url, user_type, location, specialization')
       .in('id', authorIds);
     
     if (authorsError) {
@@ -3776,11 +3776,9 @@ export async function getGlobalFeed(limit = 20, offset = 0): Promise<PostWithAut
         id: post.author_id,
         full_name: 'Unknown User',
         avatar_url: null,
-        role: null,
         user_type: 'individual',
-        verified: false,
         location: null,
-        specializations: null
+        specialization: null
       }
     }));
     
