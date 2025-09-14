@@ -3748,9 +3748,11 @@ export async function getGlobalFeed(limit = 20, offset = 0): Promise<PostWithAut
     }
     
     console.log('[Queries] Global feed posts loaded:', posts.length, 'posts');
+    console.log('[Queries] Post author IDs:', posts.map(p => ({ id: p.id, author_id: p.author_id })));
     
     // Get author IDs for the posts
     const authorIds = [...new Set(posts.map(post => post.author_id))];
+    console.log('[Queries] Unique author IDs to fetch:', authorIds);
     
     // Fetch authors separately to avoid foreign key issues
     // Only select fields that exist in the profiles table
@@ -3765,22 +3767,33 @@ export async function getGlobalFeed(limit = 20, offset = 0): Promise<PostWithAut
     }
     
     console.log('[Queries] Global feed authors loaded:', authors?.length || 0, 'authors');
+    console.log('[Queries] Author details:', authors?.map(a => ({ id: a.id, full_name: a.full_name })));
     
     // Create author lookup map
     const authorMap = new Map(authors?.map(author => [author.id, author]) || []);
+    console.log('[Queries] Author map created with keys:', Array.from(authorMap.keys()));
     
     // Combine posts with author data
-    const postsWithAuthors = posts.map(post => ({
-      ...post,
-      author: authorMap.get(post.author_id) || {
-        id: post.author_id,
-        full_name: 'Unknown User',
-        avatar_url: null,
-        user_type: 'individual',
-        location: null,
-        specialization: null
-      }
-    }));
+    const postsWithAuthors = posts.map(post => {
+      const author = authorMap.get(post.author_id);
+      console.log(`[Queries] Post ${post.id} author lookup:`, { 
+        author_id: post.author_id, 
+        found: !!author, 
+        author_name: author?.full_name || 'NOT FOUND' 
+      });
+      
+      return {
+        ...post,
+        author: author || {
+          id: post.author_id,
+          full_name: 'Unknown User',
+          avatar_url: null,
+          user_type: 'individual',
+          location: null,
+          specialization: null
+        }
+      };
+    });
     
     console.log('[Queries] Global feed loaded successfully:', postsWithAuthors.length, 'posts');
     return postsWithAuthors;
