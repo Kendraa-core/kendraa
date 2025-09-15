@@ -291,7 +291,7 @@ export default function NetworkPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="max-w-6xl mx-auto"
+          className="max-w-4xl mx-auto"
         >
           {/* Page Header */}
           <div className="text-center mb-8">
@@ -301,74 +301,30 @@ export default function NetworkPage() {
             </p>
           </div>
 
-          {/* Network Stats Overview */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-            <div className={`${COMPONENTS.card.base} text-center p-4`}>
-              <UserIcon className={`w-6 h-6 ${COMPONENTS.icon.primary} mx-auto mb-2`} />
-              <div className={`${TYPOGRAPHY.heading.h3} mb-1`}>{formatNumber(networkStats.connections)}</div>
-              <div className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>Connections</div>
-            </div>
-            <div className={`${COMPONENTS.card.base} text-center p-4`}>
-              <UserGroupIcon className={`w-6 h-6 ${COMPONENTS.icon.primary} mx-auto mb-2`} />
-              <div className={`${TYPOGRAPHY.heading.h3} mb-1`}>{formatNumber(networkStats.groups)}</div>
-              <div className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>Groups</div>
-            </div>
-            <div className={`${COMPONENTS.card.base} text-center p-4`}>
-              <CalendarDaysIcon className={`w-6 h-6 ${COMPONENTS.icon.primary} mx-auto mb-2`} />
-              <div className={`${TYPOGRAPHY.heading.h3} mb-1`}>{formatNumber(networkStats.events)}</div>
-              <div className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>Events</div>
-            </div>
-            <div className={`${COMPONENTS.card.base} text-center p-4`}>
-              <DocumentTextIcon className={`w-6 h-6 ${COMPONENTS.icon.primary} mx-auto mb-2`} />
-              <div className={`${TYPOGRAPHY.heading.h3} mb-1`}>{formatNumber(networkStats.pages)}</div>
-              <div className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>Pages</div>
-            </div>
-            <div className={`${COMPONENTS.card.base} text-center p-4`}>
-              <NewspaperIcon className={`w-6 h-6 ${COMPONENTS.icon.primary} mx-auto mb-2`} />
-              <div className={`${TYPOGRAPHY.heading.h3} mb-1`}>{formatNumber(networkStats.newsletters)}</div>
-              <div className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>Newsletters</div>
-            </div>
-          </div>
-
-          {/* Search and Navigation */}
+          {/* Navigation Tabs */}
           <div className={`${COMPONENTS.card.base} mb-6`}>
             <div className="p-6">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                {/* Search Bar */}
-                <div className="relative w-full md:w-96">
-                  <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search people..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-
-                {/* Navigation Tabs */}
-                <div className="flex items-center space-x-4">
-                  <button
-                    onClick={() => setActiveTab('grow')}
-                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                      activeTab === 'grow'
-                        ? `${COMPONENTS.button.primary}`
-                        : `${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} hover:bg-gray-100`
-                    }`}
-                  >
-                    Grow
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('catch-up')}
-                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                      activeTab === 'catch-up'
-                        ? `${COMPONENTS.button.primary}`
-                        : `${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} hover:bg-gray-100`
-                    }`}
-                  >
-                    Catch up
-                  </button>
-                </div>
+              <div className="flex items-center justify-center space-x-8">
+                <button
+                  onClick={() => setActiveTab('grow')}
+                  className={`px-6 py-3 text-sm font-medium rounded-lg transition-colors ${
+                    activeTab === 'grow'
+                      ? `${COMPONENTS.button.primary}`
+                      : `${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} hover:bg-gray-100`
+                  }`}
+                >
+                  Grow
+                </button>
+                <button
+                  onClick={() => setActiveTab('catch-up')}
+                  className={`px-6 py-3 text-sm font-medium rounded-lg transition-colors ${
+                    activeTab === 'catch-up'
+                      ? `${COMPONENTS.button.primary}`
+                      : `${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} hover:bg-gray-100`
+                  }`}
+                >
+                  Catch up
+                </button>
               </div>
             </div>
           </div>
@@ -379,7 +335,7 @@ export default function NetworkPage() {
             {connectionRequests.length > 0 && (
               <div className={`${COMPONENTS.card.base}`}>
                 <div className="p-6">
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center justify-between mb-6">
                     <h3 className={`${TYPOGRAPHY.heading.h3}`}>
                       Invitations ({connectionRequests.length})
                     </h3>
@@ -392,22 +348,27 @@ export default function NetworkPage() {
                   </div>
                   
                   <div className="space-y-4">
-                    {connectionRequests.slice(0, 3).map((request) => (
+                    {connectionRequests.slice(0, 5).map((request) => (
                       <motion.div
                         key={request.id}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg"
+                        className="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
                       >
                         <Avatar
                           src={request.requester.avatar_url}
                           alt={request.requester.full_name || 'User'}
-                          size="md"
+                          size="lg"
                         />
                         <div className="flex-1">
-                          <h4 className={`${TYPOGRAPHY.body.medium} font-semibold`}>
-                            {request.requester.full_name}
-                          </h4>
+                          <div className="flex items-center space-x-2 mb-1">
+                            <h4 className={`${TYPOGRAPHY.body.medium} font-semibold`}>
+                              {request.requester.full_name}
+                            </h4>
+                            <span className="text-xs text-gray-500">
+                              follows you and is inviting you to connect
+                            </span>
+                          </div>
                           <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} mb-2`}>
                             {request.requester.headline || 'Healthcare Professional'}
                           </p>
@@ -445,7 +406,7 @@ export default function NetworkPage() {
             {healthcareSuggestions.length > 0 && (
               <div className={`${COMPONENTS.card.base}`}>
                 <div className="p-6">
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center justify-between mb-6">
                     <h3 className={`${TYPOGRAPHY.heading.h3}`}>
                       People in the Healthcare industry you may know
                     </h3>
@@ -525,7 +486,7 @@ export default function NetworkPage() {
             {recentActivitySuggestions.length > 0 && (
               <div className={`${COMPONENTS.card.base}`}>
                 <div className="p-6">
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center justify-between mb-6">
                     <h3 className={`${TYPOGRAPHY.heading.h3}`}>
                       People you may know based on your recent activity
                     </h3>
