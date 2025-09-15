@@ -248,11 +248,39 @@ const ActivityCard = React.memo(function ActivityCard({
   connectionCount: number; 
   router: any; 
 }) {
+  const [activeTab, setActiveTab] = useState<'posts' | 'jobs' | 'events'>('posts');
+
   const allUpdates = [
     ...posts.map(post => ({ type: 'post', data: post, date: post.created_at })),
     ...jobs.map(job => ({ type: 'job', data: job, date: job.created_at })),
     ...events.map(event => ({ type: 'event', data: event, date: event.created_at }))
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  const getCurrentTabData = () => {
+    switch (activeTab) {
+      case 'posts':
+        return posts.slice(0, 5);
+      case 'jobs':
+        return jobs.slice(0, 5);
+      case 'events':
+        return events.slice(0, 5);
+      default:
+        return [];
+    }
+  };
+
+  const getCurrentTabCount = () => {
+    switch (activeTab) {
+      case 'posts':
+        return posts.length;
+      case 'jobs':
+        return jobs.length;
+      case 'events':
+        return events.length;
+      default:
+        return 0;
+    }
+  };
 
   return (
     <motion.div 
@@ -261,7 +289,7 @@ const ActivityCard = React.memo(function ActivityCard({
       transition={{ duration: 0.5, delay: 0.4 }}
       className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm"
     >
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-[#007fff]/10 rounded-lg flex items-center justify-center">
             <FireIcon className="w-4 h-4 text-[#007fff]" />
@@ -273,58 +301,124 @@ const ActivityCard = React.memo(function ActivityCard({
         </div>
       </div>
 
-      {/* All Updates */}
-      {allUpdates.length > 0 ? (
+      {/* Tab Navigation */}
+      <div className="flex space-x-1 mb-4 bg-gray-100 p-1 rounded-lg">
+        <button
+          onClick={() => setActiveTab('posts')}
+          className={cn(
+            "flex-1 px-3 py-2 text-sm font-medium rounded-md transition-all duration-200",
+            activeTab === 'posts'
+              ? "bg-white text-[#007fff] shadow-sm"
+              : "text-gray-600 hover:text-gray-900"
+          )}
+        >
+          <div className="flex items-center justify-center gap-2">
+            <DocumentTextIcon className="w-4 h-4" />
+            <span>Posts ({posts.length})</span>
+          </div>
+        </button>
+        <button
+          onClick={() => setActiveTab('jobs')}
+          className={cn(
+            "flex-1 px-3 py-2 text-sm font-medium rounded-md transition-all duration-200",
+            activeTab === 'jobs'
+              ? "bg-white text-[#007fff] shadow-sm"
+              : "text-gray-600 hover:text-gray-900"
+          )}
+        >
+          <div className="flex items-center justify-center gap-2">
+            <BriefcaseIcon className="w-4 h-4" />
+            <span>Jobs ({jobs.length})</span>
+          </div>
+        </button>
+        <button
+          onClick={() => setActiveTab('events')}
+          className={cn(
+            "flex-1 px-3 py-2 text-sm font-medium rounded-md transition-all duration-200",
+            activeTab === 'events'
+              ? "bg-white text-[#007fff] shadow-sm"
+              : "text-gray-600 hover:text-gray-900"
+          )}
+        >
+          <div className="flex items-center justify-center gap-2">
+            <CalendarDaysIcon className="w-4 h-4" />
+            <span>Events ({events.length})</span>
+          </div>
+        </button>
+      </div>
+
+      {/* Tab Content */}
+      {getCurrentTabCount() > 0 ? (
         <div>
           <div className="space-y-3">
-            {allUpdates.slice(0, 5).map((update, index) => (
+            {getCurrentTabData().map((item, index) => (
               <motion.div 
-                key={`${update.type}-${update.data.id}`}
+                key={`${activeTab}-${item.id}`}
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.1 }}
                 className="border border-gray-100 rounded-lg p-3 hover:border-[#007fff]/20 transition-colors"
               >
-                {update.type === 'post' && <PostCard post={update.data as PostWithAuthor} />}
-                {update.type === 'job' && <JobCard job={update.data as JobWithCompany} />}
-                {update.type === 'event' && <EventCard event={update.data as EventWithOrganizer} />}
+                {activeTab === 'posts' && <PostCard post={item as PostWithAuthor} />}
+                {activeTab === 'jobs' && <JobCard job={item as JobWithCompany} />}
+                {activeTab === 'events' && <EventCard event={item as EventWithOrganizer} />}
               </motion.div>
             ))}
           </div>
-          {allUpdates.length > 5 && (
+          {getCurrentTabCount() > 5 && (
             <div className="mt-4 text-center">
               <button className="text-[#007fff] hover:text-[#007fff]/80 text-sm font-medium hover:underline transition-all duration-200">
-                Show all {allUpdates.length} updates →
+                Show all {getCurrentTabCount()} {activeTab} →
               </button>
             </div>
           )}
         </div>
       ) : (
         <div className="text-center py-8">
-          <FireIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-600 text-lg mb-2">No updates yet</p>
-          <p className="text-gray-500 text-sm mb-4">Share your institution&apos;s news, jobs, and events</p>
-          {isOwnProfile && (
-            <div className="flex gap-2 justify-center">
-              <button 
-                onClick={() => router.push('/feed')}
-                className="px-4 py-2 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-colors text-sm font-medium"
-              >
-                Create Post
-              </button>
-              <button 
-                onClick={() => router.push('/institution/jobs/create')}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
-              >
-                Post Job
-              </button>
-              <button 
-                onClick={() => router.push('/institution/events/create')}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
-              >
-                Create Event
-              </button>
-            </div>
+          {activeTab === 'posts' && (
+            <>
+              <DocumentTextIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-600 text-lg mb-2">No posts yet</p>
+              <p className="text-gray-500 text-sm mb-4">Share your institution&apos;s news and updates</p>
+              {isOwnProfile && (
+                <button 
+                  onClick={() => router.push('/feed')}
+                  className="px-4 py-2 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-colors text-sm font-medium"
+                >
+                  Create Post
+                </button>
+              )}
+            </>
+          )}
+          {activeTab === 'jobs' && (
+            <>
+              <BriefcaseIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-600 text-lg mb-2">No job postings yet</p>
+              <p className="text-gray-500 text-sm mb-4">Post job opportunities to attract top talent</p>
+              {isOwnProfile && (
+                <button 
+                  onClick={() => router.push('/institution/jobs/create')}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                >
+                  Post Job
+                </button>
+              )}
+            </>
+          )}
+          {activeTab === 'events' && (
+            <>
+              <CalendarDaysIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-600 text-lg mb-2">No events yet</p>
+              <p className="text-gray-500 text-sm mb-4">Create events to engage with the healthcare community</p>
+              {isOwnProfile && (
+                <button 
+                  onClick={() => router.push('/institution/events/create')}
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                >
+                  Create Event
+                </button>
+              )}
+            </>
           )}
         </div>
       )}
