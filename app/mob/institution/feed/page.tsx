@@ -54,11 +54,6 @@ export default function MobileInstitutionFeedPage() {
             </div>
           ) : (
             <div className="space-y-4 p-4">
-              {/* Welcome Banner */}
-              <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-6 text-white">
-                <h1 className="text-xl font-bold mb-2">Welcome to your Institution Feed</h1>
-                <p className="text-blue-100">Share updates, job postings, and events with your network</p>
-              </div>
               
               {/* Posts */}
               {posts.length > 0 ? (

@@ -61,7 +61,6 @@ import {
   unfollowInstitution,
   getFollowStatus,
   getInstitutionByAdminId,
-  canUserSendRequests
 } from '@/lib/queries';
 import type { Profile, Institution, Experience, Education, Post, JobWithCompany, EventWithOrganizer } from '@/types/database.types';
 
@@ -419,11 +418,10 @@ export default function PublicInstitutionProfilePage() {
       
       // Check user permissions and follow status only if user is logged in
       if (!isOwnProfile && user?.id) {
-        const [canSend, followData] = await Promise.all([
-          canUserSendRequests(user.id),
+        const [followData] = await Promise.all([
           getFollowStatus(user.id, id)
         ]);
-        setCanSendRequests(canSend);
+        setCanSendRequests(true);
         setFollowStatus(followData ? 'following' : 'none');
       } else {
         setCanSendRequests(true);

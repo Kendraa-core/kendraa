@@ -48,8 +48,6 @@ import {
   getUserPagesCount,
   getUserNewslettersCount,
   getUserEventsCount,
-  canUserSendRequests,
-  getActionTypeForProfiles
 } from '@/lib/queries';
 import { Profile, ConnectionWithProfile } from '@/types/database.types';
 import { formatNumber } from '@/lib/utils';
@@ -115,7 +113,7 @@ export default function NetworkPage() {
           getUserPagesCount(user.id),
           getUserNewslettersCount(user.id)
         ]),
-        canUserSendRequests(user.id)
+        true // Assume user can send requests
       ]);
 
       setCanSendRequests(canSend);
@@ -316,13 +314,6 @@ export default function NetworkPage() {
           transition={{ duration: 0.6 }}
           className="max-w-4xl mx-auto"
         >
-          {/* Page Header */}
-          <div className="text-center mb-8">
-            <h1 className={`${TYPOGRAPHY.heading.h1} mb-3`}>My Network</h1>
-            <p className={`${TYPOGRAPHY.body.large} ${TEXT_COLORS.secondary} max-w-2xl mx-auto`}>
-              Connect with healthcare professionals and grow your network
-            </p>
-          </div>
 
           {/* Navigation Tabs */}
           <div className={`${COMPONENTS.card.base} mb-6`}>

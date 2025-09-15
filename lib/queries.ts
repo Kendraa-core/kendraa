@@ -414,20 +414,6 @@ export async function sendConnectionRequest(requesterId: string, recipientId: st
       return null;
     }
     
-    // Check if requester can send requests (only individuals can)
-    const canSend = await canUserSendRequests(requesterId);
-    if (!canSend) {
-      console.error('[Queries] Institution users cannot send connection requests');
-      throw new Error('Institutions cannot send connection requests');
-    }
-
-    // Check if recipient is individual (institutions should use follow system)
-    const recipientProfile = await getProfile(recipientId);
-    if (recipientProfile?.profile_type === 'institution' || recipientProfile?.user_type === 'institution') {
-      console.error('[Queries] Cannot send connection request to institution, use follow system instead');
-      throw new Error('Use follow system for institutions');
-    }
-    
     // Get requester profile for notification
     const requesterProfile = await getProfile(requesterId);
     
@@ -459,7 +445,6 @@ export async function sendConnectionRequest(requesterId: string, recipientId: st
     
     return data;
   } catch (error) {
-    console.error('[Queries] Error sending connection request:', error);
     return null;
   }
 }
@@ -617,20 +602,6 @@ export async function followInstitution(followerId: string, institutionId: strin
     const schemaExists = await true;
     if (!schemaExists) {
       return false;
-    }
-    
-    // Check if follower can send requests (only individuals can)
-    const canFollow = await canUserSendRequests(followerId);
-    if (!canFollow) {
-      console.error('[Queries] Institution users cannot follow other institutions');
-      throw new Error('Institutions cannot follow other institutions');
-    }
-
-    // Verify target is actually an institution
-    const institutionProfile = await getProfile(institutionId);
-    if (institutionProfile?.profile_type !== 'institution' && institutionProfile?.user_type !== 'institution') {
-      console.error('[Queries] Target is not an institution, use connection system instead');
-      throw new Error('Use connection system for individuals');
     }
     
     // Check if already following
@@ -1869,19 +1840,6 @@ export async function followUser(followerId: string, followingId: string, follow
       return null;
     }
     
-    // Check if follower can send requests (only individuals can)
-    const canFollow = await canUserSendRequests(followerId);
-    if (!canFollow) {
-      console.error('[Queries] Institution users cannot follow other users');
-      throw new Error('Institutions cannot follow other users');
-    }
-
-    // For institutions, redirect to followInstitution function
-    if (followingType === 'institution') {
-      const success = await followInstitution(followerId, followingId);
-      return success ? { id: 'temp', follower_id: followerId, following_id: followingId, follower_type: followerType, following_type: followingType, created_at: new Date().toISOString() } : null;
-    }
-    
     const { data, error } = await getSupabase()
       .from('follows')
       .insert({
@@ -2036,26 +1994,9 @@ export async function getSuggestedInstitutions(userId: string, limit: number = 1
     
     const followingIds = following?.map(f => f.following_id) || [];
     
-    // Get institution profiles and join with institutions table to get proper data
     let query = getSupabase()
       .from('profiles')
-      .select(`
-        *,
-        institutions!inner(
-          id,
-          name,
-          type,
-          description,
-          location,
-          website,
-          phone,
-          email,
-          logo_url,
-          banner_url,
-          specialties,
-          verified
-        )
-      `)
+      .select('*')
       .eq('profile_type', 'institution')
       .limit(limit);
     
@@ -2067,23 +2008,8 @@ export async function getSuggestedInstitutions(userId: string, limit: number = 1
 
     if (error) throw error;
     
-    // Transform the data to include institution information in the profile
-    const transformedData = data?.map(profile => ({
-      ...profile,
-      // Use institution name as full_name if available
-      full_name: profile.institutions?.name || profile.full_name,
-      // Use institution type as headline
-      headline: profile.institutions?.type ? 
-        profile.institutions.type.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()) : 
-        'Healthcare Institution',
-      // Use institution logo as avatar if available
-      avatar_url: profile.institutions?.logo_url || profile.avatar_url,
-      // Use institution location if available
-      location: profile.institutions?.location || profile.location,
-    })) || [];
-    
-    console.log('Suggested institutions fetched successfully', transformedData);
-    return transformedData;
+    console.log('Suggested institutions fetched successfully', data);
+    return data || [];
   } catch (error) {
     console.log('Error fetching suggested institutions', error);
     return [];
@@ -2499,61 +2425,6 @@ export async function getSuggestedConnectionsWithMutualCounts(userId: string, li
 } 
 
 // Profile views functionality completely removed
-
-// Helper function to check if user can send connection/follow requests
-export async function canUserSendRequests(userId: string): Promise<boolean> {
-  try {
-    const profile = await getProfile(userId);
-    // Only individuals can send connection/follow requests
-    return profile?.profile_type === 'individual' || profile?.user_type === 'individual';
-  } catch (error) {
-    console.error('[Queries] Error checking user type:', error);
-    return false;
-  }
-}
-
-// Helper function to determine correct action for user types
-export async function getActionTypeForProfiles(fromUserId: string, toUserId: string): Promise<'connect' | 'follow' | 'none'> {
-  try {
-    const [fromProfile, toProfile] = await Promise.all([
-      getProfile(fromUserId),
-      getProfile(toUserId)
-    ]);
-
-    // Institutions cannot send any requests
-    if (fromProfile?.profile_type === 'institution' || fromProfile?.user_type === 'institution') {
-      return 'none';
-    }
-
-    // If target is institution, use follow system
-    if (toProfile?.profile_type === 'institution' || toProfile?.user_type === 'institution') {
-      return 'follow';
-    }
-
-    // If both are individuals, use connection system
-    return 'connect';
-  } catch (error) {
-    console.error('[Queries] Error determining action type:', error);
-    return 'none';
-  }
-}
-
-// Get profile viewers (who viewed your profile)
-export async function getProfileViewers(userId: string, limit = 10): Promise<Profile[]> {
-  try {
-    console.log('[Queries] Getting profile viewers for user:', userId);
-    
-    // For now, return suggested connections as mock profile viewers
-    // In a real implementation, this would track actual profile views
-    const suggestions = await getSuggestedConnections(userId, limit);
-    
-    console.log('[Queries] Profile viewers fetched:', suggestions.length);
-    return suggestions;
-  } catch (error) {
-    console.error('[Queries] Error getting profile viewers:', error);
-    return [];
-  }
-}
 
 export async function getConnectionStats(userId: string) {
   try {

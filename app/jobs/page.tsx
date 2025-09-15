@@ -313,13 +313,6 @@ export default function JobsPage() {
           transition={{ duration: 0.6 }}
           className="max-w-7xl mx-auto"
         >
-          {/* Page Header */}
-          <div className="mb-6">
-            <h1 className={`${TYPOGRAPHY.heading.h1} mb-2`}>Jobs</h1>
-            <p className={`${TYPOGRAPHY.body.large} ${TEXT_COLORS.secondary}`}>
-              Discover and apply for healthcare opportunities
-              </p>
-            </div>
 
           {/* Top Navigation Bar */}
           <div className={`${COMPONENTS.card.base} mb-4`}>

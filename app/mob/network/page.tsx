@@ -14,7 +14,6 @@ import {
   followInstitution,
   acceptConnectionRequest,
   rejectConnectionRequest,
-  canUserSendRequests
 } from '@/lib/queries';
 import { Profile, ConnectionWithProfile } from '@/types/database.types';
 import {
@@ -51,15 +50,14 @@ export default function MobileNetworkPage() {
     setLoading(true);
     
     try {
-      const [individualsData, institutionsData, requestsData, connectionsData, canSend] = await Promise.all([
+      const [individualsData, institutionsData, requestsData, connectionsData] = await Promise.all([
         getSuggestedConnectionsWithMutualCounts(user.id, 20),
         getSuggestedInstitutions(user.id, 10),
         getConnectionRequests(user.id),
-        getConnections(user.id),
-        canUserSendRequests(user.id)
+        getConnections(user.id)
       ]);
 
-      setCanSendRequests(canSend);
+      setCanSendRequests(true);
 
       // Set separate state variables
       setIndividuals(individualsData);

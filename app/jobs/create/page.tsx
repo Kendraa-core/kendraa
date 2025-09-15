@@ -179,11 +179,6 @@ export default function CreateJobPage() {
           </nav>
         </div>
 
-        {/* Elegant Header */}
-        <div className="mb-6 animate-fade-in">
-          <h1 className="text-2xl font-semibold text-gray-900 mb-2">Post a Job</h1>
-          <p className="text-gray-600 text-sm">Create a new job listing for healthcare professionals</p>
-        </div>
 
         {/* Form */}
         <div className="animate-fade-in">

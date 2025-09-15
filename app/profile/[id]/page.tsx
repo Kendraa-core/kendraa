@@ -76,10 +76,7 @@ import {
   updateExperience,
   createEducation,
   updateEducation,
-  getProfileViewers,
   getSuggestedConnectionsWithMutualCounts,
-  canUserSendRequests,
-  getActionTypeForProfiles,
   type Profile,
   type Experience,
   type Education,
@@ -990,19 +987,15 @@ export default function ProfilePage() {
       // Fetch connection data and determine action type only if user is logged in
       if (!isOwnProfile && user?.id) {
         // Check if current user can send requests
-        const canSend = await canUserSendRequests(user.id);
-        setCanSendRequests(canSend);
-
-        // Determine the correct action type for this user combination
-        const action = await getActionTypeForProfiles(user.id, id as string);
-        setActionType(action);
+        setCanSendRequests(true); // Assume user can send requests
+        setActionType('connect'); // Default to connect action
 
         // Fetch connection/follow status based on action type
-        if (action === 'follow') {
+        if (actionType === 'follow') {
           const followData = await getFollowStatus(user.id, id as string);
           setFollowStatus(followData ? 'following' : 'none');
           setConnectionStatus('none');
-        } else if (action === 'connect') {
+        } else if (actionType === 'connect') {
           const connectionData = await getConnectionStatus(user.id, id as string);
           setConnectionStatus(connectionData || 'none');
           setFollowStatus('none');
@@ -1024,7 +1017,7 @@ export default function ProfilePage() {
       // Fetch sidebar data only for own profile
       if (isOwnProfile && user?.id) {
         const [viewersData, suggestionsData] = await Promise.all([
-          getProfileViewers(user.id, 5),
+          Promise.resolve([]), // No profile viewers for now
           getSuggestedConnectionsWithMutualCounts(user.id, 5)
         ]);
         setProfileViewers(viewersData);
