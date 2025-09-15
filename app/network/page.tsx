@@ -3,8 +3,9 @@
 import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import ClickableProfileName from '@/components/common/ClickableProfileName';
 import Avatar from '@/components/common/Avatar';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
+import Header from '@/components/layout/Header';
 import { 
   MagnifyingGlassIcon,
   UserGroupIcon,
@@ -19,7 +20,13 @@ import {
   ClockIcon,
   ChevronRightIcon,
   UsersIcon,
-  SparklesIcon
+  SparklesIcon,
+  CalendarDaysIcon,
+  DocumentTextIcon,
+  NewspaperIcon,
+  UserPlusIcon,
+  HeartIcon,
+  ShareIcon
 } from '@heroicons/react/24/outline';
 import { 
   getSuggestedConnectionsWithMutualCounts,
@@ -35,10 +42,25 @@ import {
   isFollowing,
   followInstitution,
   unfollowInstitution,
-  getFollowStatus
+  getFollowStatus,
+  getConnectionCount,
+  getUserGroupsCount,
+  getUserPagesCount,
+  getUserNewslettersCount,
+  getUserEventsCount
 } from '@/lib/queries';
 import { Profile, ConnectionWithProfile } from '@/types/database.types';
 import { formatNumber } from '@/lib/utils';
+import { 
+  BACKGROUNDS, 
+  TEXT_COLORS, 
+  COMPONENTS, 
+  TYPOGRAPHY, 
+  BORDER_COLORS,
+  ANIMATIONS
+} from '@/lib/design-system';
+import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
 
 interface ProfilePreview extends Profile {
   mutual_connections?: number;
@@ -46,13 +68,29 @@ interface ProfilePreview extends Profile {
   follow_status?: 'following' | 'not_following';
 }
 
+interface NetworkStats {
+  connections: number;
+  groups: number;
+  events: number;
+  pages: number;
+  newsletters: number;
+}
+
 export default function NetworkPage() {
   const { user } = useAuth();
   const [suggestions, setSuggestions] = useState<ProfilePreview[]>([]);
   const [connectionRequests, setConnectionRequests] = useState<ConnectionWithProfile[]>([]);
   const [connections, setConnections] = useState<Profile[]>([]);
+  const [networkStats, setNetworkStats] = useState<NetworkStats>({
+    connections: 0,
+    groups: 0,
+    events: 0,
+    pages: 0,
+    newsletters: 0
+  });
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState<'grow' | 'catch-up'>('grow');
 
   const fetchNetworkData = useCallback(async () => {
     if (!user?.id) return;
@@ -60,11 +98,18 @@ export default function NetworkPage() {
     setLoading(true);
     
     try {
-      const [individualsData, institutionsData, requestsData, connectionsData] = await Promise.all([
+      const [individualsData, institutionsData, requestsData, connectionsData, statsData] = await Promise.all([
         getSuggestedConnectionsWithMutualCounts(user.id, 20),
         getSuggestedInstitutions(user.id, 10),
         getConnectionRequests(user.id),
-        getConnections(user.id)
+        getConnections(user.id),
+        Promise.all([
+          getConnectionCount(user.id),
+          getUserGroupsCount(user.id),
+          getUserEventsCount(user.id),
+          getUserPagesCount(user.id),
+          getUserNewslettersCount(user.id)
+        ])
       ]);
 
       // Combine individuals and institutions, removing duplicates by ID
@@ -101,6 +146,13 @@ export default function NetworkPage() {
       setSuggestions(enrichedSuggestions);
       setConnectionRequests(requestsData);
       setConnections(connectionsData);
+      setNetworkStats({
+        connections: statsData[0],
+        groups: statsData[1],
+        events: statsData[2],
+        pages: statsData[3],
+        newsletters: statsData[4]
+      });
     } catch (error) {
       toast.error('Failed to load network data');
     } finally {
@@ -148,244 +200,460 @@ export default function NetworkPage() {
     }
   };
 
-  const handleUnfollow = async (profileId: string) => {
+  const handleAcceptConnection = async (requestId: string) => {
     if (!user?.id) return;
     
     try {
-      // Find the profile to determine if it's an institution
-      const profile = suggestions.find(p => p.id === profileId);
-      const success = profile?.profile_type === 'institution' 
-        ? await unfollowInstitution(user.id, profileId)
-        : await unfollowUser(user.id, profileId);
-      
-      if (success) {
-        // Update local state
-        setSuggestions(prev => prev.map(p => 
-          p.id === profileId ? { ...p, follow_status: 'not_following' } : p
-        ));
-        toast.success('Unfollowed successfully');
-      } else {
-        toast.error('Failed to unfollow');
-      }
-    } catch (error) {
-      toast.error('Failed to unfollow');
-    }
-  };
-
-  const handleAcceptRequest = async (requestId: string) => {
-    try {
       const success = await acceptConnectionRequest(requestId);
-      
       if (success) {
-        const request = connectionRequests.find(r => r.id === requestId);
-        if (request) {
-          // Move from requests to connections
-          setConnections(prev => [...prev, request.requester]);
-          setConnectionRequests(prev => prev.filter(r => r.id !== requestId));
-          toast.success(`You are now connected with ${request.requester.full_name}!`);
-        }
+        setConnectionRequests(prev => prev.filter(req => req.id !== requestId));
+        toast.success('Connection accepted!');
+        // Refresh network data
+        fetchNetworkData();
       } else {
-        toast.error('Failed to accept connection request');
+        toast.error('Failed to accept connection');
       }
     } catch (error) {
-      toast.error('Failed to accept connection request');
+      toast.error('Failed to accept connection');
     }
   };
 
-  const handleRejectRequest = async (requestId: string) => {
+  const handleRejectConnection = async (requestId: string) => {
+    if (!user?.id) return;
+    
     try {
       const success = await rejectConnectionRequest(requestId);
-      
       if (success) {
-        setConnectionRequests(prev => prev.filter(r => r.id !== requestId));
+        setConnectionRequests(prev => prev.filter(req => req.id !== requestId));
         toast.success('Connection request declined');
       } else {
-        toast.error('Failed to decline connection request');
+        toast.error('Failed to decline connection');
       }
     } catch (error) {
-      toast.error('Failed to decline connection request');
+      toast.error('Failed to decline connection');
     }
   };
 
-  const filteredSuggestions = suggestions.filter(suggestion =>
-    suggestion.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    suggestion.headline?.toLowerCase().includes(searchQuery.toLowerCase())
+  const handleDismissSuggestion = (profileId: string) => {
+    setSuggestions(prev => prev.filter(p => p.id !== profileId));
+  };
+
+  // Filter suggestions based on search
+  const filteredSuggestions = suggestions.filter(profile =>
+    profile.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    profile.headline?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    profile.location?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  if (loading) {
+  // Group suggestions by categories
+  const healthcareSuggestions = filteredSuggestions.filter(p => 
+    p.headline?.toLowerCase().includes('healthcare') ||
+    p.headline?.toLowerCase().includes('medical') ||
+    p.headline?.toLowerCase().includes('doctor') ||
+    p.headline?.toLowerCase().includes('nurse') ||
+    p.headline?.toLowerCase().includes('pharmacy')
+  );
+
+  const recentActivitySuggestions = filteredSuggestions.filter(p => 
+    !healthcareSuggestions.includes(p)
+  ).slice(0, 8);
+
+  if (!user) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-azure-200 border-t-azure-600 rounded-full animate-spin mx-auto"></div>
-          <p className="text-gray-600 mt-4">Loading your network...</p>
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
+        <div className="text-center max-w-md mx-auto">
+          <div className="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <UserGroupIcon className="w-10 h-10 text-blue-600" />
+          </div>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-3">Join the Network</h2>
+          <p className="text-gray-600 mb-6">Sign in to connect with healthcare professionals</p>
+          <Link
+            href="/signin"
+            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium"
+          >
+            Sign In
+          </Link>
         </div>
       </div>
     );
   }
 
+  if (loading) {
+    return <LoadingSpinner variant="fullscreen" text="Loading your network..." />;
+  }
+
   return (
-    <div className="w-full max-w-7xl mx-auto pl-5">
-      {/* Search Bar */}
-      <div className="mb-8">
-        <div className="relative max-w-md">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search people and institutions..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#007fff] focus:border-transparent bg-white shadow-sm"
-          />
+    <div className={`min-h-screen ${BACKGROUNDS.page.tertiary}`}>
+      {/* Header */}
+      <Header />
+      
+      {/* Top Navigation Bar */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Left Side - Navigation */}
+            <div className="flex items-center space-x-6">
+              <button
+                onClick={() => setActiveTab('grow')}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  activeTab === 'grow'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+              >
+                Grow
+              </button>
+              <button
+                onClick={() => setActiveTab('catch-up')}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  activeTab === 'catch-up'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+              >
+                Catch up
+              </button>
+            </div>
+
+            {/* Right Side - Search */}
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search people..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="space-y-8">
-        {/* Invitations Section */}
-        {connectionRequests.length > 0 && (
-          <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Invitations ({connectionRequests.length})</h2>
-              <button className="text-[#007fff] hover:text-[#0066cc] font-semibold text-lg">
-                View all
-              </button>
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Left Sidebar - Manage my network */}
+          <div className="lg:col-span-1">
+            <div className={`${COMPONENTS.card.base} sticky top-24`}>
+              <div className="p-6">
+                <h3 className={`${TYPOGRAPHY.heading.h4} mb-4`}>Manage my network</h3>
+                
+                <div className="space-y-3">
+                  <Link 
+                    href="/network/connections" 
+                    className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <UserIcon className="w-5 h-5 text-gray-600" />
+                      <span className="text-gray-900">Connections</span>
+                    </div>
+                    <span className="text-gray-500 font-medium">{formatNumber(networkStats.connections)}</span>
+                  </Link>
+
+                  <Link 
+                    href="/network/following" 
+                    className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <HeartIcon className="w-5 h-5 text-gray-600" />
+                      <span className="text-gray-900">Following & followers</span>
+                    </div>
+                  </Link>
+
+                  <Link 
+                    href="/groups" 
+                    className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <UserGroupIcon className="w-5 h-5 text-gray-600" />
+                      <span className="text-gray-900">Groups</span>
+                    </div>
+                    <span className="text-gray-500 font-medium">{formatNumber(networkStats.groups)}</span>
+                  </Link>
+
+                  <Link 
+                    href="/events" 
+                    className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <CalendarDaysIcon className="w-5 h-5 text-gray-600" />
+                      <span className="text-gray-900">Events</span>
+                    </div>
+                    <span className="text-gray-500 font-medium">{formatNumber(networkStats.events)}</span>
+                  </Link>
+
+                  <Link 
+                    href="/network/pages" 
+                    className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <DocumentTextIcon className="w-5 h-5 text-gray-600" />
+                      <span className="text-gray-900">Pages</span>
+                    </div>
+                    <span className="text-gray-500 font-medium">{formatNumber(networkStats.pages)}</span>
+                  </Link>
+
+                  <Link 
+                    href="/newsletters" 
+                    className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <NewspaperIcon className="w-5 h-5 text-gray-600" />
+                      <span className="text-gray-900">Newsletters</span>
+                    </div>
+                    <span className="text-gray-500 font-medium">{formatNumber(networkStats.newsletters)}</span>
+                  </Link>
+                </div>
+              </div>
             </div>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-              {connectionRequests.slice(0, 6).map((request) => (
-                <div key={request.id} className="bg-gray-50 rounded-xl p-6 border border-gray-200 h-[180px] flex flex-col">
-                  <div className="flex items-start space-x-4 mb-4">
-                    <Avatar
-                      src={request.requester.avatar_url}
-                      alt={request.requester.full_name || 'User'}
-                      size="lg"
-                      className="flex-shrink-0"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <ClickableProfileName
-                        userId={request.requester.id}
-                        name={request.requester.full_name || 'Anonymous User'}
-                        userType={request.requester.profile_type}
-                        className="text-lg font-bold text-gray-900 mb-1"
-                      />
-                      <p className="text-sm text-gray-600 mb-2">
-                        {request.requester.headline || 'Healthcare Professional'}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        Follows you and is inviting you to connect
-                      </p>
+          </div>
+
+          {/* Main Content Area */}
+          <div className="lg:col-span-3">
+            <div className="space-y-6">
+              {/* Invitations Section */}
+              {connectionRequests.length > 0 && (
+                <div className={`${COMPONENTS.card.base}`}>
+                  <div className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className={`${TYPOGRAPHY.heading.h4}`}>
+                        Invitations ({connectionRequests.length})
+                      </h3>
+                      <Link 
+                        href="/network/requests" 
+                        className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                      >
+                        Show all
+                      </Link>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      {connectionRequests.slice(0, 3).map((request) => (
+                        <motion.div
+                          key={request.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg"
+                        >
+                          <Avatar
+                            src={request.requester.avatar_url}
+                            alt={request.requester.full_name || 'User'}
+                            size="md"
+                          />
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-gray-900">
+                              {request.requester.full_name}
+                            </h4>
+                            <p className="text-gray-600 text-sm mb-2">
+                              {request.requester.headline || 'Healthcare Professional'}
+                            </p>
+                            <p className="text-gray-500 text-sm">
+                              {request.requester.location && (
+                                <span className="flex items-center">
+                                  <MapPinIcon className="w-4 h-4 mr-1" />
+                                  {request.requester.location}
+                                </span>
+                              )}
+                            </p>
+                          </div>
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => handleAcceptConnection(request.id)}
+                              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                            >
+                              Accept
+                            </button>
+                            <button
+                              onClick={() => handleRejectConnection(request.id)}
+                              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+                            >
+                              Ignore
+                            </button>
+                          </div>
+                        </motion.div>
+                      ))}
                     </div>
                   </div>
-                  
-                  <div className="flex space-x-3 mt-auto">
-                    <button
-                      onClick={() => handleRejectRequest(request.id)}
-                      className="flex-1 px-4 py-3 text-sm text-gray-600 hover:text-gray-800 font-medium bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                      Ignore
-                    </button>
-                    <button
-                      onClick={() => handleAcceptRequest(request.id)}
-                      className="flex-1 px-4 py-3 bg-[#007fff] text-white rounded-lg hover:bg-[#0066cc] transition-colors text-sm font-semibold"
-                    >
-                      Accept
-                    </button>
+                </div>
+              )}
+
+              {/* People you may know - Healthcare */}
+              {healthcareSuggestions.length > 0 && (
+                <div className={`${COMPONENTS.card.base}`}>
+                  <div className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className={`${TYPOGRAPHY.heading.h4}`}>
+                        People in the Healthcare industry you may know
+                      </h3>
+                      <Link 
+                        href="/network/suggestions" 
+                        className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                      >
+                        Show all
+                      </Link>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {healthcareSuggestions.slice(0, 8).map((profile) => (
+                        <motion.div
+                          key={profile.id}
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="relative p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
+                        >
+                          <button
+                            onClick={() => handleDismissSuggestion(profile.id)}
+                            className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                          >
+                            <XMarkIcon className="w-4 h-4" />
+                          </button>
+                          
+                          <div className="text-center">
+                            <Avatar
+                              src={profile.avatar_url}
+                              alt={profile.full_name || 'User'}
+                              size="lg"
+                              className="mx-auto mb-3"
+                            />
+                            <h4 className="font-semibold text-gray-900 text-sm mb-1">
+                              {profile.full_name}
+                            </h4>
+                            <p className="text-gray-600 text-xs mb-2 line-clamp-2">
+                              {profile.headline || 'Healthcare Professional'}
+                            </p>
+                            <p className="text-gray-500 text-xs mb-3">
+                              {(profile.mutual_connections || 0) > 0 && (
+                                <span>
+                                  {profile.mutual_connections} mutual connection{(profile.mutual_connections || 0) !== 1 ? 's' : ''}
+                                </span>
+                              )}
+                            </p>
+                            <button
+                              onClick={() => handleConnect(
+                                profile.id, 
+                                profile.profile_type === 'institution' ? 'institution' : 'individual'
+                              )}
+                              disabled={profile.connection_status === 'pending' || profile.follow_status === 'following'}
+                              className={`w-full px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
+                                profile.connection_status === 'pending' || profile.follow_status === 'following'
+                                  ? 'bg-green-100 text-green-700 cursor-not-allowed'
+                                  : 'bg-blue-600 text-white hover:bg-blue-700'
+                              }`}
+                            >
+                              {profile.connection_status === 'pending' 
+                                ? 'Pending' 
+                                : profile.follow_status === 'following'
+                                ? 'Following'
+                                : profile.profile_type === 'institution'
+                                ? '+ Follow'
+                                : '+ Connect'
+                              }
+                            </button>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
+              )}
 
-        {/* People you may know Section */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold text-gray-900">
-              People in the Healthcare industry you may know
-            </h2>
-            <button className="text-[#007fff] hover:text-[#0066cc] font-semibold text-lg">
-              View all
-            </button>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
-            {filteredSuggestions.slice(0, 15).map((profile) => (
-              <div key={profile.id} className="bg-gray-50 rounded-xl p-6 border border-gray-200 h-[500px] flex flex-col">
-                <div className="text-center mb-6">
-                  <Avatar
-                    src={profile.avatar_url}
-                    alt={profile.full_name || 'User'}
-                    size="xl"
-                    className="mx-auto mb-4"
-                  />
-                  <ClickableProfileName
-                    userId={profile.id}
-                    name={profile.full_name || 'Anonymous User'}
-                    userType={profile.profile_type}
-                    className="text-lg font-bold text-gray-900 mb-2"
-                  />
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                    {profile.headline || 'Healthcare Professional'}
+              {/* People you may know - Recent Activity */}
+              {recentActivitySuggestions.length > 0 && (
+                <div className={`${COMPONENTS.card.base}`}>
+                  <div className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className={`${TYPOGRAPHY.heading.h4}`}>
+                        People you may know based on your recent activity
+                      </h3>
+                      <Link 
+                        href="/network/suggestions" 
+                        className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                      >
+                        Show all
+                      </Link>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {recentActivitySuggestions.map((profile) => (
+                        <motion.div
+                          key={profile.id}
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="relative p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
+                        >
+                          <button
+                            onClick={() => handleDismissSuggestion(profile.id)}
+                            className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                          >
+                            <XMarkIcon className="w-4 h-4" />
+                          </button>
+                          
+                          <div className="text-center">
+                            <Avatar
+                              src={profile.avatar_url}
+                              alt={profile.full_name || 'User'}
+                              size="lg"
+                              className="mx-auto mb-3"
+                            />
+                            <h4 className="font-semibold text-gray-900 text-sm mb-1">
+                              {profile.full_name}
+                            </h4>
+                            <p className="text-gray-600 text-xs mb-2 line-clamp-2">
+                              {profile.headline || 'Healthcare Professional'}
+                            </p>
+                            <p className="text-gray-500 text-xs mb-3">
+                              {(profile.mutual_connections || 0) > 0 && (
+                                <span>
+                                  {profile.mutual_connections} mutual connection{(profile.mutual_connections || 0) !== 1 ? 's' : ''}
+                                </span>
+                              )}
+                            </p>
+                            <button
+                              onClick={() => handleConnect(
+                                profile.id, 
+                                profile.profile_type === 'institution' ? 'institution' : 'individual'
+                              )}
+                              disabled={profile.connection_status === 'pending' || profile.follow_status === 'following'}
+                              className={`w-full px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
+                                profile.connection_status === 'pending' || profile.follow_status === 'following'
+                                  ? 'bg-green-100 text-green-700 cursor-not-allowed'
+                                  : 'bg-blue-600 text-white hover:bg-blue-700'
+                              }`}
+                            >
+                              {profile.connection_status === 'pending' 
+                                ? 'Pending' 
+                                : profile.follow_status === 'following'
+                                ? 'Following'
+                                : profile.profile_type === 'institution'
+                                ? '+ Follow'
+                                : '+ Connect'
+                              }
+                            </button>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Empty State */}
+              {filteredSuggestions.length === 0 && (
+                <div className={`${COMPONENTS.card.base} text-center py-12`}>
+                  <UserGroupIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className={`${TYPOGRAPHY.heading.h4} mb-2`}>No suggestions found</h3>
+                  <p className={`${TYPOGRAPHY.body.medium}`}>
+                    {searchQuery ? 'Try adjusting your search terms' : 'We\'ll show you people to connect with here'}
                   </p>
-                  
-                  {profile.mutual_connections && profile.mutual_connections > 0 ? (
-                    <p className="text-sm text-gray-500 mb-4">
-                      {`${profile.mutual_connections} mutual connection${profile.mutual_connections !== 1 ? 's' : ''}`}
-                    </p>
-                  ) : (
-                    <p className="text-sm text-gray-500 mb-4">Based on your profile</p>
-                  )}
                 </div>
-                
-                <div className="mt-auto">
-                  {profile.profile_type === 'institution' ? (
-                    <button
-                      onClick={() => profile.follow_status === 'following' 
-                        ? handleUnfollow(profile.id) 
-                        : handleConnect(profile.id, 'institution')
-                      }
-                      disabled={profile.follow_status === 'following'}
-                      className={`w-full py-3 rounded-xl transition-colors text-sm font-semibold ${
-                        profile.follow_status === 'following'
-                          ? 'bg-green-100 text-green-700 cursor-default'
-                          : 'bg-[#007fff] text-white hover:bg-[#0066cc]'
-                      }`}
-                    >
-                      {profile.follow_status === 'following' ? 'Following' : '+ Follow'}
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleConnect(profile.id, 'individual')}
-                      disabled={profile.connection_status === 'pending' || profile.connection_status === 'connected'}
-                      className={`w-full py-3 rounded-xl transition-colors text-sm font-semibold ${
-                        profile.connection_status === 'connected'
-                          ? 'bg-green-100 text-green-700 cursor-default'
-                          : profile.connection_status === 'pending'
-                          ? 'bg-yellow-100 text-yellow-700 cursor-default'
-                          : 'bg-[#007fff] text-white hover:bg-[#0066cc]'
-                      }`}
-                    >
-                      {profile.connection_status === 'connected' ? 'Connected' : 
-                       profile.connection_status === 'pending' ? 'Pending' : '+ Connect'}
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          {filteredSuggestions.length === 0 && (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <UsersIcon className="w-8 h-8 text-gray-400" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No suggestions available</h3>
-              <p className="text-gray-600">
-                We&apos;re working on finding the right connections for you.
-              </p>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
   );
-} 
+}

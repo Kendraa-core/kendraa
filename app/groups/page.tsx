@@ -1,190 +1,213 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { UserGroupIcon, PlusIcon, UsersIcon } from '@heroicons/react/24/outline';
-
-interface Group {
-  id: string;
-  name: string;
-  description: string;
-  memberCount: number;
-  isMember: boolean;
-  category: string;
-  imageUrl?: string;
-}
+import LoadingSpinner from '@/components/common/LoadingSpinner';
+import Header from '@/components/layout/Header';
+import { 
+  UserGroupIcon,
+  SparklesIcon,
+  BellIcon,
+  PlusIcon,
+  CalendarDaysIcon,
+  UsersIcon,
+  ChatBubbleLeftRightIcon,
+  DocumentTextIcon,
+  ShareIcon,
+  HeartIcon
+} from '@heroicons/react/24/outline';
+import { 
+  BACKGROUNDS, 
+  TEXT_COLORS, 
+  COMPONENTS, 
+  TYPOGRAPHY, 
+  BORDER_COLORS,
+  ANIMATIONS
+} from '@/lib/design-system';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 export default function GroupsPage() {
   const { user } = useAuth();
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'my-groups' | 'discover'>('my-groups');
 
-  useEffect(() => {
-      const fetchGroups = async () => {
-    if (!user?.id) return;
-
-    try {
-      setLoading(true);
-      // Groups functionality not yet implemented in database
-      setGroups([]);
-    } catch (error) {
-      console.error('Error fetching groups:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-    fetchGroups();
-  }, [user?.id]);
-
-  const handleJoinGroup = (groupId: string) => {
-    setGroups(prev => prev.map(group => 
-      group.id === groupId ? { ...group, isMember: true, memberCount: group.memberCount + 1 } : group
-    ));
-  };
-
-  const handleLeaveGroup = (groupId: string) => {
-    setGroups(prev => prev.map(group => 
-      group.id === groupId ? { ...group, isMember: false, memberCount: group.memberCount - 1 } : group
-    ));
-  };
-
-  const myGroups = groups.filter(group => group.isMember);
-  const discoverGroups = groups.filter(group => !group.isMember);
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
+        <div className="text-center max-w-md mx-auto">
+          <div className="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <UserGroupIcon className="w-10 h-10 text-blue-600" />
+          </div>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-3">Join the Community</h2>
+          <p className="text-gray-600 mb-6">Sign in to access healthcare groups and communities</p>
+          <Link
+            href="/signin"
+            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium"
+          >
+            Sign In
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <UserGroupIcon className="w-6 h-6 text-blue-600" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">Groups</h1>
-                <p className="text-gray-600">Connect with professional communities</p>
-              </div>
-            </div>
-            <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-              <PlusIcon className="w-4 h-4" />
-              <span>Create Group</span>
-            </button>
-          </div>
-        </div>
+    <div className={`min-h-screen ${BACKGROUNDS.page.tertiary}`}>
+      {/* Header */}
+      <Header />
+      
+      {/* Main Content */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="text-center">
+          {/* Coming Soon Icon */}
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 200, damping: 10 }}
+            className="w-32 h-32 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-8"
+          >
+            <UserGroupIcon className="w-16 h-16 text-white" />
+          </motion.div>
 
-        {/* Tab Navigation */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
-          <div className="flex">
-            <button
-              onClick={() => setActiveTab('my-groups')}
-              className={`flex-1 py-3 px-4 text-center font-medium transition-colors ${
-                activeTab === 'my-groups'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              My Groups ({myGroups.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('discover')}
-              className={`flex-1 py-3 px-4 text-center font-medium transition-colors ${
-                activeTab === 'discover'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Discover Groups ({discoverGroups.length})
-            </button>
-          </div>
-        </div>
-
-        {/* Content */}
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <div className="relative">
-                {/* Main spinner */}
-                <div className="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
-                
-                {/* Pulse effect */}
-                <div className="absolute inset-0 w-12 h-12 border-4 border-transparent border-t-primary-400 rounded-full animate-ping opacity-20"></div>
-              </div>
-              
-              <p className="text-gray-600 mt-4 text-sm font-medium">Loading groups...</p>
-              
-              {/* Progress dots */}
-              <div className="flex justify-center mt-2 space-x-1">
-                <div className="w-2 h-2 bg-primary-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                <div className="w-2 h-2 bg-primary-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                <div className="w-2 h-2 bg-primary-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {(activeTab === 'my-groups' ? myGroups : discoverGroups).map((group) => (
-              <div key={group.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">{group.name}</h3>
-                    <div className="flex items-center space-x-2 text-sm text-gray-500">
-                      <UsersIcon className="w-4 h-4" />
-                      <span>{group.memberCount} members</span>
-                      <span>•</span>
-                      <span className="px-2 py-1 bg-gray-100 rounded-full text-xs">{group.category}</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <p className="text-gray-600 text-sm mb-4 line-clamp-3">{group.description}</p>
-                
-                <div className="flex justify-between items-center">
-                  <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                    View Group
-                  </button>
-                  {group.isMember ? (
-                    <button
-                      onClick={() => handleLeaveGroup(group.id)}
-                      className="px-3 py-1 text-sm font-medium bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-                    >
-                      Leave
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleJoinGroup(group.id)}
-                      className="px-3 py-1 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      Join
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Empty State */}
-        {!loading && (activeTab === 'my-groups' ? myGroups : discoverGroups).length === 0 && (
-          <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <UserGroupIcon className="w-8 h-8 text-gray-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          {/* Coming Soon Text */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="mb-8"
+          >
+            <h1 className={`${TYPOGRAPHY.heading.h1} mb-4`}>
               Groups Coming Soon
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Professional groups functionality is currently under development. 
-              You&apos;ll soon be able to join and create groups to connect with healthcare communities.
+            </h1>
+            <p className={`${TYPOGRAPHY.body.large} text-gray-600 max-w-2xl mx-auto`}>
+              We&apos;re building an amazing community feature where healthcare professionals can connect, 
+              share knowledge, and collaborate in specialized groups.
             </p>
-            <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-              <span>Feature in development</span>
+          </motion.div>
+
+          {/* Features Preview */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12"
+          >
+            <div className={`${COMPONENTS.card.base} p-6 text-center`}>
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <UsersIcon className="w-6 h-6 text-blue-600" />
+              </div>
+              <h3 className={`${TYPOGRAPHY.heading.h4} mb-2`}>Specialized Communities</h3>
+              <p className={`${TYPOGRAPHY.body.small} text-gray-600`}>
+                Join groups based on your medical specialty, interests, and expertise areas.
+              </p>
             </div>
-          </div>
-        )}
+
+            <div className={`${COMPONENTS.card.base} p-6 text-center`}>
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <ChatBubbleLeftRightIcon className="w-6 h-6 text-green-600" />
+              </div>
+              <h3 className={`${TYPOGRAPHY.heading.h4} mb-2`}>Knowledge Sharing</h3>
+              <p className={`${TYPOGRAPHY.body.small} text-gray-600`}>
+                Share insights, ask questions, and learn from fellow healthcare professionals.
+              </p>
+            </div>
+
+            <div className={`${COMPONENTS.card.base} p-6 text-center`}>
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <CalendarDaysIcon className="w-6 h-6 text-purple-600" />
+              </div>
+              <h3 className={`${TYPOGRAPHY.heading.h4} mb-2`}>Group Events</h3>
+              <p className={`${TYPOGRAPHY.body.small} text-gray-600`}>
+                Organize and participate in group-specific events, webinars, and meetups.
+              </p>
+            </div>
+
+            <div className={`${COMPONENTS.card.base} p-6 text-center`}>
+              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <DocumentTextIcon className="w-6 h-6 text-orange-600" />
+              </div>
+              <h3 className={`${TYPOGRAPHY.heading.h4} mb-2`}>Resource Sharing</h3>
+              <p className={`${TYPOGRAPHY.body.small} text-gray-600`}>
+                Share documents, research papers, and valuable resources with your group.
+              </p>
+            </div>
+
+            <div className={`${COMPONENTS.card.base} p-6 text-center`}>
+              <div className="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <BellIcon className="w-6 h-6 text-pink-600" />
+              </div>
+              <h3 className={`${TYPOGRAPHY.heading.h4} mb-2`}>Smart Notifications</h3>
+              <p className={`${TYPOGRAPHY.body.small} text-gray-600`}>
+                Get notified about relevant discussions and updates in your groups.
+              </p>
+            </div>
+
+            <div className={`${COMPONENTS.card.base} p-6 text-center`}>
+              <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <ShareIcon className="w-6 h-6 text-indigo-600" />
+              </div>
+              <h3 className={`${TYPOGRAPHY.heading.h4} mb-2`}>Collaboration Tools</h3>
+              <p className={`${TYPOGRAPHY.body.small} text-gray-600`}>
+                Work together on projects, research, and professional development.
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Call to Action */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="space-y-4"
+          >
+            <div className="flex items-center justify-center space-x-2 text-gray-600">
+              <SparklesIcon className="w-5 h-5" />
+              <span className="text-sm">Be the first to know when Groups launches</span>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4">
+              <Link
+                href="/network"
+                className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium"
+              >
+                <UserGroupIcon className="w-5 h-5 mr-2" />
+                Explore Network
+              </Link>
+              
+              <Link
+                href="/events"
+                className="inline-flex items-center px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
+              >
+                <CalendarDaysIcon className="w-5 h-5 mr-2" />
+                Browse Events
+              </Link>
+            </div>
+          </motion.div>
+
+          {/* Progress Indicator */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
+            className="mt-12"
+          >
+            <div className="max-w-md mx-auto">
+              <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
+                <span>Development Progress</span>
+                <span>75%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: "75%" }}
+                  transition={{ delay: 1, duration: 1, ease: "easeOut" }}
+                  className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full"
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                We&apos;re working hard to bring you the best group experience
+              </p>
+            </div>
+          </motion.div>
+        </div>
       </div>
     </div>
   );
