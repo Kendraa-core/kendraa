@@ -49,36 +49,11 @@ export default function DashboardLayout({
   useEffect(() => {
     if (!authLoading && user && profile) {
       if (profile.user_type === 'institution' || profile.profile_type === 'institution') {
-        // Redirect to appropriate institution page based on current path
-        if (pathname === '/dashboard' || pathname.startsWith('/dashboard/')) {
-          router.push('/institution/dashboard');
-        } else if (pathname.startsWith('/jobs')) {
-          router.push('/institution/jobs');
-        } else if (pathname.startsWith('/events')) {
-          router.push('/institution/events');
-        } else if (pathname.startsWith('/network')) {
-          router.push('/institution/network');
-        } else if (pathname.startsWith('/notifications')) {
-          router.push('/institution/notifications');
-        } else if (pathname.startsWith('/feed')) {
-          router.push('/institution/feed');
-        } else if (pathname.startsWith('/applications')) {
-          router.push('/institution/jobs');
-        } else if (pathname.startsWith('/specializations')) {
-          router.push('/institution/dashboard');
-        } else if (pathname.startsWith('/saved-items')) {
-          router.push('/institution/dashboard');
-        } else if (pathname.startsWith('/reviews')) {
-          router.push('/institution/dashboard');
-        } else if (pathname.startsWith('/newsletters')) {
-          router.push('/institution/dashboard');
-        } else {
-          router.push('/institution/dashboard');
-        }
+        router.push('/institution/dashboard');
         return;
       }
     }
-  }, [user, profile, authLoading, pathname, router]);
+  }, [user, profile, authLoading, router]);
 
   useEffect(() => {
     const loadData = async () => {
