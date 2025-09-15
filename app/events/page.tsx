@@ -22,12 +22,28 @@ import {
   AcademicCapIcon,
   UserGroupIcon,
   SparklesIcon,
-  FireIcon
+  FireIcon,
+  MagnifyingGlassIcon,
+  FunnelIcon,
+  ArrowRightIcon,
+  StarIcon,
+  HeartIcon,
+  ShareIcon,
+  ChevronDownIcon,
+  TrophyIcon,
+  EyeIcon,
+  GlobeAltIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  AdjustmentsHorizontalIcon,
+  Bars3Icon
 } from '@heroicons/react/24/outline';
+import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import Avatar from '@/components/common/Avatar';
 import type { Event } from '@/types/database.types';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface EventWithRegistration extends Event {
   isRegistered?: boolean;
@@ -44,57 +60,33 @@ export default function EventsPage() {
   const { user } = useAuth();
   const [events, setEvents] = useState<EventWithRegistration[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedEvent, setSelectedEvent] = useState<EventWithRegistration | null>(null);
   const [activeTab, setActiveTab] = useState<'upcoming' | 'registered' | 'my-events'>('upcoming');
   const [selectedType, setSelectedType] = useState<string>('all');
   const [selectedFormat, setSelectedFormat] = useState<string>('all');
-
-  // Function to fetch organizer information for events
-  const fetchOrganizerInfo = async (events: Event[]): Promise<EventWithRegistration[]> => {
-    const eventsWithOrganizers = await Promise.all(
-      events.map(async (event) => {
-        try {
-          const organizer = await getEventOrganizer(event.organizer_id);
-          return {
-            ...event,
-            organizer: organizer || {
-              id: event.organizer_id,
-              full_name: 'Unknown Organizer',
-              avatar_url: null,
-              user_type: 'individual',
-              headline: 'Healthcare Professional'
-            }
-          };
-        } catch (error) {
-          console.error('Error fetching organizer for event:', event.id, error);
-          return {
-            ...event,
-            organizer: {
-              id: event.organizer_id,
-              full_name: 'Unknown Organizer',
-              avatar_url: null,
-              user_type: 'individual',
-              headline: 'Healthcare Professional'
-            }
-          };
-        }
-      })
-    );
-    return eventsWithOrganizers;
-  };
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [sortBy, setSortBy] = useState<string>('date');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [userTypeFilter, setUserTypeFilter] = useState<string>('all');
+  const [domainFilter, setDomainFilter] = useState<string>('all');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
 
   useEffect(() => {
     const fetchEvents = async () => {
-      if (!user?.id) return;
+      if (!user?.id) {
+        setLoading(false);
+        return;
+      }
 
       try {
         setLoading(true);
-        
         let allEvents: Event[] = [];
-        
-        if (activeTab === 'my-events') {
-          allEvents = await getEventsByOrganizer(user.id);
-        } else if (activeTab === 'registered') {
+
+        if (activeTab === 'registered') {
           allEvents = await getUserRegisteredEvents(user.id);
+        } else if (activeTab === 'my-events') {
+          allEvents = await getEventsByOrganizer(user.id);
         } else {
           allEvents = await getEvents();
         }
@@ -112,6 +104,11 @@ export default function EventsPage() {
         } else {
           setEvents(eventsWithOrganizers);
         }
+
+        // Set first event as selected by default
+        if (eventsWithOrganizers.length > 0 && !selectedEvent) {
+          setSelectedEvent(eventsWithOrganizers[0]);
+        }
       } catch (error) {
         console.error('Error fetching events:', error);
         toast.error('Failed to load events');
@@ -122,6 +119,21 @@ export default function EventsPage() {
 
     fetchEvents();
   }, [user?.id, activeTab]);
+
+  const fetchOrganizerInfo = async (events: Event[]) => {
+    const eventsWithOrganizers = await Promise.all(
+      events.map(async (event) => {
+        try {
+          const organizer = await getEventOrganizer(event.organizer_id);
+          return { ...event, organizer };
+        } catch (error) {
+          console.error('Error fetching organizer:', error);
+          return event;
+        }
+      })
+    );
+    return eventsWithOrganizers;
+  };
 
   const handleRegister = async (eventId: string) => {
     if (!user?.id) {
@@ -137,6 +149,12 @@ export default function EventsPage() {
             ? { ...event, isRegistered: true, attendees_count: (event.attendees_count || 0) + 1 }
             : event
         ));
+        
+        // Update selected event if it's the one being registered
+        if (selectedEvent?.id === eventId) {
+          setSelectedEvent(prev => prev ? { ...prev, isRegistered: true, attendees_count: (prev.attendees_count || 0) + 1 } : null);
+        }
+        
         toast.success('Successfully registered for event!');
       } else {
         toast.error('Failed to register for event. You may already be registered.');
@@ -161,6 +179,12 @@ export default function EventsPage() {
             ? { ...event, isRegistered: false, attendees_count: Math.max(0, (event.attendees_count || 0) - 1) }
             : event
         ));
+        
+        // Update selected event if it's the one being unregistered
+        if (selectedEvent?.id === eventId) {
+          setSelectedEvent(prev => prev ? { ...prev, isRegistered: false, attendees_count: Math.max(0, (prev.attendees_count || 0) - 1) } : null);
+        }
+        
         toast.success('Successfully unregistered from event');
       } else {
         toast.error('Failed to unregister from event');
@@ -211,31 +235,77 @@ export default function EventsPage() {
     }
   };
 
-  // Filter events based on filters
+  const getEventTypeColor = (type: string) => {
+    switch (type) {
+      case 'conference': return 'bg-blue-100 text-blue-700';
+      case 'webinar': return 'bg-purple-100 text-purple-700';
+      case 'workshop': return 'bg-green-100 text-green-700';
+      case 'seminar': return 'bg-orange-100 text-orange-700';
+      case 'networking': return 'bg-pink-100 text-pink-700';
+      case 'training': return 'bg-red-100 text-red-700';
+      default: return 'bg-gray-100 text-gray-700';
+    }
+  };
+
+  const getDaysLeft = (dateString: string) => {
+    const eventDate = new Date(dateString);
+    const today = new Date();
+    const diffTime = eventDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 0) return 'Ended';
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return '1 day left';
+    if (diffDays < 7) return `${diffDays} days left`;
+    if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks left`;
+    return `${Math.ceil(diffDays / 30)} months left`;
+  };
+
+  // Filter and sort events
   const filteredEvents = events.filter(event => {
     const matchesType = selectedType === 'all' || event.event_type === selectedType;
     const matchesFormat = selectedFormat === 'all' || 
                          (selectedFormat === 'virtual' && event.is_virtual) ||
                          (selectedFormat === 'in-person' && !event.is_virtual);
+    const matchesSearch = searchQuery === '' || 
+                         event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         event.description.toLowerCase().includes(searchQuery.toLowerCase());
     
-    return matchesType && matchesFormat;
+    return matchesType && matchesFormat && matchesSearch;
+  }).sort((a, b) => {
+    switch (sortBy) {
+      case 'date':
+        return new Date(a.start_date).getTime() - new Date(b.start_date).getTime();
+      case 'popularity':
+        return (b.attendees_count || 0) - (a.attendees_count || 0);
+      case 'name':
+        return a.title.localeCompare(b.title);
+      default:
+        return 0;
+    }
   });
 
   const upcomingEvents = filteredEvents.filter(event => !event.isRegistered);
   const registeredEvents = filteredEvents.filter(event => event.isRegistered);
 
+  const getDisplayEvents = () => {
+    if (activeTab === 'registered') return registeredEvents;
+    if (activeTab === 'my-events') return filteredEvents.filter(e => e.organizer_id === user?.id);
+    return filteredEvents;
+  };
+
   if (!user) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center p-4">
         <div className="text-center max-w-md mx-auto">
-          <div className="w-20 h-20 bg-azure-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <CalendarIcon className="w-10 h-10 text-azure-600" />
+          <div className="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <CalendarIcon className="w-10 h-10 text-blue-600" />
           </div>
           <h2 className="text-2xl font-semibold text-gray-900 mb-3">Join the Community</h2>
           <p className="text-gray-600 mb-6">Sign in to discover and join healthcare events</p>
           <Link
             href="/signin"
-            className="inline-flex items-center px-6 py-3 bg-azure-600 text-white rounded-xl hover:bg-azure-700 transition-colors font-medium"
+            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium"
           >
             Sign In to Continue
           </Link>
@@ -245,275 +315,439 @@ export default function EventsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Filters */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <div className="flex flex-col sm:flex-row gap-4">
-          {/* Filters */}
-          <div className="flex gap-3">
-            <select
-              value={selectedType}
-              onChange={(e) => setSelectedType(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent transition-colors text-sm"
-            >
-              <option value="all">All Types</option>
-              <option value="conference">Conference</option>
-              <option value="webinar">Webinar</option>
-              <option value="workshop">Workshop</option>
-              <option value="seminar">Seminar</option>
-              <option value="networking">Networking</option>
-              <option value="training">Training</option>
-            </select>
-            
-            <select
-              value={selectedFormat}
-              onChange={(e) => setSelectedFormat(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-transparent transition-colors text-sm"
-            >
-              <option value="all">All Formats</option>
-              <option value="virtual">Virtual</option>
-              <option value="in-person">In-Person</option>
-            </select>
+    <div className="min-h-screen bg-gray-50">
+      {/* Top Navigation Bar */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Left Side - Navigation */}
+            <div className="flex items-center space-x-6">
+              <button
+                onClick={() => setActiveTab('upcoming')}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  activeTab === 'upcoming'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+              >
+                Events
+              </button>
+              
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="date">Sort By Date</option>
+                    <option value="popularity">Sort By Popularity</option>
+                    <option value="name">Sort By Name</option>
+                  </select>
+                  <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                </div>
 
-            {/* Create Event Button */}
-            <Link
-              href="/events/create"
-              className="inline-flex items-center px-4 py-2 bg-azure-600 text-white rounded-lg hover:bg-azure-700 transition-colors text-sm font-medium"
-            >
-              <PlusIcon className="w-4 h-4 mr-2" />
-              Create Event
-            </Link>
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="flex items-center px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <FunnelIcon className="w-4 h-4 mr-2 text-gray-600" />
+                  <span className="text-sm text-gray-700">Filters</span>
+                  <span className="ml-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full">6</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Right Side - Filters */}
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="all">Status</option>
+                  <option value="upcoming">Upcoming</option>
+                  <option value="ongoing">Ongoing</option>
+                  <option value="ended">Ended</option>
+                </select>
+                <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full">1</span>
+              </div>
+
+              <div className="relative">
+                <select
+                  value={userTypeFilter}
+                  onChange={(e) => setUserTypeFilter(e.target.value)}
+                  className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="all">User Type</option>
+                  <option value="individual">Individual</option>
+                  <option value="institution">Institution</option>
+                </select>
+                <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full">1</span>
+              </div>
+
+              <div className="relative">
+                <select
+                  value={domainFilter}
+                  onChange={(e) => setDomainFilter(e.target.value)}
+                  className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="all">Domain</option>
+                  <option value="healthcare">Healthcare</option>
+                  <option value="technology">Technology</option>
+                  <option value="business">Business</option>
+                </select>
+                <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full">1</span>
+              </div>
+
+              <div className="relative">
+                <select
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                  className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="all">Category</option>
+                  <option value="conference">Conference</option>
+                  <option value="webinar">Webinar</option>
+                  <option value="workshop">Workshop</option>
+                  <option value="seminar">Seminar</option>
+                  <option value="networking">Networking</option>
+                  <option value="training">Training</option>
+                </select>
+                <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              </div>
+
+              <Link
+                href="/events/create"
+                className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              >
+                <PlusIcon className="w-4 h-4 mr-2" />
+                Create Event
+              </Link>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="bg-white rounded-lg border border-gray-200 p-1">
-        <div className="flex">
-          <button
-            onClick={() => setActiveTab('upcoming')}
-            className={`flex-1 px-4 py-3 text-sm font-medium rounded-md transition-colors ${
-              activeTab === 'upcoming'
-                ? 'bg-azure-600 text-white'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-            }`}
-          >
-            <div className="flex items-center justify-center space-x-2">
-              <CalendarIcon className="w-4 h-4" />
-              <span>All Events</span>
-              <span className="bg-white/20 px-2 py-1 rounded-full text-xs">
-                {upcomingEvents.length}
-              </span>
-            </div>
-          </button>
-          <button
-            onClick={() => setActiveTab('registered')}
-            className={`flex-1 px-4 py-3 text-sm font-medium rounded-md transition-colors ${
-              activeTab === 'registered'
-                ? 'bg-azure-600 text-white'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-            }`}
-          >
-            <div className="flex items-center justify-center space-x-2">
-              <UsersIcon className="w-4 h-4" />
-              <span>My Events</span>
-              <span className="bg-white/20 px-2 py-1 rounded-full text-xs">
-                {registeredEvents.length}
-              </span>
-            </div>
-          </button>
-          <button
-            onClick={() => setActiveTab('my-events')}
-            className={`flex-1 px-4 py-3 text-sm font-medium rounded-md transition-colors ${
-              activeTab === 'my-events'
-                ? 'bg-azure-600 text-white'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-            }`}
-          >
-            <div className="flex items-center justify-center space-x-2">
-              <PlusIcon className="w-4 h-4" />
-              <span>Created</span>
-              <span className="bg-white/20 px-2 py-1 rounded-full text-xs">
-                {events.filter(e => e.organizer_id === user?.id).length}
-              </span>
-            </div>
-          </button>
-        </div>
-      </div>
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Event List */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 h-[calc(100vh-8rem)] overflow-hidden">
+              {/* Search Bar */}
+              <div className="p-4 border-b border-gray-200">
+                <div className="relative">
+                  <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search events..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
 
-      {/* Events Grid */}
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="text-center">
-            <div className="w-8 h-8 border-2 border-azure-200 border-t-azure-600 rounded-full animate-spin mx-auto"></div>
-            <p className="text-gray-600 mt-4">Loading events...</p>
+              {/* Event List */}
+              <div className="overflow-y-auto h-[calc(100%-5rem)]">
+                {loading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="w-8 h-8 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                  </div>
+                ) : (
+                  <div className="p-2">
+                    {getDisplayEvents().map((event, index) => (
+                      <motion.div
+                        key={event.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        onClick={() => setSelectedEvent(event)}
+                        className={`p-4 rounded-lg cursor-pointer transition-all duration-200 mb-2 ${
+                          selectedEvent?.id === event.id
+                            ? 'bg-blue-50 border-2 border-blue-200'
+                            : 'hover:bg-gray-50 border-2 border-transparent'
+                        }`}
+                      >
+                        <div className="flex items-start space-x-3">
+                          {/* Event Logo */}
+                          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <span className="text-white font-bold text-lg">
+                              {event.organizer?.full_name?.charAt(0) || 'E'}
+                            </span>
+                          </div>
+
+                          {/* Event Info */}
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-gray-900 text-sm mb-1 line-clamp-2">
+                              {event.title}
+                            </h3>
+                            <p className="text-xs text-gray-600 mb-2 line-clamp-1">
+                              {event.organizer?.full_name || 'Unknown Organizer'}
+                            </p>
+
+                            {/* Stats */}
+                            <div className="flex items-center space-x-4 text-xs text-gray-500 mb-2">
+                              <div className="flex items-center">
+                                <UsersIcon className="w-3 h-3 mr-1" />
+                                <span>{event.attendees_count || 0} Registered</span>
+                              </div>
+                              <div className="flex items-center">
+                                <ClockIcon className="w-3 h-3 mr-1" />
+                                <span>{getDaysLeft(event.start_date)}</span>
+                              </div>
+                            </div>
+
+                            {/* Tags */}
+                            <div className="flex flex-wrap gap-1">
+                              <span className={`px-2 py-1 text-xs font-medium rounded-full ${getEventTypeColor(event.event_type)}`}>
+                                {event.event_type}
+                              </span>
+                              {event.is_virtual && (
+                                <span className="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-700 rounded-full">
+                                  Virtual
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+
+                    {getDisplayEvents().length === 0 && (
+                      <div className="text-center py-12">
+                        <CalendarIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-500">No events found</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {(() => {
-            let displayEvents = filteredEvents;
-            if (activeTab === 'registered') {
-              displayEvents = registeredEvents;
-            } else if (activeTab === 'my-events') {
-              displayEvents = filteredEvents.filter(e => e.organizer_id === user?.id);
-            }
-            return displayEvents;
-          })().map((event) => (
-            <Link key={event.id} href={`/events/${event.id}`}>
-              <div className="group bg-white rounded-lg border border-gray-200 hover:border-azure-300 hover:shadow-md transition-all duration-200 overflow-hidden">
+
+          {/* Right Column - Event Details */}
+          <div className="lg:col-span-2">
+            {selectedEvent ? (
+              <motion.div
+                key={selectedEvent.id}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="bg-white rounded-xl shadow-sm border border-gray-200 h-[calc(100vh-8rem)] overflow-y-auto"
+              >
                 {/* Event Header */}
-                <div className="p-6">
+                <div className="p-6 border-b border-gray-200">
                   <div className="flex items-start justify-between mb-4">
-                    <div className="inline-flex items-center px-3 py-1 text-xs font-medium bg-azure-50 text-azure-700 rounded-full">
-                      {getEventTypeIcon(event.event_type)}
-                      <span className="ml-1.5">{event.event_type.charAt(0).toUpperCase() + event.event_type.slice(1)}</span>
+                    <div className="flex items-center space-x-4">
+                      <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                        <span className="text-white font-bold text-2xl">
+                          {selectedEvent.organizer?.full_name?.charAt(0) || 'E'}
+                        </span>
+                      </div>
+                      <div>
+                        <h1 className="text-2xl font-bold text-gray-900 mb-1">
+                          {selectedEvent.title}
+                        </h1>
+                        <p className="text-gray-600">
+                          {selectedEvent.organizer?.full_name || 'Unknown Organizer'}
+                        </p>
+                      </div>
                     </div>
-                    {event.is_virtual && (
-                      <div className="inline-flex items-center px-2 py-1 text-xs font-medium bg-purple-50 text-purple-700 rounded-full">
-                        <VideoCameraIcon className="w-3 h-3 mr-1" />
+                    
+                    <div className="flex items-center space-x-2">
+                      <button className="p-2 text-gray-400 hover:text-red-500 transition-colors">
+                        <HeartIcon className="w-5 h-5" />
+                      </button>
+                      <button className="p-2 text-gray-400 hover:text-blue-500 transition-colors">
+                        <ShareIcon className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Event Info */}
+                  <div className="flex items-center space-x-6 text-sm text-gray-600 mb-4">
+                    <div className="flex items-center">
+                      <MapPinIcon className="w-4 h-4 mr-1" />
+                      <span>{selectedEvent.is_virtual ? 'Online' : selectedEvent.location || 'TBA'}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <CalendarIcon className="w-4 h-4 mr-1" />
+                      <span>Updated On: {formatDate(selectedEvent.created_at)}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <GlobeAltIcon className="w-4 h-4 mr-1" />
+                      <span>Official website</span>
+                    </div>
+                  </div>
+
+                  {/* Tags */}
+                  <div className="flex flex-wrap gap-2">
+                    <span className={`px-3 py-1 text-sm font-medium rounded-full ${getEventTypeColor(selectedEvent.event_type)}`}>
+                      {selectedEvent.event_type}
+                    </span>
+                    {selectedEvent.is_virtual && (
+                      <span className="px-3 py-1 text-sm font-medium bg-purple-100 text-purple-700 rounded-full">
                         Virtual
-                      </div>
-                    )}
-                  </div>
-
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3 group-hover:text-azure-600 transition-colors">
-                    {event.title}
-                  </h3>
-                  <p className="text-gray-600 text-sm mb-4 leading-relaxed">{event.description}</p>
-                </div>
-
-                {/* Event Details */}
-                <div className="px-6 pb-4">
-                  <div className="space-y-3">
-                    <div className="flex items-center text-sm text-gray-600">
-                      <CalendarIcon className="w-4 h-4 mr-3 text-azure-500" />
-                      <span className="font-medium">{formatDate(event.start_date)}</span>
-                    </div>
-                    <div className="flex items-center text-sm text-gray-600">
-                      <ClockIcon className="w-4 h-4 mr-3 text-azure-500" />
-                      <span>{formatTime(event.start_date)} - {formatTime(event.end_date)}</span>
-                    </div>
-                    {event.location && (
-                      <div className="flex items-center text-sm text-gray-600">
-                        <MapPinIcon className="w-4 h-4 mr-3 text-azure-500" />
-                        <span>{event.location}</span>
-                      </div>
-                    )}
-                    <div className="flex items-center text-sm text-gray-600">
-                      <UsersIcon className="w-4 h-4 mr-3 text-azure-500" />
-                      <span className="font-medium">{event.attendees_count || 0}</span>
-                      <span className="text-gray-400 ml-1">
-                        / {event.max_attendees || '∞'} registered
                       </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Organizer Section */}
-                <div className="px-6 pb-4">
-                  <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                    <Avatar
-                      src={event.organizer?.avatar_url}
-                      alt={event.organizer?.full_name || 'Organizer'}
-                      size="md"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {event.organizer?.full_name || 'Unknown Organizer'}
-                      </p>
-                      <p className="text-xs text-gray-500 truncate">
-                        {event.organizer?.headline || 'Healthcare Professional'}
-                      </p>
-                    </div>
+                    )}
+                    <span className="px-3 py-1 text-sm font-medium bg-gray-100 text-gray-700 rounded-full">
+                      Healthcare
+                    </span>
                   </div>
                 </div>
 
                 {/* Action Section */}
-                <div className="px-6 pb-6">
-                  <div className="flex justify-between items-center">
-                    {activeTab === 'my-events' ? (
-                      <span className="text-xs text-azure-600 font-medium">
-                        ✨ You created this event
-                      </span>
-                    ) : (
-                      <span className="text-xs text-gray-500">
-                        Organized by {event.organizer?.full_name || 'Unknown'}
-                      </span>
-                    )}
+                <div className="p-6 border-b border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className="text-2xl font-bold text-gray-900">
+                        {selectedEvent.registration_fee ? `$${selectedEvent.registration_fee}` : 'Free'}
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <button className="p-2 text-gray-400 hover:text-red-500 transition-colors">
+                          <HeartIcon className="w-5 h-5" />
+                        </button>
+                        <button className="p-2 text-gray-400 hover:text-blue-500 transition-colors">
+                          <CalendarIcon className="w-5 h-5" />
+                        </button>
+                        <button className="p-2 text-gray-400 hover:text-blue-500 transition-colors">
+                          <ShareIcon className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
                     
-                    {activeTab !== 'my-events' && (
-                      event.isRegistered ? (
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleUnregister(event.id);
-                          }}
-                          className="px-3 py-1.5 text-sm font-medium bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
-                        >
-                          Unregister
-                        </button>
-                      ) : (
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleRegister(event.id);
-                          }}
-                          className="px-3 py-1.5 text-sm font-medium bg-azure-600 text-white rounded-md hover:bg-azure-700 transition-colors"
-                        >
-                          Register
-                        </button>
-                      )
+                    {user?.id !== selectedEvent.organizer_id && (
+                      <button
+                        onClick={() => selectedEvent.isRegistered ? handleUnregister(selectedEvent.id) : handleRegister(selectedEvent.id)}
+                        className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+                          selectedEvent.isRegistered
+                            ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                        }`}
+                      >
+                        {selectedEvent.isRegistered ? 'Unregister' : 'Register'}
+                      </button>
                     )}
                   </div>
                 </div>
+
+                {/* Key Metrics */}
+                <div className="p-6 border-b border-gray-200">
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="text-center">
+                      <div className="flex items-center justify-center mb-2">
+                        <ClockIcon className="w-5 h-5 text-blue-600 mr-2" />
+                        <span className="text-sm font-medium text-gray-700">Registration Deadline</span>
+                      </div>
+                      <p className="text-lg font-bold text-gray-900">{getDaysLeft(selectedEvent.start_date)}</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="flex items-center justify-center mb-2">
+                        <EyeIcon className="w-5 h-5 text-blue-600 mr-2" />
+                        <span className="text-sm font-medium text-gray-700">Impressions</span>
+                      </div>
+                      <p className="text-lg font-bold text-gray-900">3,529</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="flex items-center justify-center mb-2">
+                        <UsersIcon className="w-5 h-5 text-blue-600 mr-2" />
+                        <span className="text-sm font-medium text-gray-700">Team Size</span>
+                      </div>
+                      <p className="text-lg font-bold text-gray-900">1-4 Members</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Event Description */}
+                <div className="p-6 border-b border-gray-200">
+                  <h2 className="text-xl font-bold text-gray-900 mb-4">About This Event</h2>
+                  <p className="text-gray-600 leading-relaxed">
+                    {selectedEvent.description}
+                  </p>
+                </div>
+
+                {/* Event Details */}
+                <div className="p-6 border-b border-gray-200">
+                  <h2 className="text-xl font-bold text-gray-900 mb-4">Event Details</h2>
+                  <div className="space-y-4">
+                    <div className="flex items-start space-x-3">
+                      <CalendarIcon className="w-5 h-5 text-blue-600 mt-1" />
+                      <div>
+                        <h3 className="font-semibold text-gray-900">Date & Time</h3>
+                        <p className="text-gray-600">
+                          {formatDate(selectedEvent.start_date)} at {formatTime(selectedEvent.start_date)}
+                        </p>
+                        <p className="text-gray-500 text-sm">
+                          Ends at {formatTime(selectedEvent.end_date)}
+                        </p>
+                      </div>
+                    </div>
+
+                    {selectedEvent.location && (
+                      <div className="flex items-start space-x-3">
+                        <MapPinIcon className="w-5 h-5 text-blue-600 mt-1" />
+                        <div>
+                          <h3 className="font-semibold text-gray-900">Location</h3>
+                          <p className="text-gray-600">{selectedEvent.location}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex items-start space-x-3">
+                      <UsersIcon className="w-5 h-5 text-blue-600 mt-1" />
+                      <div>
+                        <h3 className="font-semibold text-gray-900">Capacity</h3>
+                        <p className="text-gray-600">
+                          {selectedEvent.attendees_count || 0} of {selectedEvent.max_attendees || '∞'} registered
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Organizer */}
+                <div className="p-6">
+                  <h2 className="text-xl font-bold text-gray-900 mb-4">Organizer</h2>
+                  <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                    <Avatar
+                      src={selectedEvent.organizer?.avatar_url}
+                      alt={selectedEvent.organizer?.full_name || 'Organizer'}
+                      size="lg"
+                    />
+                    <div>
+                      <h3 className="font-semibold text-gray-900">
+                        {selectedEvent.organizer?.full_name || 'Unknown Organizer'}
+                      </h3>
+                      <p className="text-gray-600">
+                        {selectedEvent.organizer?.headline || 'Healthcare Professional'}
+                      </p>
+                      <Link
+                        href={`/profile/${selectedEvent.organizer?.id}`}
+                        className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+                      >
+                        View Profile →
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ) : (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 h-[calc(100vh-8rem)] flex items-center justify-center">
+                <div className="text-center">
+                  <CalendarIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Select an Event</h3>
+                  <p className="text-gray-600">Choose an event from the list to view details</p>
+                </div>
               </div>
-            </Link>
-          ))}
-        </div>
-      )}
-      
-      {/* Empty State */}
-      {!loading && (() => {
-        let displayEvents = filteredEvents;
-        if (activeTab === 'registered') {
-          displayEvents = registeredEvents;
-        } else if (activeTab === 'my-events') {
-          displayEvents = filteredEvents.filter(e => e.organizer_id === user?.id);
-        }
-        return displayEvents.length === 0;
-      })() && (
-        <div className="text-center py-12">
-          <div className="w-16 h-16 bg-azure-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <CalendarIcon className="w-8 h-8 text-azure-600" />
+            )}
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            {activeTab === 'upcoming' 
-              ? 'No events found' 
-              : activeTab === 'registered'
-              ? 'No registered events'
-              : 'No created events'}
-          </h3>
-          <p className="text-gray-600 mb-6 max-w-md mx-auto">
-            {activeTab === 'upcoming' 
-              ? 'Try adjusting your search or filters to find more events.' 
-              : activeTab === 'registered'
-              ? 'Register for events to see them here and stay updated.'
-              : 'Create your first event to start building your community.'}
-          </p>
-          {activeTab === 'my-events' && (
-            <Link
-              href="/events/create"
-              className="inline-flex items-center px-4 py-2 bg-azure-600 text-white rounded-lg hover:bg-azure-700 transition-colors font-medium"
-            >
-              <PlusIcon className="w-4 h-4 mr-2" />
-              Create Your First Event
-            </Link>
-          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
