@@ -37,6 +37,8 @@ interface ProfilePreview extends Profile {
 export default function MobileNetworkPage() {
   const { user } = useAuth();
   const [suggestions, setSuggestions] = useState<ProfilePreview[]>([]);
+  const [individuals, setIndividuals] = useState<ProfilePreview[]>([]);
+  const [institutions, setInstitutions] = useState<ProfilePreview[]>([]);
   const [connectionRequests, setConnectionRequests] = useState<ConnectionWithProfile[]>([]);
   const [connections, setConnections] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,7 +61,11 @@ export default function MobileNetworkPage() {
 
       setCanSendRequests(canSend);
 
-      // Combine individuals and institutions
+      // Set separate state variables
+      setIndividuals(individualsData);
+      setInstitutions(institutionsData);
+      
+      // Combine individuals and institutions for backward compatibility
       const allSuggestions = [...individualsData, ...institutionsData];
       const uniqueSuggestions = allSuggestions.filter((profile, index, self) => 
         index === self.findIndex(p => p.id === profile.id)
@@ -146,51 +152,94 @@ export default function MobileNetworkPage() {
   };
 
   const renderSuggestions = () => (
-    <div className="space-y-4">
-      {suggestions.map((profile) => (
-        <div key={profile.id} className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
-          <div className="flex items-center space-x-3">
-            <Avatar
-              src={profile.avatar_url}
-              alt={profile.full_name || 'User'}
-              size="md"
-            />
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-gray-900 truncate">
-                {profile.full_name}
-              </h3>
-              <p className="text-sm text-gray-500 truncate">
-                {profile.headline || 'Healthcare Professional'}
-              </p>
-              {profile.mutual_connections && profile.mutual_connections > 0 && (
-                <p className="text-xs text-blue-600">
-                  {profile.mutual_connections} mutual connection{profile.mutual_connections !== 1 ? 's' : ''}
-                </p>
-              )}
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="flex items-center">
-                {profile.profile_type === 'institution' || profile.user_type === 'institution' ? (
-                  <BuildingOfficeIcon className="w-4 h-4 text-gray-400" />
-                ) : (
-                  <UserGroupIcon className="w-4 h-4 text-gray-400" />
-                )}
+    <div className="space-y-6">
+      {/* Healthcare Institutions */}
+      {institutions.length > 0 && (
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-3">Healthcare Institutions</h3>
+          <div className="space-y-3">
+            {institutions.map((profile) => (
+              <div key={profile.id} className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
+                <div className="flex items-center space-x-3">
+                  <Avatar
+                    src={profile.avatar_url}
+                    alt={profile.full_name || 'Institution'}
+                    size="md"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-gray-900 truncate">
+                      {profile.full_name}
+                    </h3>
+                    <p className="text-sm text-gray-500 truncate">
+                      {profile.headline || 'Healthcare Institution'}
+                    </p>
+                    {profile.location && (
+                      <p className="text-xs text-gray-400 truncate">
+                        📍 {profile.location}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <BuildingOfficeIcon className="w-4 h-4 text-gray-400" />
+                    {canSendRequests && (
+                      <button
+                        onClick={() => handleConnect(profile.id, 'institution')}
+                        className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        Follow
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
-              {canSendRequests && (
-                <button
-                  onClick={() => handleConnect(
-                    profile.id, 
-                    (profile.profile_type === 'institution' || profile.user_type === 'institution') ? 'institution' : 'individual'
-                  )}
-                  className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  {(profile.profile_type === 'institution' || profile.user_type === 'institution') ? 'Follow' : 'Connect'}
-                </button>
-              )}
-            </div>
+            ))}
           </div>
         </div>
-      ))}
+      )}
+
+      {/* Healthcare Professionals */}
+      {individuals.length > 0 && (
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-3">Healthcare Professionals</h3>
+          <div className="space-y-3">
+            {individuals.map((profile) => (
+              <div key={profile.id} className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
+                <div className="flex items-center space-x-3">
+                  <Avatar
+                    src={profile.avatar_url}
+                    alt={profile.full_name || 'User'}
+                    size="md"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-gray-900 truncate">
+                      {profile.full_name}
+                    </h3>
+                    <p className="text-sm text-gray-500 truncate">
+                      {profile.headline || 'Healthcare Professional'}
+                    </p>
+                    {profile.mutual_connections && profile.mutual_connections > 0 && (
+                      <p className="text-xs text-blue-600">
+                        {profile.mutual_connections} mutual connection{profile.mutual_connections !== 1 ? 's' : ''}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <UserGroupIcon className="w-4 h-4 text-gray-400" />
+                    {canSendRequests && (
+                      <button
+                        onClick={() => handleConnect(profile.id, 'individual')}
+                        className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        Connect
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -324,7 +373,7 @@ export default function MobileNetworkPage() {
         {/* Empty States */}
         {!loading && (
           <>
-            {activeTab === 'suggestions' && suggestions.length === 0 && (
+            {activeTab === 'suggestions' && individuals.length === 0 && institutions.length === 0 && (
               <div className="text-center py-12">
                 <UserGroupIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-500">No suggestions available</p>

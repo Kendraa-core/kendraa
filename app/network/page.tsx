@@ -81,6 +81,8 @@ interface NetworkStats {
 export default function NetworkPage() {
   const { user } = useAuth();
   const [suggestions, setSuggestions] = useState<ProfilePreview[]>([]);
+  const [individuals, setIndividuals] = useState<ProfilePreview[]>([]);
+  const [institutions, setInstitutions] = useState<ProfilePreview[]>([]);
   const [connectionRequests, setConnectionRequests] = useState<ConnectionWithProfile[]>([]);
   const [connections, setConnections] = useState<Profile[]>([]);
   const [networkStats, setNetworkStats] = useState<NetworkStats>({
@@ -118,38 +120,42 @@ export default function NetworkPage() {
 
       setCanSendRequests(canSend);
 
-      // Combine individuals and institutions, removing duplicates by ID
-      const allSuggestions = [...individualsData, ...institutionsData];
-      const uniqueSuggestions = allSuggestions.filter((profile, index, self) => 
-        index === self.findIndex(p => p.id === profile.id)
-      );
-
-      // Add connection status and follow status to suggestions
-      const enrichedSuggestions = await Promise.all(
-        uniqueSuggestions.map(async (profile) => {
-          let connectionStatus: 'none' | 'pending' | 'connected' = 'none';
-          let followStatus: 'following' | 'not_following' = 'not_following';
-          
-          if (profile.profile_type === 'institution') {
-            // For institutions, check follow status using new function
-            const isFollowingUser = await getFollowStatus(user.id, profile.id);
-            followStatus = isFollowingUser ? 'following' : 'not_following';
-          } else {
-            // For individuals, check connection status
-            const status = await getConnectionStatus(user.id, profile.id);
-            connectionStatus = (status as 'none' | 'pending' | 'connected') || 'none';
-          }
+      // Separate individuals and institutions
+      const enrichedIndividuals = await Promise.all(
+        individualsData.map(async (profile) => {
+          const status = await getConnectionStatus(user.id, profile.id);
+          const connectionStatus = (status as 'none' | 'pending' | 'connected') || 'none';
           
           return {
             ...profile,
             connection_status: connectionStatus,
-            follow_status: followStatus,
+            follow_status: 'not_following' as const,
             mutual_connections: (profile as any).mutual_connections || 0,
           };
         })
       );
 
-      setSuggestions(enrichedSuggestions);
+      const enrichedInstitutions = await Promise.all(
+        institutionsData.map(async (profile) => {
+          const isFollowingUser = await getFollowStatus(user.id, profile.id);
+          const followStatus: 'following' | 'not_following' = isFollowingUser ? 'following' : 'not_following';
+          
+          return {
+            ...profile,
+            connection_status: 'none' as const,
+            follow_status: followStatus,
+            mutual_connections: 0,
+          };
+        })
+      );
+
+      // Set separate state variables
+      setIndividuals(enrichedIndividuals);
+      setInstitutions(enrichedInstitutions);
+      
+      // Combine all suggestions for backward compatibility
+      const allSuggestions = [...enrichedIndividuals, ...enrichedInstitutions];
+      setSuggestions(allSuggestions);
       setConnectionRequests(requestsData);
       setConnections(connectionsData);
       setNetworkStats({
@@ -250,14 +256,20 @@ export default function NetworkPage() {
   };
 
   // Filter suggestions based on search
-  const filteredSuggestions = suggestions.filter(profile =>
+  const filteredIndividuals = individuals.filter(profile =>
     profile.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     profile.headline?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     profile.location?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Group suggestions by categories
-  const healthcareSuggestions = filteredSuggestions.filter(p => 
+  const filteredInstitutions = institutions.filter(profile =>
+    profile.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    profile.headline?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    profile.location?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Group individuals by categories
+  const healthcareIndividuals = filteredIndividuals.filter(p => 
     p.headline?.toLowerCase().includes('healthcare') ||
     p.headline?.toLowerCase().includes('medical') ||
     p.headline?.toLowerCase().includes('doctor') ||
@@ -265,8 +277,8 @@ export default function NetworkPage() {
     p.headline?.toLowerCase().includes('pharmacy')
   );
 
-  const recentActivitySuggestions = filteredSuggestions.filter(p => 
-    !healthcareSuggestions.includes(p)
+  const recentActivityIndividuals = filteredIndividuals.filter(p => 
+    !healthcareIndividuals.includes(p)
   ).slice(0, 8);
 
   if (!user) {
@@ -413,13 +425,13 @@ export default function NetworkPage() {
               </div>
             )}
 
-            {/* People you may know - Healthcare */}
-            {healthcareSuggestions.length > 0 && (
+            {/* Healthcare Institutions */}
+            {filteredInstitutions.length > 0 && (
               <div className={`${COMPONENTS.card.base}`}>
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-6">
                     <h3 className={`${TYPOGRAPHY.heading.h3}`}>
-                      People in the Healthcare industry you may know
+                      Healthcare Institutions
                     </h3>
                     <Link 
                       href="/network/suggestions" 
@@ -430,7 +442,78 @@ export default function NetworkPage() {
                   </div>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {healthcareSuggestions.slice(0, 8).map((profile) => (
+                    {filteredInstitutions.slice(0, 8).map((profile) => (
+                      <motion.div
+                        key={profile.id}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="relative p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
+                      >
+                        <button
+                          onClick={() => handleDismissSuggestion(profile.id)}
+                          className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                          <XMarkIcon className="w-4 h-4" />
+                        </button>
+                        
+                        <div className="text-center">
+                          <Avatar
+                            src={profile.avatar_url}
+                            alt={profile.full_name || 'Institution'}
+                            size="lg"
+                            className="mx-auto mb-3"
+                          />
+                          <h4 className={`${TYPOGRAPHY.body.medium} font-semibold mb-1`}>
+                            {profile.full_name}
+                          </h4>
+                          <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} mb-2 line-clamp-2`}>
+                            {profile.headline || 'Healthcare Institution'}
+                          </p>
+                          <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} mb-3`}>
+                            {profile.location && (
+                              <span className="flex items-center justify-center">
+                                <MapPinIcon className="w-4 h-4 mr-1" />
+                                {profile.location}
+                              </span>
+                            )}
+                          </p>
+                          <button
+                            onClick={() => handleConnect(profile.id, 'institution')}
+                            disabled={profile.follow_status === 'following'}
+                            className={`w-full px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
+                              profile.follow_status === 'following'
+                                ? 'bg-green-100 text-green-700 cursor-not-allowed'
+                                : `${COMPONENTS.button.primary}`
+                            }`}
+                          >
+                            {profile.follow_status === 'following' ? 'Following' : '+ Follow'}
+                          </button>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* People you may know - Healthcare */}
+            {healthcareIndividuals.length > 0 && (
+              <div className={`${COMPONENTS.card.base}`}>
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className={`${TYPOGRAPHY.heading.h3}`}>
+                      Healthcare Professionals you may know
+                    </h3>
+                    <Link 
+                      href="/network/suggestions" 
+                      className={`${TEXT_COLORS.accent} hover:text-blue-700 text-sm font-medium`}
+                    >
+                      Show all
+                    </Link>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {healthcareIndividuals.slice(0, 8).map((profile) => (
                       <motion.div
                         key={profile.id}
                         initial={{ opacity: 0, scale: 0.95 }}
@@ -465,25 +548,15 @@ export default function NetworkPage() {
                             )}
                           </p>
                           <button
-                            onClick={() => handleConnect(
-                              profile.id, 
-                              profile.profile_type === 'institution' ? 'institution' : 'individual'
-                            )}
-                            disabled={profile.connection_status === 'pending' || profile.follow_status === 'following'}
+                            onClick={() => handleConnect(profile.id, 'individual')}
+                            disabled={profile.connection_status === 'pending'}
                             className={`w-full px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
-                              profile.connection_status === 'pending' || profile.follow_status === 'following'
+                              profile.connection_status === 'pending'
                                 ? 'bg-green-100 text-green-700 cursor-not-allowed'
                                 : `${COMPONENTS.button.primary}`
                             }`}
                           >
-                            {profile.connection_status === 'pending' 
-                              ? 'Pending' 
-                              : profile.follow_status === 'following'
-                              ? 'Following'
-                              : profile.profile_type === 'institution'
-                              ? '+ Follow'
-                              : '+ Connect'
-                            }
+                            {profile.connection_status === 'pending' ? 'Pending' : '+ Connect'}
                           </button>
                         </div>
                       </motion.div>
@@ -494,7 +567,7 @@ export default function NetworkPage() {
             )}
 
             {/* People you may know - Recent Activity */}
-            {recentActivitySuggestions.length > 0 && (
+            {recentActivityIndividuals.length > 0 && (
               <div className={`${COMPONENTS.card.base}`}>
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-6">
@@ -510,7 +583,7 @@ export default function NetworkPage() {
                   </div>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {recentActivitySuggestions.map((profile) => (
+                    {recentActivityIndividuals.map((profile) => (
                       <motion.div
                         key={profile.id}
                         initial={{ opacity: 0, scale: 0.95 }}
@@ -545,25 +618,15 @@ export default function NetworkPage() {
                             )}
                           </p>
                           <button
-                            onClick={() => handleConnect(
-                              profile.id, 
-                              profile.profile_type === 'institution' ? 'institution' : 'individual'
-                            )}
-                            disabled={profile.connection_status === 'pending' || profile.follow_status === 'following'}
+                            onClick={() => handleConnect(profile.id, 'individual')}
+                            disabled={profile.connection_status === 'pending'}
                             className={`w-full px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
-                              profile.connection_status === 'pending' || profile.follow_status === 'following'
+                              profile.connection_status === 'pending'
                                 ? 'bg-green-100 text-green-700 cursor-not-allowed'
                                 : `${COMPONENTS.button.primary}`
                             }`}
                           >
-                            {profile.connection_status === 'pending' 
-                              ? 'Pending' 
-                              : profile.follow_status === 'following'
-                              ? 'Following'
-                              : profile.profile_type === 'institution'
-                              ? '+ Follow'
-                              : '+ Connect'
-                            }
+                            {profile.connection_status === 'pending' ? 'Pending' : '+ Connect'}
                           </button>
                         </div>
                       </motion.div>
@@ -574,7 +637,7 @@ export default function NetworkPage() {
             )}
 
             {/* Empty State */}
-            {filteredSuggestions.length === 0 && (
+            {filteredIndividuals.length === 0 && filteredInstitutions.length === 0 && (
               <div className={`${COMPONENTS.card.base} text-center py-12`}>
                 <UserGroupIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                 <h3 className={`${TYPOGRAPHY.heading.h3} mb-2`}>No suggestions found</h3>

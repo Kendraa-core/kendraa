@@ -2036,9 +2036,26 @@ export async function getSuggestedInstitutions(userId: string, limit: number = 1
     
     const followingIds = following?.map(f => f.following_id) || [];
     
+    // Get institution profiles and join with institutions table to get proper data
     let query = getSupabase()
       .from('profiles')
-      .select('*')
+      .select(`
+        *,
+        institutions!inner(
+          id,
+          name,
+          type,
+          description,
+          location,
+          website,
+          phone,
+          email,
+          logo_url,
+          banner_url,
+          specialties,
+          verified
+        )
+      `)
       .eq('profile_type', 'institution')
       .limit(limit);
     
@@ -2050,8 +2067,23 @@ export async function getSuggestedInstitutions(userId: string, limit: number = 1
 
     if (error) throw error;
     
-    console.log('Suggested institutions fetched successfully', data);
-    return data || [];
+    // Transform the data to include institution information in the profile
+    const transformedData = data?.map(profile => ({
+      ...profile,
+      // Use institution name as full_name if available
+      full_name: profile.institutions?.name || profile.full_name,
+      // Use institution type as headline
+      headline: profile.institutions?.type ? 
+        profile.institutions.type.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()) : 
+        'Healthcare Institution',
+      // Use institution logo as avatar if available
+      avatar_url: profile.institutions?.logo_url || profile.avatar_url,
+      // Use institution location if available
+      location: profile.institutions?.location || profile.location,
+    })) || [];
+    
+    console.log('Suggested institutions fetched successfully', transformedData);
+    return transformedData;
   } catch (error) {
     console.log('Error fetching suggested institutions', error);
     return [];
