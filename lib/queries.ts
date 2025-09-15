@@ -3252,7 +3252,10 @@ export async function deleteEvent(eventId: string, organizerId: string): Promise
 
     if (fetchError) {
       console.error('[Queries] Error fetching event for deletion:', fetchError);
-      throw new Error('Event not found');
+      if (fetchError.code === 'PGRST116') {
+        throw new Error('Event not found');
+      }
+      throw new Error('Failed to fetch event for deletion');
     }
 
     if (event.organizer_id !== organizerId) {
@@ -3267,7 +3270,8 @@ export async function deleteEvent(eventId: string, organizerId: string): Promise
 
     if (attendeesError) {
       console.error('[Queries] Error deleting event attendees:', attendeesError);
-      throw attendeesError;
+      // Don't throw here, continue with event deletion even if attendees deletion fails
+      console.warn('[Queries] Continuing with event deletion despite attendees deletion error');
     }
 
     // Delete the event
@@ -3278,24 +3282,10 @@ export async function deleteEvent(eventId: string, organizerId: string): Promise
 
     if (deleteError) {
       console.error('[Queries] Error deleting event:', deleteError);
-      throw deleteError;
+      throw new Error(`Failed to delete event: ${deleteError.message}`);
     }
     
     console.log('[Queries] Event deleted successfully from database');
-    
-    // Verify the event was actually deleted
-    const { data: verifyData, error: verifyError } = await getSupabase()
-      .from('events')
-      .select('id')
-      .eq('id', eventId)
-      .single();
-    
-    if (verifyData) {
-      console.error('[Queries] Event still exists after deletion attempt');
-      throw new Error('Event deletion failed - event still exists');
-    }
-    
-    console.log('[Queries] Event deletion verified - event no longer exists');
     return true;
   } catch (error) {
     console.error('[Queries] Error in deleteEvent:', error);
