@@ -291,51 +291,63 @@ export default function NetworkPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="max-w-7xl mx-auto"
+          className="max-w-6xl mx-auto"
         >
           {/* Page Header */}
-          <div className="mb-6">
-            <h1 className={`${TYPOGRAPHY.heading.h1} mb-2`}>My Network</h1>
-            <p className={`${TYPOGRAPHY.body.large} ${TEXT_COLORS.secondary}`}>
+          <div className="text-center mb-8">
+            <h1 className={`${TYPOGRAPHY.heading.h1} mb-3`}>My Network</h1>
+            <p className={`${TYPOGRAPHY.body.large} ${TEXT_COLORS.secondary} max-w-2xl mx-auto`}>
               Connect with healthcare professionals and grow your network
             </p>
           </div>
 
-          {/* Network Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-            <div className={`${COMPONENTS.card.base} text-center`}>
-              <UserIcon className={`w-8 h-8 ${COMPONENTS.icon.primary} mx-auto mb-2`} />
+          {/* Network Stats Overview */}
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+            <div className={`${COMPONENTS.card.base} text-center p-4`}>
+              <UserIcon className={`w-6 h-6 ${COMPONENTS.icon.primary} mx-auto mb-2`} />
               <div className={`${TYPOGRAPHY.heading.h3} mb-1`}>{formatNumber(networkStats.connections)}</div>
               <div className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>Connections</div>
             </div>
-            <div className={`${COMPONENTS.card.base} text-center`}>
-              <UserGroupIcon className={`w-8 h-8 ${COMPONENTS.icon.primary} mx-auto mb-2`} />
+            <div className={`${COMPONENTS.card.base} text-center p-4`}>
+              <UserGroupIcon className={`w-6 h-6 ${COMPONENTS.icon.primary} mx-auto mb-2`} />
               <div className={`${TYPOGRAPHY.heading.h3} mb-1`}>{formatNumber(networkStats.groups)}</div>
               <div className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>Groups</div>
             </div>
-            <div className={`${COMPONENTS.card.base} text-center`}>
-              <CalendarDaysIcon className={`w-8 h-8 ${COMPONENTS.icon.primary} mx-auto mb-2`} />
+            <div className={`${COMPONENTS.card.base} text-center p-4`}>
+              <CalendarDaysIcon className={`w-6 h-6 ${COMPONENTS.icon.primary} mx-auto mb-2`} />
               <div className={`${TYPOGRAPHY.heading.h3} mb-1`}>{formatNumber(networkStats.events)}</div>
               <div className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>Events</div>
             </div>
-            <div className={`${COMPONENTS.card.base} text-center`}>
-              <DocumentTextIcon className={`w-8 h-8 ${COMPONENTS.icon.primary} mx-auto mb-2`} />
+            <div className={`${COMPONENTS.card.base} text-center p-4`}>
+              <DocumentTextIcon className={`w-6 h-6 ${COMPONENTS.icon.primary} mx-auto mb-2`} />
               <div className={`${TYPOGRAPHY.heading.h3} mb-1`}>{formatNumber(networkStats.pages)}</div>
               <div className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>Pages</div>
             </div>
-            <div className={`${COMPONENTS.card.base} text-center`}>
-              <NewspaperIcon className={`w-8 h-8 ${COMPONENTS.icon.primary} mx-auto mb-2`} />
+            <div className={`${COMPONENTS.card.base} text-center p-4`}>
+              <NewspaperIcon className={`w-6 h-6 ${COMPONENTS.icon.primary} mx-auto mb-2`} />
               <div className={`${TYPOGRAPHY.heading.h3} mb-1`}>{formatNumber(networkStats.newsletters)}</div>
               <div className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>Newsletters</div>
             </div>
           </div>
 
-          {/* Top Navigation Bar */}
-          <div className={`${COMPONENTS.card.base} mb-4`}>
+          {/* Search and Navigation */}
+          <div className={`${COMPONENTS.card.base} mb-6`}>
             <div className="p-6">
-              <div className="flex items-center justify-between">
-                {/* Left Side - Navigation */}
-                <div className="flex items-center space-x-6">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                {/* Search Bar */}
+                <div className="relative w-full md:w-96">
+                  <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search people..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                {/* Navigation Tabs */}
+                <div className="flex items-center space-x-4">
                   <button
                     onClick={() => setActiveTab('grow')}
                     className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
@@ -357,25 +369,12 @@ export default function NetworkPage() {
                     Catch up
                   </button>
                 </div>
-
-                {/* Right Side - Search */}
-                <div className="flex items-center space-x-4">
-                  <div className="relative">
-                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="Search people..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"
-                    />
-                  </div>
-                </div>
               </div>
             </div>
           </div>
 
-          <div className="space-y-4">
+          {/* Main Content */}
+          <div className="space-y-6">
             {/* Invitations Section */}
             {connectionRequests.length > 0 && (
               <div className={`${COMPONENTS.card.base}`}>
@@ -458,7 +457,7 @@ export default function NetworkPage() {
                     </Link>
                   </div>
                   
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {healthcareSuggestions.slice(0, 8).map((profile) => (
                       <motion.div
                         key={profile.id}
@@ -538,7 +537,7 @@ export default function NetworkPage() {
                     </Link>
                   </div>
                   
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {recentActivitySuggestions.map((profile) => (
                       <motion.div
                         key={profile.id}
