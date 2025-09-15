@@ -31,13 +31,14 @@ import {
   UserIcon,
   UserPlusIcon,
   CalendarDaysIcon,
+  BookmarkIcon,
 } from '@heroicons/react/24/outline';
 import { formatRelativeTime } from '@/lib/utils';
-import { getConnectionStats, getPostStats, getNotifications, getInstitutionByAdminId } from '@/lib/queries';
+import { getConnectionStats, getPostStats, getNotifications, getInstitutionByAdminId, getSavedPosts } from '@/lib/queries';
 import ShareButton from '@/components/common/ShareButton';
 import ProfileCompletionPrompt from '@/components/profile/ProfileCompletionPrompt';
 import Link from 'next/link';
-import type { Institution } from '@/types/database.types';
+import type { Institution, Post } from '@/types/database.types';
 
 interface DashboardStats {
   connections: number;
@@ -63,6 +64,7 @@ export default function InstitutionDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
+  const [savedPosts, setSavedPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [signOutLoading, setSignOutLoading] = useState(false);
 
@@ -139,6 +141,10 @@ export default function InstitutionDashboard() {
           icon: getActivityIcon(notification.type),
         }));
         setRecentActivity(recentNotifications);
+
+        // Load saved posts
+        const saved = await getSavedPosts(user.id);
+        setSavedPosts(saved.slice(0, 5)); // Show only the 5 most recent saved posts
       }
     } catch (error) {
       console.error('Error loading dashboard data:', error);
@@ -284,7 +290,7 @@ export default function InstitutionDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Recent Activity */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
               <h2 className="text-xl font-bold text-gray-900 mb-6">Recent Activity</h2>
               {recentActivity.length > 0 ? (
                 <div className="space-y-4">
@@ -307,6 +313,54 @@ export default function InstitutionDashboard() {
                 <div className="text-center py-8">
                   <BellIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-600">No recent activity</p>
+                </div>
+              )}
+            </div>
+
+            {/* Saved Posts */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-gray-900">Saved Posts</h2>
+                <Link
+                  href="/saved-items"
+                  className="text-[#007fff] hover:text-[#0066cc] text-sm font-medium transition-colors"
+                >
+                  View All
+                </Link>
+              </div>
+              {savedPosts.length > 0 ? (
+                <div className="space-y-4">
+                  {savedPosts.map((post) => (
+                    <div key={post.id} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0">
+                          <div className="w-8 h-8 bg-[#007fff]/10 rounded-full flex items-center justify-center">
+                            <BookmarkIcon className="w-4 h-4 text-[#007fff]" />
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-gray-900 line-clamp-2 mb-2">
+                            {post.content}
+                          </p>
+                          <div className="flex items-center gap-4 text-xs text-gray-500">
+                            <span>{formatRelativeTime(post.created_at)}</span>
+                            <Link
+                              href={`/profile/${post.author_id}`}
+                              className="text-[#007fff] hover:text-[#0066cc] transition-colors"
+                            >
+                              View Post
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <BookmarkIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600 mb-2">No saved posts yet</p>
+                  <p className="text-sm text-gray-500">Save posts you find interesting to view them here</p>
                 </div>
               )}
             </div>
