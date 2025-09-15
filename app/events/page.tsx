@@ -408,12 +408,12 @@ export default function EventsPage() {
   }
 
   return (
-    <div className={`min-h-screen ${BACKGROUNDS.page.tertiary}`}>
+    <div className={`min-h-screen ${BACKGROUNDS.page.primary}`}>
       {/* Header */}
       <Header />
       
       {/* Top Navigation Bar */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+      <div className={`${COMPONENTS.card.base} border-b ${BORDER_COLORS.primary} sticky top-0 z-10`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Left Side - Navigation */}
@@ -422,8 +422,8 @@ export default function EventsPage() {
                 onClick={() => setActiveTab('upcoming')}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                   activeTab === 'upcoming'
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                    ? `${COMPONENTS.button.primary}`
+                    : `${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} hover:bg-gray-100`
                 }`}
               >
                 Events
@@ -434,22 +434,22 @@ export default function EventsPage() {
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
-                    className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className={`appearance-none ${COMPONENTS.input.base} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                   >
                     <option value="date">Sort By Date</option>
                     <option value="popularity">Sort By Popularity</option>
                     <option value="name">Sort By Name</option>
                   </select>
-                  <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  <ChevronDownIcon className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 ${TEXT_COLORS.secondary} pointer-events-none`} />
                 </div>
 
                 <button
                   onClick={() => setShowFilters(!showFilters)}
-                  className="flex items-center px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  className={`flex items-center px-3 py-2 border ${BORDER_COLORS.primary} rounded-lg hover:bg-gray-50 transition-colors`}
                 >
-                  <FunnelIcon className="w-4 h-4 mr-2 text-gray-600" />
-                  <span className="text-sm text-gray-700">Filters</span>
-                  <span className="ml-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full">6</span>
+                  <FunnelIcon className={`w-4 h-4 mr-2 ${TEXT_COLORS.secondary}`} />
+                  <span className={`text-sm ${TEXT_COLORS.primary}`}>Filters</span>
+                  <span className={`ml-2 ${COMPONENTS.button.primary} text-xs px-2 py-1 rounded-full`}>6</span>
                 </button>
               </div>
             </div>
@@ -460,51 +460,51 @@ export default function EventsPage() {
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`appearance-none ${COMPONENTS.input.base} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                 >
                   <option value="all">Status</option>
                   <option value="upcoming">Upcoming</option>
                   <option value="ongoing">Ongoing</option>
                   <option value="ended">Ended</option>
                 </select>
-                <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full">1</span>
+                <ChevronDownIcon className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 ${TEXT_COLORS.secondary} pointer-events-none`} />
+                <span className={`absolute -top-2 -right-2 ${COMPONENTS.button.primary} text-xs px-1.5 py-0.5 rounded-full`}>1</span>
               </div>
 
               <div className="relative">
                 <select
                   value={userTypeFilter}
                   onChange={(e) => setUserTypeFilter(e.target.value)}
-                  className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`appearance-none ${COMPONENTS.input.base} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                 >
                   <option value="all">User Type</option>
                   <option value="individual">Individual</option>
                   <option value="institution">Institution</option>
                 </select>
-                <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full">1</span>
+                <ChevronDownIcon className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 ${TEXT_COLORS.secondary} pointer-events-none`} />
+                <span className={`absolute -top-2 -right-2 ${COMPONENTS.button.primary} text-xs px-1.5 py-0.5 rounded-full`}>1</span>
               </div>
 
               <div className="relative">
             <select
                   value={domainFilter}
                   onChange={(e) => setDomainFilter(e.target.value)}
-                  className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`appearance-none ${COMPONENTS.input.base} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                 >
                   <option value="all">Domain</option>
                   <option value="healthcare">Healthcare</option>
                   <option value="technology">Technology</option>
                   <option value="business">Business</option>
             </select>
-                <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full">1</span>
+                <ChevronDownIcon className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 ${TEXT_COLORS.secondary} pointer-events-none`} />
+                <span className={`absolute -top-2 -right-2 ${COMPONENTS.button.primary} text-xs px-1.5 py-0.5 rounded-full`}>1</span>
               </div>
             
               <div className="relative">
             <select
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`appearance-none ${COMPONENTS.input.base} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                 >
                   <option value="all">Category</option>
                   {eventTypes.map(type => (
@@ -513,12 +513,12 @@ export default function EventsPage() {
                     </option>
                   ))}
             </select>
-                <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                <ChevronDownIcon className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 ${TEXT_COLORS.secondary} pointer-events-none`} />
               </div>
 
             <Link
               href="/events/create"
-                className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                className={`flex items-center px-4 py-2 ${COMPONENTS.button.primary} rounded-lg hover:bg-blue-700 transition-colors font-medium`}
             >
               <PlusIcon className="w-4 h-4 mr-2" />
               Create Event
@@ -533,17 +533,17 @@ export default function EventsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Event List */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 h-[calc(100vh-8rem)] overflow-hidden">
+            <div className={`${COMPONENTS.card.base} h-[calc(100vh-8rem)] overflow-hidden`}>
               {/* Search Bar */}
-              <div className="p-4 border-b border-gray-200">
+              <div className={`p-4 border-b ${BORDER_COLORS.primary}`}>
                 <div className="relative">
-                  <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <MagnifyingGlassIcon className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${TEXT_COLORS.secondary}`} />
                   <input
                     type="text"
                     placeholder="Search events..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className={`w-full pl-10 pr-4 py-2 ${COMPONENTS.input.base} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                   />
         </div>
       </div>
@@ -570,24 +570,25 @@ export default function EventsPage() {
                         }`}
                       >
                         <div className="flex items-start space-x-3">
-                          {/* Event Logo */}
-                          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <span className="text-white font-bold text-lg">
-                              {event.organizer?.full_name?.charAt(0) || 'E'}
-                            </span>
-                          </div>
+                          {/* Event Organizer Avatar */}
+                          <Avatar
+                            src={event.organizer?.avatar_url}
+                            alt={event.organizer?.full_name || 'Event Organizer'}
+                            size="md"
+                            className="flex-shrink-0"
+                          />
 
                           {/* Event Info */}
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-gray-900 text-sm mb-1 line-clamp-2">
+                            <h3 className={`${TYPOGRAPHY.body.medium} font-semibold mb-1 line-clamp-2`}>
                               {event.title}
                             </h3>
-                            <p className="text-xs text-gray-600 mb-2 line-clamp-1">
+                            <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} mb-2 line-clamp-1`}>
                               {event.organizer?.full_name || 'Unknown Organizer'}
                             </p>
 
                             {/* Stats */}
-                            <div className="flex items-center space-x-4 text-xs text-gray-500 mb-2">
+                            <div className={`flex items-center space-x-4 ${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} mb-2`}>
                               <div className="flex items-center">
                                 <UsersIcon className="w-3 h-3 mr-1" />
                                 <span>{event.attendees_count || 0} Registered</span>
@@ -616,8 +617,8 @@ export default function EventsPage() {
 
                     {getDisplayEvents().length === 0 && (
                       <div className="text-center py-12">
-                        <CalendarIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                        <p className="text-gray-500">No events found</p>
+                        <CalendarIcon className={`w-12 h-12 ${TEXT_COLORS.secondary} mx-auto mb-4`} />
+                        <p className={`${TEXT_COLORS.secondary}`}>No events found</p>
                       </div>
                     )}
                   </div>
@@ -633,22 +634,22 @@ export default function EventsPage() {
                 key={selectedEvent.id}
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="bg-white rounded-xl shadow-sm border border-gray-200 h-[calc(100vh-8rem)] overflow-y-auto"
+                className={`${COMPONENTS.card.base} h-[calc(100vh-8rem)] overflow-y-auto`}
               >
                 {/* Event Header */}
-                <div className="p-6 border-b border-gray-200">
+                <div className={`p-6 border-b ${BORDER_COLORS.primary}`}>
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center space-x-4">
-                      <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                        <span className="text-white font-bold text-2xl">
-                          {selectedEvent.organizer?.full_name?.charAt(0) || 'E'}
-                        </span>
-                      </div>
+                      <Avatar
+                        src={selectedEvent.organizer?.avatar_url}
+                        alt={selectedEvent.organizer?.full_name || 'Event Organizer'}
+                        size="lg"
+                      />
                       <div>
-                        <h1 className="text-2xl font-bold text-gray-900 mb-1">
+                        <h1 className={`${TYPOGRAPHY.heading.h2} mb-1`}>
                           {selectedEvent.title}
                         </h1>
-                        <p className="text-gray-600">
+                        <p className={`${TEXT_COLORS.secondary}`}>
                           {selectedEvent.organizer?.full_name || 'Unknown Organizer'}
                         </p>
                       </div>
@@ -679,7 +680,7 @@ export default function EventsPage() {
       </div>
 
                   {/* Event Info */}
-                  <div className="flex items-center space-x-6 text-sm text-gray-600 mb-4">
+                  <div className={`flex items-center space-x-6 ${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} mb-4`}>
                     <div className="flex items-center">
                       <MapPinIcon className="w-4 h-4 mr-1" />
                       <span>{selectedEvent.is_virtual ? 'Online' : selectedEvent.location || 'TBA'}</span>
@@ -704,17 +705,17 @@ export default function EventsPage() {
                         Virtual
                       </span>
                     )}
-                    <span className="px-3 py-1 text-sm font-medium bg-gray-100 text-gray-700 rounded-full">
+                    <span className={`px-3 py-1 text-sm font-medium ${COMPONENTS.badge.secondary} rounded-full`}>
                       Healthcare
                     </span>
                   </div>
                 </div>
 
                 {/* Action Section */}
-                <div className="p-6 border-b border-gray-200">
+                <div className={`p-6 border-b ${BORDER_COLORS.primary}`}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
-                      <div className="text-2xl font-bold text-gray-900">
+                      <div className={`${TYPOGRAPHY.heading.h2}`}>
                         {selectedEvent.registration_fee ? `$${selectedEvent.registration_fee}` : 'Free'}
                       </div>
                       <div className="flex items-center space-x-2">
