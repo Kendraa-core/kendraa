@@ -230,7 +230,18 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
   };
 
   const getAuthorHeadline = () => {
-    return post.profiles?.headline || 'Healthcare Professional';
+    // If there's a custom headline, use it
+    if (post.profiles?.headline) {
+      return post.profiles.headline;
+    }
+    
+    // For institutions, show appropriate institution type
+    if (post.profiles?.user_type === 'institution' || post.profiles?.profile_type === 'institution') {
+      return 'Healthcare Organization';
+    }
+    
+    // Default fallback for individuals
+    return 'Healthcare Professional';
   };
 
   return (
