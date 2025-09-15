@@ -41,6 +41,7 @@ import {
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import Avatar from '@/components/common/Avatar';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import Header from '@/components/layout/Header';
 import type { Event } from '@/types/database.types';
 import { 
   BACKGROUNDS, 
@@ -82,6 +83,8 @@ export default function EventsPage() {
   const [userTypeFilter, setUserTypeFilter] = useState<string>('all');
   const [domainFilter, setDomainFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [likedEvents, setLikedEvents] = useState<Set<string>>(new Set());
+  const [eventTypes, setEventTypes] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -120,6 +123,10 @@ export default function EventsPage() {
         if (eventsWithOrganizers.length > 0 && !selectedEvent) {
           setSelectedEvent(eventsWithOrganizers[0]);
         }
+        
+        // Extract unique event types dynamically
+        const types = [...new Set(eventsWithOrganizers.map(event => event.event_type).filter(Boolean))];
+        setEventTypes(types);
       } catch (error) {
         console.error('Error fetching events:', error);
         toast.error('Failed to load events');
@@ -203,6 +210,47 @@ export default function EventsPage() {
     } catch (error) {
       console.error('Error unregistering from event:', error);
       toast.error('Failed to unregister from event');
+    }
+  };
+
+  const handleLike = (eventId: string) => {
+    setLikedEvents(prev => {
+      const newLikedEvents = new Set(prev);
+      if (newLikedEvents.has(eventId)) {
+        newLikedEvents.delete(eventId);
+        toast.success('Removed from favorites');
+      } else {
+        newLikedEvents.add(eventId);
+        toast.success('Added to favorites');
+      }
+      return newLikedEvents;
+    });
+  };
+
+  const handleShare = async (event: EventWithRegistration) => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: event.title,
+          text: event.description,
+          url: window.location.origin + `/events/${event.id}`,
+        });
+        toast.success('Event shared successfully');
+      } catch (error: any) {
+        if (error.name !== 'AbortError') {
+          console.error('Error sharing:', error);
+          toast.error('Failed to share event');
+        }
+      }
+    } else {
+      // Fallback to clipboard
+      try {
+        await navigator.clipboard.writeText(window.location.origin + `/events/${event.id}`);
+        toast.success('Event link copied to clipboard');
+      } catch (error) {
+        console.error('Error copying to clipboard:', error);
+        toast.error('Failed to copy event link');
+      }
     }
   };
 
@@ -317,6 +365,9 @@ export default function EventsPage() {
 
   return (
     <div className={`min-h-screen ${BACKGROUNDS.page.tertiary}`}>
+      {/* Header */}
+      <Header />
+      
       {/* Top Navigation Bar */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -412,12 +463,11 @@ export default function EventsPage() {
                   className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="all">Category</option>
-                  <option value="conference">Conference</option>
-                  <option value="webinar">Webinar</option>
-                  <option value="workshop">Workshop</option>
-                  <option value="seminar">Seminar</option>
-                  <option value="networking">Networking</option>
-                  <option value="training">Training</option>
+                  {eventTypes.map(type => (
+                    <option key={type} value={type}>
+                      {type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ')}
+                    </option>
+                  ))}
                 </select>
                 <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
               </div>
@@ -561,10 +611,24 @@ export default function EventsPage() {
                     </div>
                     
                     <div className="flex items-center space-x-2">
-                      <button className="p-2 text-gray-400 hover:text-red-500 transition-colors">
-                        <HeartIcon className="w-5 h-5" />
+                      <button 
+                        onClick={() => handleLike(selectedEvent.id)}
+                        className={`p-2 transition-colors ${
+                          likedEvents.has(selectedEvent.id) 
+                            ? 'text-red-500' 
+                            : 'text-gray-400 hover:text-red-500'
+                        }`}
+                      >
+                        {likedEvents.has(selectedEvent.id) ? (
+                          <HeartSolidIcon className="w-5 h-5" />
+                        ) : (
+                          <HeartIcon className="w-5 h-5" />
+                        )}
                       </button>
-                      <button className="p-2 text-gray-400 hover:text-blue-500 transition-colors">
+                      <button 
+                        onClick={() => handleShare(selectedEvent)}
+                        className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
+                      >
                         <ShareIcon className="w-5 h-5" />
                       </button>
                     </div>
@@ -610,13 +674,27 @@ export default function EventsPage() {
                         {selectedEvent.registration_fee ? `$${selectedEvent.registration_fee}` : 'Free'}
                       </div>
                       <div className="flex items-center space-x-2">
-                        <button className="p-2 text-gray-400 hover:text-red-500 transition-colors">
-                          <HeartIcon className="w-5 h-5" />
+                        <button 
+                          onClick={() => handleLike(selectedEvent.id)}
+                          className={`p-2 transition-colors ${
+                            likedEvents.has(selectedEvent.id) 
+                              ? 'text-red-500' 
+                              : 'text-gray-400 hover:text-red-500'
+                          }`}
+                        >
+                          {likedEvents.has(selectedEvent.id) ? (
+                            <HeartSolidIcon className="w-5 h-5" />
+                          ) : (
+                            <HeartIcon className="w-5 h-5" />
+                          )}
                         </button>
                         <button className="p-2 text-gray-400 hover:text-blue-500 transition-colors">
                           <CalendarIcon className="w-5 h-5" />
                         </button>
-                        <button className="p-2 text-gray-400 hover:text-blue-500 transition-colors">
+                        <button 
+                          onClick={() => handleShare(selectedEvent)}
+                          className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
+                        >
                           <ShareIcon className="w-5 h-5" />
                         </button>
                       </div>
