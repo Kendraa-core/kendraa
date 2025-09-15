@@ -318,38 +318,74 @@ export default function EventsPage() {
     return `${Math.ceil(diffDays / 30)} months left`;
   };
 
-  // Filter and sort events
-  const filteredEvents = events.filter(event => {
-    const matchesType = selectedType === 'all' || event.event_type === selectedType;
-    const matchesFormat = selectedFormat === 'all' || 
-                         (selectedFormat === 'virtual' && event.is_virtual) ||
-                         (selectedFormat === 'in-person' && !event.is_virtual);
-    const matchesSearch = searchQuery === '' || 
-                         event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         event.description.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    return matchesType && matchesFormat && matchesSearch;
-  }).sort((a, b) => {
-    switch (sortBy) {
-      case 'date':
-        return new Date(a.start_date).getTime() - new Date(b.start_date).getTime();
-      case 'popularity':
-        return (b.attendees_count || 0) - (a.attendees_count || 0);
-      case 'name':
-        return a.title.localeCompare(b.title);
-      default:
-        return 0;
-    }
-  });
-
-  const upcomingEvents = filteredEvents.filter(event => !event.isRegistered);
-  const registeredEvents = filteredEvents.filter(event => event.isRegistered);
-
   const getDisplayEvents = () => {
-    if (activeTab === 'registered') return registeredEvents;
-    if (activeTab === 'my-events') return filteredEvents.filter(e => e.organizer_id === user?.id);
-    return filteredEvents;
+    let displayEvents: EventWithRegistration[] = [];
+    
+    // Get base events based on active tab
+    if (activeTab === 'registered') {
+      displayEvents = events.filter(event => event.isRegistered);
+    } else if (activeTab === 'my-events') {
+      displayEvents = events.filter(e => e.organizer_id === user?.id);
+    } else {
+      displayEvents = events;
+    }
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      displayEvents = displayEvents.filter(event =>
+        event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        event.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        event.organizer?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        event.location?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Apply status filter
+    if (statusFilter !== 'all') {
+      displayEvents = displayEvents.filter(event => event.status === statusFilter);
+    }
+
+    // Apply user type filter (based on organizer)
+    if (userTypeFilter !== 'all') {
+      displayEvents = displayEvents.filter(event => 
+        event.organizer?.user_type === userTypeFilter
+      );
+    }
+
+    // Apply domain filter (based on event description or title)
+    if (domainFilter !== 'all') {
+      displayEvents = displayEvents.filter(event => {
+        const searchText = `${event.title} ${event.description || ''}`.toLowerCase();
+        return searchText.includes(domainFilter.toLowerCase());
+      });
+    }
+
+    // Apply category filter (event type)
+    if (categoryFilter !== 'all') {
+      displayEvents = displayEvents.filter(event => event.event_type === categoryFilter);
+    }
+
+    // Apply sorting
+    displayEvents.sort((a, b) => {
+      switch (sortBy) {
+        case 'date':
+          return new Date(a.start_date).getTime() - new Date(b.start_date).getTime();
+        case 'popularity':
+          return (b.attendees_count || 0) - (a.attendees_count || 0);
+        case 'name':
+          return a.title.localeCompare(b.title);
+        default:
+          return 0;
+      }
+    });
+
+    return displayEvents;
   };
+
+  // Get filtered and sorted events using the display function
+  const displayEvents = getDisplayEvents();
+  const upcomingEvents = displayEvents.filter(event => !event.isRegistered);
+  const registeredEvents = displayEvents.filter(event => event.isRegistered);
 
   if (!user) {
     return (
