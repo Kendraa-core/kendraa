@@ -11,9 +11,9 @@ import {
   getInstitutionByAdminId
 } from '@/lib/queries';
 import { 
-  BriefcaseIcon, 
-  MapPinIcon, 
-  ClockIcon, 
+  BriefcaseIcon,
+  MapPinIcon,
+  ClockIcon,
   UsersIcon, 
   PlusIcon,
   VideoCameraIcon,
@@ -47,6 +47,14 @@ import type { JobWithCompany } from '@/types/database.types';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  BACKGROUNDS, 
+  TEXT_COLORS, 
+  COMPONENTS, 
+  TYPOGRAPHY, 
+  BORDER_COLORS,
+  ANIMATIONS
+} from '@/lib/design-system';
 
 interface JobWithApplication extends JobWithCompany {
   isApplied?: boolean;
@@ -55,87 +63,80 @@ interface JobWithApplication extends JobWithCompany {
 export default function JobsPage() {
   const { user } = useAuth();
   const [jobs, setJobs] = useState<JobWithApplication[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState<JobWithApplication | null>(null);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'available' | 'applied' | 'my-jobs'>('available');
-  const [selectedType, setSelectedType] = useState<string>('all');
-  const [selectedFormat, setSelectedFormat] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedType, setSelectedType] = useState('all');
+  const [selectedFormat, setSelectedFormat] = useState('all');
+  const [sortBy, setSortBy] = useState<'date' | 'popularity' | 'name'>('date');
   const [showFilters, setShowFilters] = useState(false);
-  const [sortBy, setSortBy] = useState<string>('date');
   const [likedJobs, setLikedJobs] = useState<Set<string>>(new Set());
   const [jobTypes, setJobTypes] = useState<string[]>([]);
 
-  useEffect(() => {
-    const fetchJobs = async () => {
-      if (!user?.id) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        let allJobs: JobWithCompany[] = [];
-        
-        if (activeTab === 'applied') {
-          const applications = await getJobApplications(user.id);
-          const jobIds = applications.map(app => app.job_id);
-          const allJobsData = await getJobs();
-          allJobs = allJobsData.filter(job => jobIds.includes(job.id));
-        } else if (activeTab === 'my-jobs') {
-          allJobs = await getJobsByInstitution(user.id);
-        } else {
-          allJobs = await getJobs();
-        }
-        
-        // Filter out closed jobs from the default "available" tab
-        let filteredJobs = allJobs;
-        if (activeTab === 'available') {
-          filteredJobs = allJobs.filter(job => 
-            job.status === 'active'
-          );
-        }
-        
-        if (activeTab !== 'my-jobs') {
-          const jobsWithApplication = await Promise.all(
-            filteredJobs.map(async (job) => {
-              const isApplied = await hasAppliedToJob(job.id, user.id);
-              return { ...job, isApplied };
-            })
-          );
-          setJobs(jobsWithApplication);
-        } else {
-          setJobs(filteredJobs);
-        }
-
-        // Set first job as selected by default
-        if (filteredJobs.length > 0 && !selectedJob) {
-          setSelectedJob(filteredJobs[0]);
-        }
-        
-        // Extract unique job types dynamically from filtered jobs
-        const types = [...new Set(filteredJobs.map(job => job.job_type).filter(Boolean))];
-        setJobTypes(types);
-      } catch (error) {
-        console.error('Error fetching jobs:', error);
-        toast.error('Failed to load jobs');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchJobs();
-  }, [user?.id, activeTab]);
-
-  const handleApply = async (jobId: string) => {
-    if (!user?.id) {
-      toast.error('Please log in to apply for jobs');
-      return;
-    }
-
+  const fetchJobs = async () => {
+    if (!user?.id) return;
+    
+    setLoading(true);
     try {
-      const application = await applyToJob({
-        job_id: jobId,
+      let jobsData: JobWithCompany[] = [];
+      
+      if (activeTab === 'applied') {
+        // Fetch applied jobs
+        const applications = await getJobApplications(user.id);
+        const jobIds = applications.map(app => app.job_id);
+        const allJobs = await getJobs();
+        jobsData = allJobs.filter(job => jobIds.includes(job.id));
+        
+        // Mark as applied
+        jobsData = jobsData.map(job => ({ ...job, isApplied: true }));
+      } else if (activeTab === 'my-jobs') {
+        // Fetch jobs posted by user's institution
+        const institution = await getInstitutionByAdminId(user.id);
+        if (institution) {
+          jobsData = await getJobsByInstitution(institution.id);
+        }
+      } else {
+        // Fetch all available jobs
+        jobsData = await getJobs();
+        
+        // Check which jobs user has applied to
+        const applications = await getJobApplications(user.id);
+        const appliedJobIds = new Set(applications.map(app => app.job_id));
+        jobsData = jobsData.map(job => ({ 
+          ...job, 
+          isApplied: appliedJobIds.has(job.id) 
+        }));
+      }
+
+      setJobs(jobsData);
+      
+      // Extract unique job types
+      const types = [...new Set(jobsData.map(job => job.job_type).filter(Boolean))];
+      setJobTypes(types);
+      
+      // Set first job as selected if available
+      if (jobsData.length > 0 && !selectedJob) {
+        setSelectedJob(jobsData[0]);
+      }
+    } catch (error) {
+      console.error('Error fetching jobs:', error);
+      toast.error('Failed to load jobs');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchJobs();
+  }, [activeTab, user?.id]);
+
+  const handleApply = async (job: JobWithApplication) => {
+    if (!user?.id) return;
+    
+    try {
+      const success = await applyToJob({
+        job_id: job.id,
         applicant_id: user.id,
         cover_letter: null,
         resume_url: null,
@@ -144,47 +145,52 @@ export default function JobsPage() {
         reviewed_at: null,
         notes: null
       });
-      if (application) {
-        setJobs(prev => prev.map(job => 
-          job.id === jobId 
-            ? { ...job, isApplied: true, applications_count: (job.applications_count || 0) + 1 }
-            : job
+      
+      if (success) {
+        // Update local state
+        setJobs(prevJobs => prevJobs.map(j => 
+          j.id === job.id 
+            ? { ...j, isApplied: true, applications_count: (j.applications_count || 0) + 1 }
+            : j
         ));
         
-        // Update selected job if it's the one being applied to
-        if (selectedJob?.id === jobId) {
+        if (selectedJob?.id === job.id) {
           setSelectedJob(prev => prev ? { ...prev, isApplied: true, applications_count: (prev.applications_count || 0) + 1 } : null);
         }
         
-        toast.success('Application submitted successfully');
+        toast.success('Application submitted successfully!');
+      } else {
+        toast.error('Failed to submit application');
       }
     } catch (error) {
       console.error('Error applying to job:', error);
-      toast.error('Failed to apply to job');
+      toast.error('Failed to submit application');
     }
   };
 
   const handleLike = (jobId: string) => {
     setLikedJobs(prev => {
-      const newLikedJobs = new Set(prev);
-      if (newLikedJobs.has(jobId)) {
-        newLikedJobs.delete(jobId);
+      const newSet = new Set(prev);
+      if (newSet.has(jobId)) {
+        newSet.delete(jobId);
         toast.success('Removed from favorites');
-      } else {
-        newLikedJobs.add(jobId);
+        } else {
+        newSet.add(jobId);
         toast.success('Added to favorites');
       }
-      return newLikedJobs;
+      return newSet;
     });
   };
 
   const handleShare = async (job: JobWithApplication) => {
+    const jobUrl = `${window.location.origin}/jobs/${job.id}`;
+    
     if (navigator.share) {
       try {
         await navigator.share({
           title: job.title,
-          text: job.description,
-          url: window.location.origin + `/jobs/${job.id}`,
+          text: `Check out this job: ${job.title} at ${job.company?.name}`,
+          url: jobUrl
         });
         toast.success('Job shared successfully');
       } catch (error: any) {
@@ -192,11 +198,10 @@ export default function JobsPage() {
           console.error('Error sharing:', error);
           toast.error('Failed to share job');
         }
-      }
-    } else {
-      // Fallback to clipboard
+        }
+      } else {
       try {
-        await navigator.clipboard.writeText(window.location.origin + `/jobs/${job.id}`);
+        await navigator.clipboard.writeText(jobUrl);
         toast.success('Job link copied to clipboard');
       } catch (error) {
         console.error('Error copying to clipboard:', error);
@@ -298,175 +303,293 @@ export default function JobsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+    <div className={`${BACKGROUNDS.page.primary} min-h-screen`}>
       <Header />
       
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Top Navigation Bar */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-          <div className="p-6">
-            <div className="flex items-center justify-between">
-              {/* Left Side - Navigation */}
-              <div className="flex items-center space-x-6">
-                <button
-                  onClick={() => setActiveTab('available')}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                    activeTab === 'available'
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                  }`}
-                >
-                  Available Jobs
-                </button>
-                <button
-                  onClick={() => setActiveTab('applied')}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                    activeTab === 'applied'
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                  }`}
-                >
-                  Applied Jobs
-                </button>
-                <button
-                  onClick={() => setActiveTab('my-jobs')}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                    activeTab === 'my-jobs'
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                  }`}
-                >
-                  My Jobs
-                </button>
-              </div>
+      <div className="container mx-auto px-4 py-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="max-w-7xl mx-auto"
+        >
+          {/* Page Header */}
+        <div className="mb-8">
+            <h1 className={`${TYPOGRAPHY.heading.h1} mb-2`}>Jobs</h1>
+            <p className={`${TYPOGRAPHY.body.large} ${TEXT_COLORS.secondary}`}>
+              Discover and apply for healthcare opportunities
+              </p>
+            </div>
 
-              {/* Right Side - Search and Actions */}
-              <div className="flex items-center space-x-4">
+          {/* Top Navigation Bar */}
+          <div className={`${COMPONENTS.card.base} mb-6`}>
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                {/* Left Side - Navigation */}
+                <div className="flex items-center space-x-6">
+                  <button
+                    onClick={() => setActiveTab('available')}
+                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      activeTab === 'available'
+                        ? `${COMPONENTS.button.primary}`
+                        : `${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} hover:bg-gray-100`
+                    }`}
+                  >
+                    Available Jobs
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('applied')}
+                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      activeTab === 'applied'
+                        ? `${COMPONENTS.button.primary}`
+                        : `${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} hover:bg-gray-100`
+                    }`}
+                  >
+                    Applied Jobs
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('my-jobs')}
+                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      activeTab === 'my-jobs'
+                        ? `${COMPONENTS.button.primary}`
+                        : `${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} hover:bg-gray-100`
+                    }`}
+                  >
+                    My Jobs
+                  </button>
+          </div>
+
+                {/* Right Side - Search and Actions */}
+                <div className="flex items-center space-x-4">
                 <div className="relative">
-                  <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
+                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
                     type="text"
-                    placeholder="Search jobs..."
+                      placeholder="Search jobs..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"
+                      className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"
                   />
-                </div>
-                
-                <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <FunnelIcon className="w-5 h-5" />
-                </button>
+                  </div>
+                  
+                    <button
+                    onClick={() => setShowFilters(!showFilters)}
+                    className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                    <FunnelIcon className="w-5 h-5" />
+                    </button>
 
-                <Link
-                  href="/jobs/create"
-                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-                >
-                  <PlusIcon className="w-4 h-4 mr-2" />
-                  Post Job
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Filters */}
-        {showFilters && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-            <div className="p-6">
-              <div className="flex flex-wrap gap-4">
-                <div className="relative">
-                  <select
-                    value={selectedType}
-                    onChange={(e) => setSelectedType(e.target.value)}
-                    className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  <Link
+                    href="/jobs/create"
+                    className={`${COMPONENTS.button.primary} inline-flex items-center px-4 py-2 text-sm font-medium`}
                   >
-                    <option value="all">Job Type</option>
-                    {jobTypes.map(type => (
-                      <option key={type} value={type}>
-                        {type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ')}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                </div>
-
-                <div className="relative">
-                  <select
-                    value={selectedFormat}
-                    onChange={(e) => setSelectedFormat(e.target.value)}
-                    className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="all">Location</option>
-                    <option value="remote">Remote</option>
-                    <option value="on-site">On-Site</option>
-                  </select>
-                  <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                </div>
-
-                <div className="relative">
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="date">Sort by Date</option>
-                    <option value="popularity">Sort by Popularity</option>
-                    <option value="name">Sort by Name</option>
-                  </select>
-                  <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                    <PlusIcon className="w-4 h-4 mr-2" />
+                    Post Job
+                  </Link>
                 </div>
               </div>
             </div>
           </div>
-        )}
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Jobs List */}
-          <div className="lg:col-span-2">
-            <div className="space-y-4">
-              {getDisplayJobs().map((job) => (
-                <motion.div
-                  key={job.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={`bg-white rounded-lg shadow-sm border transition-all duration-200 cursor-pointer hover:shadow-md ${
-                    selectedJob?.id === job.id ? 'ring-2 ring-blue-500 border-blue-500' : 'border-gray-200'
-                  }`}
-                  onClick={() => setSelectedJob(job)}
-                >
+          {/* Filters */}
+          {showFilters && (
+            <div className={`${COMPONENTS.card.base} mb-6`}>
+              <div className="p-6">
+                <div className="flex flex-wrap gap-4">
+                  <div className="relative">
+                <select
+                  value={selectedType}
+                  onChange={(e) => setSelectedType(e.target.value)}
+                      className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="all">Job Type</option>
+                      {jobTypes.map(type => (
+                        <option key={type} value={type}>
+                          {type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ')}
+                    </option>
+                  ))}
+                </select>
+                    <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  </div>
+
+                  <div className="relative">
+                    <select
+                      value={selectedFormat}
+                      onChange={(e) => setSelectedFormat(e.target.value)}
+                      className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="all">Work Format</option>
+                      <option value="remote">Remote</option>
+                      <option value="on-site">On-site</option>
+                    </select>
+                    <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              </div>
+
+                  <div className="relative">
+                <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value as 'date' | 'popularity' | 'name')}
+                      className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="date">Sort by Date</option>
+                      <option value="popularity">Sort by Popularity</option>
+                      <option value="name">Sort by Name</option>
+                </select>
+                    <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Main Content Grid */}
+          <div className="lg:grid lg:grid-cols-3 lg:gap-8">
+            {/* Job Listings */}
+            <div className="lg:col-span-2 mb-8 lg:mb-0">
+              <div className="space-y-4">
+                {getDisplayJobs().map((job) => (
+                  <motion.div
+                    key={job.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`${COMPONENTS.card.base} cursor-pointer transition-all duration-200 hover:shadow-lg ${
+                      selectedJob?.id === job.id ? 'ring-2 ring-blue-500' : ''
+                    }`}
+                    onClick={() => setSelectedJob(job)}
+                  >
+                    <div className="p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-start space-x-4">
+                          <Avatar
+                            src={job.company?.logo_url}
+                            alt={job.company?.name || 'Company'}
+                            size="lg"
+                            className="flex-shrink-0"
+                          />
+                          <div className="flex-1">
+                            <h3 className={`${TYPOGRAPHY.heading.h3} mb-1`}>
+                              {job.title}
+                            </h3>
+                            <p className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary} mb-2`}>
+                              {job.company?.name || 'Unknown Company'}
+                            </p>
+                            <div className="flex items-center space-x-4 text-sm text-gray-500">
+                              <div className="flex items-center">
+                                <MapPinIcon className="w-4 h-4 mr-1" />
+                                {job.location}
+                              </div>
+                              <div className="flex items-center">
+                                <ClockIcon className="w-4 h-4 mr-1" />
+                                {formatDate(job.created_at)}
+                              </div>
+                              <div className="flex items-center">
+                                <CurrencyDollarIcon className="w-4 h-4 mr-1" />
+                                {formatSalary(job.salary_min, job.salary_max)}
+                              </div>
+                </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleLike(job.id);
+                            }}
+                            className={`p-2 transition-colors ${
+                              likedJobs.has(job.id) 
+                                ? 'text-red-500' 
+                                : 'text-gray-400 hover:text-red-500'
+                            }`}
+                          >
+                            {likedJobs.has(job.id) ? (
+                              <HeartSolidIcon className="w-5 h-5" />
+                            ) : (
+                              <HeartIcon className="w-5 h-5" />
+                            )}
+                          </button>
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleShare(job);
+                            }}
+                            className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
+                          >
+                            <ShareIcon className="w-5 h-5" />
+                          </button>
+                          </div>
+                      </div>
+
+                      <p className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary} mb-4 line-clamp-2`}>
+                        {job.description}
+                      </p>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getJobTypeColor(job.job_type)}`}>
+                            {job.job_type?.replace('_', ' ')}
+                          </span>
+                          {job.location?.toLowerCase().includes('remote') && (
+                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
+                              Remote
+                            </span>
+                          )}
+                        </div>
+                        
+                        <div className="flex items-center space-x-2 text-sm text-gray-500">
+                          <UsersIcon className="w-4 h-4" />
+                          <span>{job.applications_count || 0} applicants</span>
+                        </div>
+              </div>
+            </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              {getDisplayJobs().length === 0 && (
+                <div className={`${COMPONENTS.card.base} text-center py-12`}>
+                  <BriefcaseIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className={`${TYPOGRAPHY.heading.h3} mb-2`}>No jobs found</h3>
+                  <p className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary}`}>
+                    {activeTab === 'applied' 
+                      ? "You haven't applied to any jobs yet."
+                      : activeTab === 'my-jobs'
+                      ? "You haven't posted any jobs yet."
+                      : "No jobs match your current filters."
+                    }
+                  </p>
+                </div>
+                              )}
+                            </div>
+
+            {/* Job Details Panel */}
+            <div className="lg:col-span-1">
+              {selectedJob ? (
+                <div className={`${COMPONENTS.card.base} sticky top-24`}>
                   <div className="p-6">
-                    <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-start justify-between mb-6">
                       <div className="flex items-start space-x-4">
                         <Avatar
-                          src={job.company?.logo_url}
-                          alt={job.company?.name || 'Company'}
-                          size="md"
+                          src={selectedJob.company?.logo_url}
+                          alt={selectedJob.company?.name || 'Company'}
+                          size="lg"
+                          className="flex-shrink-0"
                         />
                         <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                            {job.title}
-                          </h3>
-                          <p className="text-gray-600 mb-2">
-                            {job.company?.name || 'Unknown Company'}
+                          <h2 className={`${TYPOGRAPHY.heading.h2} mb-1`}>
+                            {selectedJob.title}
+                          </h2>
+                          <p className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary} mb-2`}>
+                            {selectedJob.company?.name || 'Unknown Company'}
                           </p>
                           <div className="flex items-center space-x-4 text-sm text-gray-500">
                             <div className="flex items-center">
                               <MapPinIcon className="w-4 h-4 mr-1" />
-                              {job.location}
+                              {selectedJob.location}
                             </div>
                             <div className="flex items-center">
                               <ClockIcon className="w-4 h-4 mr-1" />
-                              {formatDate(job.created_at)}
-                            </div>
-                            <div className="flex items-center">
-                              <CurrencyDollarIcon className="w-4 h-4 mr-1" />
-                              {formatSalary(job.salary_min, job.salary_max)}
+                              {formatDate(selectedJob.created_at)}
                             </div>
                           </div>
                         </div>
@@ -474,27 +597,21 @@ export default function JobsPage() {
                       
                       <div className="flex items-center space-x-2">
                         <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleLike(job.id);
-                          }}
+                          onClick={() => handleLike(selectedJob.id)}
                           className={`p-2 transition-colors ${
-                            likedJobs.has(job.id) 
+                            likedJobs.has(selectedJob.id) 
                               ? 'text-red-500' 
                               : 'text-gray-400 hover:text-red-500'
                           }`}
                         >
-                          {likedJobs.has(job.id) ? (
+                          {likedJobs.has(selectedJob.id) ? (
                             <HeartSolidIcon className="w-5 h-5" />
                           ) : (
                             <HeartIcon className="w-5 h-5" />
                           )}
                         </button>
                         <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleShare(job);
-                          }}
+                          onClick={() => handleShare(selectedJob)}
                           className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
                         >
                           <ShareIcon className="w-5 h-5" />
@@ -502,189 +619,92 @@ export default function JobsPage() {
                       </div>
                     </div>
 
-                    <p className="text-gray-600 mb-4 line-clamp-2">
-                      {job.description}
-                    </p>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getJobTypeColor(job.job_type)}`}>
-                          {job.job_type?.replace('_', ' ')}
-                        </span>
-                        {job.location?.toLowerCase().includes('remote') && (
-                          <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
-                            Remote
-                          </span>
-                        )}
-                      </div>
-                      
-                      <div className="flex items-center space-x-2 text-sm text-gray-500">
-                        <UsersIcon className="w-4 h-4" />
-                        <span>{job.applications_count || 0} applicants</span>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-
-            {getDisplayJobs().length === 0 && (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 text-center py-12">
-                <BriefcaseIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No jobs found</h3>
-                <p className="text-gray-500">
-                  {activeTab === 'applied' 
-                    ? "You haven't applied to any jobs yet."
-                    : activeTab === 'my-jobs'
-                    ? "You haven't posted any jobs yet."
-                    : "No jobs match your current filters."
-                  }
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Job Details Panel */}
-          <div className="lg:col-span-1">
-            {selectedJob ? (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 sticky top-24">
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-6">
-                    <div className="flex items-start space-x-4">
-                      <Avatar
-                        src={selectedJob.company?.logo_url}
-                        alt={selectedJob.company?.name || 'Company'}
-                        size="lg"
-                      />
-                      <div>
-                        <h1 className="text-xl font-semibold text-gray-900 mb-1">
-                          {selectedJob.title}
-                        </h1>
-                        <p className="text-gray-600 mb-4">
-                          {selectedJob.company?.name || 'Unknown Company'}
-                        </p>
-                        <div className="flex items-center space-x-4 text-sm text-gray-500">
-                          <div className="flex items-center">
-                            <MapPinIcon className="w-4 h-4 mr-1" />
-                            {selectedJob.location}
-                          </div>
-                          <div className="flex items-center">
-                            <ClockIcon className="w-4 h-4 mr-1" />
-                            {formatDate(selectedJob.created_at)}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <button 
-                        onClick={() => handleLike(selectedJob.id)}
-                        className={`p-2 transition-colors ${
-                          likedJobs.has(selectedJob.id) 
-                            ? 'text-red-500' 
-                            : 'text-gray-400 hover:text-red-500'
-                        }`}
-                      >
-                        {likedJobs.has(selectedJob.id) ? (
-                          <HeartSolidIcon className="w-5 h-5" />
-                        ) : (
-                          <HeartIcon className="w-5 h-5" />
-                        )}
-                      </button>
-                      <button className="p-2 text-gray-400 hover:text-blue-500 transition-colors">
-                        <BriefcaseIcon className="w-5 h-5" />
-                      </button>
-                      <button 
-                        onClick={() => handleShare(selectedJob)}
-                        className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
-                      >
-                        <ShareIcon className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="text-2xl font-bold text-gray-900">
-                      {formatSalary(selectedJob.salary_min, selectedJob.salary_max)}
-                    </div>
-                    
-                    {user?.id !== selectedJob.company_id && (
+                    <div className="mb-6">
                       <button
-                        onClick={() => selectedJob.isApplied ? null : handleApply(selectedJob.id)}
+                        onClick={() => handleApply(selectedJob)}
                         disabled={selectedJob.isApplied}
-                        className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+                        className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
                           selectedJob.isApplied
                             ? 'bg-green-100 text-green-700 cursor-not-allowed'
-                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                            : `${COMPONENTS.button.primary}`
                         }`}
                       >
                         {selectedJob.isApplied ? 'Applied' : 'Apply Now'}
                       </button>
-                    )}
-                  </div>
-
-                  {/* Job Details */}
-                  <div className="space-y-6">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Job Description</h3>
-                      <p className="text-gray-600 whitespace-pre-wrap">
-                        {selectedJob.description}
-                      </p>
                     </div>
 
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Job Details</h3>
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-gray-600">Type</span>
-                          <span className="font-medium">{selectedJob.job_type?.replace('_', ' ')}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-gray-600">Location</span>
-                          <span className="font-medium">{selectedJob.location}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-gray-600">Posted</span>
-                          <span className="font-medium">{formatDate(selectedJob.created_at)}</span>
+                    <div className="space-y-6">
+                      <div>
+                        <h3 className={`${TYPOGRAPHY.heading.h3} mb-3`}>Job Description</h3>
+                        <p className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary}`}>
+                          {selectedJob.description}
+                        </p>
+                      </div>
+
+                      <div>
+                        <h3 className={`${TYPOGRAPHY.heading.h3} mb-3`}>Job Details</h3>
+                        <div className="space-y-2">
+                          <div className="flex justify-between">
+                            <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary}`}>Type:</span>
+                            <span className={`${TYPOGRAPHY.body.medium} font-medium`}>
+                              {selectedJob.job_type?.replace('_', ' ')}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary}`}>Location:</span>
+                            <span className={`${TYPOGRAPHY.body.medium} font-medium`}>
+                              {selectedJob.location}
+                              </span>
+                            </div>
+                          <div className="flex justify-between">
+                            <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary}`}>Salary:</span>
+                            <span className={`${TYPOGRAPHY.body.medium} font-medium`}>
+                              {formatSalary(selectedJob.salary_min, selectedJob.salary_max)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary}`}>Posted:</span>
+                            <span className={`${TYPOGRAPHY.body.medium} font-medium`}>
+                              {formatDate(selectedJob.created_at)}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Company</h3>
-                      <div className="flex items-center space-x-3">
-                        <Avatar
-                          src={selectedJob.company?.logo_url}
-                          alt={selectedJob.company?.name || 'Company'}
-                          size="md"
-                        />
-                        <div>
-                          <p className="font-medium text-gray-900">
-                            {selectedJob.company?.name || 'Unknown Company'}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            {selectedJob.company?.type?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Healthcare Organization'}
-                          </p>
-                        </div>
-                      </div>
+                      <div>
+                        <h3 className={`${TYPOGRAPHY.heading.h3} mb-3`}>Company</h3>
+                        <div className="flex items-center space-x-3">
+                          <Avatar
+                            src={selectedJob.company?.logo_url}
+                            alt={selectedJob.company?.name || 'Company'}
+                            size="md"
+                          />
+                          <div>
+                            <p className={`${TYPOGRAPHY.body.medium} font-medium`}>
+                              {selectedJob.company?.name || 'Unknown Company'}
+                            </p>
+                            <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                              {selectedJob.company?.type || 'Healthcare Organization'}
+                            </p>
                     </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 sticky top-24">
-                <div className="p-6 text-center">
-                  <BriefcaseIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Select a Job</h3>
-                  <p className="text-gray-600">
-                    Choose a job from the list to view details
-                  </p>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
     </div>
+          </div>
+              ) : (
+                <div className={`${COMPONENTS.card.base} text-center py-12`}>
+                  <BriefcaseIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className={`${TYPOGRAPHY.heading.h3} mb-2`}>Select a job</h3>
+                  <p className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary}`}>
+                    Choose a job from the list to view details
+            </p>
+          </div>
+              )}
+            </div>
+            </div>
+        </motion.div>
+      </div>
+    </div>
   );
-}
+} 
