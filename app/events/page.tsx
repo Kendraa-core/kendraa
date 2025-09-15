@@ -96,7 +96,7 @@ export default function EventsPage() {
       try {
         setLoading(true);
         let allEvents: Event[] = [];
-
+        
         if (activeTab === 'registered') {
           allEvents = await getUserRegisteredEvents(user.id);
         } else if (activeTab === 'my-events') {
@@ -107,25 +107,33 @@ export default function EventsPage() {
         
         const eventsWithOrganizers = await fetchOrganizerInfo(allEvents);
         
+        // Filter out ended events (completed/cancelled) from the default "upcoming" tab
+        let filteredEvents = eventsWithOrganizers;
+        if (activeTab === 'upcoming') {
+          filteredEvents = eventsWithOrganizers.filter(event => 
+            event.status === 'upcoming' || event.status === 'ongoing'
+          );
+        }
+        
         if (activeTab !== 'my-events') {
           const eventsWithRegistration = await Promise.all(
-            eventsWithOrganizers.map(async (event) => {
+            filteredEvents.map(async (event) => {
               const isRegistered = await isRegisteredForEvent(event.id, user.id);
               return { ...event, isRegistered };
             })
           );
           setEvents(eventsWithRegistration);
         } else {
-          setEvents(eventsWithOrganizers);
+          setEvents(filteredEvents);
         }
 
         // Set first event as selected by default
-        if (eventsWithOrganizers.length > 0 && !selectedEvent) {
-          setSelectedEvent(eventsWithOrganizers[0]);
+        if (filteredEvents.length > 0 && !selectedEvent) {
+          setSelectedEvent(filteredEvents[0]);
         }
         
-        // Extract unique event types dynamically
-        const types = [...new Set(eventsWithOrganizers.map(event => event.event_type).filter(Boolean))];
+        // Extract unique event types dynamically from filtered events
+        const types = [...new Set(filteredEvents.map(event => event.event_type).filter(Boolean))];
         setEventTypes(types);
       } catch (error) {
         console.error('Error fetching events:', error);
@@ -442,7 +450,7 @@ export default function EventsPage() {
               </div>
 
               <div className="relative">
-                <select
+            <select
                   value={domainFilter}
                   onChange={(e) => setDomainFilter(e.target.value)}
                   className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -451,13 +459,13 @@ export default function EventsPage() {
                   <option value="healthcare">Healthcare</option>
                   <option value="technology">Technology</option>
                   <option value="business">Business</option>
-                </select>
+            </select>
                 <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                 <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full">1</span>
               </div>
-
+            
               <div className="relative">
-                <select
+            <select
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
                   className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -468,18 +476,18 @@ export default function EventsPage() {
                       {type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ')}
                     </option>
                   ))}
-                </select>
+            </select>
                 <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
               </div>
 
-              <Link
-                href="/events/create"
+            <Link
+              href="/events/create"
                 className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-              >
-                <PlusIcon className="w-4 h-4 mr-2" />
-                Create Event
-              </Link>
-            </div>
+            >
+              <PlusIcon className="w-4 h-4 mr-2" />
+              Create Event
+            </Link>
+          </div>
           </div>
         </div>
       </div>
@@ -501,8 +509,8 @@ export default function EventsPage() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
-                </div>
-              </div>
+        </div>
+      </div>
 
               {/* Event List */}
               <div className="overflow-y-auto h-[calc(100%-5rem)]">
@@ -562,7 +570,7 @@ export default function EventsPage() {
                               {event.is_virtual && (
                                 <span className="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-700 rounded-full">
                                   Virtual
-                                </span>
+              </span>
                               )}
                             </div>
                           </div>
@@ -611,7 +619,7 @@ export default function EventsPage() {
                     </div>
                     
                     <div className="flex items-center space-x-2">
-                      <button 
+          <button
                         onClick={() => handleLike(selectedEvent.id)}
                         className={`p-2 transition-colors ${
                           likedEvents.has(selectedEvent.id) 
@@ -624,26 +632,26 @@ export default function EventsPage() {
                         ) : (
                           <HeartIcon className="w-5 h-5" />
                         )}
-                      </button>
-                      <button 
+          </button>
+          <button
                         onClick={() => handleShare(selectedEvent)}
                         className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
                       >
                         <ShareIcon className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </div>
+          </button>
+        </div>
+      </div>
 
                   {/* Event Info */}
                   <div className="flex items-center space-x-6 text-sm text-gray-600 mb-4">
                     <div className="flex items-center">
                       <MapPinIcon className="w-4 h-4 mr-1" />
                       <span>{selectedEvent.is_virtual ? 'Online' : selectedEvent.location || 'TBA'}</span>
-                    </div>
+          </div>
                     <div className="flex items-center">
                       <CalendarIcon className="w-4 h-4 mr-1" />
                       <span>Updated On: {formatDate(selectedEvent.created_at)}</span>
-                    </div>
+        </div>
                     <div className="flex items-center">
                       <GlobeAltIcon className="w-4 h-4 mr-1" />
                       <span>Official website</span>
@@ -740,7 +748,7 @@ export default function EventsPage() {
                       <p className="text-lg font-bold text-gray-900">1-4 Members</p>
                     </div>
                   </div>
-                </div>
+                  </div>
 
                 {/* Event Description */}
                 <div className="p-6 border-b border-gray-200">
@@ -773,7 +781,7 @@ export default function EventsPage() {
                         <div>
                           <h3 className="font-semibold text-gray-900">Location</h3>
                           <p className="text-gray-600">{selectedEvent.location}</p>
-                        </div>
+                    </div>
                       </div>
                     )}
 
@@ -822,8 +830,8 @@ export default function EventsPage() {
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Select an Event</h3>
                   <p className="text-gray-600">Choose an event from the list to view details</p>
                 </div>
-              </div>
-            )}
+        </div>
+      )}
           </div>
         </div>
       </div>
