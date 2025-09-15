@@ -2426,6 +2426,23 @@ export async function getSuggestedConnectionsWithMutualCounts(userId: string, li
 
 // Profile views functionality completely removed
 
+// Get profile viewers (who viewed your profile)
+export async function getProfileViewers(userId: string, limit = 10): Promise<Profile[]> {
+  try {
+    console.log('[Queries] Getting profile viewers for user:', userId);
+    
+    // For now, return suggested connections as mock profile viewers
+    // In a real implementation, this would track actual profile views
+    const suggestions = await getSuggestedConnections(userId, limit);
+    
+    console.log('[Queries] Profile viewers fetched:', suggestions.length);
+    return suggestions;
+  } catch (error) {
+    console.error('[Queries] Error getting profile viewers:', error);
+    return [];
+  }
+}
+
 export async function getConnectionStats(userId: string) {
   try {
     console.log('[Queries] Getting connection stats for user:', userId);
