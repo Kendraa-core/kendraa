@@ -32,6 +32,16 @@ import {
   CalendarDaysIcon,
 } from '@heroicons/react/24/outline';
 import { formatRelativeTime } from '@/lib/utils';
+import { 
+  BACKGROUNDS, 
+  TEXT_COLORS, 
+  COMPONENTS, 
+  TYPOGRAPHY, 
+  BORDER_COLORS,
+  ANIMATIONS,
+  NOTIFICATION_TYPE_COLORS,
+  getNotificationTypeColor
+} from '@/lib/design-system';
 import { getConnectionStats, getPostStats, getNotifications } from '@/lib/queries';
 import ShareButton from '@/components/common/ShareButton';
 import ProfileCompletionPrompt from '@/components/profile/ProfileCompletionPrompt';
@@ -163,25 +173,9 @@ export default function UserDashboard() {
     }
   };
 
-  const getActivityColor = (type: string) => {
-    switch (type) {
-      case 'connection_request': return 'text-[#007fff] bg-[#007fff]/10';
-      case 'post_like': return 'text-[#007fff] bg-[#007fff]/10';
-      case 'comment': return 'text-[#007fff] bg-[#007fff]/10';
-      case 'job_application': return 'text-[#007fff] bg-[#007fff]/10';
-      default: return 'text-gray-600 bg-gray-100';
-    }
-  };
+  // Activity color function is now imported from design system
 
-  const getStatusColor = (type: string) => {
-    switch (type) {
-      case 'connection_request': return 'text-[#007fff] bg-[#007fff]/10';
-      case 'post_like': return 'text-[#007fff] bg-[#007fff]/10';
-      case 'comment': return 'text-[#007fff] bg-[#007fff]/10';
-      case 'job_application': return 'text-[#007fff] bg-[#007fff]/10';
-      default: return 'text-gray-600 bg-gray-100';
-    }
-  };
+  // Status color function is now imported from design system
 
   const getStatusIcon = (type: string) => {
     switch (type) {
@@ -402,7 +396,7 @@ export default function UserDashboard() {
                       const IconComponent = getActivityIcon(activity.type);
                       return (
                         <div key={index} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white transition-colors">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getActivityColor(activity.type)}`}>
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getNotificationTypeColor(activity.type)}`}>
                             <IconComponent className="w-5 h-5" />
                           </div>
                           <div className="flex-1 min-w-0">

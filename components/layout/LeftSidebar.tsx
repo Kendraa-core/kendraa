@@ -233,7 +233,7 @@ export default function LeftSidebar({
           </Link>
           <Link href="/network" className="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
             <UserGroupIcon className="w-5 h-5 text-gray-600" />
-            <span className="text-sm text-gray-700">Groups</span>
+            <span className="text-sm text-gray-700">Network</span>
           </Link>
           <Link href="/newsletters" className="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
             <UserCircleIcon className="w-5 h-5 text-gray-600" />

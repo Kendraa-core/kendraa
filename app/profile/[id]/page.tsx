@@ -9,11 +9,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import Avatar from '@/components/common/Avatar';
 import Breadcrumb from '@/components/common/Breadcrumb';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 import EditProfileModal from '@/components/profile/EditProfileModal';
 import EnhancedProfileImageEditor from '@/components/profile/EnhancedProfileImageEditor';
 import PostCard from '@/components/post/PostCard';
 import SimilarPeople from '@/components/profile/SimilarPeople';
 import { cn, formatDate, formatNumber } from '@/lib/utils';
+import { 
+  BACKGROUNDS, 
+  TEXT_COLORS, 
+  COMPONENTS, 
+  TYPOGRAPHY, 
+  BORDER_COLORS,
+  ANIMATIONS 
+} from '@/lib/design-system';
 import {
   ArrowLeftIcon,
   PencilIcon,
@@ -845,7 +854,7 @@ export default function ProfilePage() {
     if (!id) return;
 
     try {
-    setLoading(true);
+      setLoading(true);
       
       // Fetch profile data
       const profileData = await getProfile(id as string);
@@ -860,15 +869,14 @@ export default function ProfilePage() {
       setExperiences(experiencesData);
       setEducation(educationData);
       
-      // Fetch connection data
+      // Fetch connection count (public data)
+      const countData = await getConnectionCount(id as string);
+      setConnectionCount(countData);
+      
+      // Fetch connection data only if user is logged in
       if (!isOwnProfile && user?.id) {
-        const [connectionData, countData] = await Promise.all([
-          getConnectionStatus(user.id, id as string),
-          getConnectionCount(id as string)
-        ]);
-        
+        const connectionData = await getConnectionStatus(user.id, id as string);
         setConnectionStatus(connectionData || 'none');
-        setConnectionCount(countData);
         
         // Check follow status based on profile type
         if (profileData?.profile_type === 'institution') {
@@ -878,9 +886,9 @@ export default function ProfilePage() {
           const followData = await isFollowing(user.id, id as string);
           setFollowStatus(followData ? 'following' : 'none');
         }
-        } else {
-        const countData = await getConnectionCount(id as string);
-        setConnectionCount(countData);
+      } else {
+        setConnectionStatus('none');
+        setFollowStatus('none');
       }
       
       // Fetch posts for activity
@@ -893,7 +901,7 @@ export default function ProfilePage() {
     } finally {
       setLoading(false);
     }
-  }, [id, user?.id]);
+  }, [id, user?.id, isOwnProfile]);
 
   useEffect(() => {
     if (id && !profile) {
@@ -902,7 +910,10 @@ export default function ProfilePage() {
   }, [id, profile, fetchProfileData]);
 
   const handleConnect = async () => {
-    if (!profile || !user) return;
+    if (!profile || !user) {
+      toast.error('Please sign in to connect with this user');
+      return;
+    }
 
     try {
       if (profile.profile_type === 'institution') {
@@ -921,7 +932,10 @@ export default function ProfilePage() {
   };
 
   const handleUnfollow = async () => {
-    if (!profile || !user) return;
+    if (!profile || !user) {
+      toast.error('Please sign in to unfollow this user');
+      return;
+    }
     
     try {
       if (profile.profile_type === 'institution') {
@@ -1199,14 +1213,7 @@ export default function ProfilePage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-white via-[#007fff]/5 to-[#007fff]/10 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-[#007fff]/20 border-t-[#007fff] rounded-full animate-spin mx-auto"></div>
-          <p className="text-[#007fff] mt-6 text-lg font-medium">Loading medical profile...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner variant="fullscreen" text="Loading medical profile..." />;
   }
 
   if (!profile) {
@@ -1222,12 +1229,12 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-[#007fff]/5">
+    <div className={`min-h-screen ${BACKGROUNDS.page.primary}`}>
       <div className="flex gap-6 px-4 sm:px-6 lg:px-8 py-6">
         {/* Main Content Container */}
         <div className="flex-1 max-w-4xl mx-auto space-y-4">
           {/* Profile Header */}
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+          <div className={`${COMPONENTS.card.base} shadow-xl`}>
             {/* Banner */}
             <div className="relative h-56 bg-[#007fff] overflow-hidden">
               {/* Background Pattern */}
@@ -1500,53 +1507,76 @@ export default function ProfilePage() {
                   {/* Action Buttons for non-own profiles */}
                   {!isOwnProfile && (
                     <div className="flex flex-col gap-3">
-                      {profile.profile_type === 'institution' ? (
-                        followStatus === 'following' ? (
-                          <button
-                            onClick={handleUnfollow}
-                            className="inline-flex items-center justify-center px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 text-sm font-semibold border border-gray-200 w-full group hover:scale-[1.02]"
+                      {user ? (
+                        // Logged in user actions
+                        <>
+                          {profile.profile_type === 'institution' ? (
+                            followStatus === 'following' ? (
+                              <button
+                                onClick={handleUnfollow}
+                                className="inline-flex items-center justify-center px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 text-sm font-semibold border border-gray-200 w-full group hover:scale-[1.02]"
+                              >
+                                <CheckIcon className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
+                                Following
+                              </button>
+                            ) : (
+                              <button
+                                onClick={handleConnect}
+                                className="inline-flex items-center justify-center px-6 py-3 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-semibold w-full group hover:scale-[1.02] shadow-lg hover:shadow-xl"
+                              >
+                                <PlusIcon className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
+                                Follow
+                              </button>
+                            )
+                          ) : (
+                            connectionStatus === 'connected' ? (
+                              <span className="inline-flex items-center justify-center px-6 py-3 bg-green-100 text-green-700 rounded-lg text-sm font-semibold border border-green-200 w-full">
+                                <CheckIcon className="w-4 h-4 mr-2" />
+                                Connected
+                              </span>
+                            ) : connectionStatus === 'pending' ? (
+                              <span className="inline-flex items-center justify-center px-6 py-3 bg-yellow-100 text-yellow-700 rounded-lg text-sm font-semibold border border-yellow-200 w-full">
+                                <ClockIcon className="w-4 h-4 mr-2" />
+                                Pending
+                              </span>
+                            ) : (
+                              <button
+                                onClick={handleConnect}
+                                className="inline-flex items-center justify-center px-6 py-3 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-semibold w-full group hover:scale-[1.02] shadow-lg hover:shadow-xl"
+                              >
+                                <UserPlusIcon className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
+                                Connect
+                              </button>
+                            )
+                          )}
+                          <button 
+                            onClick={() => router.push(`/messages?user=${profile.id}`)}
+                            className="inline-flex items-center justify-center px-6 py-3 bg-white text-[#007fff] border-2 border-[#007fff] rounded-lg hover:bg-[#007fff]/5 transition-all duration-200 text-sm font-semibold w-full group hover:scale-[1.02] hover:border-[#007fff]/80"
                           >
-                            <CheckIcon className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
-                            Following
-                    </button>
-                        ) : (
-                          <button
-                            onClick={handleConnect}
-                            className="inline-flex items-center justify-center px-6 py-3 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-semibold w-full group hover:scale-[1.02] shadow-lg hover:shadow-xl"
-                          >
-                            <PlusIcon className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
-                            Follow
+                            <EnvelopeIcon className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
+                            Message
                           </button>
-                        )
+                        </>
                       ) : (
-                        connectionStatus === 'connected' ? (
-                          <span className="inline-flex items-center justify-center px-6 py-3 bg-green-100 text-green-700 rounded-lg text-sm font-semibold border border-green-200 w-full">
-                            <CheckIcon className="w-4 h-4 mr-2" />
-                            Connected
-                          </span>
-                        ) : connectionStatus === 'pending' ? (
-                          <span className="inline-flex items-center justify-center px-6 py-3 bg-yellow-100 text-yellow-700 rounded-lg text-sm font-semibold border border-yellow-200 w-full">
-                            <ClockIcon className="w-4 h-4 mr-2" />
-                            Pending
-                          </span>
-                        ) : (
-                          <button
-                            onClick={handleConnect}
+                        // Non-logged in user actions
+                        <>
+                          <Link
+                            href="/signin"
                             className="inline-flex items-center justify-center px-6 py-3 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-semibold w-full group hover:scale-[1.02] shadow-lg hover:shadow-xl"
                           >
                             <UserPlusIcon className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
-                            Connect
-                          </button>
-                        )
+                            {profile.profile_type === 'institution' ? 'Follow' : 'Connect'}
+                          </Link>
+                          <Link
+                            href="/signin"
+                            className="inline-flex items-center justify-center px-6 py-3 bg-white text-[#007fff] border-2 border-[#007fff] rounded-lg hover:bg-[#007fff]/5 transition-all duration-200 text-sm font-semibold w-full group hover:scale-[1.02] hover:border-[#007fff]/80"
+                          >
+                            <EnvelopeIcon className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
+                            Message
+                          </Link>
+                        </>
                       )}
-                      <button 
-                        onClick={() => router.push(`/messages?user=${profile.id}`)}
-                        className="inline-flex items-center justify-center px-6 py-3 bg-white text-[#007fff] border-2 border-[#007fff] rounded-lg hover:bg-[#007fff]/5 transition-all duration-200 text-sm font-semibold w-full group hover:scale-[1.02] hover:border-[#007fff]/80"
-                      >
-                        <EnvelopeIcon className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
-                        Message
-                      </button>
-                </div>
+                    </div>
                   )}
                     </div>
                   </div>
