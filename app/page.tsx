@@ -112,7 +112,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-6 lg:px-8">
+      <section className="pt-24 pb-16 px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
             <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -125,7 +125,7 @@ export default function LandingPage() {
                 healthcare networking
               </span>
                </h1>
-            <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
               Connect, collaborate, and transform healthcare. Join thousands of professionals building the future of medicine.
                </p>
             </motion.div>
@@ -134,7 +134,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-            className="flex items-center justify-center mb-16"
+            className="flex items-center justify-center mb-12"
           >
             <Link
               href="/signup"
@@ -159,14 +159,14 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 px-6 lg:px-8 bg-gray-50">
+      <section id="features" className="py-16 px-6 lg:px-8 bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="text-center mb-12"
           >
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
               Everything you need to
@@ -234,14 +234,14 @@ export default function LandingPage() {
       </section>
 
       {/* How it works Section */}
-      <section id="how-it-works" className="py-20 px-6 lg:px-8">
+      <section id="how-it-works" className="py-16 px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="text-center mb-12"
           >
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
               Simple. Powerful.
@@ -294,7 +294,7 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-6 lg:px-8 bg-gradient-to-br from-blue-600 to-purple-700">
+      <section className="py-16 px-6 lg:px-8 bg-gradient-to-br from-blue-600 to-purple-700">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -306,7 +306,7 @@ export default function LandingPage() {
               Ready to transform
               <span className="block">healthcare?</span>
             </h2>
-            <p className="text-xl text-blue-100 mb-12 max-w-2xl mx-auto">
+            <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
               Join thousands of healthcare professionals who are already making a difference. Your journey starts here.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

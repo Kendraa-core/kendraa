@@ -286,7 +286,7 @@ export default function NetworkPage() {
     <div className={`${BACKGROUNDS.page.primary} min-h-screen`}>
       <Header />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -294,7 +294,7 @@ export default function NetworkPage() {
           className="max-w-7xl mx-auto"
         >
           {/* Page Header */}
-          <div className="mb-8">
+          <div className="mb-6">
             <h1 className={`${TYPOGRAPHY.heading.h1} mb-2`}>My Network</h1>
             <p className={`${TYPOGRAPHY.body.large} ${TEXT_COLORS.secondary}`}>
               Connect with healthcare professionals and grow your network
@@ -302,7 +302,7 @@ export default function NetworkPage() {
           </div>
 
           {/* Network Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
             <div className={`${COMPONENTS.card.base} text-center`}>
               <UserIcon className={`w-8 h-8 ${COMPONENTS.icon.primary} mx-auto mb-2`} />
               <div className={`${TYPOGRAPHY.heading.h3} mb-1`}>{formatNumber(networkStats.connections)}</div>
@@ -331,7 +331,7 @@ export default function NetworkPage() {
           </div>
 
           {/* Top Navigation Bar */}
-          <div className={`${COMPONENTS.card.base} mb-6`}>
+          <div className={`${COMPONENTS.card.base} mb-4`}>
             <div className="p-6">
               <div className="flex items-center justify-between">
                 {/* Left Side - Navigation */}
@@ -375,7 +375,7 @@ export default function NetworkPage() {
             </div>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Invitations Section */}
             {connectionRequests.length > 0 && (
               <div className={`${COMPONENTS.card.base}`}>

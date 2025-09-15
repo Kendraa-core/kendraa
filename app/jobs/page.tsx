@@ -306,7 +306,7 @@ export default function JobsPage() {
     <div className={`${BACKGROUNDS.page.primary} min-h-screen`}>
       <Header />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -314,7 +314,7 @@ export default function JobsPage() {
           className="max-w-7xl mx-auto"
         >
           {/* Page Header */}
-        <div className="mb-8">
+          <div className="mb-6">
             <h1 className={`${TYPOGRAPHY.heading.h1} mb-2`}>Jobs</h1>
             <p className={`${TYPOGRAPHY.body.large} ${TEXT_COLORS.secondary}`}>
               Discover and apply for healthcare opportunities
@@ -322,7 +322,7 @@ export default function JobsPage() {
             </div>
 
           {/* Top Navigation Bar */}
-          <div className={`${COMPONENTS.card.base} mb-6`}>
+          <div className={`${COMPONENTS.card.base} mb-4`}>
             <div className="p-6">
               <div className="flex items-center justify-between">
                 {/* Left Side - Navigation */}
@@ -393,7 +393,7 @@ export default function JobsPage() {
 
           {/* Filters */}
           {showFilters && (
-            <div className={`${COMPONENTS.card.base} mb-6`}>
+            <div className={`${COMPONENTS.card.base} mb-4`}>
               <div className="p-6">
                 <div className="flex flex-wrap gap-4">
                   <div className="relative">
@@ -445,7 +445,7 @@ export default function JobsPage() {
           {/* Main Content Grid */}
           <div className="lg:grid lg:grid-cols-3 lg:gap-8">
             {/* Job Listings */}
-            <div className="lg:col-span-2 mb-8 lg:mb-0">
+            <div className="lg:col-span-2 mb-6 lg:mb-0">
               <div className="space-y-4">
                 {getDisplayJobs().map((job) => (
                   <motion.div
