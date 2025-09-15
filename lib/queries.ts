@@ -3162,6 +3162,57 @@ export async function getEventRegistrations(eventId: string): Promise<any[]> {
   }
 }
 
+// Delete event
+export async function deleteEvent(eventId: string, organizerId: string): Promise<boolean> {
+  try {
+    console.log('[Queries] Deleting event:', eventId, 'by organizer:', organizerId);
+    
+    // First, verify the user is the organizer of this event
+    const { data: event, error: fetchError } = await getSupabase()
+      .from('events')
+      .select('organizer_id')
+      .eq('id', eventId)
+      .single();
+
+    if (fetchError) {
+      console.error('[Queries] Error fetching event for deletion:', fetchError);
+      throw new Error('Event not found');
+    }
+
+    if (event.organizer_id !== organizerId) {
+      throw new Error('Unauthorized: You can only delete your own events');
+    }
+
+    // Delete all event attendees first
+    const { error: attendeesError } = await getSupabase()
+      .from('event_attendees')
+      .delete()
+      .eq('event_id', eventId);
+
+    if (attendeesError) {
+      console.error('[Queries] Error deleting event attendees:', attendeesError);
+      throw attendeesError;
+    }
+
+    // Delete the event
+    const { error: deleteError } = await getSupabase()
+      .from('events')
+      .delete()
+      .eq('id', eventId);
+
+    if (deleteError) {
+      console.error('[Queries] Error deleting event:', deleteError);
+      throw deleteError;
+    }
+    
+    console.log('[Queries] Event deleted successfully');
+    return true;
+  } catch (error) {
+    console.error('[Queries] Error in deleteEvent:', error);
+    throw error;
+  }
+}
+
 // Get user's groups count
 export async function getUserGroupsCount(userId: string): Promise<number> {
   try {

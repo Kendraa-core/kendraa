@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { getEventsByOrganizer, getInstitutionByAdminId } from '@/lib/queries';
+import { getEventsByOrganizer, getInstitutionByAdminId, deleteEvent } from '@/lib/queries';
 import type { EventWithOrganizer, Institution } from '@/types/database.types';
 import { 
   CalendarIcon,
@@ -113,6 +113,26 @@ export default function InstitutionEventsPage() {
     return events.reduce((total, event) => {
       return total + (event.max_attendees || 0);
     }, 0);
+  };
+
+  const handleDeleteEvent = async (eventId: string, eventTitle: string) => {
+    if (!user?.id) return;
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${eventTitle}"? This action cannot be undone and will remove all event registrations.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deleteEvent(eventId, user.id);
+      toast.success('Event deleted successfully');
+      // Refresh the events list
+      fetchEvents();
+    } catch (error: any) {
+      console.error('Error deleting event:', error);
+      toast.error(error.message || 'Failed to delete event');
+    }
   };
 
   if (loading) {
@@ -331,7 +351,11 @@ export default function InstitutionEventsPage() {
                           Edit
                         </Button>
                         
-                        <Button variant="outline" className="text-red-600 hover:text-red-700">
+                        <Button 
+                          variant="outline" 
+                          className="text-red-600 hover:text-red-700"
+                          onClick={() => handleDeleteEvent(event.id, event.title)}
+                        >
                           <TrashIcon className="w-4 h-4" />
                         </Button>
                       </div>
