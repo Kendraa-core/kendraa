@@ -283,392 +283,337 @@ export default function NetworkPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+    <div className={`${BACKGROUNDS.page.primary} min-h-screen`}>
       <Header />
       
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Left Sidebar - Manage my network */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 sticky top-24">
-              <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Manage my network</h3>
-                
-                <div className="space-y-3">
-                  <Link 
-                    href="/network/connections" 
-                    className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <UserIcon className="w-5 h-5 text-gray-600" />
-                      <span className="text-gray-900">Connections</span>
-                    </div>
-                    <span className="text-gray-500 font-medium">{formatNumber(networkStats.connections)}</span>
-                  </Link>
+      <div className="container mx-auto px-4 py-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="max-w-7xl mx-auto"
+        >
+          {/* Page Header */}
+          <div className="mb-8">
+            <h1 className={`${TYPOGRAPHY.heading.h1} mb-2`}>My Network</h1>
+            <p className={`${TYPOGRAPHY.body.large} ${TEXT_COLORS.secondary}`}>
+              Connect with healthcare professionals and grow your network
+            </p>
+          </div>
 
-                  <Link 
-                    href="/network/following" 
-                    className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <HeartIcon className="w-5 h-5 text-gray-600" />
-                      <span className="text-gray-900">Following & followers</span>
-                    </div>
-                  </Link>
+          {/* Network Stats Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+            <div className={`${COMPONENTS.card.base} text-center`}>
+              <UserIcon className={`w-8 h-8 ${COMPONENTS.icon.primary} mx-auto mb-2`} />
+              <div className={`${TYPOGRAPHY.heading.h3} mb-1`}>{formatNumber(networkStats.connections)}</div>
+              <div className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>Connections</div>
+            </div>
+            <div className={`${COMPONENTS.card.base} text-center`}>
+              <UserGroupIcon className={`w-8 h-8 ${COMPONENTS.icon.primary} mx-auto mb-2`} />
+              <div className={`${TYPOGRAPHY.heading.h3} mb-1`}>{formatNumber(networkStats.groups)}</div>
+              <div className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>Groups</div>
+            </div>
+            <div className={`${COMPONENTS.card.base} text-center`}>
+              <CalendarDaysIcon className={`w-8 h-8 ${COMPONENTS.icon.primary} mx-auto mb-2`} />
+              <div className={`${TYPOGRAPHY.heading.h3} mb-1`}>{formatNumber(networkStats.events)}</div>
+              <div className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>Events</div>
+            </div>
+            <div className={`${COMPONENTS.card.base} text-center`}>
+              <DocumentTextIcon className={`w-8 h-8 ${COMPONENTS.icon.primary} mx-auto mb-2`} />
+              <div className={`${TYPOGRAPHY.heading.h3} mb-1`}>{formatNumber(networkStats.pages)}</div>
+              <div className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>Pages</div>
+            </div>
+            <div className={`${COMPONENTS.card.base} text-center`}>
+              <NewspaperIcon className={`w-8 h-8 ${COMPONENTS.icon.primary} mx-auto mb-2`} />
+              <div className={`${TYPOGRAPHY.heading.h3} mb-1`}>{formatNumber(networkStats.newsletters)}</div>
+              <div className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>Newsletters</div>
+            </div>
+          </div>
 
-                  <Link 
-                    href="/groups" 
-                    className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors"
+          {/* Top Navigation Bar */}
+          <div className={`${COMPONENTS.card.base} mb-6`}>
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                {/* Left Side - Navigation */}
+                <div className="flex items-center space-x-6">
+                  <button
+                    onClick={() => setActiveTab('grow')}
+                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      activeTab === 'grow'
+                        ? `${COMPONENTS.button.primary}`
+                        : `${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} hover:bg-gray-100`
+                    }`}
                   >
-                    <div className="flex items-center space-x-3">
-                      <UserGroupIcon className="w-5 h-5 text-gray-600" />
-                      <span className="text-gray-900">Groups</span>
-                    </div>
-                    <span className="text-gray-500 font-medium">{formatNumber(networkStats.groups)}</span>
-                  </Link>
-
-                  <Link 
-                    href="/events" 
-                    className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                    Grow
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('catch-up')}
+                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      activeTab === 'catch-up'
+                        ? `${COMPONENTS.button.primary}`
+                        : `${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} hover:bg-gray-100`
+                    }`}
                   >
-                    <div className="flex items-center space-x-3">
-                      <CalendarDaysIcon className="w-5 h-5 text-gray-600" />
-                      <span className="text-gray-900">Events</span>
-                    </div>
-                    <span className="text-gray-500 font-medium">{formatNumber(networkStats.events)}</span>
-                  </Link>
-
-                  <Link 
-                    href="/network/pages" 
-                    className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <DocumentTextIcon className="w-5 h-5 text-gray-600" />
-                      <span className="text-gray-900">Pages</span>
-                    </div>
-                    <span className="text-gray-500 font-medium">{formatNumber(networkStats.pages)}</span>
-                  </Link>
-
-                  <Link 
-                    href="/newsletters" 
-                    className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <NewspaperIcon className="w-5 h-5 text-gray-600" />
-                      <span className="text-gray-900">Newsletters</span>
-                    </div>
-                    <span className="text-gray-500 font-medium">{formatNumber(networkStats.newsletters)}</span>
-                  </Link>
+                    Catch up
+                  </button>
                 </div>
 
-                {/* Footer Links */}
-                <div className="mt-8 pt-6 border-t border-gray-200">
-                  <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
-                    <Link href="/about" className="hover:text-gray-900 transition-colors">About</Link>
-                    <Link href="/accessibility" className="hover:text-gray-900 transition-colors">Accessibility</Link>
-                    <Link href="/help" className="hover:text-gray-900 transition-colors">Help Center</Link>
-                    <Link href="/privacy" className="hover:text-gray-900 transition-colors">Privacy & Terms</Link>
-                    <Link href="/ad-choices" className="hover:text-gray-900 transition-colors">Ad Choices</Link>
-                    <Link href="/advertising" className="hover:text-gray-900 transition-colors">Advertising</Link>
-                    <Link href="/business-services" className="hover:text-gray-900 transition-colors">Business Services</Link>
-                    <Link href="/app" className="hover:text-gray-900 transition-colors">Get the App</Link>
-                    <Link href="/more" className="hover:text-gray-900 transition-colors col-span-2">More</Link>
+                {/* Right Side - Search */}
+                <div className="flex items-center space-x-4">
+                  <div className="relative">
+                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Search people..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"
+                    />
                   </div>
-                  <p className="text-xs text-gray-500 mt-4">kendraa Corporation © 2025</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Main Content Area */}
-          <div className="lg:col-span-3">
-            {/* Top Navigation Bar */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-              <div className="p-6">
-                <div className="flex items-center justify-between">
-                  {/* Left Side - Navigation */}
-                  <div className="flex items-center space-x-6">
-                    <button
-                      onClick={() => setActiveTab('grow')}
-                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                        activeTab === 'grow'
-                          ? 'bg-blue-600 text-white'
-                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                      }`}
+          <div className="space-y-6">
+            {/* Invitations Section */}
+            {connectionRequests.length > 0 && (
+              <div className={`${COMPONENTS.card.base}`}>
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className={`${TYPOGRAPHY.heading.h3}`}>
+                      Invitations ({connectionRequests.length})
+                    </h3>
+                    <Link 
+                      href="/network/requests" 
+                      className={`${TEXT_COLORS.accent} hover:text-blue-700 text-sm font-medium`}
                     >
-                      Grow
-                    </button>
-                    <button
-                      onClick={() => setActiveTab('catch-up')}
-                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                        activeTab === 'catch-up'
-                          ? 'bg-blue-600 text-white'
-                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                      }`}
-                    >
-                      Catch up
-                    </button>
+                      Show all
+                    </Link>
                   </div>
-
-                  {/* Right Side - Search */}
-                  <div className="flex items-center space-x-4">
-                    <div className="relative">
-                      <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <input
-                        type="text"
-                        placeholder="Search people..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"
-                      />
-                    </div>
+                  
+                  <div className="space-y-4">
+                    {connectionRequests.slice(0, 3).map((request) => (
+                      <motion.div
+                        key={request.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg"
+                      >
+                        <Avatar
+                          src={request.requester.avatar_url}
+                          alt={request.requester.full_name || 'User'}
+                          size="md"
+                        />
+                        <div className="flex-1">
+                          <h4 className={`${TYPOGRAPHY.body.medium} font-semibold`}>
+                            {request.requester.full_name}
+                          </h4>
+                          <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} mb-2`}>
+                            {request.requester.headline || 'Healthcare Professional'}
+                          </p>
+                          <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                            {request.requester.location && (
+                              <span className="flex items-center">
+                                <MapPinIcon className="w-4 h-4 mr-1" />
+                                {request.requester.location}
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => handleAcceptConnection(request.id)}
+                            className={`${COMPONENTS.button.primary} px-4 py-2 text-sm font-medium`}
+                          >
+                            Accept
+                          </button>
+                          <button
+                            onClick={() => handleRejectConnection(request.id)}
+                            className={`${COMPONENTS.button.secondary} px-4 py-2 text-sm font-medium`}
+                          >
+                            Ignore
+                          </button>
+                        </div>
+                      </motion.div>
+                    ))}
                   </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            <div className="space-y-6">
-              {/* Invitations Section */}
-              {connectionRequests.length > 0 && (
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                  <div className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        Invitations ({connectionRequests.length})
-                      </h3>
-                      <Link 
-                        href="/network/requests" 
-                        className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+            {/* People you may know - Healthcare */}
+            {healthcareSuggestions.length > 0 && (
+              <div className={`${COMPONENTS.card.base}`}>
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className={`${TYPOGRAPHY.heading.h3}`}>
+                      People in the Healthcare industry you may know
+                    </h3>
+                    <Link 
+                      href="/network/suggestions" 
+                      className={`${TEXT_COLORS.accent} hover:text-blue-700 text-sm font-medium`}
+                    >
+                      Show all
+                    </Link>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {healthcareSuggestions.slice(0, 8).map((profile) => (
+                      <motion.div
+                        key={profile.id}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="relative p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
                       >
-                        Show all
-                      </Link>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      {connectionRequests.slice(0, 3).map((request) => (
-                        <motion.div
-                          key={request.id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg"
+                        <button
+                          onClick={() => handleDismissSuggestion(profile.id)}
+                          className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
                         >
+                          <XMarkIcon className="w-4 h-4" />
+                        </button>
+                        
+                        <div className="text-center">
                           <Avatar
-                            src={request.requester.avatar_url}
-                            alt={request.requester.full_name || 'User'}
-                            size="md"
+                            src={profile.avatar_url}
+                            alt={profile.full_name || 'User'}
+                            size="lg"
+                            className="mx-auto mb-3"
                           />
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-gray-900">
-                              {request.requester.full_name}
-                            </h4>
-                            <p className="text-gray-600 text-sm mb-2">
-                              {request.requester.headline || 'Healthcare Professional'}
-                            </p>
-                            <p className="text-gray-500 text-sm">
-                              {request.requester.location && (
-                                <span className="flex items-center">
-                                  <MapPinIcon className="w-4 h-4 mr-1" />
-                                  {request.requester.location}
-                                </span>
-                              )}
-                            </p>
-                          </div>
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={() => handleAcceptConnection(request.id)}
-                              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-                            >
-                              Accept
-                            </button>
-                            <button
-                              onClick={() => handleRejectConnection(request.id)}
-                              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
-                            >
-                              Ignore
-                            </button>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* People you may know - Healthcare */}
-              {healthcareSuggestions.length > 0 && (
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                  <div className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        People in the Healthcare industry you may know
-                      </h3>
-                      <Link 
-                        href="/network/suggestions" 
-                        className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                      >
-                        Show all
-                      </Link>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                      {healthcareSuggestions.slice(0, 8).map((profile) => (
-                        <motion.div
-                          key={profile.id}
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          className="relative p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
-                        >
+                          <h4 className={`${TYPOGRAPHY.body.medium} font-semibold mb-1`}>
+                            {profile.full_name}
+                          </h4>
+                          <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} mb-2 line-clamp-2`}>
+                            {profile.headline || 'Healthcare Professional'}
+                          </p>
+                          <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} mb-3`}>
+                            {(profile.mutual_connections || 0) > 0 && (
+                              <span>
+                                {profile.mutual_connections} mutual connection{(profile.mutual_connections || 0) !== 1 ? 's' : ''}
+                              </span>
+                            )}
+                          </p>
                           <button
-                            onClick={() => handleDismissSuggestion(profile.id)}
-                            className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                            onClick={() => handleConnect(
+                              profile.id, 
+                              profile.profile_type === 'institution' ? 'institution' : 'individual'
+                            )}
+                            disabled={profile.connection_status === 'pending' || profile.follow_status === 'following'}
+                            className={`w-full px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
+                              profile.connection_status === 'pending' || profile.follow_status === 'following'
+                                ? 'bg-green-100 text-green-700 cursor-not-allowed'
+                                : `${COMPONENTS.button.primary}`
+                            }`}
                           >
-                            <XMarkIcon className="w-4 h-4" />
+                            {profile.connection_status === 'pending' 
+                              ? 'Pending' 
+                              : profile.follow_status === 'following'
+                              ? 'Following'
+                              : profile.profile_type === 'institution'
+                              ? '+ Follow'
+                              : '+ Connect'
+                            }
                           </button>
-                          
-                          <div className="text-center">
-                            <Avatar
-                              src={profile.avatar_url}
-                              alt={profile.full_name || 'User'}
-                              size="lg"
-                              className="mx-auto mb-3"
-                            />
-                            <h4 className="font-semibold text-gray-900 text-sm mb-1">
-                              {profile.full_name}
-                            </h4>
-                            <p className="text-gray-600 text-xs mb-2 line-clamp-2">
-                              {profile.headline || 'Healthcare Professional'}
-                            </p>
-                            <p className="text-gray-500 text-xs mb-3">
-                              {(profile.mutual_connections || 0) > 0 && (
-                                <span>
-                                  {profile.mutual_connections} mutual connection{(profile.mutual_connections || 0) !== 1 ? 's' : ''}
-                                </span>
-                              )}
-                            </p>
-                            <button
-                              onClick={() => handleConnect(
-                                profile.id, 
-                                profile.profile_type === 'institution' ? 'institution' : 'individual'
-                              )}
-                              disabled={profile.connection_status === 'pending' || profile.follow_status === 'following'}
-                              className={`w-full px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
-                                profile.connection_status === 'pending' || profile.follow_status === 'following'
-                                  ? 'bg-green-100 text-green-700 cursor-not-allowed'
-                                  : 'bg-blue-600 text-white hover:bg-blue-700'
-                              }`}
-                            >
-                              {profile.connection_status === 'pending' 
-                                ? 'Pending' 
-                                : profile.follow_status === 'following'
-                                ? 'Following'
-                                : profile.profile_type === 'institution'
-                                ? '+ Follow'
-                                : '+ Connect'
-                              }
-                            </button>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
+                        </div>
+                      </motion.div>
+                    ))}
                   </div>
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* People you may know - Recent Activity */}
-              {recentActivitySuggestions.length > 0 && (
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                  <div className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        People you may know based on your recent activity
-                      </h3>
-                      <Link 
-                        href="/network/suggestions" 
-                        className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+            {/* People you may know - Recent Activity */}
+            {recentActivitySuggestions.length > 0 && (
+              <div className={`${COMPONENTS.card.base}`}>
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className={`${TYPOGRAPHY.heading.h3}`}>
+                      People you may know based on your recent activity
+                    </h3>
+                    <Link 
+                      href="/network/suggestions" 
+                      className={`${TEXT_COLORS.accent} hover:text-blue-700 text-sm font-medium`}
+                    >
+                      Show all
+                    </Link>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {recentActivitySuggestions.map((profile) => (
+                      <motion.div
+                        key={profile.id}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="relative p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
                       >
-                        Show all
-                      </Link>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                      {recentActivitySuggestions.map((profile) => (
-                        <motion.div
-                          key={profile.id}
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          className="relative p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
+                        <button
+                          onClick={() => handleDismissSuggestion(profile.id)}
+                          className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
                         >
+                          <XMarkIcon className="w-4 h-4" />
+                        </button>
+                        
+                        <div className="text-center">
+                          <Avatar
+                            src={profile.avatar_url}
+                            alt={profile.full_name || 'User'}
+                            size="lg"
+                            className="mx-auto mb-3"
+                          />
+                          <h4 className={`${TYPOGRAPHY.body.medium} font-semibold mb-1`}>
+                            {profile.full_name}
+                          </h4>
+                          <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} mb-2 line-clamp-2`}>
+                            {profile.headline || 'Healthcare Professional'}
+                          </p>
+                          <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} mb-3`}>
+                            {(profile.mutual_connections || 0) > 0 && (
+                              <span>
+                                {profile.mutual_connections} mutual connection{(profile.mutual_connections || 0) !== 1 ? 's' : ''}
+                              </span>
+                            )}
+                          </p>
                           <button
-                            onClick={() => handleDismissSuggestion(profile.id)}
-                            className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                            onClick={() => handleConnect(
+                              profile.id, 
+                              profile.profile_type === 'institution' ? 'institution' : 'individual'
+                            )}
+                            disabled={profile.connection_status === 'pending' || profile.follow_status === 'following'}
+                            className={`w-full px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
+                              profile.connection_status === 'pending' || profile.follow_status === 'following'
+                                ? 'bg-green-100 text-green-700 cursor-not-allowed'
+                                : `${COMPONENTS.button.primary}`
+                            }`}
                           >
-                            <XMarkIcon className="w-4 h-4" />
+                            {profile.connection_status === 'pending' 
+                              ? 'Pending' 
+                              : profile.follow_status === 'following'
+                              ? 'Following'
+                              : profile.profile_type === 'institution'
+                              ? '+ Follow'
+                              : '+ Connect'
+                            }
                           </button>
-                          
-                          <div className="text-center">
-                            <Avatar
-                              src={profile.avatar_url}
-                              alt={profile.full_name || 'User'}
-                              size="lg"
-                              className="mx-auto mb-3"
-                            />
-                            <h4 className="font-semibold text-gray-900 text-sm mb-1">
-                              {profile.full_name}
-                            </h4>
-                            <p className="text-gray-600 text-xs mb-2 line-clamp-2">
-                              {profile.headline || 'Healthcare Professional'}
-                            </p>
-                            <p className="text-gray-500 text-xs mb-3">
-                              {(profile.mutual_connections || 0) > 0 && (
-                                <span>
-                                  {profile.mutual_connections} mutual connection{(profile.mutual_connections || 0) !== 1 ? 's' : ''}
-                                </span>
-                              )}
-                            </p>
-                            <button
-                              onClick={() => handleConnect(
-                                profile.id, 
-                                profile.profile_type === 'institution' ? 'institution' : 'individual'
-                              )}
-                              disabled={profile.connection_status === 'pending' || profile.follow_status === 'following'}
-                              className={`w-full px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
-                                profile.connection_status === 'pending' || profile.follow_status === 'following'
-                                  ? 'bg-green-100 text-green-700 cursor-not-allowed'
-                                  : 'bg-blue-600 text-white hover:bg-blue-700'
-                              }`}
-                            >
-                              {profile.connection_status === 'pending' 
-                                ? 'Pending' 
-                                : profile.follow_status === 'following'
-                                ? 'Following'
-                                : profile.profile_type === 'institution'
-                                ? '+ Follow'
-                                : '+ Connect'
-                              }
-                            </button>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
+                        </div>
+                      </motion.div>
+                    ))}
                   </div>
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* Empty State */}
-              {filteredSuggestions.length === 0 && (
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 text-center py-12">
-                  <UserGroupIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No suggestions found</h3>
-                  <p className="text-gray-600">
-                    {searchQuery ? 'Try adjusting your search terms' : 'We\'ll show you people to connect with here'}
-                  </p>
-                </div>
-              )}
-            </div>
+            {/* Empty State */}
+            {filteredSuggestions.length === 0 && (
+              <div className={`${COMPONENTS.card.base} text-center py-12`}>
+                <UserGroupIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className={`${TYPOGRAPHY.heading.h3} mb-2`}>No suggestions found</h3>
+                <p className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary}`}>
+                  {searchQuery ? 'Try adjusting your search terms' : 'We\'ll show you people to connect with here'}
+                </p>
+              </div>
+            )}
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
