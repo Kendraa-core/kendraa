@@ -6,6 +6,7 @@ import { useIsClient } from '@/hooks/useIsClient';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import Logo from '@/components/common/Logo';
 import { 
   ArrowRightIcon, 
   CheckCircleIcon, 
@@ -19,7 +20,6 @@ import {
   ChatBubbleLeftRightIcon, 
   LightBulbIcon, 
   UserIcon,
-  PlayIcon,
   ChevronDownIcon
 } from '@heroicons/react/24/outline';
 
@@ -36,14 +36,14 @@ export default function LandingPage() {
         if (profile.user_type === 'institution' || profile.profile_type === 'institution') {
           router.push('/institution/dashboard');
         } else {
-          router.push('/feed');
+        router.push('/feed');
         }
       } else {
         // Redirect based on user type
         if (profile.user_type === 'institution' || profile.profile_type === 'institution') {
           router.push('/institution/onboarding');
-        } else {
-          router.push('/onboarding');
+      } else {
+        router.push('/onboarding');
         }
       }
     }
@@ -80,9 +80,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center">
-              <div className="text-2xl font-bold text-gray-900">
-                kendraa
-              </div>
+              <Logo size="sm" className="h-8" />
             </div>
             <div className="hidden md:flex items-center space-x-8">
               <Link href="#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">
@@ -96,13 +94,13 @@ export default function LandingPage() {
               </Link>
             </div>
             <div className="flex items-center space-x-4">
-              <Link
+              <Link 
                 href="/signin"
                 className="text-gray-600 hover:text-gray-900 transition-colors font-medium"
               >
                 Sign in
               </Link>
-              <Link
+              <Link 
                 href="/signup"
                 className="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors font-medium"
               >
@@ -116,7 +114,7 @@ export default function LandingPage() {
       {/* Hero Section */}
       <section className="pt-32 pb-20 px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
-          <motion.div
+            <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -126,17 +124,17 @@ export default function LandingPage() {
               <span className="block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 healthcare networking
               </span>
-            </h1>
+               </h1>
             <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
               Connect, collaborate, and transform healthcare. Join thousands of professionals building the future of medicine.
-            </p>
-          </motion.div>
+               </p>
+            </motion.div>
 
-          <motion.div
+            <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
+              transition={{ duration: 0.8, delay: 0.2 }}
+            className="flex items-center justify-center mb-16"
           >
             <Link
               href="/signup"
@@ -145,10 +143,6 @@ export default function LandingPage() {
               Start your journey
               <ArrowRightIcon className="inline-block w-5 h-5 ml-2" />
             </Link>
-            <button className="flex items-center text-gray-600 hover:text-gray-900 transition-colors text-lg font-medium">
-              <PlayIcon className="w-6 h-6 mr-2" />
-              Watch demo
-            </button>
           </motion.div>
 
           {/* Scroll indicator */}
@@ -160,7 +154,7 @@ export default function LandingPage() {
           >
             <p className="text-sm text-gray-500 mb-2">Discover more</p>
             <ChevronDownIcon className="w-6 h-6 text-gray-400 animate-bounce" />
-          </motion.div>
+            </motion.div>
         </div>
       </section>
 
@@ -181,7 +175,7 @@ export default function LandingPage() {
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Powerful tools designed for healthcare professionals who want to make a real difference.
             </p>
-          </motion.div>
+            </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
@@ -216,14 +210,14 @@ export default function LandingPage() {
                 description: "Discover new technologies, methodologies, and approaches. Stay at the forefront of healthcare innovation."
               }
             ].map((feature, index) => (
-              <motion.div
+            <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
+              viewport={{ once: true }}
                 className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
-              >
+            >
                 <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
                   <feature.icon className="w-6 h-6 text-blue-600" />
                 </div>
@@ -233,7 +227,7 @@ export default function LandingPage() {
                 <p className="text-gray-600 leading-relaxed">
                   {feature.description}
                 </p>
-              </motion.div>
+            </motion.div>
             ))}
           </div>
         </div>
@@ -316,15 +310,15 @@ export default function LandingPage() {
               Join thousands of healthcare professionals who are already making a difference. Your journey starts here.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link
-                href="/signup"
+              <Link 
+                href="/signup" 
                 className="bg-white text-blue-600 px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
               >
                 Get started free
                 <ArrowRightIcon className="inline-block w-5 h-5 ml-2" />
               </Link>
-              <Link
-                href="/signin"
+              <Link 
+                href="/signin" 
                 className="text-white border-2 border-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300"
               >
                 Sign in
@@ -339,8 +333,8 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="col-span-1 md:col-span-2">
-              <div className="text-2xl font-bold text-white mb-4">
-                kendraa
+              <div className="mb-4">
+                <Logo size="sm" className="h-8 filter brightness-0 invert" />
               </div>
               <p className="text-gray-400 mb-6 max-w-md">
                 Connecting healthcare professionals worldwide to advance medicine and improve patient care.
