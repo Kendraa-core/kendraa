@@ -3162,6 +3162,82 @@ export async function getEventRegistrations(eventId: string): Promise<any[]> {
   }
 }
 
+// Delete post
+export async function deletePost(postId: string, authorId: string): Promise<boolean> {
+  try {
+    console.log('[Queries] Deleting post:', postId, 'by author:', authorId);
+    
+    // First, verify the user is the author of this post
+    const { data: post, error: fetchError } = await getSupabase()
+      .from('posts')
+      .select('author_id')
+      .eq('id', postId)
+      .single();
+
+    if (fetchError) {
+      console.error('[Queries] Error fetching post for deletion:', fetchError);
+      throw new Error('Post not found');
+    }
+
+    if (post.author_id !== authorId) {
+      throw new Error('Unauthorized: You can only delete your own posts');
+    }
+
+    // Delete all post comments first
+    const { error: commentsError } = await getSupabase()
+      .from('post_comments')
+      .delete()
+      .eq('post_id', postId);
+
+    if (commentsError) {
+      console.error('[Queries] Error deleting post comments:', commentsError);
+      throw commentsError;
+    }
+
+    // Delete all post reactions
+    const { error: reactionsError } = await getSupabase()
+      .from('post_reactions')
+      .delete()
+      .eq('post_id', postId);
+
+    if (reactionsError) {
+      console.error('[Queries] Error deleting post reactions:', reactionsError);
+      throw reactionsError;
+    }
+
+    // Delete the post
+    const { error: deleteError } = await getSupabase()
+      .from('posts')
+      .delete()
+      .eq('id', postId);
+
+    if (deleteError) {
+      console.error('[Queries] Error deleting post:', deleteError);
+      throw deleteError;
+    }
+    
+    console.log('[Queries] Post deleted successfully from database');
+    
+    // Verify the post was actually deleted
+    const { data: verifyData, error: verifyError } = await getSupabase()
+      .from('posts')
+      .select('id')
+      .eq('id', postId)
+      .single();
+    
+    if (verifyData) {
+      console.error('[Queries] Post still exists after deletion attempt');
+      throw new Error('Post deletion failed - post still exists');
+    }
+    
+    console.log('[Queries] Post deletion verified - post no longer exists');
+    return true;
+  } catch (error) {
+    console.error('[Queries] Error in deletePost:', error);
+    throw error;
+  }
+}
+
 // Delete event
 export async function deleteEvent(eventId: string, organizerId: string): Promise<boolean> {
   try {

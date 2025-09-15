@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import Avatar from '@/components/common/Avatar';
@@ -12,11 +12,13 @@ import {
   ChatBubbleOvalLeftIcon,
   BookmarkIcon,
   EllipsisHorizontalIcon,
+  TrashIcon,
 } from '@heroicons/react/24/outline';
 import {
   BookmarkIcon as BookmarkSolidIcon,
 } from '@heroicons/react/24/solid';
 import { formatRelativeTime } from '@/lib/utils';
+import { deletePost } from '@/lib/queries';
 import toast from 'react-hot-toast';
 import {
   getPostComments,
@@ -55,6 +57,9 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
   const [comments, setComments] = useState<CommentWithAuthor[]>([]);
   const [newComment, setNewComment] = useState('');
   const [showCommentBox, setShowCommentBox] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const [isCommenting, setIsCommenting] = useState(false);
   const [isLoadingComments, setIsLoadingComments] = useState(false);
   const [showAllComments, setShowAllComments] = useState(false);
@@ -96,6 +101,23 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
       setCommentsCount(post.comments_count || 0);
     }
   }, [post?.id, post?.likes_count, post?.comments_count]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showDropdown]);
 
   // Validate post data
   if (!post || !post.id) {
@@ -244,6 +266,35 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
     return 'Healthcare Professional';
   };
 
+  const handleDeletePost = async () => {
+    if (!user?.id) return;
+
+    const confirmed = window.confirm(
+      'Are you sure you want to delete this post? This action cannot be undone.'
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setIsDeleting(true);
+      await deletePost(post.id, user.id);
+      toast.success('Post deleted successfully');
+      
+      // Call the onInteraction callback to refresh the parent component
+      if (onInteraction) {
+        onInteraction();
+      }
+    } catch (error: any) {
+      console.error('Error deleting post:', error);
+      toast.error(error.message || 'Failed to delete post');
+    } finally {
+      setIsDeleting(false);
+      setShowDropdown(false);
+    }
+  };
+
+  const isOwnPost = user?.id === post.author_id;
+
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
       {/* Post Header */}
@@ -268,11 +319,29 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
             </p>
           </div>
         </div>
-        <button
-          className="p-1 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
-        >
-          <EllipsisHorizontalIcon className="w-5 h-5" />
-        </button>
+        <div className="relative" ref={dropdownRef}>
+          <button
+            onClick={() => setShowDropdown(!showDropdown)}
+            className="p-1 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
+          >
+            <EllipsisHorizontalIcon className="w-5 h-5" />
+          </button>
+          
+          {showDropdown && (
+            <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-10 min-w-[120px]">
+              {isOwnPost && (
+                <button
+                  onClick={handleDeletePost}
+                  disabled={isDeleting}
+                  className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 disabled:opacity-50"
+                >
+                  <TrashIcon className="w-4 h-4" />
+                  {isDeleting ? 'Deleting...' : 'Delete'}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Post Content */}
