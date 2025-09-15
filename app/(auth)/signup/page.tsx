@@ -218,7 +218,10 @@ export default function SignUp() {
                     Create your {profileType} account
                   </h1>
                   <p className="text-gray-600">
-                    Join thousands of healthcare professionals
+                    {profileType === 'institution' 
+                      ? 'Connect with healthcare professionals and build institutional partnerships'
+                      : 'Join thousands of healthcare professionals'
+                    }
                   </p>
                 </div>
                 
@@ -235,7 +238,7 @@ export default function SignUp() {
 
                   <div>
                     <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
-                      Full Name
+                      {profileType === 'institution' ? 'Institution Name' : 'Full Name'}
                     </label>
                     <input
                       id="fullName"
@@ -246,13 +249,13 @@ export default function SignUp() {
                       value={formData.fullName}
                       onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#007fff]/20 focus:border-[#007fff] transition-all duration-200 placeholder:text-gray-400"
-                      placeholder="Enter your full name"
+                      placeholder={profileType === 'institution' ? 'Enter your institution name' : 'Enter your full name'}
                     />
                   </div>
 
                   <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                      Email Address
+                      {profileType === 'institution' ? 'Institution Email' : 'Email Address'}
                     </label>
                     <input
                       id="email"
@@ -263,7 +266,7 @@ export default function SignUp() {
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#007fff]/20 focus:border-[#007fff] transition-all duration-200 placeholder:text-gray-400"
-                      placeholder="Enter your email"
+                      placeholder={profileType === 'institution' ? 'Enter your institution email' : 'Enter your email'}
                     />
                   </div>
 
@@ -336,10 +339,10 @@ export default function SignUp() {
                       {loading ? (
                         <div className="flex items-center justify-center space-x-2">
                           <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                          <span>Creating account...</span>
+                          <span>Creating {profileType} account...</span>
                         </div>
                       ) : (
-                        'Create Account'
+                        `Create ${profileType === 'institution' ? 'Institution' : 'Account'}`
                       )}
                     </button>
                   </div>
