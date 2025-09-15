@@ -11,9 +11,9 @@ import {
   getInstitutionByAdminId
 } from '@/lib/queries';
 import { 
-  BriefcaseIcon,
-  MapPinIcon,
-  ClockIcon,
+  BriefcaseIcon, 
+  MapPinIcon, 
+  ClockIcon, 
   UsersIcon, 
   PlusIcon,
   VideoCameraIcon,
@@ -44,16 +44,6 @@ import Avatar from '@/components/common/Avatar';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import Header from '@/components/layout/Header';
 import type { JobWithCompany } from '@/types/database.types';
-import {
-  BACKGROUNDS, 
-  TEXT_COLORS, 
-  COMPONENTS, 
-  TYPOGRAPHY, 
-  BORDER_COLORS,
-  ANIMATIONS,
-  EVENT_TYPE_COLORS,
-  getEventTypeColor
-} from '@/lib/design-system';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -73,17 +63,13 @@ export default function JobsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState<string>('date');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [userTypeFilter, setUserTypeFilter] = useState<string>('all');
-  const [domainFilter, setDomainFilter] = useState<string>('all');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [likedJobs, setLikedJobs] = useState<Set<string>>(new Set());
   const [jobTypes, setJobTypes] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchJobs = async () => {
       if (!user?.id) {
-      setLoading(false);
+        setLoading(false);
         return;
       }
 
@@ -102,24 +88,10 @@ export default function JobsPage() {
           allJobs = await getJobs();
         }
         
-        const jobsWithCompanies = await fetchCompanyInfo(allJobs);
-        
-        if (activeTab !== 'my-jobs') {
-          const jobsWithApplication = await Promise.all(
-            jobsWithCompanies.map(async (job) => {
-              const isApplied = await hasAppliedToJob(job.id, user.id);
-              return { ...job, isApplied };
-            })
-          );
-          setJobs(jobsWithApplication);
-        } else {
-          setJobs(jobsWithCompanies);
-        }
-
         // Filter out closed jobs from the default "available" tab
-        let filteredJobs = jobsWithCompanies;
+        let filteredJobs = allJobs;
         if (activeTab === 'available') {
-          filteredJobs = jobsWithCompanies.filter(job => 
+          filteredJobs = allJobs.filter(job => 
             job.status === 'active'
           );
         }
@@ -154,11 +126,6 @@ export default function JobsPage() {
 
     fetchJobs();
   }, [user?.id, activeTab]);
-
-  const fetchCompanyInfo = async (jobs: JobWithCompany[]) => {
-    // Jobs already have company info from JobWithCompany interface
-    return jobs;
-  };
 
   const handleApply = async (jobId: string) => {
     if (!user?.id) {
@@ -203,7 +170,7 @@ export default function JobsPage() {
       if (newLikedJobs.has(jobId)) {
         newLikedJobs.delete(jobId);
         toast.success('Removed from favorites');
-        } else {
+      } else {
         newLikedJobs.add(jobId);
         toast.success('Added to favorites');
       }
@@ -225,8 +192,8 @@ export default function JobsPage() {
           console.error('Error sharing:', error);
           toast.error('Failed to share job');
         }
-        }
-      } else {
+      }
+    } else {
       // Fallback to clipboard
       try {
         await navigator.clipboard.writeText(window.location.origin + `/jobs/${job.id}`);
@@ -254,26 +221,6 @@ export default function JobsPage() {
         day: 'numeric',
         year: date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
       });
-    }
-  };
-
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
-      minute: '2-digit',
-      hour12: true 
-    });
-  };
-
-  const getJobTypeIcon = (type: string) => {
-    switch (type) {
-      case 'full_time': return <BriefcaseIcon className="w-4 h-4" />;
-      case 'part_time': return <ClockIcon className="w-4 h-4" />;
-      case 'contract': return <DocumentTextIcon className="w-4 h-4" />;
-      case 'internship': return <AcademicCapIcon className="w-4 h-4" />;
-      case 'volunteer': return <HeartIcon className="w-4 h-4" />;
-      default: return <BriefcaseIcon className="w-4 h-4" />;
     }
   };
 
@@ -320,11 +267,8 @@ export default function JobsPage() {
     }
   });
 
-  const availableJobs = filteredJobs.filter(job => !job.isApplied);
-  const appliedJobs = filteredJobs.filter(job => job.isApplied);
-
   const getDisplayJobs = () => {
-    if (activeTab === 'applied') return appliedJobs;
+    if (activeTab === 'applied') return filteredJobs.filter(job => job.isApplied);
     if (activeTab === 'my-jobs') return filteredJobs.filter(j => j.company_id === user?.id);
     return filteredJobs;
   };
@@ -354,144 +298,145 @@ export default function JobsPage() {
   }
 
   return (
-    <div className={`min-h-screen ${BACKGROUNDS.page.tertiary}`}>
-        {/* Header */}
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
       <Header />
       
-      {/* Top Navigation Bar */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Left Side - Navigation */}
-            <div className="flex items-center space-x-6">
-              <button
-                onClick={() => setActiveTab('available')}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                  activeTab === 'available'
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                }`}
-              >
-                Available Jobs
-              </button>
-              <button
-                onClick={() => setActiveTab('applied')}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                  activeTab === 'applied'
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                }`}
-              >
-                Applied Jobs
-              </button>
-              <button
-                onClick={() => setActiveTab('my-jobs')}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                  activeTab === 'my-jobs'
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                }`}
-              >
-                My Jobs
-              </button>
-            </div>
-
-            {/* Right Side - Search and Actions */}
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search jobs..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"
-                />
-              </div>
-              
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <FunnelIcon className="w-5 h-5" />
-              </button>
-
-              <Link
-                href="/jobs/create"
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-              >
-                <PlusIcon className="w-4 h-4 mr-2" />
-                Post Job
-              </Link>
-            </div>
-          </div>
-                </div>
-              </div>
-
-      {/* Filters */}
-      {showFilters && (
-        <div className="bg-white border-b border-gray-200 p-4">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-wrap gap-4">
-              <div className="relative">
-                <select
-                  value={selectedType}
-                  onChange={(e) => setSelectedType(e.target.value)}
-                  className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="all">Job Type</option>
-                  {jobTypes.map(type => (
-                    <option key={type} value={type}>
-                      {type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ')}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-              </div>
-
-              <div className="relative">
-                <select
-                  value={selectedFormat}
-                  onChange={(e) => setSelectedFormat(e.target.value)}
-                  className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="all">Location</option>
-                  <option value="remote">Remote</option>
-                  <option value="on-site">On-Site</option>
-                </select>
-                <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-              </div>
-
-              <div className="relative">
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="date">Sort by Date</option>
-                  <option value="popularity">Sort by Popularity</option>
-                  <option value="name">Sort by Name</option>
-                </select>
-                <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-              </div>
-            </div>
-          </div>
-                </div>
-      )}
-
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Top Navigation Bar */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+          <div className="p-6">
+            <div className="flex items-center justify-between">
+              {/* Left Side - Navigation */}
+              <div className="flex items-center space-x-6">
+                <button
+                  onClick={() => setActiveTab('available')}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                    activeTab === 'available'
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
+                >
+                  Available Jobs
+                </button>
+                <button
+                  onClick={() => setActiveTab('applied')}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                    activeTab === 'applied'
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
+                >
+                  Applied Jobs
+                </button>
+                <button
+                  onClick={() => setActiveTab('my-jobs')}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                    activeTab === 'my-jobs'
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
+                >
+                  My Jobs
+                </button>
+              </div>
+
+              {/* Right Side - Search and Actions */}
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search jobs..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"
+                  />
+                </div>
+                
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <FunnelIcon className="w-5 h-5" />
+                </button>
+
+                <Link
+                  href="/jobs/create"
+                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                >
+                  <PlusIcon className="w-4 h-4 mr-2" />
+                  Post Job
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Filters */}
+        {showFilters && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+            <div className="p-6">
+              <div className="flex flex-wrap gap-4">
+                <div className="relative">
+                  <select
+                    value={selectedType}
+                    onChange={(e) => setSelectedType(e.target.value)}
+                    className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="all">Job Type</option>
+                    {jobTypes.map(type => (
+                      <option key={type} value={type}>
+                        {type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ')}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                </div>
+
+                <div className="relative">
+                  <select
+                    value={selectedFormat}
+                    onChange={(e) => setSelectedFormat(e.target.value)}
+                    className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="all">Location</option>
+                    <option value="remote">Remote</option>
+                    <option value="on-site">On-Site</option>
+                  </select>
+                  <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                </div>
+
+                <div className="relative">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="date">Sort by Date</option>
+                    <option value="popularity">Sort by Popularity</option>
+                    <option value="name">Sort by Name</option>
+                  </select>
+                  <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Jobs List */}
           <div className="lg:col-span-2">
-                  <div className="space-y-4">
+            <div className="space-y-4">
               {getDisplayJobs().map((job) => (
                 <motion.div
                   key={job.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className={`${COMPONENTS.card.base} cursor-pointer hover:shadow-md transition-all duration-200 ${
-                    selectedJob?.id === job.id ? 'ring-2 ring-blue-500' : ''
+                  className={`bg-white rounded-lg shadow-sm border transition-all duration-200 cursor-pointer hover:shadow-md ${
+                    selectedJob?.id === job.id ? 'ring-2 ring-blue-500 border-blue-500' : 'border-gray-200'
                   }`}
                   onClick={() => setSelectedJob(job)}
                 >
@@ -524,9 +469,9 @@ export default function JobsPage() {
                               {formatSalary(job.salary_min, job.salary_max)}
                             </div>
                           </div>
-                          </div>
                         </div>
-                        
+                      </div>
+                      
                       <div className="flex items-center space-x-2">
                         <button 
                           onClick={(e) => {
@@ -554,8 +499,8 @@ export default function JobsPage() {
                         >
                           <ShareIcon className="w-5 h-5" />
                         </button>
-                                  </div>
-                                </div>
+                      </div>
+                    </div>
 
                     <p className="text-gray-600 mb-4 line-clamp-2">
                       {job.description}
@@ -569,7 +514,7 @@ export default function JobsPage() {
                         {job.location?.toLowerCase().includes('remote') && (
                           <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
                             Remote
-                                </span>
+                          </span>
                         )}
                       </div>
                       
@@ -584,7 +529,7 @@ export default function JobsPage() {
             </div>
 
             {getDisplayJobs().length === 0 && (
-              <div className="text-center py-12">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 text-center py-12">
                 <BriefcaseIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No jobs found</h3>
                 <p className="text-gray-500">
@@ -596,13 +541,13 @@ export default function JobsPage() {
                   }
                 </p>
               </div>
-                              )}
-                            </div>
+            )}
+          </div>
 
           {/* Job Details Panel */}
           <div className="lg:col-span-1">
             {selectedJob ? (
-              <div className={`${COMPONENTS.card.base} sticky top-24`}>
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 sticky top-24">
                 <div className="p-6">
                   <div className="flex items-start justify-between mb-6">
                     <div className="flex items-start space-x-4">
@@ -612,24 +557,24 @@ export default function JobsPage() {
                         size="lg"
                       />
                       <div>
-                        <h1 className={`${TYPOGRAPHY.heading.h2} mb-1`}>
+                        <h1 className="text-xl font-semibold text-gray-900 mb-1">
                           {selectedJob.title}
                         </h1>
-                        <p className={`${TYPOGRAPHY.body.medium} mb-4`}>
+                        <p className="text-gray-600 mb-4">
                           {selectedJob.company?.name || 'Unknown Company'}
                         </p>
                         <div className="flex items-center space-x-4 text-sm text-gray-500">
                           <div className="flex items-center">
                             <MapPinIcon className="w-4 h-4 mr-1" />
                             {selectedJob.location}
-                              </div>
+                          </div>
                           <div className="flex items-center">
                             <ClockIcon className="w-4 h-4 mr-1" />
                             {formatDate(selectedJob.created_at)}
                           </div>
                         </div>
                       </div>
-                            </div>
+                    </div>
                     
                     <div className="flex items-center space-x-2">
                       <button 
@@ -659,35 +604,8 @@ export default function JobsPage() {
                   </div>
 
                   <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center space-x-4">
-                      <div className="text-2xl font-bold text-gray-900">
-                        {formatSalary(selectedJob.salary_min, selectedJob.salary_max)}
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <button 
-                          onClick={() => handleLike(selectedJob.id)}
-                          className={`p-2 transition-colors ${
-                            likedJobs.has(selectedJob.id) 
-                              ? 'text-red-500' 
-                              : 'text-gray-400 hover:text-red-500'
-                          }`}
-                        >
-                          {likedJobs.has(selectedJob.id) ? (
-                            <HeartSolidIcon className="w-5 h-5" />
-                          ) : (
-                            <HeartIcon className="w-5 h-5" />
-                          )}
-                        </button>
-                        <button className="p-2 text-gray-400 hover:text-blue-500 transition-colors">
-                          <BriefcaseIcon className="w-5 h-5" />
-                        </button>
-                        <button 
-                          onClick={() => handleShare(selectedJob)}
-                          className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
-                        >
-                          <ShareIcon className="w-5 h-5" />
-                        </button>
-                      </div>
+                    <div className="text-2xl font-bold text-gray-900">
+                      {formatSalary(selectedJob.salary_min, selectedJob.salary_max)}
                     </div>
                     
                     {user?.id !== selectedJob.company_id && (
@@ -708,14 +626,14 @@ export default function JobsPage() {
                   {/* Job Details */}
                   <div className="space-y-6">
                     <div>
-                      <h3 className={`${TYPOGRAPHY.heading.h4} mb-3`}>Job Description</h3>
-                      <p className={`${TYPOGRAPHY.body.medium} whitespace-pre-wrap`}>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Job Description</h3>
+                      <p className="text-gray-600 whitespace-pre-wrap">
                         {selectedJob.description}
                       </p>
                     </div>
 
                     <div>
-                      <h3 className={`${TYPOGRAPHY.heading.h4} mb-3`}>Job Details</h3>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Job Details</h3>
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
                           <span className="text-gray-600">Type</span>
@@ -728,12 +646,12 @@ export default function JobsPage() {
                         <div className="flex items-center justify-between">
                           <span className="text-gray-600">Posted</span>
                           <span className="font-medium">{formatDate(selectedJob.created_at)}</span>
-          </div>
-        </div>
-      </div>
+                        </div>
+                      </div>
+                    </div>
 
                     <div>
-                      <h3 className={`${TYPOGRAPHY.heading.h4} mb-3`}>Company</h3>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Company</h3>
                       <div className="flex items-center space-x-3">
                         <Avatar
                           src={selectedJob.company?.logo_url}
@@ -751,22 +669,22 @@ export default function JobsPage() {
                       </div>
                     </div>
                   </div>
-    </div>
-          </div>
+                </div>
+              </div>
             ) : (
-              <div className={`${COMPONENTS.card.base} sticky top-24`}>
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 sticky top-24">
                 <div className="p-6 text-center">
                   <BriefcaseIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className={`${TYPOGRAPHY.heading.h4} mb-2`}>Select a Job</h3>
-                  <p className={`${TYPOGRAPHY.body.medium}`}>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Select a Job</h3>
+                  <p className="text-gray-600">
                     Choose a job from the list to view details
-            </p>
-          </div>
-            </div>
+                  </p>
+                </div>
+              </div>
             )}
-            </div>
+          </div>
         </div>
       </div>
     </div>
   );
-} 
+}
