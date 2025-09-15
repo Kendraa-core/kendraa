@@ -60,7 +60,8 @@ import {
   followInstitution,
   unfollowInstitution,
   getFollowStatus,
-  getInstitutionByAdminId
+  getInstitutionByAdminId,
+  canUserSendRequests
 } from '@/lib/queries';
 import type { Profile, Institution, Experience, Education, Post, JobWithCompany, EventWithOrganizer } from '@/types/database.types';
 
@@ -370,6 +371,7 @@ export default function PublicInstitutionProfilePage() {
   const [connectionCount, setConnectionCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [followStatus, setFollowStatus] = useState<'none' | 'following'>('none');
+  const [canSendRequests, setCanSendRequests] = useState(true);
 
   const id = params.id as string;
   const isOwnProfile = user?.id === id;
@@ -415,11 +417,16 @@ export default function PublicInstitutionProfilePage() {
         setEvents(eventsData);
       }
       
-      // Fetch follow status only if user is logged in
+      // Check user permissions and follow status only if user is logged in
       if (!isOwnProfile && user?.id) {
-        const followData = await getFollowStatus(user.id, id);
+        const [canSend, followData] = await Promise.all([
+          canUserSendRequests(user.id),
+          getFollowStatus(user.id, id)
+        ]);
+        setCanSendRequests(canSend);
         setFollowStatus(followData ? 'following' : 'none');
       } else {
+        setCanSendRequests(true);
         setFollowStatus('none');
       }
       
@@ -441,13 +448,22 @@ export default function PublicInstitutionProfilePage() {
       return;
     }
 
+    if (!canSendRequests) {
+      toast.error('Institutions cannot follow other institutions');
+      return;
+    }
+
     try {
-      await followInstitution(user.id, profile.id);
-      setFollowStatus('following');
-      toast.success('Successfully followed institution');
-    } catch (error) {
+      const success = await followInstitution(user.id, profile.id);
+      if (success) {
+        setFollowStatus('following');
+        toast.success('Successfully followed institution');
+      } else {
+        toast.error('Failed to follow institution');
+      }
+    } catch (error: any) {
       console.error('Error following:', error);
-      toast.error('Failed to follow institution');
+      toast.error(error.message || 'Failed to follow institution');
     }
   };
 
@@ -593,11 +609,17 @@ export default function PublicInstitutionProfilePage() {
 
               {user ? (
                 <div className="space-y-4">
-                  {followStatus === 'following' ? (
+                  {!canSendRequests ? (
+                    <div className="w-full px-6 py-3 bg-gray-100 text-gray-600 rounded-xl font-semibold text-center">
+                      <XCircleIcon className="w-4 h-4 inline mr-2" />
+                      Institutions Cannot Follow Other Institutions
+                    </div>
+                  ) : followStatus === 'following' ? (
                     <button
                       onClick={handleUnfollow}
                       className="w-full px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-semibold"
                     >
+                      <CheckIcon className="w-4 h-4 inline mr-2" />
                       Following
                     </button>
                   ) : (
@@ -605,6 +627,7 @@ export default function PublicInstitutionProfilePage() {
                       onClick={handleFollow}
                       className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl"
                     >
+                      <PlusIcon className="w-4 h-4 inline mr-2" />
                       Follow Institution
                     </button>
                   )}

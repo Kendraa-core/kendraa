@@ -47,7 +47,9 @@ import {
   getUserGroupsCount,
   getUserPagesCount,
   getUserNewslettersCount,
-  getUserEventsCount
+  getUserEventsCount,
+  canUserSendRequests,
+  getActionTypeForProfiles
 } from '@/lib/queries';
 import { Profile, ConnectionWithProfile } from '@/types/database.types';
 import { formatNumber } from '@/lib/utils';
@@ -91,6 +93,7 @@ export default function NetworkPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'grow' | 'catch-up'>('grow');
+  const [canSendRequests, setCanSendRequests] = useState(true);
 
   const fetchNetworkData = useCallback(async () => {
     if (!user?.id) return;
@@ -98,7 +101,7 @@ export default function NetworkPage() {
     setLoading(true);
     
     try {
-      const [individualsData, institutionsData, requestsData, connectionsData, statsData] = await Promise.all([
+      const [individualsData, institutionsData, requestsData, connectionsData, statsData, canSend] = await Promise.all([
         getSuggestedConnectionsWithMutualCounts(user.id, 20),
         getSuggestedInstitutions(user.id, 10),
         getConnectionRequests(user.id),
@@ -109,8 +112,11 @@ export default function NetworkPage() {
           getUserEventsCount(user.id),
           getUserPagesCount(user.id),
           getUserNewslettersCount(user.id)
-        ])
+        ]),
+        canUserSendRequests(user.id)
       ]);
+
+      setCanSendRequests(canSend);
 
       // Combine individuals and institutions, removing duplicates by ID
       const allSuggestions = [...individualsData, ...institutionsData];
@@ -167,6 +173,11 @@ export default function NetworkPage() {
   const handleConnect = async (profileId: string, profileType: 'individual' | 'institution') => {
     if (!user?.id) return;
     
+    if (!canSendRequests) {
+      toast.error('Institutions cannot send connection or follow requests');
+      return;
+    }
+    
     try {
       if (profileType === 'institution') {
         // For institutions, use follow system (automatic acceptance)
@@ -195,8 +206,8 @@ export default function NetworkPage() {
           toast.error('Failed to send connection request');
         }
       }
-    } catch (error) {
-      toast.error('Failed to complete action');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to complete action');
     }
   };
 

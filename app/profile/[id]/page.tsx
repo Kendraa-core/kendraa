@@ -78,6 +78,8 @@ import {
   updateEducation,
   getProfileViewers,
   getSuggestedConnectionsWithMutualCounts,
+  canUserSendRequests,
+  getActionTypeForProfiles,
   type Profile,
   type Experience,
   type Education,
@@ -930,6 +932,8 @@ export default function ProfilePage() {
   const [showContactModal, setShowContactModal] = useState(false);
   const [profileViewers, setProfileViewers] = useState<Profile[]>([]);
   const [suggestedConnections, setSuggestedConnections] = useState<Array<Profile & { mutual_connections: number }>>([]);
+  const [canSendRequests, setCanSendRequests] = useState(true);
+  const [actionType, setActionType] = useState<'connect' | 'follow' | 'none'>('none');
 
   // Inline editing states
   const [editingField, setEditingField] = useState<string | null>(null);
@@ -983,22 +987,34 @@ export default function ProfilePage() {
       const countData = await getConnectionCount(id as string);
       setConnectionCount(countData);
       
-      // Fetch connection data only if user is logged in
+      // Fetch connection data and determine action type only if user is logged in
       if (!isOwnProfile && user?.id) {
-        const connectionData = await getConnectionStatus(user.id, id as string);
-        setConnectionStatus(connectionData || 'none');
-        
-        // Check follow status based on profile type
-        if (profileData?.profile_type === 'institution') {
+        // Check if current user can send requests
+        const canSend = await canUserSendRequests(user.id);
+        setCanSendRequests(canSend);
+
+        // Determine the correct action type for this user combination
+        const action = await getActionTypeForProfiles(user.id, id as string);
+        setActionType(action);
+
+        // Fetch connection/follow status based on action type
+        if (action === 'follow') {
           const followData = await getFollowStatus(user.id, id as string);
           setFollowStatus(followData ? 'following' : 'none');
+          setConnectionStatus('none');
+        } else if (action === 'connect') {
+          const connectionData = await getConnectionStatus(user.id, id as string);
+          setConnectionStatus(connectionData || 'none');
+          setFollowStatus('none');
         } else {
-          const followData = await isFollowing(user.id, id as string);
-          setFollowStatus(followData ? 'following' : 'none');
+          setConnectionStatus('none');
+          setFollowStatus('none');
         }
       } else {
         setConnectionStatus('none');
         setFollowStatus('none');
+        setCanSendRequests(true);
+        setActionType('none');
       }
       
       // Fetch posts for activity
@@ -1035,19 +1051,34 @@ export default function ProfilePage() {
       return;
     }
 
+    if (!canSendRequests) {
+      toast.error('Institutions cannot send connection or follow requests');
+      return;
+    }
+
     try {
-      if (profile.profile_type === 'institution') {
-        await followInstitution(user.id, profile.id);
-        setFollowStatus('following');
-        toast.success('Successfully followed institution');
+      if (actionType === 'follow') {
+        const success = await followInstitution(user.id, profile.id);
+        if (success) {
+          setFollowStatus('following');
+          toast.success('Successfully followed institution');
+        } else {
+          toast.error('Failed to follow institution');
+        }
+      } else if (actionType === 'connect') {
+        const result = await sendConnectionRequest(user.id, profile.id);
+        if (result) {
+          setConnectionStatus('pending');
+          toast.success('Connection request sent');
+        } else {
+          toast.error('Failed to send connection request');
+        }
       } else {
-        await sendConnectionRequest(user.id, profile.id);
-        setConnectionStatus('pending');
-        toast.success('Connection request sent');
+        toast.error('Action not allowed');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error connecting:', error);
-      toast.error('Failed to connect');
+      toast.error(error.message || 'Failed to connect');
     }
   };
 
@@ -1648,7 +1679,14 @@ export default function ProfilePage() {
                       {user ? (
                         // Logged in user actions
                         <>
-                          {profile.profile_type === 'institution' ? (
+                          {!canSendRequests ? (
+                            // Institution users cannot send requests
+                            <div className="inline-flex items-center justify-center px-6 py-3 bg-gray-100 text-gray-600 rounded-lg text-sm font-semibold border border-gray-200 w-full">
+                              <XCircleIcon className="w-4 h-4 mr-2" />
+                              Institutions Cannot Send Requests
+                            </div>
+                          ) : actionType === 'follow' ? (
+                            // Follow logic for institutions
                             followStatus === 'following' ? (
                               <button
                                 onClick={handleUnfollow}
@@ -1666,7 +1704,8 @@ export default function ProfilePage() {
                                 Follow
                               </button>
                             )
-                          ) : (
+                          ) : actionType === 'connect' ? (
+                            // Connection logic for individuals
                             connectionStatus === 'connected' ? (
                               <span className="inline-flex items-center justify-center px-6 py-3 bg-green-100 text-green-700 rounded-lg text-sm font-semibold border border-green-200 w-full">
                                 <CheckIcon className="w-4 h-4 mr-2" />
@@ -1686,6 +1725,12 @@ export default function ProfilePage() {
                                 Connect
                               </button>
                             )
+                          ) : (
+                            // No action available
+                            <div className="inline-flex items-center justify-center px-6 py-3 bg-gray-100 text-gray-600 rounded-lg text-sm font-semibold border border-gray-200 w-full">
+                              <XCircleIcon className="w-4 h-4 mr-2" />
+                              No Action Available
+                            </div>
                           )}
                           <button 
                             onClick={() => router.push(`/messages?user=${profile.id}`)}
@@ -1703,7 +1748,7 @@ export default function ProfilePage() {
                             className="inline-flex items-center justify-center px-6 py-3 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-semibold w-full group hover:scale-[1.02] shadow-lg hover:shadow-xl"
                           >
                             <UserPlusIcon className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
-                            {profile.profile_type === 'institution' ? 'Follow' : 'Connect'}
+                            Sign In to {profile.profile_type === 'institution' || profile.user_type === 'institution' ? 'Follow' : 'Connect'}
                           </Link>
                           <Link
                             href="/signin"
