@@ -15,6 +15,14 @@ import EnhancedProfileImageEditor from '@/components/profile/EnhancedProfileImag
 import PostCard from '@/components/post/PostCard';
 import SimilarPeople from '@/components/profile/SimilarPeople';
 import { cn, formatDate, formatNumber } from '@/lib/utils';
+import { 
+  BACKGROUNDS, 
+  TEXT_COLORS, 
+  COMPONENTS, 
+  TYPOGRAPHY, 
+  BORDER_COLORS,
+  ANIMATIONS 
+} from '@/lib/design-system';
 import {
   ArrowLeftIcon,
   PencilIcon,
@@ -1221,12 +1229,12 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-[#007fff]/5">
+    <div className={`min-h-screen ${BACKGROUNDS.page.primary}`}>
       <div className="flex gap-6 px-4 sm:px-6 lg:px-8 py-6">
         {/* Main Content Container */}
         <div className="flex-1 max-w-4xl mx-auto space-y-4">
           {/* Profile Header */}
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+          <div className={`${COMPONENTS.card.base} shadow-xl`}>
             {/* Banner */}
             <div className="relative h-56 bg-[#007fff] overflow-hidden">
               {/* Background Pattern */}

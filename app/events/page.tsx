@@ -42,6 +42,16 @@ import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import Avatar from '@/components/common/Avatar';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import type { Event } from '@/types/database.types';
+import { 
+  BACKGROUNDS, 
+  TEXT_COLORS, 
+  COMPONENTS, 
+  TYPOGRAPHY, 
+  BORDER_COLORS,
+  ANIMATIONS,
+  EVENT_TYPE_COLORS,
+  getEventTypeColor
+} from '@/lib/design-system';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -236,17 +246,7 @@ export default function EventsPage() {
     }
   };
 
-  const getEventTypeColor = (type: string) => {
-    switch (type) {
-      case 'conference': return 'bg-blue-100 text-blue-700';
-      case 'webinar': return 'bg-purple-100 text-purple-700';
-      case 'workshop': return 'bg-green-100 text-green-700';
-      case 'seminar': return 'bg-orange-100 text-orange-700';
-      case 'networking': return 'bg-pink-100 text-pink-700';
-      case 'training': return 'bg-red-100 text-red-700';
-      default: return 'bg-gray-100 text-gray-700';
-    }
-  };
+  // Event type color function is now imported from design system
 
   const getDaysLeft = (dateString: string) => {
     const eventDate = new Date(dateString);
@@ -316,7 +316,7 @@ export default function EventsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={`min-h-screen ${BACKGROUNDS.page.tertiary}`}>
       {/* Top Navigation Bar */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

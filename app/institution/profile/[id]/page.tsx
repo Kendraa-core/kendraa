@@ -12,6 +12,14 @@ import Breadcrumb from '@/components/common/Breadcrumb';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import PostCard from '@/components/post/PostCard';
 import { cn, formatDate, formatNumber } from '@/lib/utils';
+import { 
+  BACKGROUNDS, 
+  TEXT_COLORS, 
+  COMPONENTS, 
+  TYPOGRAPHY, 
+  BORDER_COLORS,
+  ANIMATIONS 
+} from '@/lib/design-system';
 import {
   ArrowLeftIcon,
   MapPinIcon,
@@ -151,11 +159,11 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ posts, jobs, events, isOwnP
   );
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+    <div className={COMPONENTS.card.base}>
+      <div className={COMPONENTS.card.header}>
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-            <DocumentTextIcon className="w-5 h-5 text-[#007fff]" />
+          <h2 className={`${TYPOGRAPHY.heading.h3} flex items-center gap-2`}>
+            <DocumentTextIcon className={COMPONENTS.icon.primary} />
             Institution Updates
           </h2>
         </div>
@@ -279,14 +287,14 @@ const AboutCard: React.FC<AboutCardProps> = ({ profile, institution, isOwnProfil
   if (!profile) return null;
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
-        <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-          <BuildingOfficeIcon className="w-5 h-5 text-[#007fff]" />
+    <div className={COMPONENTS.card.base}>
+      <div className={COMPONENTS.card.header}>
+        <h2 className={`${TYPOGRAPHY.heading.h3} flex items-center gap-2`}>
+          <BuildingOfficeIcon className={COMPONENTS.icon.primary} />
           About
         </h2>
       </div>
-      <div className="p-6">
+      <div className={COMPONENTS.card.content}>
         <div className="space-y-4">
           {profile.bio && (
             <div>
@@ -485,7 +493,7 @@ export default function PublicInstitutionProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className={`min-h-screen ${BACKGROUNDS.page.primary}`}>
       {/* Header */}
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -515,7 +523,7 @@ export default function PublicInstitutionProfilePage() {
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8"
+              className={`${COMPONENTS.card.base} p-8`}
             >
               <div className="flex items-start space-x-6">
                 <Avatar
@@ -526,10 +534,10 @@ export default function PublicInstitutionProfilePage() {
                 <div className="flex-1">
                   <div className="flex items-start justify-between">
                     <div>
-                      <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                      <h1 className={`${TYPOGRAPHY.heading.h1} mb-2`}>
                         {profile.full_name}
                       </h1>
-                      <p className="text-xl text-gray-600 mb-4">
+                      <p className={`${TYPOGRAPHY.body.large} mb-4`}>
                         {institution?.type ? institution.type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Healthcare Organization'}
                       </p>
                       <div className="flex items-center space-x-6 text-sm text-gray-500">
