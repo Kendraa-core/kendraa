@@ -49,6 +49,7 @@ export default function InstitutionEventsPage() {
     try {
       setLoading(true);
       const eventsData = await getEventsByOrganizer(user.id);
+      console.log('Fetched events:', eventsData);
       setEvents(eventsData as EventWithOrganizer[]);
       setFilteredEvents(eventsData as EventWithOrganizer[]);
     } catch (error) {
@@ -125,13 +126,33 @@ export default function InstitutionEventsPage() {
     if (!confirmed) return;
 
     try {
-      await deleteEvent(eventId, user.id);
+      console.log('Deleting event:', eventId, 'for user:', user.id);
+      
+      // Optimistically remove the event from the local state
+      setEvents(prevEvents => {
+        const filtered = prevEvents.filter(event => event.id !== eventId);
+        console.log('Events after local removal:', filtered);
+        return filtered;
+      });
+      setFilteredEvents(prevFiltered => {
+        const filtered = prevFiltered.filter(event => event.id !== eventId);
+        console.log('Filtered events after local removal:', filtered);
+        return filtered;
+      });
+      
+      // Delete from database
+      const deleteResult = await deleteEvent(eventId, user.id);
+      console.log('Delete result:', deleteResult);
       toast.success('Event deleted successfully');
-      // Refresh the events list
+      
+      // Refresh the events list to ensure consistency
       fetchEvents();
     } catch (error: any) {
       console.error('Error deleting event:', error);
       toast.error(error.message || 'Failed to delete event');
+      
+      // If deletion failed, refresh the events list to restore the correct state
+      fetchEvents();
     }
   };
 

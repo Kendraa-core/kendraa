@@ -3205,7 +3205,21 @@ export async function deleteEvent(eventId: string, organizerId: string): Promise
       throw deleteError;
     }
     
-    console.log('[Queries] Event deleted successfully');
+    console.log('[Queries] Event deleted successfully from database');
+    
+    // Verify the event was actually deleted
+    const { data: verifyData, error: verifyError } = await getSupabase()
+      .from('events')
+      .select('id')
+      .eq('id', eventId)
+      .single();
+    
+    if (verifyData) {
+      console.error('[Queries] Event still exists after deletion attempt');
+      throw new Error('Event deletion failed - event still exists');
+    }
+    
+    console.log('[Queries] Event deletion verified - event no longer exists');
     return true;
   } catch (error) {
     console.error('[Queries] Error in deleteEvent:', error);
