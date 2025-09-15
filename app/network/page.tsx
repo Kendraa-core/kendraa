@@ -283,63 +283,18 @@ export default function NetworkPage() {
   }
 
   return (
-    <div className={`min-h-screen ${BACKGROUNDS.page.tertiary}`}>
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <Header />
       
-      {/* Top Navigation Bar */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Left Side - Navigation */}
-            <div className="flex items-center space-x-6">
-              <button
-                onClick={() => setActiveTab('grow')}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                  activeTab === 'grow'
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                }`}
-              >
-                Grow
-              </button>
-              <button
-                onClick={() => setActiveTab('catch-up')}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                  activeTab === 'catch-up'
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                }`}
-              >
-                Catch up
-              </button>
-            </div>
-
-            {/* Right Side - Search */}
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search people..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Left Sidebar - Manage my network */}
           <div className="lg:col-span-1">
-            <div className={`${COMPONENTS.card.base} sticky top-24`}>
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 sticky top-24">
               <div className="p-6">
-                <h3 className={`${TYPOGRAPHY.heading.h4} mb-4`}>Manage my network</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Manage my network</h3>
                 
                 <div className="space-y-3">
                   <Link 
@@ -407,19 +362,80 @@ export default function NetworkPage() {
                     <span className="text-gray-500 font-medium">{formatNumber(networkStats.newsletters)}</span>
                   </Link>
                 </div>
+
+                {/* Footer Links */}
+                <div className="mt-8 pt-6 border-t border-gray-200">
+                  <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+                    <Link href="/about" className="hover:text-gray-900 transition-colors">About</Link>
+                    <Link href="/accessibility" className="hover:text-gray-900 transition-colors">Accessibility</Link>
+                    <Link href="/help" className="hover:text-gray-900 transition-colors">Help Center</Link>
+                    <Link href="/privacy" className="hover:text-gray-900 transition-colors">Privacy & Terms</Link>
+                    <Link href="/ad-choices" className="hover:text-gray-900 transition-colors">Ad Choices</Link>
+                    <Link href="/advertising" className="hover:text-gray-900 transition-colors">Advertising</Link>
+                    <Link href="/business-services" className="hover:text-gray-900 transition-colors">Business Services</Link>
+                    <Link href="/app" className="hover:text-gray-900 transition-colors">Get the App</Link>
+                    <Link href="/more" className="hover:text-gray-900 transition-colors col-span-2">More</Link>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-4">kendraa Corporation © 2025</p>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Main Content Area */}
           <div className="lg:col-span-3">
+            {/* Top Navigation Bar */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+              <div className="p-6">
+                <div className="flex items-center justify-between">
+                  {/* Left Side - Navigation */}
+                  <div className="flex items-center space-x-6">
+                    <button
+                      onClick={() => setActiveTab('grow')}
+                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                        activeTab === 'grow'
+                          ? 'bg-blue-600 text-white'
+                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                      }`}
+                    >
+                      Grow
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('catch-up')}
+                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                        activeTab === 'catch-up'
+                          ? 'bg-blue-600 text-white'
+                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                      }`}
+                    >
+                      Catch up
+                    </button>
+                  </div>
+
+                  {/* Right Side - Search */}
+                  <div className="flex items-center space-x-4">
+                    <div className="relative">
+                      <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="text"
+                        placeholder="Search people..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="space-y-6">
               {/* Invitations Section */}
               {connectionRequests.length > 0 && (
-                <div className={`${COMPONENTS.card.base}`}>
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className={`${TYPOGRAPHY.heading.h4}`}>
+                      <h3 className="text-lg font-semibold text-gray-900">
                         Invitations ({connectionRequests.length})
                       </h3>
                       <Link 
@@ -482,10 +498,10 @@ export default function NetworkPage() {
 
               {/* People you may know - Healthcare */}
               {healthcareSuggestions.length > 0 && (
-                <div className={`${COMPONENTS.card.base}`}>
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className={`${TYPOGRAPHY.heading.h4}`}>
+                      <h3 className="text-lg font-semibold text-gray-900">
                         People in the Healthcare industry you may know
                       </h3>
                       <Link 
@@ -562,10 +578,10 @@ export default function NetworkPage() {
 
               {/* People you may know - Recent Activity */}
               {recentActivitySuggestions.length > 0 && (
-                <div className={`${COMPONENTS.card.base}`}>
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className={`${TYPOGRAPHY.heading.h4}`}>
+                      <h3 className="text-lg font-semibold text-gray-900">
                         People you may know based on your recent activity
                       </h3>
                       <Link 
@@ -642,10 +658,10 @@ export default function NetworkPage() {
 
               {/* Empty State */}
               {filteredSuggestions.length === 0 && (
-                <div className={`${COMPONENTS.card.base} text-center py-12`}>
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 text-center py-12">
                   <UserGroupIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className={`${TYPOGRAPHY.heading.h4} mb-2`}>No suggestions found</h3>
-                  <p className={`${TYPOGRAPHY.body.medium}`}>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No suggestions found</h3>
+                  <p className="text-gray-600">
                     {searchQuery ? 'Try adjusting your search terms' : 'We\'ll show you people to connect with here'}
                   </p>
                 </div>
