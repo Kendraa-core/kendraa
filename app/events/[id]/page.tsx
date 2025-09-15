@@ -33,6 +33,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import Avatar from '@/components/common/Avatar';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 import type { Event, Profile } from '@/types/database.types';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
@@ -214,14 +215,7 @@ export default function EventDetailPage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-6"></div>
-          <p className="text-gray-600 text-xl">Loading event details...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner variant="fullscreen" text="Loading event details..." />;
   }
 
   if (!event) {

@@ -110,12 +110,7 @@ export default function DashboardLayout({
   // Show a loading screen while the hook is checking the user's status
   if (isOnboardingLoading || loading || authLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-white via-[#007fff]/5 to-[#007fff]/10 flex items-center justify-center">
-        <div className="text-center">
-          <LoadingSpinner />
-          <p className="mt-4 text-[#007fff]">Loading your dashboard...</p>
-        </div>
-      </div>
+      <LoadingSpinner variant="fullscreen" text="Loading your dashboard..." />
     );
   }
   

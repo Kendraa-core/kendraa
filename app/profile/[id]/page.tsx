@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import Avatar from '@/components/common/Avatar';
 import Breadcrumb from '@/components/common/Breadcrumb';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 import EditProfileModal from '@/components/profile/EditProfileModal';
 import EnhancedProfileImageEditor from '@/components/profile/EnhancedProfileImageEditor';
 import PostCard from '@/components/post/PostCard';
@@ -1204,14 +1205,7 @@ export default function ProfilePage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-white via-[#007fff]/5 to-[#007fff]/10 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-[#007fff]/20 border-t-[#007fff] rounded-full animate-spin mx-auto"></div>
-          <p className="text-[#007fff] mt-6 text-lg font-medium">Loading medical profile...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner variant="fullscreen" text="Loading medical profile..." />;
   }
 
   if (!profile) {

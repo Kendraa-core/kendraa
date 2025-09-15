@@ -40,6 +40,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import Avatar from '@/components/common/Avatar';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 import type { Event } from '@/types/database.types';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
@@ -457,7 +458,7 @@ export default function EventsPage() {
               <div className="overflow-y-auto h-[calc(100%-5rem)]">
                 {loading ? (
                   <div className="flex items-center justify-center py-12">
-                    <div className="w-8 h-8 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                    <LoadingSpinner size="md" text="Loading events..." />
                   </div>
                 ) : (
                   <div className="p-2">

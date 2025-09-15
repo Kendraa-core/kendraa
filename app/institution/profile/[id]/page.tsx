@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import Avatar from '@/components/common/Avatar';
 import Breadcrumb from '@/components/common/Breadcrumb';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 import PostCard from '@/components/post/PostCard';
 import { cn, formatDate, formatNumber } from '@/lib/utils';
 import {
@@ -459,14 +460,7 @@ export default function PublicInstitutionProfilePage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-6"></div>
-          <p className="text-gray-600 text-xl">Loading profile...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner variant="fullscreen" text="Loading institution profile..." />;
   }
 
   if (!profile) {
