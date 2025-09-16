@@ -14,7 +14,7 @@ import EditProfileModal from '@/components/profile/EditProfileModal';
 import EnhancedProfileImageEditor from '@/components/profile/EnhancedProfileImageEditor';
 import PostCard from '@/components/post/PostCard';
 import SimilarPeople from '@/components/profile/SimilarPeople';
-import { cn, formatDate, formatNumber } from '@/lib/utils';
+import { cn, formatDate, formatNumber, formatRelativeTime } from '@/lib/utils';
 import { 
   BACKGROUNDS, 
   TEXT_COLORS, 
@@ -718,11 +718,12 @@ const EducationCard = React.memo(function EducationCard({ education, isOwnProfil
 });
 
 // ActivityCard Component
-const ActivityCard = React.memo(function ActivityCard({ posts, isOwnProfile, connectionCount, router }: { 
+const ActivityCard = React.memo(function ActivityCard({ posts, isOwnProfile, connectionCount, router, profileId }: { 
   posts: PostWithAuthor[]; 
   isOwnProfile: boolean; 
   connectionCount: number; 
   router: any; 
+  profileId: string;
 }) {
   return (
     <motion.div 
@@ -747,22 +748,78 @@ const ActivityCard = React.memo(function ActivityCard({ posts, isOwnProfile, con
       {/* Posts */}
       {posts.length > 0 ? (
         <div>
-          <div className="flex gap-4 overflow-x-auto pb-2">
+          <div className="flex gap-8 overflow-x-auto pb-6">
             {posts.slice(0, 3).map((post, index) => (
               <motion.div 
                 key={post.id}
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.1 }}
-                className="flex-shrink-0 w-80 border border-gray-100 rounded-lg p-4 hover:border-[#007fff]/20 transition-colors"
+                className="flex-shrink-0 w-96 border border-gray-100 rounded-xl p-6 hover:border-[#007fff]/20 transition-colors shadow-sm bg-white cursor-pointer"
+                onClick={() => router.push(`/post/${post.id}`)}
               >
-                <PostCard post={post} />
+                {/* Author Info */}
+                <div className="flex items-center space-x-3 mb-4">
+                  <Avatar
+                    src={'avatar_url' in post.author ? post.author.avatar_url : post.author.logo_url}
+                    name={'full_name' in post.author ? post.author.full_name : post.author.name}
+                    size="md"
+                    className="flex-shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center space-x-2">
+                      <h4 className="text-sm font-semibold text-gray-900 truncate">
+                        {'full_name' in post.author ? post.author.full_name : post.author.name}
+                      </h4>
+                      {('user_type' in post.author && post.author.user_type === 'institution') || 'type' in post.author && (
+                        <CheckBadgeIcon className="w-4 h-4 text-[#007fff] flex-shrink-0" />
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 truncate">
+                      {'headline' in post.author ? post.author.headline : post.author.description || 'Healthcare Professional'}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      {formatRelativeTime(post.created_at)} • Public
+                    </p>
+                  </div>
+                </div>
+
+                {/* Post Content */}
+                <div className="mb-4">
+                  <p className="text-gray-800 text-sm leading-relaxed line-clamp-3">
+                    {post.content}
+                  </p>
+                </div>
+
+                {/* Post Stats */}
+                <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-100">
+                  <div className="flex items-center space-x-4">
+                    <span>{post.likes_count || 0} reactions</span>
+                    <span>{post.comments_count || 0} comments</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <button className="flex items-center space-x-1 text-gray-500 hover:text-[#007fff] transition-colors">
+                      <span>❤️</span>
+                      <span>{post.likes_count || 0}</span>
+                    </button>
+                    <button className="flex items-center space-x-1 text-gray-500 hover:text-[#007fff] transition-colors">
+                      <span>💬</span>
+                      <span>{post.comments_count || 0}</span>
+                    </button>
+                    <button className="flex items-center space-x-1 text-gray-500 hover:text-[#007fff] transition-colors">
+                      <span>🔖</span>
+                    </button>
+                  </div>
+                </div>
               </motion.div>
             ))}
           </div>
           {posts.length > 3 && (
-            <div className="mt-4 text-center">
-              <button className="text-[#007fff] hover:text-[#007fff]/80 text-sm font-medium hover:underline transition-all duration-200">
+            <div className="mt-6 text-center">
+              <button 
+                onClick={() => router.push(`/profile/${profileId}/posts`)}
+                className="text-[#007fff] hover:text-[#007fff]/80 text-sm font-medium hover:underline transition-all duration-200"
+              >
                 Show all {posts.length} posts →
               </button>
             </div>
@@ -930,6 +987,7 @@ export default function ProfilePage() {
   const [profileViewers, setProfileViewers] = useState<Profile[]>([]);
   const [suggestedConnections, setSuggestedConnections] = useState<Array<Profile & { mutual_connections: number }>>([]);
   const [canSendRequests, setCanSendRequests] = useState(true);
+  const [showAllExperiences, setShowAllExperiences] = useState(false);
   const [actionType, setActionType] = useState<'connect' | 'follow' | 'none'>('none');
 
   // Inline editing states
@@ -1392,9 +1450,10 @@ export default function ProfilePage() {
 
   return (
     <div className={`min-h-screen ${BACKGROUNDS.page.primary}`}>
-      <div className="flex gap-6 px-4 sm:px-6 lg:px-8 py-6">
-        {/* Main Content Container */}
-        <div className="flex-1 max-w-4xl mx-auto space-y-4">
+      <div className="flex gap-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Main Content */}
+        <div className="flex-1 min-w-0">
+          <div className="space-y-8">
           {/* Profile Header */}
           <div className={`${COMPONENTS.card.base} shadow-xl`}>
             {/* Banner */}
@@ -1429,21 +1488,21 @@ export default function ProfilePage() {
             </div>
 
             {/* Profile Content */}
-            <div className="px-4 py-3">
+            <div className="px-6 py-6">
               {/* Avatar positioned to overlap banner */}
-              <div className="flex justify-start -mt-20 mb-3">
+              <div className="flex justify-start -mt-24 mb-6">
                 <div className="relative">
                   <Avatar
                     src={profile.avatar_url}
                     alt={profile.full_name || 'Profile'}
                     size="2xl"
-                    className="border-4 border-white shadow-2xl ring-4 ring-[#007fff]/20 w-32 h-32"
+                    className="border-4 border-white shadow-2xl ring-4 ring-[#007fff]/20 w-36 h-36"
                   />
                   {/* Edit Avatar Button */}
                   {isOwnProfile && (
                     <button
                       onClick={handleEditImages}
-                      className="absolute -bottom-2 -right-2 bg-[#007fff] text-white p-2 rounded-full hover:bg-[#007fff]/90 transition-all duration-300 shadow-lg transform hover:scale-110"
+                      className="absolute -bottom-2 -right-2 bg-[#007fff] text-white p-2.5 rounded-full hover:bg-[#007fff]/90 transition-all duration-300 shadow-lg transform hover:scale-110"
                     >
                       <CameraIcon className="w-4 h-4" />
                     </button>
@@ -1452,9 +1511,9 @@ export default function ProfilePage() {
                 </div>
 
               {/* Profile Information and Actions */}
-              <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+              <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
                 {/* Left Side: Profile Info and Stats */}
-                <div className="flex-1 min-w-0 space-y-3">
+                <div className="flex-1 min-w-0 space-y-4">
                   {/* Name */}
                   <div className="space-y-2">
                     {editingField === 'full_name' ? (
@@ -1668,7 +1727,7 @@ export default function ProfilePage() {
 
                   {/* Action Buttons for non-own profiles */}
                   {!isOwnProfile && (
-                    <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-4">
                       {user ? (
                         // Logged in user actions
                         <>
@@ -1767,6 +1826,7 @@ export default function ProfilePage() {
                     isOwnProfile={isOwnProfile} 
                     connectionCount={connectionCount} 
                     router={router}
+                    profileId={profile.id}
                   />
 
                   {/* About Section */}
@@ -1944,8 +2004,8 @@ export default function ProfilePage() {
                           </div>
                         </div>
                       ) : experiences.length > 0 ? (
-                        <div className="space-y-4">
-                          {experiences.slice(0, 3).map((experience, index) => (
+                        <div className="space-y-6">
+                          {(showAllExperiences ? experiences : experiences.slice(0, 3)).map((experience, index) => (
                             <ExperienceCard
                               key={experience.id}
                               experience={experience}
@@ -1960,8 +2020,11 @@ export default function ProfilePage() {
                           ))}
                           {experiences.length > 3 && (
                             <div className="text-center pt-4">
-                              <button className="text-[#007fff] hover:text-[#007fff]/80 text-sm font-medium hover:underline transition-colors duration-200">
-                                View all {experiences.length} experiences
+                              <button 
+                                onClick={() => setShowAllExperiences(!showAllExperiences)}
+                                className="text-[#007fff] hover:text-[#007fff]/80 text-sm font-medium hover:underline transition-colors duration-200"
+                              >
+                                {showAllExperiences ? 'Show less' : `View all ${experiences.length} experiences`}
                               </button>
                     </div>
                   )}
@@ -2133,7 +2196,7 @@ export default function ProfilePage() {
             </div>
                         </div>
                       ) : education.length > 0 ? (
-                        <div className="space-y-4">
+                        <div className="space-y-6">
                           {education.slice(0, 3).map((edu, index) => (
                             <EducationCard
                               key={edu.id}
@@ -2174,46 +2237,51 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
+          </div>
         </div>
-        
-        {/* Right Sidebar - Outside main content */}
-        <div className="hidden xl:block w-80 space-y-4 sticky top-6 h-fit">
-          {/* Who Viewed Your Profile Section - Only for own profile */}
-          {isOwnProfile && (
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+
+        {/* Right Sidebar */}
+        <div className="hidden xl:block w-80 flex-shrink-0">
+          <div className="sticky top-24 space-y-4">
+            {/* Who Viewed Your Profile Section - Only for own profile */}
+            {isOwnProfile && (
+              <div className="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
+                <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <EyeIcon className="w-4 h-4 text-[#007fff]" />
+                    Who Viewed Your Profile
+                  </h3>
+                </div>
+                <div className="p-3">
+                  <ProfileViewers viewers={profileViewers} />
+                </div>
+              </div>
+            )}
+
+            {/* People You May Know Section */}
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
               <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
                 <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                  <EyeIcon className="w-4 h-4 text-[#007fff]" />
-                  Who Viewed Your Profile
+                  <UserGroupIcon className="w-4 h-4 text-[#007fff]" />
+                  People You May Know
                 </h3>
               </div>
               <div className="p-3">
-                <ProfileViewers viewers={profileViewers} />
+                {isOwnProfile ? (
+                  <PeopleYouMayKnow 
+                    suggestions={suggestedConnections} 
+                    onConnect={handleSuggestedConnect}
+                  />
+                ) : (
+                  <SimilarPeople />
+                )}
               </div>
             </div>
-          )}
-
-          {/* People You May Know Section */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
-              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                <UserGroupIcon className="w-4 h-4 text-[#007fff]" />
-                People You May Know
-              </h3>
-            </div>
-            <div className="p-3">
-              {isOwnProfile ? (
-                <PeopleYouMayKnow 
-                  suggestions={suggestedConnections} 
-                  onConnect={handleSuggestedConnect}
-                />
-              ) : (
-                <SimilarPeople />
-              )}
+            
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-lg">
+              <SidebarCard profile={profile} isOwnProfile={isOwnProfile} />
             </div>
           </div>
-          
-          <SidebarCard profile={profile} isOwnProfile={isOwnProfile} />
         </div>
       </div>
         

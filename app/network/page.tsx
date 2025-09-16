@@ -7,7 +7,6 @@ import Avatar from '@/components/common/Avatar';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import Header from '@/components/layout/Header';
 import { 
-  MagnifyingGlassIcon,
   UserGroupIcon,
   UserIcon,
   BuildingOfficeIcon,
@@ -91,7 +90,6 @@ export default function NetworkPage() {
     newsletters: 0
   });
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
   const [canSendRequests, setCanSendRequests] = useState(true);
 
   const fetchNetworkData = useCallback(async () => {
@@ -120,7 +118,7 @@ export default function NetworkPage() {
       // Separate individuals and institutions
       const enrichedIndividuals = await Promise.all(
         individualsData.map(async (profile) => {
-          const status = await getConnectionStatus(user.id, profile.id);
+            const status = await getConnectionStatus(user.id, profile.id);
           const connectionStatus = (status as 'none' | 'pending' | 'connected') || 'none';
           
           return {
@@ -252,21 +250,9 @@ export default function NetworkPage() {
     setSuggestions(prev => prev.filter(p => p.id !== profileId));
   };
 
-  // Filter suggestions based on search
-  const filteredIndividuals = individuals.filter(profile =>
-    profile.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    profile.headline?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    profile.location?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const filteredInstitutions = institutions.filter(profile =>
-    profile.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    profile.headline?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    profile.location?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   // Group individuals by categories
-  const healthcareIndividuals = filteredIndividuals.filter(p => 
+  const healthcareIndividuals = individuals.filter(p => 
     p.headline?.toLowerCase().includes('healthcare') ||
     p.headline?.toLowerCase().includes('medical') ||
     p.headline?.toLowerCase().includes('doctor') ||
@@ -274,7 +260,7 @@ export default function NetworkPage() {
     p.headline?.toLowerCase().includes('pharmacy')
   );
 
-  const recentActivityIndividuals = filteredIndividuals.filter(p => 
+  const recentActivityIndividuals = individuals.filter(p => 
     !healthcareIndividuals.includes(p)
   ).slice(0, 8);
 
@@ -314,48 +300,84 @@ export default function NetworkPage() {
               <div className="p-6">
                 <h3 className={`${TYPOGRAPHY.heading.h3} mb-4`}>Manage my network</h3>
                 
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between py-2">
-                    <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary}`}>Connections</span>
-                    <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                <div className="space-y-1">
+                  <Link
+                    href="/network/connections"
+                    className="flex items-center justify-between py-3 px-3 rounded-lg hover:bg-gray-50 transition-colors group"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <UserGroupIcon className="w-5 h-5 text-[#007fff] group-hover:text-[#007fff]/80" />
+                      <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary} group-hover:text-[#007fff]`}>Connections</span>
+                    </div>
+                    <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} bg-gray-100 px-2 py-1 rounded-full`}>
                       {networkStats.connections}
                     </span>
-                  </div>
+                  </Link>
                   
-                  <div className="flex items-center justify-between py-2">
-                    <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary}`}>Following & followers</span>
-                    <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                  <Link
+                    href="/network/following"
+                    className="flex items-center justify-between py-3 px-3 rounded-lg hover:bg-gray-50 transition-colors group"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <UserIcon className="w-5 h-5 text-[#007fff] group-hover:text-[#007fff]/80" />
+                      <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary} group-hover:text-[#007fff]`}>Following & followers</span>
+                    </div>
+                    <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} bg-gray-100 px-2 py-1 rounded-full`}>
                       {connections.length}
                     </span>
-                  </div>
+                  </Link>
                   
-                  <div className="flex items-center justify-between py-2">
-                    <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary}`}>Groups</span>
-                    <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                  <Link
+                    href="/groups"
+                    className="flex items-center justify-between py-3 px-3 rounded-lg hover:bg-gray-50 transition-colors group"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <UsersIcon className="w-5 h-5 text-[#007fff] group-hover:text-[#007fff]/80" />
+                      <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary} group-hover:text-[#007fff]`}>Groups</span>
+                    </div>
+                    <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} bg-gray-100 px-2 py-1 rounded-full`}>
                       {networkStats.groups}
                     </span>
-                  </div>
+                  </Link>
                   
-                  <div className="flex items-center justify-between py-2">
-                    <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary}`}>Events</span>
-                    <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                  <Link
+                    href="/events"
+                    className="flex items-center justify-between py-3 px-3 rounded-lg hover:bg-gray-50 transition-colors group"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <CalendarDaysIcon className="w-5 h-5 text-[#007fff] group-hover:text-[#007fff]/80" />
+                      <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary} group-hover:text-[#007fff]`}>Events</span>
+                    </div>
+                    <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} bg-gray-100 px-2 py-1 rounded-full`}>
                       {networkStats.events}
                     </span>
-                  </div>
+                  </Link>
                   
-                  <div className="flex items-center justify-between py-2">
-                    <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary}`}>Pages</span>
-                    <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                  <Link
+                    href="/network/pages"
+                    className="flex items-center justify-between py-3 px-3 rounded-lg hover:bg-gray-50 transition-colors group"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <DocumentTextIcon className="w-5 h-5 text-[#007fff] group-hover:text-[#007fff]/80" />
+                      <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary} group-hover:text-[#007fff]`}>Pages</span>
+                    </div>
+                    <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} bg-gray-100 px-2 py-1 rounded-full`}>
                       {networkStats.pages}
                     </span>
-                  </div>
+                  </Link>
                   
-                  <div className="flex items-center justify-between py-2">
-                    <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary}`}>Newsletters</span>
-                    <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                  <Link
+                    href="/network/newsletters"
+                    className="flex items-center justify-between py-3 px-3 rounded-lg hover:bg-gray-50 transition-colors group"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <NewspaperIcon className="w-5 h-5 text-[#007fff] group-hover:text-[#007fff]/80" />
+                      <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary} group-hover:text-[#007fff]`}>Newsletters</span>
+                    </div>
+                    <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} bg-gray-100 px-2 py-1 rounded-full`}>
                       {networkStats.newsletters}
                     </span>
-                  </div>
+                  </Link>
                 </div>
                 
                 <div className="mt-6 pt-6 border-t border-gray-200">
@@ -428,47 +450,37 @@ export default function NetworkPage() {
               transition={{ duration: 0.6 }}
             >
 
-              {/* Search Bar */}
-              <div className={`${COMPONENTS.card.base} mb-6`}>
-                <div className="p-4">
-                  <div className="relative">
-                    <MagnifyingGlassIcon className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${TEXT_COLORS.secondary}`} />
-                    <input
-                      type="text"
-                      placeholder="Search people..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className={`w-full pl-10 pr-4 py-2 ${COMPONENTS.input.base} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-                    />
-                  </div>
-                </div>
-              </div>
 
               {/* Main Content */}
               <div className="space-y-6">
-                {/* Take a break with a puzzle game */}
+                {/* Network Overview */}
                 <div className={`${COMPONENTS.card.base}`}>
                   <div className="p-6">
                     <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                        <span className="text-orange-600 font-bold text-lg">Z</span>
+                      <div className="w-12 h-12 bg-[#007fff]/10 rounded-lg flex items-center justify-center">
+                        <UserGroupIcon className="w-6 h-6 text-[#007fff]" />
                       </div>
                       <div className="flex-1">
-                        <h3 className={`${TYPOGRAPHY.body.medium} font-semibold`}>Zip - a quick brain teaser</h3>
-                        <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>Solve in 60s or less!</p>
+                        <h3 className={`${TYPOGRAPHY.body.medium} font-semibold`}>Your Network Overview</h3>
+                        <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                          {networkStats.connections} connections • {connections.length} following • {networkStats.groups} groups
+                        </p>
                       </div>
-                      <button className={`px-4 py-2 ${COMPONENTS.button.primary} rounded-lg hover:bg-blue-700 transition-colors font-medium`}>
-                        Solve now
-                      </button>
+                      <Link 
+                        href="/network/connections"
+                        className={`px-4 py-2 ${COMPONENTS.button.primary} rounded-lg hover:bg-blue-700 transition-colors font-medium`}
+                      >
+                        Manage Network
+                      </Link>
                     </div>
-                  </div>
-                </div>
+        </div>
+      </div>
 
-                {/* Invitations Section */}
-                {connectionRequests.length > 0 && (
+        {/* Invitations Section */}
+        {connectionRequests.length > 0 && (
               <div className={`${COMPONENTS.card.base}`}>
                 <div className="p-6">
-                  <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-6">
                     <h3 className={`${TYPOGRAPHY.heading.h3}`}>
                       Invitations ({connectionRequests.length})
                     </h3>
@@ -478,8 +490,8 @@ export default function NetworkPage() {
                     >
                       Show all
                     </Link>
-                  </div>
-                  
+            </div>
+            
                   <div className="space-y-4">
                     {connectionRequests.slice(0, 5).map((request) => (
                       <motion.div
@@ -488,10 +500,10 @@ export default function NetworkPage() {
                         animate={{ opacity: 1, y: 0 }}
                         className="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
                       >
-                        <Avatar
-                          src={request.requester.avatar_url}
-                          alt={request.requester.full_name || 'User'}
-                          size="lg"
+                    <Avatar
+                      src={request.requester.avatar_url}
+                      alt={request.requester.full_name || 'User'}
+                      size="lg"
                         />
                         <div className="flex-1">
                           <div className="flex items-center space-x-2 mb-1">
@@ -503,8 +515,8 @@ export default function NetworkPage() {
                             </span>
                           </div>
                           <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} mb-2`}>
-                            {request.requester.headline || 'Healthcare Professional'}
-                          </p>
+                        {request.requester.headline || 'Healthcare Professional'}
+                      </p>
                           <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
                             {request.requester.location && (
                               <span className="flex items-center">
@@ -512,8 +524,8 @@ export default function NetworkPage() {
                                 {request.requester.location}
                               </span>
                             )}
-                          </p>
-                        </div>
+                      </p>
+                    </div>
                         <div className="flex space-x-2">
                           <button
                             onClick={() => handleAcceptConnection(request.id)}
@@ -536,7 +548,7 @@ export default function NetworkPage() {
             )}
 
             {/* Healthcare Institutions */}
-            {filteredInstitutions.length > 0 && (
+            {institutions.length > 0 && (
               <div className={`${COMPONENTS.card.base}`}>
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-6">
@@ -552,19 +564,19 @@ export default function NetworkPage() {
                   </div>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {filteredInstitutions.slice(0, 8).map((profile) => (
+                    {institutions.slice(0, 8).map((profile) => (
                       <motion.div
                         key={profile.id}
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         className="relative p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
                       >
-                        <button
+                    <button
                           onClick={() => handleDismissSuggestion(profile.id)}
                           className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
-                        >
+                    >
                           <XMarkIcon className="w-4 h-4" />
-                        </button>
+                    </button>
                         
                         <div className="text-center">
                           <Avatar
@@ -587,7 +599,7 @@ export default function NetworkPage() {
                               </span>
                             )}
                           </p>
-                          <button
+                    <button
                             onClick={() => handleConnect(profile.id, 'institution')}
                             disabled={profile.follow_status === 'following'}
                             className={`w-full px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
@@ -597,14 +609,14 @@ export default function NetworkPage() {
                             }`}
                           >
                             {profile.follow_status === 'following' ? 'Following' : '+ Follow'}
-                          </button>
+                    </button>
                         </div>
                       </motion.div>
                     ))}
                   </div>
-                </div>
-              </div>
-            )}
+            </div>
+          </div>
+        )}
 
             {/* People you may know - Healthcare */}
             {healthcareIndividuals.length > 0 && (
@@ -620,8 +632,8 @@ export default function NetworkPage() {
                     >
                       Show all
                     </Link>
-                  </div>
-                  
+          </div>
+          
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {healthcareIndividuals.slice(0, 8).map((profile) => (
                       <motion.div
@@ -638,9 +650,9 @@ export default function NetworkPage() {
                         </button>
                         
                         <div className="text-center">
-                          <Avatar
-                            src={profile.avatar_url}
-                            alt={profile.full_name || 'User'}
+                  <Avatar
+                    src={profile.avatar_url}
+                    alt={profile.full_name || 'User'}
                             size="lg"
                             className="mx-auto mb-3"
                           />
@@ -648,8 +660,8 @@ export default function NetworkPage() {
                             {profile.full_name}
                           </h4>
                           <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} mb-2 line-clamp-2`}>
-                            {profile.headline || 'Healthcare Professional'}
-                          </p>
+                    {profile.headline || 'Healthcare Professional'}
+                  </p>
                           <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} mb-3`}>
                             {(profile.mutual_connections || 0) > 0 && (
                               <span>
@@ -705,7 +717,7 @@ export default function NetworkPage() {
                           className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
                         >
                           <XMarkIcon className="w-4 h-4" />
-                        </button>
+                    </button>
                         
                         <div className="text-center">
                           <Avatar
@@ -727,8 +739,8 @@ export default function NetworkPage() {
                               </span>
                             )}
                           </p>
-                          <button
-                            onClick={() => handleConnect(profile.id, 'individual')}
+                    <button
+                      onClick={() => handleConnect(profile.id, 'individual')}
                             disabled={profile.connection_status === 'pending'}
                             className={`w-full px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
                               profile.connection_status === 'pending'
@@ -737,7 +749,7 @@ export default function NetworkPage() {
                             }`}
                           >
                             {profile.connection_status === 'pending' ? 'Pending' : '+ Connect'}
-                          </button>
+                    </button>
                         </div>
                       </motion.div>
                     ))}
@@ -747,20 +759,20 @@ export default function NetworkPage() {
             )}
 
             {/* Empty State */}
-            {filteredIndividuals.length === 0 && filteredInstitutions.length === 0 && (
+            {individuals.length === 0 && institutions.length === 0 && (
               <div className={`${COMPONENTS.card.base} text-center py-12`}>
                 <UserGroupIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                 <h3 className={`${TYPOGRAPHY.heading.h3} mb-2`}>No suggestions found</h3>
                 <p className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary}`}>
-                  {searchQuery ? 'Try adjusting your search terms' : 'We\'ll show you people to connect with here'}
+                  We&apos;ll show you people to connect with here
                 </p>
-              </div>
+          </div>
                 )}
               </div>
             </motion.div>
-          </div>
+            </div>
         </div>
       </div>
     </div>
   );
-}
+} 

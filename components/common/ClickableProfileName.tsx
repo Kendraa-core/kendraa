@@ -25,7 +25,7 @@ export default function ClickableProfileName({
   // Determine the correct profile URL based on user type
   const getProfileUrl = () => {
     if (userType === 'institution') {
-      return `/institution/profile`;
+      return `/institution/profile/${userId}`;
     }
     return `/profile/${userId}`;
   };

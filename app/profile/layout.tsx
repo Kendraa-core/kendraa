@@ -16,11 +16,12 @@ export default function ProfileLayout({
   const [userProfile, setUserProfile] = useState<Profile | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
 
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/signin');
-    }
-  }, [user, loading, router]);
+  // Allow public access to profile pages - no authentication required
+  // useEffect(() => {
+  //   if (!loading && !user) {
+  //     router.push('/signin');
+  //   }
+  // }, [user, loading, router]);
 
   // Load user profile to determine navigation options
   useEffect(() => {
@@ -53,7 +54,8 @@ export default function ProfileLayout({
     );
   }
 
-  if (!user) return null;
+  // Allow rendering even without user authentication for public profile viewing
+  // if (!user) return null;
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">

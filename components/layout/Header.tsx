@@ -342,57 +342,14 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
                       </div>
                     </div>
 
-                    {/* Quick Actions */}
-                    <div className="px-2 py-1">
-                      <Link
-                        href={profile?.user_type === 'institution' || profile?.profile_type === 'institution' ? '/institution/profile' : `/profile/${user?.id}`}
-                        className="flex items-center space-x-3 px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                      >
-                        <UserIcon className="w-4 h-4" />
-                        <span>View Profile</span>
-                      </Link>
-                      <button
-                        onClick={() => setShowProfileWizard(true)}
-                        className="flex items-center space-x-3 w-full px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                      >
-                        <PlusIcon className="w-4 h-4" />
-                        <span>Edit Profile</span>
-                      </button>
-                    </div>
-
-                    {/* Account Management */}
+                    {/* Settings */}
                     <div className="px-2 py-1 border-t border-gray-100">
                       <Link
                         href="/settings"
-                        className="flex items-center space-x-3 px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                        className="flex items-center space-x-3 w-full px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
                       >
                         <Cog6ToothIcon className="w-4 h-4" />
                         <span>Settings</span>
-                      </Link>
-                      <Link
-                        href="/saved-items"
-                        className="flex items-center space-x-3 px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                      >
-                        <BookmarkIcon className="w-4 h-4" />
-                        <span>Saved Items</span>
-                      </Link>
-                    </div>
-
-                    {/* Help & Support */}
-                    <div className="px-2 py-1 border-t border-gray-100">
-                      <Link
-                        href="/help"
-                        className="flex items-center space-x-3 px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                      >
-                        <QuestionMarkCircleIcon className="w-4 h-4" />
-                        <span>Help & Support</span>
-                      </Link>
-                      <Link
-                        href="/privacy"
-                        className="flex items-center space-x-3 px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                      >
-                        <ShieldCheckIcon className="w-4 h-4" />
-                        <span>Privacy Policy</span>
                       </Link>
                     </div>
 
