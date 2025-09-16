@@ -1450,7 +1450,7 @@ export default function ProfilePage() {
   return (
     <div className={`min-h-screen ${BACKGROUNDS.page.primary} relative`}>
       {/* Floating Right Island */}
-      <div className="hidden xl:block fixed right-8 top-24 w-80 z-10 space-y-4">
+      <div className="hidden xl:block fixed right-16 top-24 w-80 z-10 space-y-4">
         {/* Who Viewed Your Profile Section - Only for own profile */}
         {isOwnProfile && (
           <div className="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
@@ -1493,7 +1493,7 @@ export default function ProfilePage() {
 
       {/* Main Content Container */}
       <div className="px-4 sm:px-6 lg:px-8 py-6">
-        <div className="w-full max-w-4xl mx-auto xl:mr-96 space-y-8">
+        <div className="w-full max-w-4xl mx-auto xl:mr-96 xl:ml-16 space-y-8">
           {/* Profile Header */}
           <div className={`${COMPONENTS.card.base} shadow-xl`}>
             {/* Banner */}
