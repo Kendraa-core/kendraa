@@ -14,7 +14,7 @@ import EditProfileModal from '@/components/profile/EditProfileModal';
 import EnhancedProfileImageEditor from '@/components/profile/EnhancedProfileImageEditor';
 import PostCard from '@/components/post/PostCard';
 import SimilarPeople from '@/components/profile/SimilarPeople';
-import { cn, formatDate, formatNumber } from '@/lib/utils';
+import { cn, formatDate, formatNumber, formatRelativeTime } from '@/lib/utils';
 import { 
   BACKGROUNDS, 
   TEXT_COLORS, 
@@ -747,21 +747,73 @@ const ActivityCard = React.memo(function ActivityCard({ posts, isOwnProfile, con
       {/* Posts */}
       {posts.length > 0 ? (
         <div>
-          <div className="flex gap-6 overflow-x-auto pb-4">
+          <div className="flex gap-8 overflow-x-auto pb-6">
             {posts.slice(0, 3).map((post, index) => (
               <motion.div 
                 key={post.id}
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.1 }}
-                className="flex-shrink-0 w-80 border border-gray-100 rounded-lg p-5 hover:border-[#007fff]/20 transition-colors shadow-sm"
+                className="flex-shrink-0 w-96 border border-gray-100 rounded-xl p-6 hover:border-[#007fff]/20 transition-colors shadow-sm bg-white"
               >
-                <PostCard post={post} />
+                {/* Author Info */}
+                <div className="flex items-center space-x-3 mb-4">
+                  <Avatar
+                    src={'avatar_url' in post.author ? post.author.avatar_url : post.author.logo_url}
+                    name={'full_name' in post.author ? post.author.full_name : post.author.name}
+                    size="md"
+                    className="flex-shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center space-x-2">
+                      <h4 className="text-sm font-semibold text-gray-900 truncate">
+                        {'full_name' in post.author ? post.author.full_name : post.author.name}
+                      </h4>
+                      {('user_type' in post.author && post.author.user_type === 'institution') || 'type' in post.author && (
+                        <CheckBadgeIcon className="w-4 h-4 text-[#007fff] flex-shrink-0" />
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 truncate">
+                      {'headline' in post.author ? post.author.headline : post.author.description || 'Healthcare Professional'}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      {formatRelativeTime(post.created_at)} • Public
+                    </p>
+                  </div>
+                </div>
+
+                {/* Post Content */}
+                <div className="mb-4">
+                  <p className="text-gray-800 text-sm leading-relaxed line-clamp-3">
+                    {post.content}
+                  </p>
+                </div>
+
+                {/* Post Stats */}
+                <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-100">
+                  <div className="flex items-center space-x-4">
+                    <span>{post.likes_count || 0} reactions</span>
+                    <span>{post.comments_count || 0} comments</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <button className="flex items-center space-x-1 text-gray-500 hover:text-[#007fff] transition-colors">
+                      <span>❤️</span>
+                      <span>{post.likes_count || 0}</span>
+                    </button>
+                    <button className="flex items-center space-x-1 text-gray-500 hover:text-[#007fff] transition-colors">
+                      <span>💬</span>
+                      <span>{post.comments_count || 0}</span>
+                    </button>
+                    <button className="flex items-center space-x-1 text-gray-500 hover:text-[#007fff] transition-colors">
+                      <span>🔖</span>
+                    </button>
+                  </div>
+                </div>
               </motion.div>
             ))}
           </div>
           {posts.length > 3 && (
-            <div className="mt-4 text-center">
+            <div className="mt-6 text-center">
               <button className="text-[#007fff] hover:text-[#007fff]/80 text-sm font-medium hover:underline transition-all duration-200">
                 Show all {posts.length} posts →
               </button>
@@ -1393,7 +1445,7 @@ export default function ProfilePage() {
   return (
     <div className={`min-h-screen ${BACKGROUNDS.page.primary} relative`}>
       {/* Floating Right Island */}
-      <div className="hidden xl:block fixed right-6 top-24 w-80 z-10 space-y-4">
+      <div className="hidden xl:block fixed right-1/2 top-24 w-80 z-10 space-y-4 transform translate-x-96">
         {/* Who Viewed Your Profile Section - Only for own profile */}
         {isOwnProfile && (
           <div className="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
@@ -1436,7 +1488,7 @@ export default function ProfilePage() {
 
       {/* Main Content Container */}
       <div className="px-4 sm:px-6 lg:px-8 py-6">
-        <div className={`w-full ${isOwnProfile ? 'xl:mr-96' : 'xl:mr-96'} max-w-4xl mx-auto space-y-8`}>
+        <div className="w-full max-w-4xl mx-auto space-y-8">
           {/* Profile Header */}
           <div className={`${COMPONENTS.card.base} shadow-xl`}>
             {/* Banner */}
