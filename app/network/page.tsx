@@ -7,7 +7,6 @@ import Avatar from '@/components/common/Avatar';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import Header from '@/components/layout/Header';
 import { 
-  MagnifyingGlassIcon,
   UserGroupIcon,
   UserIcon,
   BuildingOfficeIcon,
@@ -91,7 +90,6 @@ export default function NetworkPage() {
     newsletters: 0
   });
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
   const [canSendRequests, setCanSendRequests] = useState(true);
 
   const fetchNetworkData = useCallback(async () => {
@@ -252,21 +250,9 @@ export default function NetworkPage() {
     setSuggestions(prev => prev.filter(p => p.id !== profileId));
   };
 
-  // Filter suggestions based on search
-  const filteredIndividuals = individuals.filter(profile =>
-    profile.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    profile.headline?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    profile.location?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const filteredInstitutions = institutions.filter(profile =>
-    profile.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    profile.headline?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    profile.location?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   // Group individuals by categories
-  const healthcareIndividuals = filteredIndividuals.filter(p => 
+  const healthcareIndividuals = individuals.filter(p => 
     p.headline?.toLowerCase().includes('healthcare') ||
     p.headline?.toLowerCase().includes('medical') ||
     p.headline?.toLowerCase().includes('doctor') ||
@@ -274,7 +260,7 @@ export default function NetworkPage() {
     p.headline?.toLowerCase().includes('pharmacy')
   );
 
-  const recentActivityIndividuals = filteredIndividuals.filter(p => 
+  const recentActivityIndividuals = individuals.filter(p => 
     !healthcareIndividuals.includes(p)
   ).slice(0, 8);
 
@@ -464,21 +450,6 @@ export default function NetworkPage() {
               transition={{ duration: 0.6 }}
             >
 
-      {/* Search Bar */}
-              <div className={`${COMPONENTS.card.base} mb-6`}>
-                <div className="p-4">
-                  <div className="relative">
-                    <MagnifyingGlassIcon className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${TEXT_COLORS.secondary}`} />
-          <input
-            type="text"
-                      placeholder="Search people..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-                      className={`w-full pl-10 pr-4 py-2 ${COMPONENTS.input.base} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-          />
-        </div>
-      </div>
-              </div>
 
               {/* Main Content */}
               <div className="space-y-6">
@@ -577,7 +548,7 @@ export default function NetworkPage() {
             )}
 
             {/* Healthcare Institutions */}
-            {filteredInstitutions.length > 0 && (
+            {institutions.length > 0 && (
               <div className={`${COMPONENTS.card.base}`}>
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-6">
@@ -593,7 +564,7 @@ export default function NetworkPage() {
                   </div>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {filteredInstitutions.slice(0, 8).map((profile) => (
+                    {institutions.slice(0, 8).map((profile) => (
                       <motion.div
                         key={profile.id}
                         initial={{ opacity: 0, scale: 0.95 }}
@@ -788,12 +759,12 @@ export default function NetworkPage() {
             )}
 
             {/* Empty State */}
-            {filteredIndividuals.length === 0 && filteredInstitutions.length === 0 && (
+            {individuals.length === 0 && institutions.length === 0 && (
               <div className={`${COMPONENTS.card.base} text-center py-12`}>
                 <UserGroupIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                 <h3 className={`${TYPOGRAPHY.heading.h3} mb-2`}>No suggestions found</h3>
                 <p className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary}`}>
-                  {searchQuery ? 'Try adjusting your search terms' : 'We\'ll show you people to connect with here'}
+                  We&apos;ll show you people to connect with here
                 </p>
           </div>
                 )}
