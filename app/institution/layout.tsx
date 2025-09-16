@@ -132,7 +132,8 @@ export default function InstitutionLayout({
   const isNetworkPage = pathname === '/institution/network';
   const isFeedPage = pathname === '/institution/feed';
   const shouldShowSidebars = !isNetworkPage && !isFeedPage;
-  const shouldShowInnovativeSidebar = isFeedPage;
+  // Only show innovative sidebar on the feed page, nowhere else
+  const shouldShowInnovativeSidebar = pathname === '/institution/feed';
 
   // Show a loading screen while the hook is checking the user's status
   if (isOnboardingLoading || loading || authLoading) {
