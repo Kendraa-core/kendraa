@@ -18,7 +18,6 @@ import toast from 'react-hot-toast';
 import PostCard from '@/components/post/PostCard';
 import Avatar from '@/components/common/Avatar';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
-import Header from '@/components/layout/Header';
 import { 
   BACKGROUNDS, 
   TEXT_COLORS, 
@@ -35,7 +34,6 @@ export default function InstitutionFeedPage() {
   const [institutionPosts, setInstitutionPosts] = useState<PostWithAuthor[]>([]);
   const [institution, setInstitution] = useState<Institution | null>(null);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'feed' | 'posts'>('feed');
   const [postContent, setPostContent] = useState('');
   const [showCreatePost, setShowCreatePost] = useState(false);
 
@@ -128,10 +126,7 @@ export default function InstitutionFeedPage() {
   }
 
   return (
-    <div className={`${BACKGROUNDS.page.primary} min-h-screen`}>
-      <Header />
-      
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -152,52 +147,6 @@ export default function InstitutionFeedPage() {
             </button>
           </div>
 
-          {/* Institution Info Card */}
-          {institution && (
-            <div className={`${COMPONENTS.card.base} mb-8`}>
-              <div className="p-8 text-center">
-                <Avatar
-                  src={institution.logo_url}
-                  name={institution.name}
-                  size="xl"
-                  className="mx-auto mb-4"
-                />
-                <h2 className={`${TYPOGRAPHY.heading.h2} mb-2`}>{institution.name}</h2>
-                <p className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary} mb-4`}>
-                  {institution.description || 'Healthcare Institution'}
-                </p>
-                <div className="inline-flex items-center px-4 py-2 bg-gray-100 rounded-full">
-                  <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
-                    {institutionPosts.length} Posts
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Tabs */}
-          <div className={`${COMPONENTS.card.base} mb-8 p-2 flex space-x-2 max-w-md mx-auto`}>
-            <button
-              onClick={() => setActiveTab('feed')}
-              className={`flex-1 py-3 px-6 rounded-lg text-sm font-medium transition-colors ${
-                activeTab === 'feed'
-                  ? 'bg-[#007fff] text-white shadow-sm'
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              General Feed
-            </button>
-            <button
-              onClick={() => setActiveTab('posts')}
-              className={`flex-1 py-3 px-6 rounded-lg text-sm font-medium transition-colors ${
-                activeTab === 'posts'
-                  ? 'bg-[#007fff] text-white shadow-sm'
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              Your Posts ({institutionPosts.length})
-            </button>
-          </div>
 
           {/* Create Post Form */}
           {showCreatePost && (
@@ -237,67 +186,46 @@ export default function InstitutionFeedPage() {
               <LoadingSpinner size="lg" text="Loading content..." />
             </div>
           ) : (
-            <div className="space-y-8">
-              {activeTab === 'feed' && (
-                <div className="space-y-4">
-                  {posts.length > 0 ? (
-                    posts.map((post) => (
-                      <PostCard
-                        key={post.id}
-                        post={post}
-                        onInteraction={handlePostInteraction}
-                      />
-                    ))
-                  ) : (
-                    <div className={`${COMPONENTS.card.base} text-center py-16`}>
-                      <UserGroupIcon className="w-20 h-20 text-gray-300 mx-auto mb-6" />
-                      <h3 className={`${TYPOGRAPHY.heading.h3} mb-3`}>No posts yet</h3>
-                      <p className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary} mb-6`}>
-                        Be the first to share something with the community
-                      </p>
-                      <button
-                        onClick={() => setShowCreatePost(true)}
-                        className={`${COMPONENTS.button.primary}`}
-                      >
-                        Create First Post
-                      </button>
-                    </div>
-                  )}
+            <div className="space-y-6">
+              {/* Show all posts (both general and institution posts) */}
+              {posts.length > 0 || institutionPosts.length > 0 ? (
+                <div className="space-y-6">
+                  {/* Institution's own posts first */}
+                  {institutionPosts.map((post) => (
+                    <PostCard
+                      key={`institution-${post.id}`}
+                      post={post}
+                      onInteraction={handlePostInteraction}
+                    />
+                  ))}
+                  
+                  {/* General feed posts */}
+                  {posts.map((post) => (
+                    <PostCard
+                      key={`general-${post.id}`}
+                      post={post}
+                      onInteraction={handlePostInteraction}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className={`${COMPONENTS.card.base} text-center py-16`}>
+                  <UserGroupIcon className="w-20 h-20 text-gray-300 mx-auto mb-6" />
+                  <h3 className={`${TYPOGRAPHY.heading.h3} mb-3`}>No posts yet</h3>
+                  <p className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary} mb-6`}>
+                    Be the first to share something with the community
+                  </p>
+                  <button
+                    onClick={() => setShowCreatePost(true)}
+                    className={`${COMPONENTS.button.primary}`}
+                  >
+                    Create First Post
+                  </button>
                 </div>
               )}
-
-              {activeTab === 'posts' && (
-                <div className="space-y-4">
-                  {institutionPosts.length > 0 ? (
-                    institutionPosts.map((post) => (
-                      <PostCard
-                        key={post.id}
-                        post={post}
-                        onInteraction={handlePostInteraction}
-                      />
-                    ))
-                  ) : (
-                    <div className={`${COMPONENTS.card.base} text-center py-16`}>
-                      <PlusIcon className="w-20 h-20 text-gray-300 mx-auto mb-6" />
-                      <h3 className={`${TYPOGRAPHY.heading.h3} mb-3`}>No posts yet</h3>
-                      <p className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary} mb-6`}>
-                        Start sharing updates with your network
-                      </p>
-                      <button
-                        onClick={() => setShowCreatePost(true)}
-                        className={`${COMPONENTS.button.primary}`}
-                      >
-                        Create First Post
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-
             </div>
           )}
         </motion.div>
       </div>
-    </div>
   );
 }
