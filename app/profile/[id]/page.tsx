@@ -718,11 +718,12 @@ const EducationCard = React.memo(function EducationCard({ education, isOwnProfil
 });
 
 // ActivityCard Component
-const ActivityCard = React.memo(function ActivityCard({ posts, isOwnProfile, connectionCount, router }: { 
+const ActivityCard = React.memo(function ActivityCard({ posts, isOwnProfile, connectionCount, router, profileId }: { 
   posts: PostWithAuthor[]; 
   isOwnProfile: boolean; 
   connectionCount: number; 
   router: any; 
+  profileId: string;
 }) {
   return (
     <motion.div 
@@ -754,7 +755,8 @@ const ActivityCard = React.memo(function ActivityCard({ posts, isOwnProfile, con
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.1 }}
-                className="flex-shrink-0 w-96 border border-gray-100 rounded-xl p-6 hover:border-[#007fff]/20 transition-colors shadow-sm bg-white"
+                className="flex-shrink-0 w-96 border border-gray-100 rounded-xl p-6 hover:border-[#007fff]/20 transition-colors shadow-sm bg-white cursor-pointer"
+                onClick={() => router.push(`/post/${post.id}`)}
               >
                 {/* Author Info */}
                 <div className="flex items-center space-x-3 mb-4">
@@ -814,7 +816,10 @@ const ActivityCard = React.memo(function ActivityCard({ posts, isOwnProfile, con
           </div>
           {posts.length > 3 && (
             <div className="mt-6 text-center">
-              <button className="text-[#007fff] hover:text-[#007fff]/80 text-sm font-medium hover:underline transition-all duration-200">
+              <button 
+                onClick={() => router.push(`/profile/${profileId}/posts`)}
+                className="text-[#007fff] hover:text-[#007fff]/80 text-sm font-medium hover:underline transition-all duration-200"
+              >
                 Show all {posts.length} posts →
               </button>
             </div>
@@ -1861,6 +1866,7 @@ export default function ProfilePage() {
                     isOwnProfile={isOwnProfile} 
                     connectionCount={connectionCount} 
                     router={router}
+                    profileId={profile.id}
                   />
 
                   {/* About Section */}
