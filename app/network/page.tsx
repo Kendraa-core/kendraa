@@ -92,7 +92,6 @@ export default function NetworkPage() {
   });
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'grow' | 'catch-up'>('grow');
   const [canSendRequests, setCanSendRequests] = useState(true);
 
   const fetchNetworkData = useCallback(async () => {
@@ -307,46 +306,166 @@ export default function NetworkPage() {
     <div className={`${BACKGROUNDS.page.primary} min-h-screen`}>
       <Header />
       
-      <div className="container mx-auto px-4 py-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="max-w-4xl mx-auto"
-        >
-
-          {/* Navigation Tabs */}
-          <div className={`${COMPONENTS.card.base} mb-6`}>
-            <div className="p-6">
-              <div className="flex items-center justify-center space-x-8">
-                <button
-                  onClick={() => setActiveTab('grow')}
-                  className={`px-6 py-3 text-sm font-medium rounded-lg transition-colors ${
-                    activeTab === 'grow'
-                      ? `${COMPONENTS.button.primary}`
-                      : `${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} hover:bg-gray-100`
-                  }`}
-                >
-                  Grow
-                </button>
-                <button
-                  onClick={() => setActiveTab('catch-up')}
-                  className={`px-6 py-3 text-sm font-medium rounded-lg transition-colors ${
-                    activeTab === 'catch-up'
-                      ? `${COMPONENTS.button.primary}`
-                      : `${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} hover:bg-gray-100`
-                  }`}
-                >
-                  Catch up
-                </button>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="flex gap-6">
+          {/* Left Sidebar - Floating Island */}
+          <div className="w-80 flex-shrink-0">
+            <div className={`${COMPONENTS.card.base} sticky top-24`}>
+              <div className="p-6">
+                <h3 className={`${TYPOGRAPHY.heading.h3} mb-4`}>Manage my network</h3>
+                
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between py-2">
+                    <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary}`}>Connections</span>
+                    <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                      {networkStats.connections}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between py-2">
+                    <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary}`}>Following & followers</span>
+                    <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                      {connections.length}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between py-2">
+                    <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary}`}>Groups</span>
+                    <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                      {networkStats.groups}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between py-2">
+                    <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary}`}>Events</span>
+                    <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                      {networkStats.events}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between py-2">
+                    <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary}`}>Pages</span>
+                    <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                      {networkStats.pages}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between py-2">
+                    <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary}`}>Newsletters</span>
+                    <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                      {networkStats.newsletters}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <div className="space-y-2">
+                    <Link
+                      href="/about"
+                      className={`block ${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} transition-colors`}
+                    >
+                      About
+                    </Link>
+                    <Link
+                      href="/accessibility"
+                      className={`block ${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} transition-colors`}
+                    >
+                      Accessibility
+                    </Link>
+                    <Link
+                      href="/help"
+                      className={`block ${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} transition-colors`}
+                    >
+                      Help Center
+                    </Link>
+                    <Link
+                      href="/privacy"
+                      className={`block ${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} transition-colors`}
+                    >
+                      Privacy & Terms
+                    </Link>
+                    <Link
+                      href="/ad-choices"
+                      className={`block ${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} transition-colors`}
+                    >
+                      Ad Choices
+                    </Link>
+                    <Link
+                      href="/advertising"
+                      className={`block ${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} transition-colors`}
+                    >
+                      Advertising
+                    </Link>
+                    <Link
+                      href="/business-services"
+                      className={`block ${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} transition-colors`}
+                    >
+                      Business Services
+                    </Link>
+                    <Link
+                      href="/get-app"
+                      className={`block ${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} transition-colors`}
+                    >
+                      Get the Kendraa app
+                    </Link>
+                    <Link
+                      href="/more"
+                      className={`block ${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} transition-colors`}
+                    >
+                      More
+                    </Link>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Main Content */}
-          <div className="space-y-6">
-            {/* Invitations Section */}
-            {connectionRequests.length > 0 && (
+          {/* Main Content Area */}
+          <div className="flex-1 min-w-0">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+
+              {/* Search Bar */}
+              <div className={`${COMPONENTS.card.base} mb-6`}>
+                <div className="p-4">
+                  <div className="relative">
+                    <MagnifyingGlassIcon className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${TEXT_COLORS.secondary}`} />
+                    <input
+                      type="text"
+                      placeholder="Search people..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className={`w-full pl-10 pr-4 py-2 ${COMPONENTS.input.base} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Main Content */}
+              <div className="space-y-6">
+                {/* Take a break with a puzzle game */}
+                <div className={`${COMPONENTS.card.base}`}>
+                  <div className="p-6">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                        <span className="text-orange-600 font-bold text-lg">Z</span>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className={`${TYPOGRAPHY.body.medium} font-semibold`}>Zip - a quick brain teaser</h3>
+                        <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>Solve in 60s or less!</p>
+                      </div>
+                      <button className={`px-4 py-2 ${COMPONENTS.button.primary} rounded-lg hover:bg-blue-700 transition-colors font-medium`}>
+                        Solve now
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Invitations Section */}
+                {connectionRequests.length > 0 && (
               <div className={`${COMPONENTS.card.base}`}>
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-6">
@@ -636,9 +755,11 @@ export default function NetworkPage() {
                   {searchQuery ? 'Try adjusting your search terms' : 'We\'ll show you people to connect with here'}
                 </p>
               </div>
-            )}
+                )}
+              </div>
+            </motion.div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );
