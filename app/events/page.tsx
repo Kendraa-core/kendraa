@@ -318,38 +318,74 @@ export default function EventsPage() {
     return `${Math.ceil(diffDays / 30)} months left`;
   };
 
-  // Filter and sort events
-  const filteredEvents = events.filter(event => {
-    const matchesType = selectedType === 'all' || event.event_type === selectedType;
-    const matchesFormat = selectedFormat === 'all' || 
-                         (selectedFormat === 'virtual' && event.is_virtual) ||
-                         (selectedFormat === 'in-person' && !event.is_virtual);
-    const matchesSearch = searchQuery === '' || 
-                         event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         event.description.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    return matchesType && matchesFormat && matchesSearch;
-  }).sort((a, b) => {
-    switch (sortBy) {
-      case 'date':
-        return new Date(a.start_date).getTime() - new Date(b.start_date).getTime();
-      case 'popularity':
-        return (b.attendees_count || 0) - (a.attendees_count || 0);
-      case 'name':
-        return a.title.localeCompare(b.title);
-      default:
-        return 0;
-    }
-  });
-
-  const upcomingEvents = filteredEvents.filter(event => !event.isRegistered);
-  const registeredEvents = filteredEvents.filter(event => event.isRegistered);
-
   const getDisplayEvents = () => {
-    if (activeTab === 'registered') return registeredEvents;
-    if (activeTab === 'my-events') return filteredEvents.filter(e => e.organizer_id === user?.id);
-    return filteredEvents;
+    let displayEvents: EventWithRegistration[] = [];
+    
+    // Get base events based on active tab
+    if (activeTab === 'registered') {
+      displayEvents = events.filter(event => event.isRegistered);
+    } else if (activeTab === 'my-events') {
+      displayEvents = events.filter(e => e.organizer_id === user?.id);
+    } else {
+      displayEvents = events;
+    }
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      displayEvents = displayEvents.filter(event =>
+        event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        event.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        event.organizer?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        event.location?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Apply status filter
+    if (statusFilter !== 'all') {
+      displayEvents = displayEvents.filter(event => event.status === statusFilter);
+    }
+
+    // Apply user type filter (based on organizer)
+    if (userTypeFilter !== 'all') {
+      displayEvents = displayEvents.filter(event => 
+        event.organizer?.user_type === userTypeFilter
+      );
+    }
+
+    // Apply domain filter (based on event description or title)
+    if (domainFilter !== 'all') {
+      displayEvents = displayEvents.filter(event => {
+        const searchText = `${event.title} ${event.description || ''}`.toLowerCase();
+        return searchText.includes(domainFilter.toLowerCase());
+      });
+    }
+
+    // Apply category filter (event type)
+    if (categoryFilter !== 'all') {
+      displayEvents = displayEvents.filter(event => event.event_type === categoryFilter);
+    }
+
+    // Apply sorting
+    displayEvents.sort((a, b) => {
+      switch (sortBy) {
+        case 'date':
+          return new Date(a.start_date).getTime() - new Date(b.start_date).getTime();
+        case 'popularity':
+          return (b.attendees_count || 0) - (a.attendees_count || 0);
+        case 'name':
+          return a.title.localeCompare(b.title);
+        default:
+          return 0;
+      }
+    });
+
+    return displayEvents;
   };
+
+  // Get filtered and sorted events using the display function
+  const displayEvents = getDisplayEvents();
+  const upcomingEvents = displayEvents.filter(event => !event.isRegistered);
+  const registeredEvents = displayEvents.filter(event => event.isRegistered);
 
   if (!user) {
     return (
@@ -372,469 +408,446 @@ export default function EventsPage() {
   }
 
   return (
-    <div className={`min-h-screen ${BACKGROUNDS.page.tertiary}`}>
+    <div className={`min-h-screen ${BACKGROUNDS.page.primary}`}>
       {/* Header */}
       <Header />
       
-      {/* Top Navigation Bar */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Left Side - Navigation */}
-            <div className="flex items-center space-x-6">
-              <button
-                onClick={() => setActiveTab('upcoming')}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  activeTab === 'upcoming'
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                }`}
-              >
-                Events
-              </button>
-              
-              <div className="flex items-center space-x-4">
-                <div className="relative">
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="date">Sort By Date</option>
-                    <option value="popularity">Sort By Popularity</option>
-                    <option value="name">Sort By Name</option>
-                  </select>
-                  <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="flex gap-6">
+          {/* Left Sidebar - Floating Island */}
+          <div className="w-80 flex-shrink-0">
+            <div className={`${COMPONENTS.card.base} sticky top-24`}>
+              <div className="p-6">
+                <h3 className={`${TYPOGRAPHY.heading.h3} mb-4`}>Manage my events</h3>
+                
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between py-2">
+                    <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary}`}>My Events</span>
+                    <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                      {events.filter(e => e.organizer_id === user?.id).length}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between py-2">
+                    <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary}`}>Registered Events</span>
+                    <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                      {events.filter(e => e.isRegistered).length}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between py-2">
+                    <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary}`}>Upcoming Events</span>
+                    <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                      {events.filter(e => e.status === 'upcoming' || e.status === 'ongoing').length}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between py-2">
+                    <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary}`}>Past Events</span>
+                    <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                      {events.filter(e => e.status === 'completed' || e.status === 'cancelled').length}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between py-2">
+                    <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary}`}>Favorites</span>
+                    <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                      {likedEvents.size}
+                    </span>
+                  </div>
                 </div>
-
-                <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="flex items-center px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  <FunnelIcon className="w-4 h-4 mr-2 text-gray-600" />
-                  <span className="text-sm text-gray-700">Filters</span>
-                  <span className="ml-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full">6</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Right Side - Filters */}
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="all">Status</option>
-                  <option value="upcoming">Upcoming</option>
-                  <option value="ongoing">Ongoing</option>
-                  <option value="ended">Ended</option>
-                </select>
-                <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full">1</span>
-              </div>
-
-              <div className="relative">
-                <select
-                  value={userTypeFilter}
-                  onChange={(e) => setUserTypeFilter(e.target.value)}
-                  className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="all">User Type</option>
-                  <option value="individual">Individual</option>
-                  <option value="institution">Institution</option>
-                </select>
-                <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full">1</span>
-              </div>
-
-              <div className="relative">
-            <select
-                  value={domainFilter}
-                  onChange={(e) => setDomainFilter(e.target.value)}
-                  className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="all">Domain</option>
-                  <option value="healthcare">Healthcare</option>
-                  <option value="technology">Technology</option>
-                  <option value="business">Business</option>
-            </select>
-                <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full">1</span>
-              </div>
-            
-              <div className="relative">
-            <select
-                  value={categoryFilter}
-                  onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="all">Category</option>
-                  {eventTypes.map(type => (
-                    <option key={type} value={type}>
-                      {type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ')}
-                    </option>
-                  ))}
-            </select>
-                <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-              </div>
-
+                
+                <div className="mt-6 pt-6 border-t border-gray-200">
             <Link
               href="/events/create"
-                className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                    className={`w-full flex items-center justify-center px-4 py-2 ${COMPONENTS.button.primary} rounded-lg hover:bg-blue-700 transition-colors font-medium`}
             >
               <PlusIcon className="w-4 h-4 mr-2" />
               Create Event
             </Link>
           </div>
-          </div>
         </div>
+            </div>
+          </div>
+
+          {/* Main Content Area */}
+          <div className="flex-1 min-w-0">
+            {/* Top Controls */}
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className={`appearance-none ${COMPONENTS.input.base} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                  >
+                    <option value="date">Sort By Date</option>
+                    <option value="popularity">Sort By Popularity</option>
+                    <option value="name">Sort By Name</option>
+                  </select>
+                  <ChevronDownIcon className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 ${TEXT_COLORS.secondary} pointer-events-none`} />
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Event List */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 h-[calc(100vh-8rem)] overflow-hidden">
-              {/* Search Bar */}
-              <div className="p-4 border-b border-gray-200">
+          <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={`flex items-center px-3 py-2 border ${BORDER_COLORS.primary} rounded-lg hover:bg-gray-50 transition-colors`}
+                >
+                  <FunnelIcon className={`w-4 h-4 mr-2 ${TEXT_COLORS.secondary}`} />
+                  <span className={`text-sm ${TEXT_COLORS.primary}`}>Filters</span>
+                </button>
+            </div>
+
+              <div className="flex items-center space-x-4">
                 <div className="relative">
-                  <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className={`appearance-none ${COMPONENTS.input.base} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                  >
+                    <option value="all">Status</option>
+                    <option value="upcoming">Upcoming</option>
+                    <option value="ongoing">Ongoing</option>
+                    <option value="ended">Ended</option>
+                  </select>
+                  <ChevronDownIcon className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 ${TEXT_COLORS.secondary} pointer-events-none`} />
+            </div>
+
+                <div className="relative">
+                  <select
+                    value={categoryFilter}
+                    onChange={(e) => setCategoryFilter(e.target.value)}
+                    className={`appearance-none ${COMPONENTS.input.base} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                  >
+                    <option value="all">Category</option>
+                    {eventTypes.map(type => (
+                      <option key={type} value={type}>
+                        {type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ')}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDownIcon className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 ${TEXT_COLORS.secondary} pointer-events-none`} />
+                </div>
+              </div>
+            </div>
+
+            {/* Search Bar */}
+            <div className={`${COMPONENTS.card.base} mb-6`}>
+              <div className="p-4">
+                <div className="relative">
+                  <MagnifyingGlassIcon className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${TEXT_COLORS.secondary}`} />
                   <input
                     type="text"
                     placeholder="Search events..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className={`w-full pl-10 pr-4 py-2 ${COMPONENTS.input.base} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                   />
+                </div>
         </div>
       </div>
 
-              {/* Event List */}
-              <div className="overflow-y-auto h-[calc(100%-5rem)]">
-                {loading ? (
-                  <div className="flex items-center justify-center py-12">
-                    <LoadingSpinner size="md" text="Loading events..." />
-                  </div>
-                ) : (
-                  <div className="p-2">
-                    {getDisplayEvents().map((event, index) => (
-                      <motion.div
-                        key={event.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        onClick={() => setSelectedEvent(event)}
-                        className={`p-4 rounded-lg cursor-pointer transition-all duration-200 mb-2 ${
-                          selectedEvent?.id === event.id
-                            ? 'bg-blue-50 border-2 border-blue-200'
-                            : 'hover:bg-gray-50 border-2 border-transparent'
-                        }`}
-                      >
-                        <div className="flex items-start space-x-3">
-                          {/* Event Logo */}
-                          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <span className="text-white font-bold text-lg">
-                              {event.organizer?.full_name?.charAt(0) || 'E'}
-                            </span>
-                          </div>
-
-                          {/* Event Info */}
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-gray-900 text-sm mb-1 line-clamp-2">
-                              {event.title}
-                            </h3>
-                            <p className="text-xs text-gray-600 mb-2 line-clamp-1">
-                              {event.organizer?.full_name || 'Unknown Organizer'}
-                            </p>
-
-                            {/* Stats */}
-                            <div className="flex items-center space-x-4 text-xs text-gray-500 mb-2">
-                              <div className="flex items-center">
-                                <UsersIcon className="w-3 h-3 mr-1" />
-                                <span>{event.attendees_count || 0} Registered</span>
-                              </div>
-                              <div className="flex items-center">
-                                <ClockIcon className="w-3 h-3 mr-1" />
-                                <span>{getDaysLeft(event.start_date)}</span>
-                              </div>
-                            </div>
-
-                            {/* Tags */}
-                            <div className="flex flex-wrap gap-1">
-                              <span className={`px-2 py-1 text-xs font-medium rounded-full ${getEventTypeColor(event.event_type)}`}>
-                                {event.event_type}
-                              </span>
-                              {event.is_virtual && (
-                                <span className="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-700 rounded-full">
-                                  Virtual
-              </span>
-                              )}
-                            </div>
-                          </div>
+      {/* Events Grid */}
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+                <LoadingSpinner size="md" text="Loading events..." />
+        </div>
+      ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {getDisplayEvents().map((event, index) => (
+                  <motion.div
+                    key={event.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className={`${COMPONENTS.card.base} cursor-pointer hover:shadow-lg transition-all duration-200`}
+                    onClick={() => setSelectedEvent(event)}
+                  >
+                <div className="p-6">
+                      <div className="flex items-start space-x-3 mb-4">
+                        <Avatar
+                          src={event.organizer?.avatar_url}
+                          alt={event.organizer?.full_name || 'Event Organizer'}
+                          size="md"
+                          className="flex-shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h3 className={`${TYPOGRAPHY.body.medium} font-semibold mb-1 line-clamp-2`}>
+                            {event.title}
+                          </h3>
+                          <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} mb-2 line-clamp-1`}>
+                            {event.organizer?.full_name || 'Unknown Organizer'}
+                          </p>
                         </div>
-                      </motion.div>
-                    ))}
-
-                    {getDisplayEvents().length === 0 && (
-                      <div className="text-center py-12">
-                        <CalendarIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                        <p className="text-gray-500">No events found</p>
                       </div>
+
+                      {/* Event Info */}
+                      <div className={`space-y-2 mb-4`}>
+                        <div className="flex items-center text-sm text-gray-600">
+                          <CalendarIcon className="w-4 h-4 mr-2" />
+                          <span>{formatDate(event.start_date)} at {formatTime(event.start_date)}</span>
+                        </div>
+                        <div className="flex items-center text-sm text-gray-600">
+                          <MapPinIcon className="w-4 h-4 mr-2" />
+                          <span>{event.is_virtual ? 'Online' : event.location || 'TBA'}</span>
+                        </div>
+                        <div className="flex items-center text-sm text-gray-600">
+                          <UsersIcon className="w-4 h-4 mr-2" />
+                          <span>{event.attendees_count || 0} registered</span>
+                    </div>
+                      </div>
+
+                      {/* Tags */}
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getEventTypeColor(event.event_type)}`}>
+                          {event.event_type}
+                        </span>
+                        {event.is_virtual && (
+                          <span className="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-700 rounded-full">
+                            Virtual
+                          </span>
                     )}
                   </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleLike(event.id);
+                            }}
+                            className={`p-2 transition-colors ${
+                              likedEvents.has(event.id) 
+                                ? 'text-red-500' 
+                                : 'text-gray-400 hover:text-red-500'
+                            }`}
+                          >
+                            {likedEvents.has(event.id) ? (
+                              <HeartSolidIcon className="w-4 h-4" />
+                            ) : (
+                              <HeartIcon className="w-4 h-4" />
+                            )}
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleShare(event);
+                            }}
+                            className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
+                          >
+                            <ShareIcon className="w-4 h-4" />
+                          </button>
+                </div>
+
+                        {user?.id !== event.organizer_id && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              event.isRegistered ? handleUnregister(event.id) : handleRegister(event.id);
+                            }}
+                            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                              event.isRegistered
+                                ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                : 'bg-blue-600 text-white hover:bg-blue-700'
+                            }`}
+                          >
+                            {event.isRegistered ? 'Unregister' : 'Register'}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+
+                {getDisplayEvents().length === 0 && (
+                  <div className="col-span-full text-center py-12">
+                    <CalendarIcon className={`w-12 h-12 ${TEXT_COLORS.secondary} mx-auto mb-4`} />
+                    <p className={`${TEXT_COLORS.secondary}`}>No events found</p>
+                    </div>
+                )}
+                      </div>
+                    )}
+          </div>
+        </div>
+                    </div>
+
+      {/* Event Details Modal */}
+      {selectedEvent && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center space-x-4">
+                  <Avatar
+                    src={selectedEvent.organizer?.avatar_url}
+                    alt={selectedEvent.organizer?.full_name || 'Event Organizer'}
+                    size="lg"
+                  />
+                  <div>
+                    <h1 className={`${TYPOGRAPHY.heading.h2} mb-1`}>
+                      {selectedEvent.title}
+                    </h1>
+                    <p className={`${TEXT_COLORS.secondary}`}>
+                      {selectedEvent.organizer?.full_name || 'Unknown Organizer'}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setSelectedEvent(null)}
+                  className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <XCircleIcon className="w-6 h-6" />
+                </button>
+              </div>
+
+              {/* Event Info */}
+              <div className={`flex items-center space-x-6 ${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} mb-4`}>
+                <div className="flex items-center">
+                  <MapPinIcon className="w-4 h-4 mr-1" />
+                  <span>{selectedEvent.is_virtual ? 'Online' : selectedEvent.location || 'TBA'}</span>
+                </div>
+                <div className="flex items-center">
+                  <CalendarIcon className="w-4 h-4 mr-1" />
+                  <span>{formatDate(selectedEvent.start_date)} at {formatTime(selectedEvent.start_date)}</span>
+                </div>
+                <div className="flex items-center">
+                  <UsersIcon className="w-4 h-4 mr-1" />
+                  <span>{selectedEvent.attendees_count || 0} registered</span>
+                </div>
+              </div>
+
+              {/* Tags */}
+              <div className="flex flex-wrap gap-2 mb-6">
+                <span className={`px-3 py-1 text-sm font-medium rounded-full ${getEventTypeColor(selectedEvent.event_type)}`}>
+                  {selectedEvent.event_type}
+                </span>
+                {selectedEvent.is_virtual && (
+                  <span className="px-3 py-1 text-sm font-medium bg-purple-100 text-purple-700 rounded-full">
+                    Virtual
+                  </span>
+                )}
+                <span className={`px-3 py-1 text-sm font-medium ${COMPONENTS.badge.secondary} rounded-full`}>
+                  Healthcare
+              </span>
+            </div>
+
+              {/* Event Description */}
+              <div className="mb-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">About This Event</h2>
+                <p className="text-gray-600 leading-relaxed">
+                  {selectedEvent.description}
+                </p>
+              </div>
+
+              {/* Event Details */}
+              <div className="mb-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">Event Details</h2>
+                <div className="space-y-4">
+                  <div className="flex items-start space-x-3">
+                    <CalendarIcon className="w-5 h-5 text-blue-600 mt-1" />
+                    <div>
+                      <h3 className="font-semibold text-gray-900">Date & Time</h3>
+                      <p className="text-gray-600">
+                        {formatDate(selectedEvent.start_date)} at {formatTime(selectedEvent.start_date)}
+                      </p>
+                      <p className="text-gray-500 text-sm">
+                        Ends at {formatTime(selectedEvent.end_date)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {selectedEvent.location && (
+                    <div className="flex items-start space-x-3">
+                      <MapPinIcon className="w-5 h-5 text-blue-600 mt-1" />
+                      <div>
+                        <h3 className="font-semibold text-gray-900">Location</h3>
+                        <p className="text-gray-600">{selectedEvent.location}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-start space-x-3">
+                    <UsersIcon className="w-5 h-5 text-blue-600 mt-1" />
+                    <div>
+                      <h3 className="font-semibold text-gray-900">Capacity</h3>
+                      <p className="text-gray-600">
+                        {selectedEvent.attendees_count || 0} of {selectedEvent.max_attendees || '∞'} registered
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Organizer */}
+              <div className="mb-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">Organizer</h2>
+                <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                  <Avatar
+                    src={selectedEvent.organizer?.avatar_url}
+                    alt={selectedEvent.organizer?.full_name || 'Organizer'}
+                    size="lg"
+                  />
+                  <div>
+                    <h3 className="font-semibold text-gray-900">
+                      {selectedEvent.organizer?.full_name || 'Unknown Organizer'}
+                    </h3>
+                    <p className="text-gray-600">
+                      {selectedEvent.organizer?.headline || 'Healthcare Professional'}
+                    </p>
+                    <Link
+                      href={`/profile/${selectedEvent.organizer?.id}`}
+                      className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+                    >
+                      View Profile →
+                    </Link>
+                    </div>
+                  </div>
+                </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-between pt-6 border-t border-gray-200">
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => handleLike(selectedEvent.id)}
+                    className={`p-2 transition-colors ${
+                      likedEvents.has(selectedEvent.id) 
+                        ? 'text-red-500' 
+                        : 'text-gray-400 hover:text-red-500'
+                    }`}
+                  >
+                    {likedEvents.has(selectedEvent.id) ? (
+                      <HeartSolidIcon className="w-5 h-5" />
+                    ) : (
+                      <HeartIcon className="w-5 h-5" />
+                    )}
+                        </button>
+                        <button
+                    onClick={() => handleShare(selectedEvent)}
+                    className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
+                  >
+                    <ShareIcon className="w-5 h-5" />
+                        </button>
+                </div>
+                
+                {user?.id !== selectedEvent.organizer_id && (
+                  <button
+                    onClick={() => selectedEvent.isRegistered ? handleUnregister(selectedEvent.id) : handleRegister(selectedEvent.id)}
+                    className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+                      selectedEvent.isRegistered
+                        ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                    }`}
+                  >
+                    {selectedEvent.isRegistered ? 'Unregister' : 'Register'}
+                  </button>
                 )}
               </div>
-            </div>
-          </div>
-
-          {/* Right Column - Event Details */}
-          <div className="lg:col-span-2">
-            {selectedEvent ? (
-              <motion.div
-                key={selectedEvent.id}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="bg-white rounded-xl shadow-sm border border-gray-200 h-[calc(100vh-8rem)] overflow-y-auto"
-              >
-                {/* Event Header */}
-                <div className="p-6 border-b border-gray-200">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                        <span className="text-white font-bold text-2xl">
-                          {selectedEvent.organizer?.full_name?.charAt(0) || 'E'}
-                        </span>
-                      </div>
-                      <div>
-                        <h1 className="text-2xl font-bold text-gray-900 mb-1">
-                          {selectedEvent.title}
-                        </h1>
-                        <p className="text-gray-600">
-                          {selectedEvent.organizer?.full_name || 'Unknown Organizer'}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-          <button
-                        onClick={() => handleLike(selectedEvent.id)}
-                        className={`p-2 transition-colors ${
-                          likedEvents.has(selectedEvent.id) 
-                            ? 'text-red-500' 
-                            : 'text-gray-400 hover:text-red-500'
-                        }`}
-                      >
-                        {likedEvents.has(selectedEvent.id) ? (
-                          <HeartSolidIcon className="w-5 h-5" />
-                        ) : (
-                          <HeartIcon className="w-5 h-5" />
-                        )}
-          </button>
-          <button
-                        onClick={() => handleShare(selectedEvent)}
-                        className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
-                      >
-                        <ShareIcon className="w-5 h-5" />
-          </button>
         </div>
-      </div>
-
-                  {/* Event Info */}
-                  <div className="flex items-center space-x-6 text-sm text-gray-600 mb-4">
-                    <div className="flex items-center">
-                      <MapPinIcon className="w-4 h-4 mr-1" />
-                      <span>{selectedEvent.is_virtual ? 'Online' : selectedEvent.location || 'TBA'}</span>
           </div>
-                    <div className="flex items-center">
-                      <CalendarIcon className="w-4 h-4 mr-1" />
-                      <span>Updated On: {formatDate(selectedEvent.created_at)}</span>
-        </div>
-                    <div className="flex items-center">
-                      <GlobeAltIcon className="w-4 h-4 mr-1" />
-                      <span>Official website</span>
-                    </div>
-                  </div>
-
-                  {/* Tags */}
-                  <div className="flex flex-wrap gap-2">
-                    <span className={`px-3 py-1 text-sm font-medium rounded-full ${getEventTypeColor(selectedEvent.event_type)}`}>
-                      {selectedEvent.event_type}
-                    </span>
-                    {selectedEvent.is_virtual && (
-                      <span className="px-3 py-1 text-sm font-medium bg-purple-100 text-purple-700 rounded-full">
-                        Virtual
-                      </span>
-                    )}
-                    <span className="px-3 py-1 text-sm font-medium bg-gray-100 text-gray-700 rounded-full">
-                      Healthcare
-                    </span>
-                  </div>
-                </div>
-
-                {/* Action Section */}
-                <div className="p-6 border-b border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="text-2xl font-bold text-gray-900">
-                        {selectedEvent.registration_fee ? `$${selectedEvent.registration_fee}` : 'Free'}
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <button 
-                          onClick={() => handleLike(selectedEvent.id)}
-                          className={`p-2 transition-colors ${
-                            likedEvents.has(selectedEvent.id) 
-                              ? 'text-red-500' 
-                              : 'text-gray-400 hover:text-red-500'
-                          }`}
-                        >
-                          {likedEvents.has(selectedEvent.id) ? (
-                            <HeartSolidIcon className="w-5 h-5" />
-                          ) : (
-                            <HeartIcon className="w-5 h-5" />
-                          )}
-                        </button>
-                        <button className="p-2 text-gray-400 hover:text-blue-500 transition-colors">
-                          <CalendarIcon className="w-5 h-5" />
-                        </button>
-                        <button 
-                          onClick={() => handleShare(selectedEvent)}
-                          className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
-                        >
-                          <ShareIcon className="w-5 h-5" />
-                        </button>
-                      </div>
-                    </div>
-                    
-                    {user?.id !== selectedEvent.organizer_id && (
-                      <button
-                        onClick={() => selectedEvent.isRegistered ? handleUnregister(selectedEvent.id) : handleRegister(selectedEvent.id)}
-                        className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
-                          selectedEvent.isRegistered
-                            ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            : 'bg-blue-600 text-white hover:bg-blue-700'
-                        }`}
-                      >
-                        {selectedEvent.isRegistered ? 'Unregister' : 'Register'}
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Key Metrics */}
-                <div className="p-6 border-b border-gray-200">
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="text-center">
-                      <div className="flex items-center justify-center mb-2">
-                        <ClockIcon className="w-5 h-5 text-blue-600 mr-2" />
-                        <span className="text-sm font-medium text-gray-700">Registration Deadline</span>
-                      </div>
-                      <p className="text-lg font-bold text-gray-900">{getDaysLeft(selectedEvent.start_date)}</p>
-                    </div>
-                    <div className="text-center">
-                      <div className="flex items-center justify-center mb-2">
-                        <EyeIcon className="w-5 h-5 text-blue-600 mr-2" />
-                        <span className="text-sm font-medium text-gray-700">Impressions</span>
-                      </div>
-                      <p className="text-lg font-bold text-gray-900">3,529</p>
-                    </div>
-                    <div className="text-center">
-                      <div className="flex items-center justify-center mb-2">
-                        <UsersIcon className="w-5 h-5 text-blue-600 mr-2" />
-                        <span className="text-sm font-medium text-gray-700">Team Size</span>
-                      </div>
-                      <p className="text-lg font-bold text-gray-900">1-4 Members</p>
-                    </div>
-                  </div>
-                  </div>
-
-                {/* Event Description */}
-                <div className="p-6 border-b border-gray-200">
-                  <h2 className="text-xl font-bold text-gray-900 mb-4">About This Event</h2>
-                  <p className="text-gray-600 leading-relaxed">
-                    {selectedEvent.description}
-                  </p>
-                </div>
-
-                {/* Event Details */}
-                <div className="p-6 border-b border-gray-200">
-                  <h2 className="text-xl font-bold text-gray-900 mb-4">Event Details</h2>
-                  <div className="space-y-4">
-                    <div className="flex items-start space-x-3">
-                      <CalendarIcon className="w-5 h-5 text-blue-600 mt-1" />
-                      <div>
-                        <h3 className="font-semibold text-gray-900">Date & Time</h3>
-                        <p className="text-gray-600">
-                          {formatDate(selectedEvent.start_date)} at {formatTime(selectedEvent.start_date)}
-                        </p>
-                        <p className="text-gray-500 text-sm">
-                          Ends at {formatTime(selectedEvent.end_date)}
-                        </p>
-                      </div>
-                    </div>
-
-                    {selectedEvent.location && (
-                      <div className="flex items-start space-x-3">
-                        <MapPinIcon className="w-5 h-5 text-blue-600 mt-1" />
-                        <div>
-                          <h3 className="font-semibold text-gray-900">Location</h3>
-                          <p className="text-gray-600">{selectedEvent.location}</p>
-                    </div>
-                      </div>
-                    )}
-
-                    <div className="flex items-start space-x-3">
-                      <UsersIcon className="w-5 h-5 text-blue-600 mt-1" />
-                      <div>
-                        <h3 className="font-semibold text-gray-900">Capacity</h3>
-                        <p className="text-gray-600">
-                          {selectedEvent.attendees_count || 0} of {selectedEvent.max_attendees || '∞'} registered
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Organizer */}
-                <div className="p-6">
-                  <h2 className="text-xl font-bold text-gray-900 mb-4">Organizer</h2>
-                  <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-                    <Avatar
-                      src={selectedEvent.organizer?.avatar_url}
-                      alt={selectedEvent.organizer?.full_name || 'Organizer'}
-                      size="lg"
-                    />
-                    <div>
-                      <h3 className="font-semibold text-gray-900">
-                        {selectedEvent.organizer?.full_name || 'Unknown Organizer'}
-                      </h3>
-                      <p className="text-gray-600">
-                        {selectedEvent.organizer?.headline || 'Healthcare Professional'}
-                      </p>
-                      <Link
-                        href={`/profile/${selectedEvent.organizer?.id}`}
-                        className="text-blue-600 hover:text-blue-700 font-medium text-sm"
-                      >
-                        View Profile →
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            ) : (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 h-[calc(100vh-8rem)] flex items-center justify-center">
-                <div className="text-center">
-                  <CalendarIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Select an Event</h3>
-                  <p className="text-gray-600">Choose an event from the list to view details</p>
-                </div>
         </div>
       )}
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

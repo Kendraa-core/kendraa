@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import Avatar from '@/components/common/Avatar';
 import ClickableProfileName from '@/components/common/ClickableProfileName';
@@ -13,6 +14,12 @@ import {
   BookmarkIcon,
   EllipsisHorizontalIcon,
   TrashIcon,
+  ChartBarIcon,
+  FlagIcon,
+  EyeSlashIcon,
+  UserMinusIcon,
+  ExclamationTriangleIcon,
+  ShareIcon,
 } from '@heroicons/react/24/outline';
 import {
   BookmarkIcon as BookmarkSolidIcon,
@@ -38,6 +45,13 @@ import {
   validateStringLength
 } from '@/utils/errorHandler';
 import { cn } from '@/lib/utils';
+import { 
+  trackPostImpression, 
+  trackPostView, 
+  trackPostShare,
+  trackProfileView 
+} from '@/lib/queries';
+import { getDeviceType } from '@/lib/analytics';
 
 interface PostCardProps {
   post: Post & {
@@ -48,6 +62,7 @@ interface PostCardProps {
 
 export default function PostCard({ post, onInteraction }: PostCardProps) {
   const { user } = useAuth();
+  const router = useRouter();
   
   // State management
   const [isBookmarked, setIsBookmarked] = useState(false);
@@ -68,16 +83,25 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
 
   // Initialize post state on mount
   useEffect(() => {
-    if (!post?.id || !user?.id) return;
+    if (!post?.id) return;
 
     const initializePostState = async () => {
       try {
-        const [saved, reactionType] = await Promise.all([
-          isPostSaved(post.id, user.id),
-          isPostLiked(user.id, post.id)
-        ]);
-        setIsBookmarked(saved);
-        setUserReaction(reactionType);
+        if (user?.id) {
+          const [saved, reactionType] = await Promise.all([
+            isPostSaved(post.id, user.id),
+            isPostLiked(user.id, post.id)
+          ]);
+          setIsBookmarked(saved);
+          setUserReaction(reactionType);
+        }
+
+        // Track post impression
+        const deviceType = getDeviceType();
+        const source = window.location.pathname.includes('/profile/') ? 'profile' : 
+                      window.location.pathname.includes('/search') ? 'search' : 'feed';
+        
+        await trackPostImpression(post.id, user?.id || null, source, deviceType);
       } catch (error) {
         // Silently fail, UI will just show default state
       }
@@ -266,6 +290,54 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
     return 'Healthcare Professional';
   };
 
+  const handlePostClick = async () => {
+    // Track post view
+    if (user?.id) {
+      const deviceType = getDeviceType();
+      await trackPostView(post.id, user.id, 5, deviceType); // Assume 5 seconds view duration
+    }
+    
+    router.push(`/post/${post.id}`);
+  };
+
+  const handleViewAnalytics = () => {
+    router.push(`/post/${post.id}/analytics`);
+  };
+
+  const handleReportPost = () => {
+    // TODO: Implement report functionality
+    toast.success('Post reported successfully');
+    setShowDropdown(false);
+  };
+
+  const handleHidePost = () => {
+    // TODO: Implement hide post functionality
+    toast.success('Post hidden from your feed');
+    setShowDropdown(false);
+  };
+
+  const handleUnfollowUser = () => {
+    // TODO: Implement unfollow functionality
+    toast.success('Unfollowed user');
+    setShowDropdown(false);
+  };
+
+  const handleBlockUser = () => {
+    // TODO: Implement block functionality
+    toast.success('User blocked');
+    setShowDropdown(false);
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}/post/${post.id}`);
+      toast.success('Link copied to clipboard');
+    } catch (error) {
+      toast.error('Failed to copy link');
+    }
+    setShowDropdown(false);
+  };
+
   const handleDeletePost = async () => {
     if (!user?.id) return;
 
@@ -328,16 +400,72 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
           </button>
           
           {showDropdown && (
-            <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-10 min-w-[120px]">
-              {isOwnPost && (
-                <button
-                  onClick={handleDeletePost}
-                  disabled={isDeleting}
-                  className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 disabled:opacity-50"
-                >
-                  <TrashIcon className="w-4 h-4" />
-                  {isDeleting ? 'Deleting...' : 'Delete'}
-                </button>
+            <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-10 min-w-[160px]">
+              {isOwnPost ? (
+                <>
+                  <button
+                    onClick={handleViewAnalytics}
+                    className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  >
+                    <ChartBarIcon className="w-4 h-4" />
+                    View Analytics
+                  </button>
+                  <button
+                    onClick={handleCopyLink}
+                    className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  >
+                    <ShareIcon className="w-4 h-4" />
+                    Copy Link
+                  </button>
+                  <div className="border-t border-gray-100 my-1"></div>
+                  <button
+                    onClick={handleDeletePost}
+                    disabled={isDeleting}
+                    className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 disabled:opacity-50"
+                  >
+                    <TrashIcon className="w-4 h-4" />
+                    {isDeleting ? 'Deleting...' : 'Delete Post'}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={handleCopyLink}
+                    className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  >
+                    <ShareIcon className="w-4 h-4" />
+                    Copy Link
+                  </button>
+                  <button
+                    onClick={handleHidePost}
+                    className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  >
+                    <EyeSlashIcon className="w-4 h-4" />
+                    Hide Post
+                  </button>
+                  <button
+                    onClick={handleUnfollowUser}
+                    className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  >
+                    <UserMinusIcon className="w-4 h-4" />
+                    Unfollow
+                  </button>
+                  <div className="border-t border-gray-100 my-1"></div>
+                  <button
+                    onClick={handleReportPost}
+                    className="w-full px-3 py-2 text-left text-sm text-orange-600 hover:bg-orange-50 flex items-center gap-2"
+                  >
+                    <ExclamationTriangleIcon className="w-4 h-4" />
+                    Report Post
+                  </button>
+                  <button
+                    onClick={handleBlockUser}
+                    className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                  >
+                    <FlagIcon className="w-4 h-4" />
+                    Block User
+                  </button>
+                </>
               )}
             </div>
           )}
@@ -345,7 +473,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
       </div>
 
       {/* Post Content */}
-      <div className="mb-4">
+      <div className="mb-4 cursor-pointer" onClick={handlePostClick}>
         <p className="text-gray-900 whitespace-pre-wrap break-words leading-relaxed">{post.content}</p>
         
         {post.image_url && (
@@ -387,7 +515,15 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
           <ChatBubbleOvalLeftIcon className="w-5 h-5" />
           <span className="text-sm font-medium">Comment</span>
         </button>
-        <ShareButton title={`Post by ${getAuthorName()}`} url={`${window.location.origin}/post/${post.id}`} />
+        <ShareButton 
+          title={`Post by ${getAuthorName()}`} 
+          url={`${window.location.origin}/post/${post.id}`}
+          onShare={async (shareType, platform) => {
+            if (user?.id) {
+              await trackPostShare(post.id, user.id, shareType, platform);
+            }
+          }}
+        />
         <button
           onClick={handleBookmark}
           className={cn("flex items-center space-x-2 px-3 py-2 rounded-lg", isBookmarked ? "text-blue-600 bg-blue-50" : "text-gray-500 hover:bg-gray-100")}

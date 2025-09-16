@@ -76,6 +76,26 @@ export interface Database {
         Insert: Omit<Notification, 'id' | 'created_at'>;
         Update: Partial<Omit<Notification, 'id' | 'created_at'>>;
       };
+      post_analytics: {
+        Row: PostAnalytics;
+        Insert: Omit<PostAnalytics, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<PostAnalytics, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      post_impressions: {
+        Row: PostImpression;
+        Insert: Omit<PostImpression, 'id' | 'created_at'>;
+        Update: Partial<Omit<PostImpression, 'id' | 'created_at'>>;
+      };
+      post_views: {
+        Row: PostView;
+        Insert: Omit<PostView, 'id' | 'created_at'>;
+        Update: Partial<Omit<PostView, 'id' | 'created_at'>>;
+      };
+      post_shares: {
+        Row: PostShare;
+        Insert: Omit<PostShare, 'id' | 'created_at'>;
+        Update: Partial<Omit<PostShare, 'id' | 'created_at'>>;
+      };
 
     };
   };
@@ -484,6 +504,52 @@ export interface Notification {
   read: boolean;
   data: Record<string, unknown> | null;
   action_url: string | null;
+}
+
+export interface PostAnalytics {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  post_id: string;
+  impressions: number;
+  unique_impressions: number;
+  profile_views: number;
+  followers_gained: number;
+  video_views: number;
+  total_watch_time: number;
+  average_watch_time: number;
+  shares_count: number;
+  saves_count: number;
+}
+
+export interface PostImpression {
+  id: string;
+  created_at: string;
+  post_id: string;
+  user_id: string | null; // null for anonymous users
+  source: 'feed' | 'profile' | 'search' | 'direct' | 'share';
+  device_type: 'desktop' | 'mobile' | 'tablet';
+  location: string | null;
+}
+
+export interface PostView {
+  id: string;
+  created_at: string;
+  post_id: string;
+  user_id: string | null; // null for anonymous users
+  view_duration: number; // in seconds
+  completion_rate: number; // percentage
+  device_type: 'desktop' | 'mobile' | 'tablet';
+}
+
+export interface PostShare {
+  id: string;
+  created_at: string;
+  post_id: string;
+  user_id: string;
+  share_type: 'native' | 'copy_link' | 'external';
+  platform: string | null; // for external shares
+  recipient_count: number | null; // for native shares
 }
 
 // Helper types

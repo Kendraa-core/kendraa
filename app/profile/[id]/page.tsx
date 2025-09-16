@@ -49,7 +49,9 @@ import {
   BellIcon,
   XCircleIcon,
   ClockIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  EyeIcon,
+  ArrowRightIcon
 } from '@heroicons/react/24/outline';
 import { CheckBadgeIcon, BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
@@ -74,6 +76,7 @@ import {
   updateExperience,
   createEducation,
   updateEducation,
+  getSuggestedConnectionsWithMutualCounts,
   type Profile,
   type Experience,
   type Education,
@@ -784,6 +787,110 @@ const ActivityCard = React.memo(function ActivityCard({ posts, isOwnProfile, con
   );
 });
 
+// Profile Viewers Component
+const ProfileViewers = React.memo(function ProfileViewers({ viewers }: { viewers: Profile[] }) {
+  if (viewers.length === 0) {
+    return (
+      <div className="text-center py-4">
+        <EyeIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+        <p className="text-sm text-gray-500">No recent profile views</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {viewers.slice(0, 5).map((viewer) => (
+        <div key={viewer.id} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+          <Avatar
+            src={viewer.avatar_url}
+            alt={viewer.full_name || 'Profile Viewer'}
+            size="sm"
+            className="flex-shrink-0"
+          />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-gray-900 truncate">
+              {viewer.full_name}
+            </p>
+            <p className="text-xs text-gray-500 truncate">
+              {viewer.headline || 'Healthcare Professional'}
+            </p>
+          </div>
+        </div>
+      ))}
+      {viewers.length > 5 && (
+        <Link
+          href="/network"
+          className="block text-center text-sm text-[#007fff] hover:text-blue-600 font-medium py-2"
+        >
+          View all {viewers.length} viewers
+        </Link>
+      )}
+    </div>
+  );
+});
+
+// People You May Know Component
+const PeopleYouMayKnow = React.memo(function PeopleYouMayKnow({ 
+  suggestions, 
+  onConnect 
+}: { 
+  suggestions: Array<Profile & { mutual_connections: number }>;
+  onConnect: (userId: string) => void;
+}) {
+  if (suggestions.length === 0) {
+    return (
+      <div className="text-center py-4">
+        <UserGroupIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+        <p className="text-sm text-gray-500">No suggestions available</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {suggestions.slice(0, 5).map((person) => (
+        <div key={person.id} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+          <Avatar
+            src={person.avatar_url}
+            alt={person.full_name || 'Suggested Connection'}
+            size="sm"
+            className="flex-shrink-0"
+          />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-gray-900 truncate">
+              {person.full_name}
+            </p>
+            <p className="text-xs text-gray-500 truncate">
+              {person.headline || 'Healthcare Professional'}
+            </p>
+            {person.mutual_connections > 0 && (
+              <p className="text-xs text-[#007fff]">
+                {person.mutual_connections} mutual connection{person.mutual_connections !== 1 ? 's' : ''}
+              </p>
+            )}
+          </div>
+          <button
+            onClick={() => onConnect(person.id)}
+            className="flex-shrink-0 p-1.5 text-[#007fff] hover:bg-blue-50 rounded-full transition-colors"
+            title="Connect"
+          >
+            <UserPlusIcon className="w-4 h-4" />
+          </button>
+        </div>
+      ))}
+      {suggestions.length > 5 && (
+        <Link
+          href="/network"
+          className="block text-center text-sm text-[#007fff] hover:text-blue-600 font-medium py-2"
+        >
+          View all suggestions
+        </Link>
+      )}
+    </div>
+  );
+});
+
 // SidebarCard Component
 const SidebarCard = React.memo(function SidebarCard({ profile, isOwnProfile }: { 
   profile: Profile; 
@@ -820,6 +927,10 @@ export default function ProfilePage() {
   const [connectionCount, setConnectionCount] = useState(0);
   const [showImageEditor, setShowImageEditor] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
+  const [profileViewers, setProfileViewers] = useState<Profile[]>([]);
+  const [suggestedConnections, setSuggestedConnections] = useState<Array<Profile & { mutual_connections: number }>>([]);
+  const [canSendRequests, setCanSendRequests] = useState(true);
+  const [actionType, setActionType] = useState<'connect' | 'follow' | 'none'>('none');
 
   // Inline editing states
   const [editingField, setEditingField] = useState<string | null>(null);
@@ -873,27 +984,45 @@ export default function ProfilePage() {
       const countData = await getConnectionCount(id as string);
       setConnectionCount(countData);
       
-      // Fetch connection data only if user is logged in
+      // Fetch connection data and determine action type only if user is logged in
       if (!isOwnProfile && user?.id) {
-        const connectionData = await getConnectionStatus(user.id, id as string);
-        setConnectionStatus(connectionData || 'none');
-        
-        // Check follow status based on profile type
-        if (profileData?.profile_type === 'institution') {
+        // Check if current user can send requests
+        setCanSendRequests(true); // Assume user can send requests
+        setActionType('connect'); // Default to connect action
+
+        // Fetch connection/follow status based on action type
+        if (actionType === 'follow') {
           const followData = await getFollowStatus(user.id, id as string);
           setFollowStatus(followData ? 'following' : 'none');
+          setConnectionStatus('none');
+        } else if (actionType === 'connect') {
+          const connectionData = await getConnectionStatus(user.id, id as string);
+          setConnectionStatus(connectionData || 'none');
+          setFollowStatus('none');
         } else {
-          const followData = await isFollowing(user.id, id as string);
-          setFollowStatus(followData ? 'following' : 'none');
+          setConnectionStatus('none');
+          setFollowStatus('none');
         }
       } else {
         setConnectionStatus('none');
         setFollowStatus('none');
+        setCanSendRequests(true);
+        setActionType('none');
       }
       
       // Fetch posts for activity
       const postsData = await getPostsByAuthor(id as string);
       setPosts(postsData);
+      
+      // Fetch sidebar data only for own profile
+      if (isOwnProfile && user?.id) {
+        const [viewersData, suggestionsData] = await Promise.all([
+          Promise.resolve([]), // No profile viewers for now
+          getSuggestedConnectionsWithMutualCounts(user.id, 5)
+        ]);
+        setProfileViewers(viewersData);
+        setSuggestedConnections(suggestionsData);
+      }
       
     } catch (error) {
       console.error('Error fetching profile data:', error);
@@ -915,19 +1044,34 @@ export default function ProfilePage() {
       return;
     }
 
+    if (!canSendRequests) {
+      toast.error('Institutions cannot send connection or follow requests');
+      return;
+    }
+
     try {
-      if (profile.profile_type === 'institution') {
-        await followInstitution(user.id, profile.id);
-        setFollowStatus('following');
-        toast.success('Successfully followed institution');
+      if (actionType === 'follow') {
+        const success = await followInstitution(user.id, profile.id);
+        if (success) {
+          setFollowStatus('following');
+          toast.success('Successfully followed institution');
+        } else {
+          toast.error('Failed to follow institution');
+        }
+      } else if (actionType === 'connect') {
+        const result = await sendConnectionRequest(user.id, profile.id);
+        if (result) {
+          setConnectionStatus('pending');
+          toast.success('Connection request sent');
+        } else {
+          toast.error('Failed to send connection request');
+        }
       } else {
-        await sendConnectionRequest(user.id, profile.id);
-        setConnectionStatus('pending');
-        toast.success('Connection request sent');
+        toast.error('Action not allowed');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error connecting:', error);
-      toast.error('Failed to connect');
+      toast.error(error.message || 'Failed to connect');
     }
   };
 
@@ -948,6 +1092,24 @@ export default function ProfilePage() {
     } catch (error) {
       console.error('Error unfollowing:', error);
       toast.error('Failed to unfollow');
+    }
+  };
+
+  const handleSuggestedConnect = async (userId: string) => {
+    if (!user) {
+      toast.error('Please sign in to connect');
+      return;
+    }
+
+    try {
+      await sendConnectionRequest(user.id, userId);
+      toast.success('Connection request sent');
+      // Refresh suggestions to remove the connected user
+      const updatedSuggestions = await getSuggestedConnectionsWithMutualCounts(user.id, 5);
+      setSuggestedConnections(updatedSuggestions);
+    } catch (error) {
+      console.error('Error sending connection request:', error);
+      toast.error('Failed to send connection request');
     }
   };
 
@@ -1510,7 +1672,14 @@ export default function ProfilePage() {
                       {user ? (
                         // Logged in user actions
                         <>
-                          {profile.profile_type === 'institution' ? (
+                          {!canSendRequests ? (
+                            // Institution users cannot send requests
+                            <div className="inline-flex items-center justify-center px-6 py-3 bg-gray-100 text-gray-600 rounded-lg text-sm font-semibold border border-gray-200 w-full">
+                              <XCircleIcon className="w-4 h-4 mr-2" />
+                              Institutions Cannot Send Requests
+                            </div>
+                          ) : actionType === 'follow' ? (
+                            // Follow logic for institutions
                             followStatus === 'following' ? (
                               <button
                                 onClick={handleUnfollow}
@@ -1528,7 +1697,8 @@ export default function ProfilePage() {
                                 Follow
                               </button>
                             )
-                          ) : (
+                          ) : actionType === 'connect' ? (
+                            // Connection logic for individuals
                             connectionStatus === 'connected' ? (
                               <span className="inline-flex items-center justify-center px-6 py-3 bg-green-100 text-green-700 rounded-lg text-sm font-semibold border border-green-200 w-full">
                                 <CheckIcon className="w-4 h-4 mr-2" />
@@ -1548,6 +1718,12 @@ export default function ProfilePage() {
                                 Connect
                               </button>
                             )
+                          ) : (
+                            // No action available
+                            <div className="inline-flex items-center justify-center px-6 py-3 bg-gray-100 text-gray-600 rounded-lg text-sm font-semibold border border-gray-200 w-full">
+                              <XCircleIcon className="w-4 h-4 mr-2" />
+                              No Action Available
+                            </div>
                           )}
                           <button 
                             onClick={() => router.push(`/messages?user=${profile.id}`)}
@@ -1565,7 +1741,7 @@ export default function ProfilePage() {
                             className="inline-flex items-center justify-center px-6 py-3 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-semibold w-full group hover:scale-[1.02] shadow-lg hover:shadow-xl"
                           >
                             <UserPlusIcon className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
-                            {profile.profile_type === 'institution' ? 'Follow' : 'Connect'}
+                            Sign In to {profile.profile_type === 'institution' || profile.user_type === 'institution' ? 'Follow' : 'Connect'}
                           </Link>
                           <Link
                             href="/signin"
@@ -2002,6 +2178,21 @@ export default function ProfilePage() {
         
         {/* Right Sidebar - Outside main content */}
         <div className="hidden xl:block w-80 space-y-4 sticky top-6 h-fit">
+          {/* Who Viewed Your Profile Section - Only for own profile */}
+          {isOwnProfile && (
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+              <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+                <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                  <EyeIcon className="w-4 h-4 text-[#007fff]" />
+                  Who Viewed Your Profile
+                </h3>
+              </div>
+              <div className="p-3">
+                <ProfileViewers viewers={profileViewers} />
+              </div>
+            </div>
+          )}
+
           {/* People You May Know Section */}
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
             <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
@@ -2011,7 +2202,14 @@ export default function ProfilePage() {
               </h3>
             </div>
             <div className="p-3">
-              <SimilarPeople />
+              {isOwnProfile ? (
+                <PeopleYouMayKnow 
+                  suggestions={suggestedConnections} 
+                  onConnect={handleSuggestedConnect}
+                />
+              ) : (
+                <SimilarPeople />
+              )}
             </div>
           </div>
           

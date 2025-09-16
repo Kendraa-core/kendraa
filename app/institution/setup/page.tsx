@@ -55,9 +55,6 @@ export default function InstitutionSetupPage() {
           <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
             <BuildingOfficeIcon className="h-6 w-6 text-blue-600" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Institution Setup
-          </h1>
           <p className="text-gray-600">
             Complete your institution profile to get started
           </p>

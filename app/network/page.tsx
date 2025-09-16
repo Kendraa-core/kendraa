@@ -47,7 +47,7 @@ import {
   getUserGroupsCount,
   getUserPagesCount,
   getUserNewslettersCount,
-  getUserEventsCount
+  getUserEventsCount,
 } from '@/lib/queries';
 import { Profile, ConnectionWithProfile } from '@/types/database.types';
 import { formatNumber } from '@/lib/utils';
@@ -79,6 +79,8 @@ interface NetworkStats {
 export default function NetworkPage() {
   const { user } = useAuth();
   const [suggestions, setSuggestions] = useState<ProfilePreview[]>([]);
+  const [individuals, setIndividuals] = useState<ProfilePreview[]>([]);
+  const [institutions, setInstitutions] = useState<ProfilePreview[]>([]);
   const [connectionRequests, setConnectionRequests] = useState<ConnectionWithProfile[]>([]);
   const [connections, setConnections] = useState<Profile[]>([]);
   const [networkStats, setNetworkStats] = useState<NetworkStats>({
@@ -90,7 +92,7 @@ export default function NetworkPage() {
   });
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'grow' | 'catch-up'>('grow');
+  const [canSendRequests, setCanSendRequests] = useState(true);
 
   const fetchNetworkData = useCallback(async () => {
     if (!user?.id) return;
@@ -98,7 +100,7 @@ export default function NetworkPage() {
     setLoading(true);
     
     try {
-      const [individualsData, institutionsData, requestsData, connectionsData, statsData] = await Promise.all([
+      const [individualsData, institutionsData, requestsData, connectionsData, statsData, canSend] = await Promise.all([
         getSuggestedConnectionsWithMutualCounts(user.id, 20),
         getSuggestedInstitutions(user.id, 10),
         getConnectionRequests(user.id),
@@ -109,41 +111,48 @@ export default function NetworkPage() {
           getUserEventsCount(user.id),
           getUserPagesCount(user.id),
           getUserNewslettersCount(user.id)
-        ])
+        ]),
+        true // Assume user can send requests
       ]);
 
-      // Combine individuals and institutions, removing duplicates by ID
-      const allSuggestions = [...individualsData, ...institutionsData];
-      const uniqueSuggestions = allSuggestions.filter((profile, index, self) => 
-        index === self.findIndex(p => p.id === profile.id)
-      );
+      setCanSendRequests(canSend);
 
-      // Add connection status and follow status to suggestions
-      const enrichedSuggestions = await Promise.all(
-        uniqueSuggestions.map(async (profile) => {
-          let connectionStatus: 'none' | 'pending' | 'connected' = 'none';
-          let followStatus: 'following' | 'not_following' = 'not_following';
-          
-          if (profile.profile_type === 'institution') {
-            // For institutions, check follow status using new function
-            const isFollowingUser = await getFollowStatus(user.id, profile.id);
-            followStatus = isFollowingUser ? 'following' : 'not_following';
-          } else {
-            // For individuals, check connection status
-            const status = await getConnectionStatus(user.id, profile.id);
-            connectionStatus = (status as 'none' | 'pending' | 'connected') || 'none';
-          }
+      // Separate individuals and institutions
+      const enrichedIndividuals = await Promise.all(
+        individualsData.map(async (profile) => {
+          const status = await getConnectionStatus(user.id, profile.id);
+          const connectionStatus = (status as 'none' | 'pending' | 'connected') || 'none';
           
           return {
             ...profile,
             connection_status: connectionStatus,
-            follow_status: followStatus,
+            follow_status: 'not_following' as const,
             mutual_connections: (profile as any).mutual_connections || 0,
           };
         })
       );
 
-      setSuggestions(enrichedSuggestions);
+      const enrichedInstitutions = await Promise.all(
+        institutionsData.map(async (profile) => {
+          const isFollowingUser = await getFollowStatus(user.id, profile.id);
+          const followStatus: 'following' | 'not_following' = isFollowingUser ? 'following' : 'not_following';
+          
+          return {
+            ...profile,
+            connection_status: 'none' as const,
+            follow_status: followStatus,
+            mutual_connections: 0,
+          };
+        })
+      );
+
+      // Set separate state variables
+      setIndividuals(enrichedIndividuals);
+      setInstitutions(enrichedInstitutions);
+      
+      // Combine all suggestions for backward compatibility
+      const allSuggestions = [...enrichedIndividuals, ...enrichedInstitutions];
+      setSuggestions(allSuggestions);
       setConnectionRequests(requestsData);
       setConnections(connectionsData);
       setNetworkStats({
@@ -166,6 +175,11 @@ export default function NetworkPage() {
 
   const handleConnect = async (profileId: string, profileType: 'individual' | 'institution') => {
     if (!user?.id) return;
+    
+    if (!canSendRequests) {
+      toast.error('Institutions cannot send connection or follow requests');
+      return;
+    }
     
     try {
       if (profileType === 'institution') {
@@ -195,8 +209,8 @@ export default function NetworkPage() {
           toast.error('Failed to send connection request');
         }
       }
-    } catch (error) {
-      toast.error('Failed to complete action');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to complete action');
     }
   };
 
@@ -239,14 +253,20 @@ export default function NetworkPage() {
   };
 
   // Filter suggestions based on search
-  const filteredSuggestions = suggestions.filter(profile =>
+  const filteredIndividuals = individuals.filter(profile =>
     profile.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     profile.headline?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     profile.location?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Group suggestions by categories
-  const healthcareSuggestions = filteredSuggestions.filter(p => 
+  const filteredInstitutions = institutions.filter(profile =>
+    profile.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    profile.headline?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    profile.location?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Group individuals by categories
+  const healthcareIndividuals = filteredIndividuals.filter(p => 
     p.headline?.toLowerCase().includes('healthcare') ||
     p.headline?.toLowerCase().includes('medical') ||
     p.headline?.toLowerCase().includes('doctor') ||
@@ -254,8 +274,8 @@ export default function NetworkPage() {
     p.headline?.toLowerCase().includes('pharmacy')
   );
 
-  const recentActivitySuggestions = filteredSuggestions.filter(p => 
-    !healthcareSuggestions.includes(p)
+  const recentActivityIndividuals = filteredIndividuals.filter(p => 
+    !healthcareIndividuals.includes(p)
   ).slice(0, 8);
 
   if (!user) {
@@ -286,101 +306,169 @@ export default function NetworkPage() {
     <div className={`${BACKGROUNDS.page.primary} min-h-screen`}>
       <Header />
       
-      <div className="container mx-auto px-4 py-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="max-w-7xl mx-auto"
-        >
-          {/* Page Header */}
-          <div className="mb-6">
-            <h1 className={`${TYPOGRAPHY.heading.h1} mb-2`}>My Network</h1>
-            <p className={`${TYPOGRAPHY.body.large} ${TEXT_COLORS.secondary}`}>
-              Connect with healthcare professionals and grow your network
-            </p>
-          </div>
-
-          {/* Network Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-            <div className={`${COMPONENTS.card.base} text-center`}>
-              <UserIcon className={`w-8 h-8 ${COMPONENTS.icon.primary} mx-auto mb-2`} />
-              <div className={`${TYPOGRAPHY.heading.h3} mb-1`}>{formatNumber(networkStats.connections)}</div>
-              <div className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>Connections</div>
-            </div>
-            <div className={`${COMPONENTS.card.base} text-center`}>
-              <UserGroupIcon className={`w-8 h-8 ${COMPONENTS.icon.primary} mx-auto mb-2`} />
-              <div className={`${TYPOGRAPHY.heading.h3} mb-1`}>{formatNumber(networkStats.groups)}</div>
-              <div className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>Groups</div>
-            </div>
-            <div className={`${COMPONENTS.card.base} text-center`}>
-              <CalendarDaysIcon className={`w-8 h-8 ${COMPONENTS.icon.primary} mx-auto mb-2`} />
-              <div className={`${TYPOGRAPHY.heading.h3} mb-1`}>{formatNumber(networkStats.events)}</div>
-              <div className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>Events</div>
-            </div>
-            <div className={`${COMPONENTS.card.base} text-center`}>
-              <DocumentTextIcon className={`w-8 h-8 ${COMPONENTS.icon.primary} mx-auto mb-2`} />
-              <div className={`${TYPOGRAPHY.heading.h3} mb-1`}>{formatNumber(networkStats.pages)}</div>
-              <div className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>Pages</div>
-            </div>
-            <div className={`${COMPONENTS.card.base} text-center`}>
-              <NewspaperIcon className={`w-8 h-8 ${COMPONENTS.icon.primary} mx-auto mb-2`} />
-              <div className={`${TYPOGRAPHY.heading.h3} mb-1`}>{formatNumber(networkStats.newsletters)}</div>
-              <div className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>Newsletters</div>
-            </div>
-          </div>
-
-          {/* Top Navigation Bar */}
-          <div className={`${COMPONENTS.card.base} mb-4`}>
-            <div className="p-6">
-              <div className="flex items-center justify-between">
-                {/* Left Side - Navigation */}
-                <div className="flex items-center space-x-6">
-                  <button
-                    onClick={() => setActiveTab('grow')}
-                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                      activeTab === 'grow'
-                        ? `${COMPONENTS.button.primary}`
-                        : `${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} hover:bg-gray-100`
-                    }`}
-                  >
-                    Grow
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('catch-up')}
-                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                      activeTab === 'catch-up'
-                        ? `${COMPONENTS.button.primary}`
-                        : `${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} hover:bg-gray-100`
-                    }`}
-                  >
-                    Catch up
-                  </button>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="flex gap-6">
+          {/* Left Sidebar - Floating Island */}
+          <div className="w-80 flex-shrink-0">
+            <div className={`${COMPONENTS.card.base} sticky top-24`}>
+              <div className="p-6">
+                <h3 className={`${TYPOGRAPHY.heading.h3} mb-4`}>Manage my network</h3>
+                
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between py-2">
+                    <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary}`}>Connections</span>
+                    <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                      {networkStats.connections}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between py-2">
+                    <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary}`}>Following & followers</span>
+                    <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                      {connections.length}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between py-2">
+                    <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary}`}>Groups</span>
+                    <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                      {networkStats.groups}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between py-2">
+                    <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary}`}>Events</span>
+                    <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                      {networkStats.events}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between py-2">
+                    <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary}`}>Pages</span>
+                    <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                      {networkStats.pages}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between py-2">
+                    <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary}`}>Newsletters</span>
+                    <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                      {networkStats.newsletters}
+                    </span>
+                  </div>
                 </div>
-
-                {/* Right Side - Search */}
-                <div className="flex items-center space-x-4">
-                  <div className="relative">
-                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="Search people..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"
-                    />
+                
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <div className="space-y-2">
+                    <Link
+                      href="/about"
+                      className={`block ${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} transition-colors`}
+                    >
+                      About
+                    </Link>
+                    <Link
+                      href="/accessibility"
+                      className={`block ${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} transition-colors`}
+                    >
+                      Accessibility
+                    </Link>
+                    <Link
+                      href="/help"
+                      className={`block ${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} transition-colors`}
+                    >
+                      Help Center
+                    </Link>
+                    <Link
+                      href="/privacy"
+                      className={`block ${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} transition-colors`}
+                    >
+                      Privacy & Terms
+                    </Link>
+                    <Link
+                      href="/ad-choices"
+                      className={`block ${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} transition-colors`}
+                    >
+                      Ad Choices
+                    </Link>
+                    <Link
+                      href="/advertising"
+                      className={`block ${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} transition-colors`}
+                    >
+                      Advertising
+                    </Link>
+                    <Link
+                      href="/business-services"
+                      className={`block ${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} transition-colors`}
+                    >
+                      Business Services
+                    </Link>
+                    <Link
+                      href="/get-app"
+                      className={`block ${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} transition-colors`}
+                    >
+                      Get the Kendraa app
+                    </Link>
+                    <Link
+                      href="/more"
+                      className={`block ${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} hover:${TEXT_COLORS.primary} transition-colors`}
+                    >
+                      More
+                    </Link>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="space-y-4">
-            {/* Invitations Section */}
-            {connectionRequests.length > 0 && (
+          {/* Main Content Area */}
+          <div className="flex-1 min-w-0">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+
+              {/* Search Bar */}
+              <div className={`${COMPONENTS.card.base} mb-6`}>
+                <div className="p-4">
+                  <div className="relative">
+                    <MagnifyingGlassIcon className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${TEXT_COLORS.secondary}`} />
+                    <input
+                      type="text"
+                      placeholder="Search people..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className={`w-full pl-10 pr-4 py-2 ${COMPONENTS.input.base} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Main Content */}
+              <div className="space-y-6">
+                {/* Take a break with a puzzle game */}
+                <div className={`${COMPONENTS.card.base}`}>
+                  <div className="p-6">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                        <span className="text-orange-600 font-bold text-lg">Z</span>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className={`${TYPOGRAPHY.body.medium} font-semibold`}>Zip - a quick brain teaser</h3>
+                        <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>Solve in 60s or less!</p>
+                      </div>
+                      <button className={`px-4 py-2 ${COMPONENTS.button.primary} rounded-lg hover:bg-blue-700 transition-colors font-medium`}>
+                        Solve now
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Invitations Section */}
+                {connectionRequests.length > 0 && (
               <div className={`${COMPONENTS.card.base}`}>
                 <div className="p-6">
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center justify-between mb-6">
                     <h3 className={`${TYPOGRAPHY.heading.h3}`}>
                       Invitations ({connectionRequests.length})
                     </h3>
@@ -393,22 +481,27 @@ export default function NetworkPage() {
                   </div>
                   
                   <div className="space-y-4">
-                    {connectionRequests.slice(0, 3).map((request) => (
+                    {connectionRequests.slice(0, 5).map((request) => (
                       <motion.div
                         key={request.id}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg"
+                        className="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
                       >
                         <Avatar
                           src={request.requester.avatar_url}
                           alt={request.requester.full_name || 'User'}
-                          size="md"
+                          size="lg"
                         />
                         <div className="flex-1">
-                          <h4 className={`${TYPOGRAPHY.body.medium} font-semibold`}>
-                            {request.requester.full_name}
-                          </h4>
+                          <div className="flex items-center space-x-2 mb-1">
+                            <h4 className={`${TYPOGRAPHY.body.medium} font-semibold`}>
+                              {request.requester.full_name}
+                            </h4>
+                            <span className="text-xs text-gray-500">
+                              follows you and is inviting you to connect
+                            </span>
+                          </div>
                           <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} mb-2`}>
                             {request.requester.headline || 'Healthcare Professional'}
                           </p>
@@ -442,13 +535,13 @@ export default function NetworkPage() {
               </div>
             )}
 
-            {/* People you may know - Healthcare */}
-            {healthcareSuggestions.length > 0 && (
+            {/* Healthcare Institutions */}
+            {filteredInstitutions.length > 0 && (
               <div className={`${COMPONENTS.card.base}`}>
                 <div className="p-6">
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center justify-between mb-6">
                     <h3 className={`${TYPOGRAPHY.heading.h3}`}>
-                      People in the Healthcare industry you may know
+                      Healthcare Institutions
                     </h3>
                     <Link 
                       href="/network/suggestions" 
@@ -458,8 +551,79 @@ export default function NetworkPage() {
                     </Link>
                   </div>
                   
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {healthcareSuggestions.slice(0, 8).map((profile) => (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {filteredInstitutions.slice(0, 8).map((profile) => (
+                      <motion.div
+                        key={profile.id}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="relative p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
+                      >
+                        <button
+                          onClick={() => handleDismissSuggestion(profile.id)}
+                          className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                          <XMarkIcon className="w-4 h-4" />
+                        </button>
+                        
+                        <div className="text-center">
+                          <Avatar
+                            src={profile.avatar_url}
+                            alt={profile.full_name || 'Institution'}
+                            size="lg"
+                            className="mx-auto mb-3"
+                          />
+                          <h4 className={`${TYPOGRAPHY.body.medium} font-semibold mb-1`}>
+                            {profile.full_name}
+                          </h4>
+                          <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} mb-2 line-clamp-2`}>
+                            {profile.headline || 'Healthcare Institution'}
+                          </p>
+                          <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} mb-3`}>
+                            {profile.location && (
+                              <span className="flex items-center justify-center">
+                                <MapPinIcon className="w-4 h-4 mr-1" />
+                                {profile.location}
+                              </span>
+                            )}
+                          </p>
+                          <button
+                            onClick={() => handleConnect(profile.id, 'institution')}
+                            disabled={profile.follow_status === 'following'}
+                            className={`w-full px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
+                              profile.follow_status === 'following'
+                                ? 'bg-green-100 text-green-700 cursor-not-allowed'
+                                : `${COMPONENTS.button.primary}`
+                            }`}
+                          >
+                            {profile.follow_status === 'following' ? 'Following' : '+ Follow'}
+                          </button>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* People you may know - Healthcare */}
+            {healthcareIndividuals.length > 0 && (
+              <div className={`${COMPONENTS.card.base}`}>
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className={`${TYPOGRAPHY.heading.h3}`}>
+                      Healthcare Professionals you may know
+                    </h3>
+                    <Link 
+                      href="/network/suggestions" 
+                      className={`${TEXT_COLORS.accent} hover:text-blue-700 text-sm font-medium`}
+                    >
+                      Show all
+                    </Link>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {healthcareIndividuals.slice(0, 8).map((profile) => (
                       <motion.div
                         key={profile.id}
                         initial={{ opacity: 0, scale: 0.95 }}
@@ -494,25 +658,15 @@ export default function NetworkPage() {
                             )}
                           </p>
                           <button
-                            onClick={() => handleConnect(
-                              profile.id, 
-                              profile.profile_type === 'institution' ? 'institution' : 'individual'
-                            )}
-                            disabled={profile.connection_status === 'pending' || profile.follow_status === 'following'}
+                            onClick={() => handleConnect(profile.id, 'individual')}
+                            disabled={profile.connection_status === 'pending'}
                             className={`w-full px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
-                              profile.connection_status === 'pending' || profile.follow_status === 'following'
+                              profile.connection_status === 'pending'
                                 ? 'bg-green-100 text-green-700 cursor-not-allowed'
                                 : `${COMPONENTS.button.primary}`
                             }`}
                           >
-                            {profile.connection_status === 'pending' 
-                              ? 'Pending' 
-                              : profile.follow_status === 'following'
-                              ? 'Following'
-                              : profile.profile_type === 'institution'
-                              ? '+ Follow'
-                              : '+ Connect'
-                            }
+                            {profile.connection_status === 'pending' ? 'Pending' : '+ Connect'}
                           </button>
                         </div>
                       </motion.div>
@@ -523,10 +677,10 @@ export default function NetworkPage() {
             )}
 
             {/* People you may know - Recent Activity */}
-            {recentActivitySuggestions.length > 0 && (
+            {recentActivityIndividuals.length > 0 && (
               <div className={`${COMPONENTS.card.base}`}>
                 <div className="p-6">
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center justify-between mb-6">
                     <h3 className={`${TYPOGRAPHY.heading.h3}`}>
                       People you may know based on your recent activity
                     </h3>
@@ -538,8 +692,8 @@ export default function NetworkPage() {
                     </Link>
                   </div>
                   
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {recentActivitySuggestions.map((profile) => (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {recentActivityIndividuals.map((profile) => (
                       <motion.div
                         key={profile.id}
                         initial={{ opacity: 0, scale: 0.95 }}
@@ -574,25 +728,15 @@ export default function NetworkPage() {
                             )}
                           </p>
                           <button
-                            onClick={() => handleConnect(
-                              profile.id, 
-                              profile.profile_type === 'institution' ? 'institution' : 'individual'
-                            )}
-                            disabled={profile.connection_status === 'pending' || profile.follow_status === 'following'}
+                            onClick={() => handleConnect(profile.id, 'individual')}
+                            disabled={profile.connection_status === 'pending'}
                             className={`w-full px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
-                              profile.connection_status === 'pending' || profile.follow_status === 'following'
+                              profile.connection_status === 'pending'
                                 ? 'bg-green-100 text-green-700 cursor-not-allowed'
                                 : `${COMPONENTS.button.primary}`
                             }`}
                           >
-                            {profile.connection_status === 'pending' 
-                              ? 'Pending' 
-                              : profile.follow_status === 'following'
-                              ? 'Following'
-                              : profile.profile_type === 'institution'
-                              ? '+ Follow'
-                              : '+ Connect'
-                            }
+                            {profile.connection_status === 'pending' ? 'Pending' : '+ Connect'}
                           </button>
                         </div>
                       </motion.div>
@@ -603,7 +747,7 @@ export default function NetworkPage() {
             )}
 
             {/* Empty State */}
-            {filteredSuggestions.length === 0 && (
+            {filteredIndividuals.length === 0 && filteredInstitutions.length === 0 && (
               <div className={`${COMPONENTS.card.base} text-center py-12`}>
                 <UserGroupIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                 <h3 className={`${TYPOGRAPHY.heading.h3} mb-2`}>No suggestions found</h3>
@@ -611,9 +755,11 @@ export default function NetworkPage() {
                   {searchQuery ? 'Try adjusting your search terms' : 'We\'ll show you people to connect with here'}
                 </p>
               </div>
-            )}
+                )}
+              </div>
+            </motion.div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

@@ -127,73 +127,74 @@ export default function DashboardLayout({
     <div className="min-h-screen bg-gradient-to-br from-white via-[#007fff]/5 to-[#007fff]/10 flex flex-col">
       <Header />
       
-      <div className="flex-1 flex overflow-hidden pt-16">
-        <div className="hidden lg:block lg:w-80 lg:flex-shrink-0">
-          <div className="p-6 h-full">
-            {isNetworkPage ? (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 h-full">
-                <h2 className="text-lg font-semibold text-black mb-4">Manage my network</h2>
-                
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
-                    <div className="flex items-center space-x-3">
-                      <UserGroupIcon className="w-5 h-5 text-[#007fff]" />
-                      <span className="text-sm text-gray-700">Connections</span>
-                    </div>
-                    <span className="text-sm font-medium text-black">{formatNumber(connectionCount)}</span>
+      <div className="flex-1 pt-16 relative">
+        {/* Floating Left Island */}
+        <div className="hidden lg:block fixed left-6 top-24 w-80 z-10">
+          {isNetworkPage ? (
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+              <h2 className="text-lg font-semibold text-black mb-4">Manage my network</h2>
+              
+              <div className="space-y-1">
+                <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
+                  <div className="flex items-center space-x-3">
+                    <UserGroupIcon className="w-5 h-5 text-[#007fff]" />
+                    <span className="text-sm text-gray-700">Connections</span>
                   </div>
-                   <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
-                    <div className="flex items-center space-x-3">
-                      <UserIcon className="w-5 h-5 text-[#007fff]" />
-                      <span className="text-sm text-gray-700">Following & followers</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
-                    <div className="flex items-center space-x-3">
-                      <BuildingOfficeIcon className="w-5 h-5 text-[#007fff]" />
-                      <span className="text-sm text-gray-700">Groups</span>
-                    </div>
-                    <span className="text-sm font-medium text-black">{formatNumber(groupsCount)}</span>
-                  </div>
-                  <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
-                    <div className="flex items-center space-x-3">
-                      <CalendarDaysIcon className="w-5 h-5 text-[#007fff]" />
-                      <span className="text-sm text-gray-700">Events</span>
-                    </div>
-                    <span className="text-sm font-medium text-black">{formatNumber(eventsCount)}</span>
-                  </div>
-                  <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
-                    <div className="flex items-center space-x-3">
-                      <DocumentTextIcon className="w-5 h-5 text-[#007fff]" />
-                      <span className="text-sm text-gray-700">Pages</span>
-                    </div>
-                    <span className="text-sm font-medium text-black">{formatNumber(pagesCount)}</span>
-                  </div>
-                  <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
-                    <div className="flex items-center space-x-3">
-                      <NewspaperIcon className="w-5 h-5 text-[#007fff]" />
-                      <span className="text-sm text-gray-700">Newsletters</span>
-                    </div>
-                    <span className="text-sm font-medium text-black">{formatNumber(newslettersCount)}</span>
+                  <span className="text-sm font-medium text-black">{formatNumber(connectionCount)}</span>
+                </div>
+                 <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
+                  <div className="flex items-center space-x-3">
+                    <UserIcon className="w-5 h-5 text-[#007fff]" />
+                    <span className="text-sm text-gray-700">Following & followers</span>
                   </div>
                 </div>
-                
-                <div className="mt-8 pt-6 border-t border-gray-200">
-                  <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
-                    <a href="#" className="hover:text-gray-700">About</a>
-                    <a href="#" className="hover:text-gray-700">Accessibility</a>
-                    <a href="#" className="hover:text-gray-700">Help Center</a>
-                    <a href="#" className="hover:text-gray-700">Privacy & Terms</a>
-                    <a href="#" className="hover:text-gray-700">Ad Choices</a>
-                    <a href="#" className="hover:text-gray-700">Advertising</a>
-                    <a href="#" className="hover:text-gray-700">Business Services</a>
-                    <a href="#" className="hover:text-gray-700">Get the App</a>
-                    <a href="#" className="hover:text-gray-700">More</a>
+                <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
+                  <div className="flex items-center space-x-3">
+                    <BuildingOfficeIcon className="w-5 h-5 text-[#007fff]" />
+                    <span className="text-sm text-gray-700">Groups</span>
                   </div>
-                  <p className="text-xs text-gray-400 mt-4"><span className="mulish-semibold">kendraa</span> Corporation © 2025</p>
+                  <span className="text-sm font-medium text-black">{formatNumber(groupsCount)}</span>
+                </div>
+                <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
+                  <div className="flex items-center space-x-3">
+                    <CalendarDaysIcon className="w-5 h-5 text-[#007fff]" />
+                    <span className="text-sm text-gray-700">Events</span>
+                  </div>
+                  <span className="text-sm font-medium text-black">{formatNumber(eventsCount)}</span>
+                </div>
+                <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
+                  <div className="flex items-center space-x-3">
+                    <DocumentTextIcon className="w-5 h-5 text-[#007fff]" />
+                    <span className="text-sm text-gray-700">Pages</span>
+                  </div>
+                  <span className="text-sm font-medium text-black">{formatNumber(pagesCount)}</span>
+                </div>
+                <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer">
+                  <div className="flex items-center space-x-3">
+                    <NewspaperIcon className="w-5 h-5 text-[#007fff]" />
+                    <span className="text-sm text-gray-700">Newsletters</span>
+                  </div>
+                  <span className="text-sm font-medium text-black">{formatNumber(newslettersCount)}</span>
                 </div>
               </div>
-            ) : (
+              
+              <div className="mt-8 pt-6 border-t border-gray-200">
+                <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
+                  <a href="#" className="hover:text-gray-700">About</a>
+                  <a href="#" className="hover:text-gray-700">Accessibility</a>
+                  <a href="#" className="hover:text-gray-700">Help Center</a>
+                  <a href="#" className="hover:text-gray-700">Privacy & Terms</a>
+                  <a href="#" className="hover:text-gray-700">Ad Choices</a>
+                  <a href="#" className="hover:text-gray-700">Advertising</a>
+                  <a href="#" className="hover:text-gray-700">Business Services</a>
+                  <a href="#" className="hover:text-gray-700">Get the App</a>
+                  <a href="#" className="hover:text-gray-700">More</a>
+                </div>
+                <p className="text-xs text-gray-400 mt-4"><span className="mulish-semibold">kendraa</span> Corporation © 2025</p>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
               <LeftSidebar 
                 connectionCount={connectionCount}
                 groupsCount={groupsCount}
@@ -202,14 +203,15 @@ export default function DashboardLayout({
                 newslettersCount={newslettersCount}
                 isInstitution={false}
               />
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
-        <div className="flex-1 overflow-y-auto">
+        {/* Main Content */}
+        <div className="overflow-y-auto">
           <div className="w-full px-4 sm:px-6 lg:px-8">
             <div className="flex justify-center">
-              <div className={`w-full ${isNetworkPage ? '' : 'max-w-2xl'}`}>
+              <div className={`w-full ${isNetworkPage ? '' : 'max-w-2xl lg:ml-96'}`}>
                 <main className="py-8">
                   {children}
                 </main>
@@ -218,9 +220,10 @@ export default function DashboardLayout({
           </div>
         </div>
 
+        {/* Floating Right Island */}
         {!isNetworkPage && (
-          <div className="hidden xl:block xl:w-80 xl:flex-shrink-0">
-            <div className="p-6 h-full">
+          <div className="hidden xl:block fixed right-6 top-24 w-80 z-10">
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
               <RightSidebar connectionCount={connectionCount} isInstitution={false} />
             </div>
           </div>

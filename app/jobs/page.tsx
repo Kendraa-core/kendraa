@@ -10,6 +10,7 @@ import {
   getJobApplications,
   getInstitutionByAdminId
 } from '@/lib/queries';
+import { uploadToSupabaseStorage } from '@/lib/utils';
 import { 
   BriefcaseIcon,
   MapPinIcon,
@@ -37,7 +38,10 @@ import {
   AdjustmentsHorizontalIcon,
   Bars3Icon,
   CurrencyDollarIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  XMarkIcon,
+  CloudArrowUpIcon,
+  DocumentIcon
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import Avatar from '@/components/common/Avatar';
@@ -73,6 +77,12 @@ export default function JobsPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [likedJobs, setLikedJobs] = useState<Set<string>>(new Set());
   const [jobTypes, setJobTypes] = useState<string[]>([]);
+  const [showApplicationModal, setShowApplicationModal] = useState(false);
+  const [applicationJob, setApplicationJob] = useState<JobWithApplication | null>(null);
+  const [coverLetter, setCoverLetter] = useState('');
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [uploadingResume, setUploadingResume] = useState(false);
+  const [submittingApplication, setSubmittingApplication] = useState(false);
 
   const fetchJobs = async () => {
     if (!user?.id) return;
@@ -131,15 +141,63 @@ export default function JobsPage() {
     fetchJobs();
   }, [activeTab, user?.id]);
 
-  const handleApply = async (job: JobWithApplication) => {
-    if (!user?.id) return;
+  const handleApply = (job: JobWithApplication) => {
+    setApplicationJob(job);
+    setShowApplicationModal(true);
+    setCoverLetter('');
+    setResumeFile(null);
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Check file type
+      const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+      if (!allowedTypes.includes(file.type)) {
+        toast.error('Please upload a PDF or Word document');
+        return;
+      }
+      
+      // Check file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('File size must be less than 5MB');
+        return;
+      }
+      
+      setResumeFile(file);
+    }
+  };
+
+  const submitApplication = async () => {
+    if (!user?.id || !applicationJob) return;
+    
+    setSubmittingApplication(true);
+    let resumeUrl = null;
     
     try {
+      // Upload resume if provided
+      if (resumeFile) {
+        setUploadingResume(true);
+        const fileName = `resumes/${user.id}/${Date.now()}-${resumeFile.name}`;
+        const { url, error } = await uploadToSupabaseStorage('documents', fileName, resumeFile);
+        
+        if (error) {
+          toast.error('Failed to upload resume');
+          setUploadingResume(false);
+          setSubmittingApplication(false);
+      return;
+    }
+
+        resumeUrl = url;
+        setUploadingResume(false);
+      }
+      
+      // Submit application
       const success = await applyToJob({
-        job_id: job.id,
+        job_id: applicationJob.id,
         applicant_id: user.id,
-        cover_letter: null,
-        resume_url: null,
+        cover_letter: coverLetter.trim() || null,
+        resume_url: resumeUrl,
         status: 'pending',
         reviewed_by: null,
         reviewed_at: null,
@@ -149,22 +207,29 @@ export default function JobsPage() {
       if (success) {
         // Update local state
         setJobs(prevJobs => prevJobs.map(j => 
-          j.id === job.id 
+          j.id === applicationJob.id 
             ? { ...j, isApplied: true, applications_count: (j.applications_count || 0) + 1 }
             : j
         ));
         
-        if (selectedJob?.id === job.id) {
+        if (selectedJob?.id === applicationJob.id) {
           setSelectedJob(prev => prev ? { ...prev, isApplied: true, applications_count: (prev.applications_count || 0) + 1 } : null);
         }
         
         toast.success('Application submitted successfully!');
+        setShowApplicationModal(false);
+        setApplicationJob(null);
+        setCoverLetter('');
+        setResumeFile(null);
       } else {
         toast.error('Failed to submit application');
       }
     } catch (error) {
       console.error('Error applying to job:', error);
       toast.error('Failed to submit application');
+    } finally {
+      setSubmittingApplication(false);
+      setUploadingResume(false);
     }
   };
 
@@ -313,13 +378,6 @@ export default function JobsPage() {
           transition={{ duration: 0.6 }}
           className="max-w-7xl mx-auto"
         >
-          {/* Page Header */}
-          <div className="mb-6">
-            <h1 className={`${TYPOGRAPHY.heading.h1} mb-2`}>Jobs</h1>
-            <p className={`${TYPOGRAPHY.body.large} ${TEXT_COLORS.secondary}`}>
-              Discover and apply for healthcare opportunities
-              </p>
-            </div>
 
           {/* Top Navigation Bar */}
           <div className={`${COMPONENTS.card.base} mb-4`}>
@@ -539,7 +597,7 @@ export default function JobsPage() {
                         <div className="flex items-center space-x-2 text-sm text-gray-500">
                           <UsersIcon className="w-4 h-4" />
                           <span>{job.applications_count || 0} applicants</span>
-                        </div>
+                  </div>
               </div>
             </div>
                   </motion.div>
@@ -705,6 +763,142 @@ export default function JobsPage() {
             </div>
         </motion.div>
       </div>
+
+      {/* Application Modal */}
+      {showApplicationModal && applicationJob && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-start justify-between mb-6">
+                <div>
+                  <h2 className={`${TYPOGRAPHY.heading.h2} mb-2`}>Apply for Position</h2>
+                  <h3 className={`${TYPOGRAPHY.heading.h3} ${TEXT_COLORS.primary}`}>
+                    {applicationJob.title}
+                  </h3>
+                  <p className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary}`}>
+                    {applicationJob.company?.name || 'Healthcare Organization'}
+                  </p>
+    </div>
+            <button
+                  onClick={() => setShowApplicationModal(false)}
+                  className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+                  <XMarkIcon className="w-6 h-6" />
+            </button>
+          </div>
+
+              <div className="space-y-6">
+                {/* Resume Upload */}
+                <div>
+                  <label className={`block ${TYPOGRAPHY.body.medium} font-medium ${TEXT_COLORS.primary} mb-3`}>
+                    Resume *
+                  </label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+                    <input
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                      id="resume-upload"
+                    />
+                    <label htmlFor="resume-upload" className="cursor-pointer">
+                      {resumeFile ? (
+                        <div className="flex items-center justify-center space-x-2">
+                          <DocumentIcon className="w-8 h-8 text-blue-600" />
+                          <div>
+                            <p className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary}`}>
+                              {resumeFile.name}
+                            </p>
+                            <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                              {(resumeFile.size / 1024 / 1024).toFixed(2)} MB
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div>
+                          <CloudArrowUpIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                          <p className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary} mb-2`}>
+                            Upload your resume
+                          </p>
+                          <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                            PDF or Word document, max 5MB
+                          </p>
+                        </div>
+                      )}
+                    </label>
+                  </div>
+          </div>
+
+                {/* Cover Letter */}
+                <div>
+                  <label className={`block ${TYPOGRAPHY.body.medium} font-medium ${TEXT_COLORS.primary} mb-3`}>
+                Cover Letter
+              </label>
+              <textarea
+                value={coverLetter}
+                onChange={(e) => setCoverLetter(e.target.value)}
+                    rows={6}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Tell us why you're interested in this position and what makes you a great fit..."
+              />
+            </div>
+
+                {/* Application Summary */}
+                <div className={`${COMPONENTS.card.base} p-4 bg-gray-50`}>
+                  <h4 className={`${TYPOGRAPHY.body.medium} font-medium ${TEXT_COLORS.primary} mb-2`}>
+                    Application Summary
+                  </h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>Position:</span>
+                      <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.primary}`}>{applicationJob.title}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>Company:</span>
+                      <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.primary}`}>
+                        {applicationJob.company?.name || 'Healthcare Organization'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>Resume:</span>
+                      <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.primary}`}>
+                        {resumeFile ? 'Uploaded' : 'Not provided'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>Cover Letter:</span>
+                      <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.primary}`}>
+                        {coverLetter.trim() ? 'Provided' : 'Not provided'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+                  <button
+                    onClick={() => setShowApplicationModal(false)}
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+                  </button>
+                  <button
+                    onClick={submitApplication}
+                    disabled={!resumeFile || submittingApplication || uploadingResume}
+                    className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+                      !resumeFile || submittingApplication || uploadingResume
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                    }`}
+                  >
+                    {uploadingResume ? 'Uploading...' : submittingApplication ? 'Submitting...' : 'Submit Application'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 
