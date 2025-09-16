@@ -16,6 +16,10 @@ import {
   TrashIcon,
   ChartBarIcon,
   FlagIcon,
+  EyeSlashIcon,
+  UserMinusIcon,
+  ExclamationTriangleIcon,
+  ShareIcon,
 } from '@heroicons/react/24/outline';
 import {
   BookmarkIcon as BookmarkSolidIcon,
@@ -306,6 +310,34 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
     setShowDropdown(false);
   };
 
+  const handleHidePost = () => {
+    // TODO: Implement hide post functionality
+    toast.success('Post hidden from your feed');
+    setShowDropdown(false);
+  };
+
+  const handleUnfollowUser = () => {
+    // TODO: Implement unfollow functionality
+    toast.success('Unfollowed user');
+    setShowDropdown(false);
+  };
+
+  const handleBlockUser = () => {
+    // TODO: Implement block functionality
+    toast.success('User blocked');
+    setShowDropdown(false);
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}/post/${post.id}`);
+      toast.success('Link copied to clipboard');
+    } catch (error) {
+      toast.error('Failed to copy link');
+    }
+    setShowDropdown(false);
+  };
+
   const handleDeletePost = async () => {
     if (!user?.id) return;
 
@@ -368,7 +400,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
           </button>
           
           {showDropdown && (
-            <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-10 min-w-[140px]">
+            <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-10 min-w-[160px]">
               {isOwnPost ? (
                 <>
                   <button
@@ -379,29 +411,59 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
                     View Analytics
                   </button>
                   <button
+                    onClick={handleCopyLink}
+                    className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  >
+                    <ShareIcon className="w-4 h-4" />
+                    Copy Link
+                  </button>
+                  <div className="border-t border-gray-100 my-1"></div>
+                  <button
                     onClick={handleDeletePost}
                     disabled={isDeleting}
                     className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 disabled:opacity-50"
                   >
                     <TrashIcon className="w-4 h-4" />
-                    {isDeleting ? 'Deleting...' : 'Delete'}
+                    {isDeleting ? 'Deleting...' : 'Delete Post'}
                   </button>
                 </>
               ) : (
                 <>
                   <button
-                    onClick={handleViewAnalytics}
+                    onClick={handleCopyLink}
                     className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                   >
-                    <ChartBarIcon className="w-4 h-4" />
-                    View Analytics
+                    <ShareIcon className="w-4 h-4" />
+                    Copy Link
                   </button>
                   <button
+                    onClick={handleHidePost}
+                    className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  >
+                    <EyeSlashIcon className="w-4 h-4" />
+                    Hide Post
+                  </button>
+                  <button
+                    onClick={handleUnfollowUser}
+                    className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  >
+                    <UserMinusIcon className="w-4 h-4" />
+                    Unfollow
+                  </button>
+                  <div className="border-t border-gray-100 my-1"></div>
+                  <button
                     onClick={handleReportPost}
+                    className="w-full px-3 py-2 text-left text-sm text-orange-600 hover:bg-orange-50 flex items-center gap-2"
+                  >
+                    <ExclamationTriangleIcon className="w-4 h-4" />
+                    Report Post
+                  </button>
+                  <button
+                    onClick={handleBlockUser}
                     className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
                   >
                     <FlagIcon className="w-4 h-4" />
-                    Report Post
+                    Block User
                   </button>
                 </>
               )}

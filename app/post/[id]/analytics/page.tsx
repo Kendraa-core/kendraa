@@ -61,6 +61,12 @@ export default function PostAnalyticsPage() {
           return;
         }
 
+        // Check if current user is the post creator
+        if (!user?.id || user.id !== postData.author_id) {
+          setError('Access denied. Only the post creator can view analytics.');
+          return;
+        }
+
         setPost(postData);
         setAnalytics(analyticsData);
       } catch (error) {
@@ -73,7 +79,7 @@ export default function PostAnalyticsPage() {
     };
 
     fetchData();
-  }, [id]);
+  }, [id, user?.id]);
 
   const handleDownloadAnalytics = () => {
     if (!analytics) return;
