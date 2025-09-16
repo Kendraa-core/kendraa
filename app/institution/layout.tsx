@@ -10,7 +10,11 @@ import {
   getUserPagesCount,
   getUserNewslettersCount,
   getUserEventsCount,
-  getInstitutionByAdminId
+  getInstitutionByAdminId,
+  getUserAnalytics,
+  getTrendingTopics,
+  getRecentActivity,
+  getPostStats
 } from '@/lib/queries';
 import { useOnboardingProtection } from '@/hooks/useOnboardingProtection';
 import Header from '@/components/layout/Header';
@@ -48,6 +52,22 @@ export default function InstitutionLayout({
   const [pagesCount, setPagesCount] = useState(0);
   const [newslettersCount, setNewslettersCount] = useState(0);
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
+  const [analytics, setAnalytics] = useState({
+    totalPosts: 0,
+    totalEngagement: 0,
+    engagementRate: 0,
+    totalReach: 0
+  });
+  const [trendingTopics, setTrendingTopics] = useState<Array<{topic: string, count: number}>>([]);
+  const [recentActivity, setRecentActivity] = useState<Array<{
+    id: string,
+    type: string,
+    message: string,
+    time: string,
+    icon: string,
+    color: string
+  }>>([]);
+  const [postStats, setPostStats] = useState({ posts: 0, comments: 0, likes: 0 });
 
   // Use the new, cleaner onboarding protection hook
   const { isProtected, isLoading: isOnboardingLoading } = useOnboardingProtection();
@@ -116,6 +136,21 @@ export default function InstitutionLayout({
         setEventsCount(events);
         setPagesCount(pages);
         setNewslettersCount(newsletters);
+        
+        // Load analytics and feed data (only for feed page)
+        if (pathname === '/institution/feed') {
+          const [analyticsData, topics, activity, stats] = await Promise.all([
+            getUserAnalytics(user.id),
+            getTrendingTopics(5),
+            getRecentActivity(user.id, 5),
+            getPostStats(user.id)
+          ]);
+          
+          setAnalytics(analyticsData);
+          setTrendingTopics(topics);
+          setRecentActivity(activity);
+          setPostStats(stats);
+        }
       } catch (error) {
         console.error('Error loading institution layout data:', error);
       } finally {
@@ -194,19 +229,28 @@ export default function InstitutionLayout({
                   Quick Actions
                 </h3>
                 <div className="space-y-3">
-                  <button className="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
+                  <button 
+                    onClick={() => router.push('/institution/feed?create=post')}
+                    className="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group"
+                  >
                     <div className="w-10 h-10 bg-[#007fff]/10 rounded-lg flex items-center justify-center group-hover:bg-[#007fff]/20 transition-colors">
                       <PlusIcon className="w-5 h-5 text-[#007fff]" />
                     </div>
                     <span className="text-sm font-medium text-gray-700">Create Post</span>
                   </button>
-                  <button className="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
+                  <button 
+                    onClick={() => router.push('/institution/jobs/create')}
+                    className="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group"
+                  >
                     <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
                       <BriefcaseIcon className="w-5 h-5 text-green-600" />
                     </div>
                     <span className="text-sm font-medium text-gray-700">Post Job</span>
                   </button>
-                  <button className="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
+                  <button 
+                    onClick={() => router.push('/institution/events/create')}
+                    className="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group"
+                  >
                     <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors">
                       <CalendarDaysIcon className="w-5 h-5 text-purple-600" />
                     </div>
@@ -224,15 +268,15 @@ export default function InstitutionLayout({
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">Total Posts</span>
-                    <span className="text-lg font-bold text-gray-900">-</span>
+                    <span className="text-lg font-bold text-gray-900">{analytics.totalPosts}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">Engagement</span>
-                    <span className="text-lg font-bold text-green-600">+12%</span>
+                    <span className="text-lg font-bold text-green-600">{analytics.engagementRate}%</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">Reach</span>
-                    <span className="text-lg font-bold text-blue-600">2.4K</span>
+                    <span className="text-lg font-bold text-blue-600">{analytics.totalReach}</span>
                   </div>
                 </div>
               </div>
@@ -244,11 +288,11 @@ export default function InstitutionLayout({
                   Trending Topics
                 </h3>
                 <div className="space-y-3">
-                  {['Healthcare Innovation', 'Medical Research', 'Patient Care', 'Digital Health', 'Telemedicine'].map((topic, index) => (
-                    <div key={topic} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                      <span className="text-sm text-gray-700">#{topic}</span>
+                  {trendingTopics.map((topic, index) => (
+                    <div key={topic.topic} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                      <span className="text-sm text-gray-700">#{topic.topic}</span>
                       <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                        {Math.floor(Math.random() * 1000) + 100}
+                        {topic.count}
                       </span>
                     </div>
                   ))}
@@ -262,33 +306,37 @@ export default function InstitutionLayout({
                   Recent Activity
                 </h3>
                 <div className="space-y-3">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      <UserGroupIcon className="w-4 h-4 text-blue-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-700">New connection request</p>
-                      <p className="text-xs text-gray-500">2 hours ago</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                      <HeartIcon className="w-4 h-4 text-green-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-700">Post liked by 5 people</p>
-                      <p className="text-xs text-gray-500">4 hours ago</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                      <ChatBubbleLeftIcon className="w-4 h-4 text-purple-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-700">New comment on your post</p>
-                      <p className="text-xs text-gray-500">6 hours ago</p>
-                    </div>
-                  </div>
+                  {recentActivity.map((activity) => {
+                    const IconComponent = activity.icon === 'UserGroupIcon' ? UserGroupIcon :
+                                        activity.icon === 'HeartIcon' ? HeartIcon :
+                                        activity.icon === 'ChatBubbleLeftIcon' ? ChatBubbleLeftIcon :
+                                        UserGroupIcon;
+                    
+                    const colorClasses = {
+                      blue: 'bg-blue-100 text-blue-600',
+                      green: 'bg-green-100 text-green-600',
+                      purple: 'bg-purple-100 text-purple-600',
+                      gray: 'bg-gray-100 text-gray-600'
+                    };
+                    
+                    const timeAgo = new Date(activity.time).toLocaleString('en-US', {
+                      hour: 'numeric',
+                      minute: '2-digit',
+                      hour12: true
+                    });
+                    
+                    return (
+                      <div key={activity.id} className="flex items-start space-x-3">
+                        <div className={`w-8 h-8 ${colorClasses[activity.color as keyof typeof colorClasses]} rounded-full flex items-center justify-center`}>
+                          <IconComponent className="w-4 h-4" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm text-gray-700">{activity.message}</p>
+                          <p className="text-xs text-gray-500">{timeAgo}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -317,7 +365,7 @@ export default function InstitutionLayout({
                   {/* Stats */}
                   <div className="grid grid-cols-3 gap-4 mb-6">
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-[#007fff]">-</div>
+                      <div className="text-2xl font-bold text-[#007fff]">{postStats.posts}</div>
                       <div className="text-xs text-gray-500">Posts</div>
                     </div>
                     <div className="text-center">
@@ -325,17 +373,23 @@ export default function InstitutionLayout({
                       <div className="text-xs text-gray-500">Connections</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-[#007fff]">-</div>
-                      <div className="text-xs text-gray-500">Followers</div>
+                      <div className="text-2xl font-bold text-[#007fff]">{analytics.totalReach}</div>
+                      <div className="text-xs text-gray-500">Reach</div>
                     </div>
                   </div>
                   
                   {/* Quick Actions */}
                   <div className="space-y-3">
-                    <button className="w-full bg-[#007fff] text-white py-2 px-4 rounded-lg hover:bg-[#007fff]/90 transition-colors font-medium">
+                    <button 
+                      onClick={() => router.push('/institution/profile')}
+                      className="w-full bg-[#007fff] text-white py-2 px-4 rounded-lg hover:bg-[#007fff]/90 transition-colors font-medium"
+                    >
                       View Profile
                     </button>
-                    <button className="w-full border border-[#007fff] text-[#007fff] py-2 px-4 rounded-lg hover:bg-[#007fff]/5 transition-colors font-medium">
+                    <button 
+                      onClick={() => router.push('/institution/profile')}
+                      className="w-full border border-[#007fff] text-[#007fff] py-2 px-4 rounded-lg hover:bg-[#007fff]/5 transition-colors font-medium"
+                    >
                       Edit Profile
                     </button>
                   </div>

@@ -36,6 +36,14 @@ export default function InstitutionFeedPage() {
   const [postContent, setPostContent] = useState('');
   const [showCreatePost, setShowCreatePost] = useState(false);
 
+  // Check URL params for create post trigger
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('create') === 'post') {
+      setShowCreatePost(true);
+    }
+  }, []);
+
   // Redirect non-institution users
   useEffect(() => {
     if (profile && profile.user_type !== 'institution') {
