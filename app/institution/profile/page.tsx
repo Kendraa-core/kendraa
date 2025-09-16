@@ -12,6 +12,7 @@ import Breadcrumb from '@/components/common/Breadcrumb';
 import EditProfileModal from '@/components/profile/EditProfileModal';
 import EnhancedProfileImageEditor from '@/components/profile/EnhancedProfileImageEditor';
 import PostCard from '@/components/post/PostCard';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { cn, formatDate, formatNumber } from '@/lib/utils';
 import {
   ArrowLeftIcon,
@@ -550,23 +551,25 @@ export default function InstitutionProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-[#007fff]/5 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#007fff] mx-auto mb-3"></div>
-          <p className="text-sm text-[#007fff]">Loading institution profile...</p>
-        </div>
-      </div>
+      <LoadingSpinner 
+        variant="fullscreen" 
+        text="Loading institution profile..." 
+      />
     );
   }
 
   if (!profile) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-[#007fff]/5 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600">Institution profile not found</p>
+        <div className="text-center max-w-md mx-auto px-4">
+          <div className="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <BuildingOfficeIcon className="w-10 h-10 text-blue-600" />
+          </div>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-3">Institution Profile Not Found</h2>
+          <p className="text-gray-600 mb-6">It looks like your institution profile hasn&apos;t been set up yet.</p>
           <button 
             onClick={() => router.push('/institution/onboarding')}
-            className="mt-4 px-4 py-2 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-colors"
+            className="px-6 py-3 bg-[#007fff] text-white rounded-xl hover:bg-[#007fff]/90 transition-colors font-medium"
           >
             Complete Institution Setup
           </button>

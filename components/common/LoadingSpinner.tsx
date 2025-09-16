@@ -301,7 +301,7 @@ export default function LoadingSpinner({
           transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
         />
         <motion.div
-          className={`absolute top-0.5 left-0.5 ${size === 'sm' ? 'w-5 h-5' : size === 'md' ? 'w-7 h-7' : size === 'lg' ? 'w-11 h-11' : size === 'xl' ? 'w-15 h-15' : 'w-19 h-19'} bg-gradient-to-r from-[#007fff] to-[#007fff]/80 rounded-full`}
+          className={`absolute top-0.5 left-0.5 ${size === 'sm' ? 'w-5 h-5' : size === 'md' ? 'w-7 h-7' : size === 'lg' ? 'w-11 h-11' : size === 'xl' ? 'w-14 h-14' : 'w-18 h-18'} bg-gradient-to-r from-[#007fff] to-[#007fff]/80 rounded-full`}
           animate={{
             scale: [1, 1.1, 1],
             opacity: [0.8, 1, 0.8],
