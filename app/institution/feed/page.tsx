@@ -7,17 +7,11 @@ import {
   getPosts, 
   createPost, 
   getPostsByAuthor, 
-  getInstitutionByAdminId,
-  getJobsByInstitution,
-  getEventsByInstitution
+  getInstitutionByAdminId
 } from '@/lib/queries';
-import type { Post, PostWithAuthor, Institution, JobWithCompany, EventWithOrganizer } from '@/types/database.types';
+import type { Post, PostWithAuthor, Institution } from '@/types/database.types';
 import { 
-  PhotoIcon,
-  DocumentIcon,
   PlusIcon,
-  BriefcaseIcon,
-  CalendarDaysIcon,
   UserGroupIcon
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
@@ -40,10 +34,8 @@ export default function InstitutionFeedPage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [institutionPosts, setInstitutionPosts] = useState<PostWithAuthor[]>([]);
   const [institution, setInstitution] = useState<Institution | null>(null);
-  const [jobs, setJobs] = useState<JobWithCompany[]>([]);
-  const [events, setEvents] = useState<EventWithOrganizer[]>([]);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'feed' | 'posts' | 'jobs' | 'events'>('feed');
+  const [activeTab, setActiveTab] = useState<'feed' | 'posts'>('feed');
   const [postContent, setPostContent] = useState('');
   const [showCreatePost, setShowCreatePost] = useState(false);
 
@@ -59,15 +51,8 @@ export default function InstitutionFeedPage() {
 
     try {
       setLoading(true);
-      const [institutionData, jobsData, eventsData] = await Promise.all([
-        getInstitutionByAdminId(user.id),
-        getJobsByInstitution(user.id),
-        getEventsByInstitution(user.id)
-      ]);
-      
+      const institutionData = await getInstitutionByAdminId(user.id);
       setInstitution(institutionData);
-      setJobs(jobsData);
-      setEvents(eventsData);
     } catch (error) {
       console.error('Error fetching institution data:', error);
     } finally {
@@ -188,7 +173,7 @@ export default function InstitutionFeedPage() {
                     </p>
                     <div className="flex items-center space-x-4 mt-2">
                       <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
-                        {jobs.length} Jobs • {events.length} Events • {institutionPosts.length} Posts
+                        {institutionPosts.length} Posts
                       </span>
                     </div>
                   </div>
@@ -218,26 +203,6 @@ export default function InstitutionFeedPage() {
               }`}
             >
               Your Posts ({institutionPosts.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('jobs')}
-              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
-                activeTab === 'jobs'
-                  ? 'bg-[#007fff] text-white shadow-sm'
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              Jobs ({jobs.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('events')}
-              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
-                activeTab === 'events'
-                  ? 'bg-[#007fff] text-white shadow-sm'
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              Events ({events.length})
             </button>
           </div>
 
@@ -330,97 +295,6 @@ export default function InstitutionFeedPage() {
                 </div>
               )}
 
-              {activeTab === 'jobs' && (
-                <div className="space-y-4">
-                  {jobs.length > 0 ? (
-                    jobs.map((job) => (
-                      <div key={job.id} className={`${COMPONENTS.card.base} p-6`}>
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h3 className={`${TYPOGRAPHY.heading.h3} mb-2`}>{job.title}</h3>
-                            <p className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary} mb-3`}>
-                              {job.description}
-                            </p>
-                            <div className="flex items-center space-x-4 text-sm text-gray-500">
-                              <span className="flex items-center">
-                                <BriefcaseIcon className="w-4 h-4 mr-1" />
-                                {job.job_type}
-                              </span>
-                              <span>{job.location}</span>
-                            </div>
-                          </div>
-                          <Link
-                            href={`/institution/jobs/${job.id}/applications`}
-                            className={`${COMPONENTS.button.secondary} text-sm`}
-                          >
-                            View Applications
-                          </Link>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className={`${COMPONENTS.card.base} text-center py-12`}>
-                      <BriefcaseIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                      <h3 className={`${TYPOGRAPHY.heading.h3} mb-2`}>No jobs posted</h3>
-                      <p className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary} mb-4`}>
-                        Start posting job opportunities
-                      </p>
-                      <Link
-                        href="/institution/jobs/create"
-                        className={`${COMPONENTS.button.primary}`}
-                      >
-                        Create Job Posting
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {activeTab === 'events' && (
-                <div className="space-y-4">
-                  {events.length > 0 ? (
-                    events.map((event) => (
-                      <div key={event.id} className={`${COMPONENTS.card.base} p-6`}>
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h3 className={`${TYPOGRAPHY.heading.h3} mb-2`}>{event.title}</h3>
-                            <p className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary} mb-3`}>
-                              {event.description}
-                            </p>
-                            <div className="flex items-center space-x-4 text-sm text-gray-500">
-                              <span className="flex items-center">
-                                <CalendarDaysIcon className="w-4 h-4 mr-1" />
-                                {new Date(event.start_date).toLocaleDateString()}
-                              </span>
-                              <span>{event.location}</span>
-                            </div>
-                          </div>
-                          <Link
-                            href={`/institution/events/${event.id}`}
-                            className={`${COMPONENTS.button.secondary} text-sm`}
-                          >
-                            View Event
-                          </Link>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className={`${COMPONENTS.card.base} text-center py-12`}>
-                      <CalendarDaysIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                      <h3 className={`${TYPOGRAPHY.heading.h3} mb-2`}>No events created</h3>
-                      <p className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary} mb-4`}>
-                        Start organizing events for your community
-                      </p>
-                      <Link
-                        href="/institution/events/create"
-                        className={`${COMPONENTS.button.primary}`}
-                      >
-                        Create Event
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
           )}
         </motion.div>
