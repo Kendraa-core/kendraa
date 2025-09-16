@@ -342,6 +342,16 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
                       </div>
                     </div>
 
+                    {/* Settings */}
+                    <div className="px-2 py-1 border-t border-gray-100">
+                      <Link
+                        href="/settings"
+                        className="flex items-center space-x-3 w-full px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                      >
+                        <Cog6ToothIcon className="w-4 h-4" />
+                        <span>Settings</span>
+                      </Link>
+                    </div>
 
                     {/* Sign Out */}
                     <div className="px-2 py-1 border-t border-gray-100">
