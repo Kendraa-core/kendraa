@@ -127,10 +127,7 @@ export default function EventsPage() {
           setEvents(filteredEvents);
         }
 
-        // Set first event as selected by default
-        if (filteredEvents.length > 0 && !selectedEvent) {
-          setSelectedEvent(filteredEvents[0]);
-        }
+        // No default event selection - user must click to select an event
         
         // Extract unique event types dynamically from filtered events
         const types = [...new Set(filteredEvents.map(event => event.event_type).filter(Boolean))];
