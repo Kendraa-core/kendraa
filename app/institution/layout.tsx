@@ -75,8 +75,9 @@ export default function InstitutionLayout({
 
   useEffect(() => {
     const loadData = async () => {
+      // Allow public access to institution profile pages - only redirect for non-profile pages
       if (!user?.id) {
-        if (!authLoading) {
+        if (!authLoading && !pathname.includes('/profile/')) {
           router.push('/signin');
         }
         return;
