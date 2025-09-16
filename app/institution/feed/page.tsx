@@ -11,7 +11,6 @@ import {
 } from '@/lib/queries';
 import type { Post, PostWithAuthor, Institution } from '@/types/database.types';
 import { 
-  PlusIcon,
   UserGroupIcon
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
