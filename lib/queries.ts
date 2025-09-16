@@ -353,6 +353,201 @@ export async function getPostById(postId: string): Promise<(Post & { profiles?: 
   }
 }
 
+// Analytics tracking functions
+export async function trackPostImpression(
+  postId: string, 
+  userId: string | null = null,
+  source: 'feed' | 'profile' | 'search' | 'direct' | 'share' = 'feed',
+  deviceType: 'desktop' | 'mobile' | 'tablet' = 'desktop'
+): Promise<void> {
+  try {
+    const schemaExists = await true;
+    if (!schemaExists) return;
+
+    // Insert impression record
+    await getSupabase()
+      .from('post_impressions')
+      .insert({
+        post_id: postId,
+        user_id: userId,
+        source,
+        device_type: deviceType,
+        created_at: new Date().toISOString()
+      });
+
+    // Update analytics summary
+    await updatePostAnalytics(postId, 'impressions');
+  } catch (error) {
+    console.error('Error tracking post impression:', error);
+  }
+}
+
+export async function trackPostView(
+  postId: string,
+  userId: string | null = null,
+  viewDuration: number = 0,
+  deviceType: 'desktop' | 'mobile' | 'tablet' = 'desktop'
+): Promise<void> {
+  try {
+    const schemaExists = await true;
+    if (!schemaExists) return;
+
+    // Calculate completion rate (assuming average post read time is 30 seconds)
+    const completionRate = Math.min(100, (viewDuration / 30) * 100);
+
+    // Insert view record
+    await getSupabase()
+      .from('post_views')
+      .insert({
+        post_id: postId,
+        user_id: userId,
+        view_duration: viewDuration,
+        completion_rate: completionRate,
+        device_type: deviceType,
+        created_at: new Date().toISOString()
+      });
+
+    // Update analytics summary
+    await updatePostAnalytics(postId, 'views');
+  } catch (error) {
+    console.error('Error tracking post view:', error);
+  }
+}
+
+export async function trackPostShare(
+  postId: string,
+  userId: string,
+  shareType: 'native' | 'copy_link' | 'external' = 'native',
+  platform: string | null = null,
+  recipientCount: number | null = null
+): Promise<void> {
+  try {
+    const schemaExists = await true;
+    if (!schemaExists) return;
+
+    // Insert share record
+    await getSupabase()
+      .from('post_shares')
+      .insert({
+        post_id: postId,
+        user_id: userId,
+        share_type: shareType,
+        platform,
+        recipient_count: recipientCount,
+        created_at: new Date().toISOString()
+      });
+
+    // Update analytics summary
+    await updatePostAnalytics(postId, 'shares');
+  } catch (error) {
+    console.error('Error tracking post share:', error);
+  }
+}
+
+export async function trackProfileView(postId: string, userId: string): Promise<void> {
+  try {
+    const schemaExists = await true;
+    if (!schemaExists) return;
+
+    // Update analytics summary
+    await updatePostAnalytics(postId, 'profile_views');
+  } catch (error) {
+    console.error('Error tracking profile view:', error);
+  }
+}
+
+export async function trackFollowerGained(postId: string): Promise<void> {
+  try {
+    const schemaExists = await true;
+    if (!schemaExists) return;
+
+    // Update analytics summary
+    await updatePostAnalytics(postId, 'followers_gained');
+  } catch (error) {
+    console.error('Error tracking follower gained:', error);
+  }
+}
+
+async function updatePostAnalytics(
+  postId: string, 
+  metric: 'impressions' | 'views' | 'shares' | 'profile_views' | 'followers_gained'
+): Promise<void> {
+  try {
+    // Get or create analytics record
+    let { data: analytics, error: fetchError } = await getSupabase()
+      .from('post_analytics')
+      .select('*')
+      .eq('post_id', postId)
+      .single();
+
+    if (fetchError && fetchError.code === 'PGRST116') {
+      // Record doesn't exist, create it
+      const { error: insertError } = await getSupabase()
+        .from('post_analytics')
+        .insert({
+          post_id: postId,
+          impressions: 0,
+          unique_impressions: 0,
+          profile_views: 0,
+          followers_gained: 0,
+          video_views: 0,
+          total_watch_time: 0,
+          average_watch_time: 0,
+          shares_count: 0,
+          saves_count: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
+
+      if (insertError) {
+        console.error('Error creating analytics record:', insertError);
+        return;
+      }
+
+      // Fetch the newly created record
+      const { data: newAnalytics } = await getSupabase()
+        .from('post_analytics')
+        .select('*')
+        .eq('post_id', postId)
+        .single();
+      
+      analytics = newAnalytics;
+    }
+
+    if (!analytics) return;
+
+    // Update the specific metric
+    const updateData: any = {
+      updated_at: new Date().toISOString()
+    };
+
+    switch (metric) {
+      case 'impressions':
+        updateData.impressions = (analytics.impressions || 0) + 1;
+        break;
+      case 'views':
+        updateData.video_views = (analytics.video_views || 0) + 1;
+        break;
+      case 'shares':
+        updateData.shares_count = (analytics.shares_count || 0) + 1;
+        break;
+      case 'profile_views':
+        updateData.profile_views = (analytics.profile_views || 0) + 1;
+        break;
+      case 'followers_gained':
+        updateData.followers_gained = (analytics.followers_gained || 0) + 1;
+        break;
+    }
+
+    await getSupabase()
+      .from('post_analytics')
+      .update(updateData)
+      .eq('post_id', postId);
+  } catch (error) {
+    console.error('Error updating post analytics:', error);
+  }
+}
+
 export async function getPostAnalytics(postId: string): Promise<{
   impressions: number;
   members_reached: number;
@@ -385,24 +580,47 @@ export async function getPostAnalytics(postId: string): Promise<{
       return null;
     }
 
+    // Get analytics data
+    const { data: analytics, error: analyticsError } = await getSupabase()
+      .from('post_analytics')
+      .select('*')
+      .eq('post_id', postId)
+      .single();
+
     // Get saved posts count
     const { count: savesCount } = await getSupabase()
       .from('saved_posts')
       .select('*', { count: 'exact', head: true })
       .eq('post_id', postId);
 
-    // For now, return mock data with real counts from the database
-    // In a real implementation, you would track impressions, views, etc.
+    // Get unique impressions count
+    const { count: uniqueImpressions } = await getSupabase()
+      .from('post_impressions')
+      .select('*', { count: 'exact', head: true })
+      .eq('post_id', postId);
+
+    // Get total watch time
+    const { data: views } = await getSupabase()
+      .from('post_views')
+      .select('view_duration')
+      .eq('post_id', postId);
+
+    const totalWatchTime = views?.reduce((sum, view) => sum + (view.view_duration || 0), 0) || 0;
+    const averageWatchTime = views && views.length > 0 ? totalWatchTime / views.length : 0;
+
     return {
-      impressions: Math.floor(Math.random() * 10000) + 1000, // Mock data
-      members_reached: Math.floor(Math.random() * 5000) + 500, // Mock data
-      profile_viewers: Math.floor(Math.random() * 50) + 5, // Mock data
-      followers_gained: Math.floor(Math.random() * 10), // Mock data
+      impressions: analytics?.impressions || 0,
+      members_reached: uniqueImpressions || 0,
+      profile_viewers: analytics?.profile_views || 0,
+      followers_gained: analytics?.followers_gained || 0,
+      video_views: analytics?.video_views || 0,
+      watch_time: totalWatchTime,
+      average_watch_time: Math.round(averageWatchTime),
       reactions: post.likes_count || 0,
       comments: post.comments_count || 0,
       reposts: post.shares_count || 0,
       saves: savesCount || 0,
-      shares: Math.floor(Math.random() * 20) + 1, // Mock data
+      shares: analytics?.shares_count || 0,
     };
   } catch (error) {
     console.error('Error fetching post analytics:', error);

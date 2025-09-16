@@ -41,6 +41,13 @@ import {
   validateStringLength
 } from '@/utils/errorHandler';
 import { cn } from '@/lib/utils';
+import { 
+  trackPostImpression, 
+  trackPostView, 
+  trackPostShare,
+  trackProfileView 
+} from '@/lib/queries';
+import { getDeviceType } from '@/lib/analytics';
 
 interface PostCardProps {
   post: Post & {
@@ -72,16 +79,25 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
 
   // Initialize post state on mount
   useEffect(() => {
-    if (!post?.id || !user?.id) return;
+    if (!post?.id) return;
 
     const initializePostState = async () => {
       try {
-        const [saved, reactionType] = await Promise.all([
-          isPostSaved(post.id, user.id),
-          isPostLiked(user.id, post.id)
-        ]);
-        setIsBookmarked(saved);
-        setUserReaction(reactionType);
+        if (user?.id) {
+          const [saved, reactionType] = await Promise.all([
+            isPostSaved(post.id, user.id),
+            isPostLiked(user.id, post.id)
+          ]);
+          setIsBookmarked(saved);
+          setUserReaction(reactionType);
+        }
+
+        // Track post impression
+        const deviceType = getDeviceType();
+        const source = window.location.pathname.includes('/profile/') ? 'profile' : 
+                      window.location.pathname.includes('/search') ? 'search' : 'feed';
+        
+        await trackPostImpression(post.id, user?.id || null, source, deviceType);
       } catch (error) {
         // Silently fail, UI will just show default state
       }
@@ -270,7 +286,13 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
     return 'Healthcare Professional';
   };
 
-  const handlePostClick = () => {
+  const handlePostClick = async () => {
+    // Track post view
+    if (user?.id) {
+      const deviceType = getDeviceType();
+      await trackPostView(post.id, user.id, 5, deviceType); // Assume 5 seconds view duration
+    }
+    
     router.push(`/post/${post.id}`);
   };
 
@@ -431,7 +453,15 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
           <ChatBubbleOvalLeftIcon className="w-5 h-5" />
           <span className="text-sm font-medium">Comment</span>
         </button>
-        <ShareButton title={`Post by ${getAuthorName()}`} url={`${window.location.origin}/post/${post.id}`} />
+        <ShareButton 
+          title={`Post by ${getAuthorName()}`} 
+          url={`${window.location.origin}/post/${post.id}`}
+          onShare={async (shareType, platform) => {
+            if (user?.id) {
+              await trackPostShare(post.id, user.id, shareType, platform);
+            }
+          }}
+        />
         <button
           onClick={handleBookmark}
           className={cn("flex items-center space-x-2 px-3 py-2 rounded-lg", isBookmarked ? "text-blue-600 bg-blue-50" : "text-gray-500 hover:bg-gray-100")}
