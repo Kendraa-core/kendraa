@@ -1101,13 +1101,27 @@ export async function getEventsByInstitution(institutionId: string): Promise<Eve
       return [];
     }
     
+    // First get the institution admin's profile ID
+    const { data: institution, error: institutionError } = await getSupabase()
+      .from('institutions')
+      .select('admin_user_id')
+      .eq('id', institutionId)
+      .single();
+
+    if (institutionError || !institution) {
+      console.error('Error fetching institution admin:', institutionError);
+      return [];
+    }
+    
+    // Then get events organized by the institution admin
     const { data, error } = await getSupabase()
       .from('events')
       .select(`
         *,
         organizer:profiles!events_organizer_id_fkey(*)
       `)
-      .eq('organizer_id', institutionId)
+      .eq('organizer_id', institution.admin_user_id)
+      .eq('organizer_type', 'institution')
       .order('created_at', { ascending: false });
 
     if (error) {
