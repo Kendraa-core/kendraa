@@ -167,7 +167,8 @@ export default function InstitutionLayout({
   const isNetworkPage = pathname === '/institution/network';
   const isFeedPage = pathname === '/institution/feed';
   const isJobsPage = pathname === '/institution/jobs';
-  const shouldShowSidebars = !isNetworkPage && !isFeedPage && !isJobsPage;
+  const isProfilePage = pathname === '/institution/profile';
+  const shouldShowSidebars = !isNetworkPage && !isFeedPage && !isJobsPage && !isProfilePage;
   // Show innovative left sidebar on the feed page
   const shouldShowInnovativeSidebar = pathname === '/institution/feed';
   // Show profile card right sidebar on the feed page
