@@ -126,6 +126,8 @@ export default function InstitutionLayout({
   }, [user, profile, authLoading, router, updateProfile, isLoadingProfile]);
 
   const isNetworkPage = pathname === '/institution/network';
+  const isFeedPage = pathname === '/institution/feed';
+  const shouldShowSidebars = !isNetworkPage && !isFeedPage;
 
   // Show a loading screen while the hook is checking the user's status
   if (isOnboardingLoading || loading || authLoading) {
@@ -154,24 +156,26 @@ export default function InstitutionLayout({
       
       <div className="flex">
         {/* Left Sidebar */}
-        <LeftSidebar 
-          connectionCount={connectionCount}
-          groupsCount={groupsCount}
-          eventsCount={eventsCount}
-          pagesCount={pagesCount}
-          newslettersCount={newslettersCount}
-          isInstitution={true}
-        />
+        {shouldShowSidebars && (
+          <LeftSidebar 
+            connectionCount={connectionCount}
+            groupsCount={groupsCount}
+            eventsCount={eventsCount}
+            pagesCount={pagesCount}
+            newslettersCount={newslettersCount}
+            isInstitution={true}
+          />
+        )}
         
         {/* Main Content */}
-        <main className="flex-1 lg:ml-64">
+        <main className={`flex-1 ${shouldShowSidebars ? 'lg:ml-64' : ''}`}>
           <div className="min-h-screen">
             {children}
           </div>
         </main>
         
         {/* Right Sidebar */}
-        {!isNetworkPage && (
+        {shouldShowSidebars && (
           <RightSidebar 
             connectionCount={connectionCount}
             isInstitution={true}

@@ -131,62 +131,55 @@ export default function InstitutionFeedPage() {
     <div className={`${BACKGROUNDS.page.primary} min-h-screen`}>
       <Header />
       
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
           {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className={`${TYPOGRAPHY.heading.h1}`}>Institution Feed</h1>
-                <p className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary}`}>
-                  Share updates, manage content, and engage with your network
-                </p>
-              </div>
-              <button
-                onClick={() => setShowCreatePost(!showCreatePost)}
-                className={`${COMPONENTS.button.primary} flex items-center space-x-2`}
-              >
-                <PlusIcon className="w-5 h-5" />
-                <span>Create Post</span>
-              </button>
-            </div>
+          <div className="text-center mb-8">
+            <h1 className={`${TYPOGRAPHY.heading.h1} mb-2`}>Institution Feed</h1>
+            <p className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary} mb-6`}>
+              Share updates, manage content, and engage with your network
+            </p>
+            <button
+              onClick={() => setShowCreatePost(!showCreatePost)}
+              className={`${COMPONENTS.button.primary} flex items-center space-x-2 mx-auto`}
+            >
+              <PlusIcon className="w-5 h-5" />
+              <span>Create Post</span>
+            </button>
           </div>
 
           {/* Institution Info Card */}
           {institution && (
-            <div className={`${COMPONENTS.card.base} mb-6`}>
-              <div className="p-6">
-                <div className="flex items-center space-x-4">
-                  <Avatar
-                    src={institution.logo_url}
-                    name={institution.name}
-                    size="lg"
-                  />
-                  <div className="flex-1">
-                    <h2 className={`${TYPOGRAPHY.heading.h2}`}>{institution.name}</h2>
-                    <p className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary}`}>
-                      {institution.description || 'Healthcare Institution'}
-                    </p>
-                    <div className="flex items-center space-x-4 mt-2">
-                      <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
-                        {institutionPosts.length} Posts
-                      </span>
-                    </div>
-                  </div>
+            <div className={`${COMPONENTS.card.base} mb-8`}>
+              <div className="p-8 text-center">
+                <Avatar
+                  src={institution.logo_url}
+                  name={institution.name}
+                  size="xl"
+                  className="mx-auto mb-4"
+                />
+                <h2 className={`${TYPOGRAPHY.heading.h2} mb-2`}>{institution.name}</h2>
+                <p className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary} mb-4`}>
+                  {institution.description || 'Healthcare Institution'}
+                </p>
+                <div className="inline-flex items-center px-4 py-2 bg-gray-100 rounded-full">
+                  <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                    {institutionPosts.length} Posts
+                  </span>
                 </div>
               </div>
             </div>
           )}
 
           {/* Tabs */}
-          <div className={`${COMPONENTS.card.base} mb-6 p-2 flex space-x-2`}>
+          <div className={`${COMPONENTS.card.base} mb-8 p-2 flex space-x-2 max-w-md mx-auto`}>
             <button
               onClick={() => setActiveTab('feed')}
-              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
+              className={`flex-1 py-3 px-6 rounded-lg text-sm font-medium transition-colors ${
                 activeTab === 'feed'
                   ? 'bg-[#007fff] text-white shadow-sm'
                   : 'text-gray-700 hover:bg-gray-100'
@@ -196,7 +189,7 @@ export default function InstitutionFeedPage() {
             </button>
             <button
               onClick={() => setActiveTab('posts')}
-              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
+              className={`flex-1 py-3 px-6 rounded-lg text-sm font-medium transition-colors ${
                 activeTab === 'posts'
                   ? 'bg-[#007fff] text-white shadow-sm'
                   : 'text-gray-700 hover:bg-gray-100'
@@ -208,27 +201,27 @@ export default function InstitutionFeedPage() {
 
           {/* Create Post Form */}
           {showCreatePost && (
-            <div className={`${COMPONENTS.card.base} mb-6`}>
-              <div className="p-6">
-                <h3 className={`${TYPOGRAPHY.heading.h3} mb-4`}>Create New Post</h3>
-                <div className="space-y-4">
+            <div className={`${COMPONENTS.card.base} mb-8`}>
+              <div className="p-8">
+                <h3 className={`${TYPOGRAPHY.heading.h3} mb-6 text-center`}>Create New Post</h3>
+                <div className="space-y-6">
                   <textarea
                     value={postContent}
                     onChange={(e) => setPostContent(e.target.value)}
                     placeholder="Share an update with your network..."
-                    className={`w-full h-32 ${COMPONENTS.input.base} resize-none`}
+                    className={`w-full h-40 ${COMPONENTS.input.base} resize-none text-center`}
                   />
-                  <div className="flex justify-end space-x-3">
+                  <div className="flex justify-center space-x-4">
                     <button
                       onClick={() => setShowCreatePost(false)}
-                      className={`${COMPONENTS.button.secondary}`}
+                      className={`${COMPONENTS.button.secondary} px-8`}
                     >
                       Cancel
                     </button>
                     <button
                       onClick={() => handleCreatePost(postContent)}
                       disabled={!postContent.trim()}
-                      className={`${COMPONENTS.button.primary} disabled:opacity-50 disabled:cursor-not-allowed`}
+                      className={`${COMPONENTS.button.primary} px-8 disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
                       Post
                     </button>
@@ -240,11 +233,11 @@ export default function InstitutionFeedPage() {
 
           {/* Content */}
           {loading ? (
-            <div className="flex justify-center items-center py-12">
+            <div className="flex justify-center items-center py-16">
               <LoadingSpinner size="lg" text="Loading content..." />
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-8">
               {activeTab === 'feed' && (
                 <div className="space-y-4">
                   {posts.length > 0 ? (
@@ -256,12 +249,18 @@ export default function InstitutionFeedPage() {
                       />
                     ))
                   ) : (
-                    <div className={`${COMPONENTS.card.base} text-center py-12`}>
-                      <UserGroupIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                      <h3 className={`${TYPOGRAPHY.heading.h3} mb-2`}>No posts yet</h3>
-                      <p className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary}`}>
+                    <div className={`${COMPONENTS.card.base} text-center py-16`}>
+                      <UserGroupIcon className="w-20 h-20 text-gray-300 mx-auto mb-6" />
+                      <h3 className={`${TYPOGRAPHY.heading.h3} mb-3`}>No posts yet</h3>
+                      <p className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary} mb-6`}>
                         Be the first to share something with the community
                       </p>
+                      <button
+                        onClick={() => setShowCreatePost(true)}
+                        className={`${COMPONENTS.button.primary}`}
+                      >
+                        Create First Post
+                      </button>
                     </div>
                   )}
                 </div>
@@ -278,10 +277,10 @@ export default function InstitutionFeedPage() {
                       />
                     ))
                   ) : (
-                    <div className={`${COMPONENTS.card.base} text-center py-12`}>
-                      <PlusIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                      <h3 className={`${TYPOGRAPHY.heading.h3} mb-2`}>No posts yet</h3>
-                      <p className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary} mb-4`}>
+                    <div className={`${COMPONENTS.card.base} text-center py-16`}>
+                      <PlusIcon className="w-20 h-20 text-gray-300 mx-auto mb-6" />
+                      <h3 className={`${TYPOGRAPHY.heading.h3} mb-3`}>No posts yet</h3>
+                      <p className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary} mb-6`}>
                         Start sharing updates with your network
                       </p>
                       <button
