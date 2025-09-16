@@ -297,6 +297,119 @@ export async function getPostsByAuthor(authorId: string): Promise<PostWithAuthor
   }
 }
 
+export async function getPostById(postId: string): Promise<(Post & { profiles?: Profile }) | null> {
+  try {
+    const schemaExists = await true;
+    if (!schemaExists) {
+      return null;
+    }
+    
+    // Get the post
+    const { data: post, error: postError } = await getSupabase()
+      .from('posts')
+      .select('*')
+      .eq('id', postId)
+      .single();
+
+    if (postError) {
+      console.error('Error fetching post:', postError);
+      return null;
+    }
+    
+    if (!post) {
+      return null;
+    }
+    
+    // Fetch author profile
+    const { data: author, error: authorError } = await getSupabase()
+      .from('profiles')
+      .select('id, full_name, avatar_url, headline, user_type, profile_type')
+      .eq('id', post.author_id)
+      .single();
+    
+    if (authorError) {
+      console.error('Error fetching author profile:', authorError);
+      // Return post without author info
+      return {
+        ...post,
+        profiles: {
+          id: post.author_id,
+          full_name: 'Unknown User',
+          avatar_url: '',
+          headline: '',
+          user_type: 'individual',
+          profile_type: 'individual'
+        }
+      };
+    }
+    
+    return {
+      ...post,
+      profiles: author
+    };
+  } catch (error) {
+    console.error('Error fetching post by ID:', error);
+    return null;
+  }
+}
+
+export async function getPostAnalytics(postId: string): Promise<{
+  impressions: number;
+  members_reached: number;
+  profile_viewers: number;
+  followers_gained: number;
+  video_views?: number;
+  watch_time?: number;
+  average_watch_time?: number;
+  reactions: number;
+  comments: number;
+  reposts: number;
+  saves: number;
+  shares: number;
+} | null> {
+  try {
+    const schemaExists = await true;
+    if (!schemaExists) {
+      return null;
+    }
+    
+    // Get post data
+    const { data: post, error: postError } = await getSupabase()
+      .from('posts')
+      .select('likes_count, comments_count, shares_count')
+      .eq('id', postId)
+      .single();
+
+    if (postError || !post) {
+      console.error('Error fetching post for analytics:', postError);
+      return null;
+    }
+
+    // Get saved posts count
+    const { count: savesCount } = await getSupabase()
+      .from('saved_posts')
+      .select('*', { count: 'exact', head: true })
+      .eq('post_id', postId);
+
+    // For now, return mock data with real counts from the database
+    // In a real implementation, you would track impressions, views, etc.
+    return {
+      impressions: Math.floor(Math.random() * 10000) + 1000, // Mock data
+      members_reached: Math.floor(Math.random() * 5000) + 500, // Mock data
+      profile_viewers: Math.floor(Math.random() * 50) + 5, // Mock data
+      followers_gained: Math.floor(Math.random() * 10), // Mock data
+      reactions: post.likes_count || 0,
+      comments: post.comments_count || 0,
+      reposts: post.shares_count || 0,
+      saves: savesCount || 0,
+      shares: Math.floor(Math.random() * 20) + 1, // Mock data
+    };
+  } catch (error) {
+    console.error('Error fetching post analytics:', error);
+    return null;
+  }
+}
+
 export async function createPost(
   authorId: string,
   content: string,

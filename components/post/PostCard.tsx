@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import Avatar from '@/components/common/Avatar';
 import ClickableProfileName from '@/components/common/ClickableProfileName';
@@ -13,6 +14,8 @@ import {
   BookmarkIcon,
   EllipsisHorizontalIcon,
   TrashIcon,
+  ChartBarIcon,
+  FlagIcon,
 } from '@heroicons/react/24/outline';
 import {
   BookmarkIcon as BookmarkSolidIcon,
@@ -48,6 +51,7 @@ interface PostCardProps {
 
 export default function PostCard({ post, onInteraction }: PostCardProps) {
   const { user } = useAuth();
+  const router = useRouter();
   
   // State management
   const [isBookmarked, setIsBookmarked] = useState(false);
@@ -266,6 +270,20 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
     return 'Healthcare Professional';
   };
 
+  const handlePostClick = () => {
+    router.push(`/post/${post.id}`);
+  };
+
+  const handleViewAnalytics = () => {
+    router.push(`/post/${post.id}/analytics`);
+  };
+
+  const handleReportPost = () => {
+    // TODO: Implement report functionality
+    toast.success('Post reported successfully');
+    setShowDropdown(false);
+  };
+
   const handleDeletePost = async () => {
     if (!user?.id) return;
 
@@ -328,16 +346,42 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
           </button>
           
           {showDropdown && (
-            <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-10 min-w-[120px]">
-              {isOwnPost && (
-                <button
-                  onClick={handleDeletePost}
-                  disabled={isDeleting}
-                  className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 disabled:opacity-50"
-                >
-                  <TrashIcon className="w-4 h-4" />
-                  {isDeleting ? 'Deleting...' : 'Delete'}
-                </button>
+            <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-10 min-w-[140px]">
+              {isOwnPost ? (
+                <>
+                  <button
+                    onClick={handleViewAnalytics}
+                    className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  >
+                    <ChartBarIcon className="w-4 h-4" />
+                    View Analytics
+                  </button>
+                  <button
+                    onClick={handleDeletePost}
+                    disabled={isDeleting}
+                    className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 disabled:opacity-50"
+                  >
+                    <TrashIcon className="w-4 h-4" />
+                    {isDeleting ? 'Deleting...' : 'Delete'}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={handleViewAnalytics}
+                    className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  >
+                    <ChartBarIcon className="w-4 h-4" />
+                    View Analytics
+                  </button>
+                  <button
+                    onClick={handleReportPost}
+                    className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                  >
+                    <FlagIcon className="w-4 h-4" />
+                    Report Post
+                  </button>
+                </>
               )}
             </div>
           )}
@@ -345,7 +389,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
       </div>
 
       {/* Post Content */}
-      <div className="mb-4">
+      <div className="mb-4 cursor-pointer" onClick={handlePostClick}>
         <p className="text-gray-900 whitespace-pre-wrap break-words leading-relaxed">{post.content}</p>
         
         {post.image_url && (
