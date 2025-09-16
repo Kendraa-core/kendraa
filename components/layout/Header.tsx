@@ -342,7 +342,7 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
                       </div>
                     </div>
 
-                    {/* Quick Actions */}
+                    {/* Profile & Analytics */}
                     <div className="px-2 py-1">
                       <Link
                         href={profile?.user_type === 'institution' || profile?.profile_type === 'institution' ? '/institution/profile' : `/profile/${user?.id}`}
@@ -351,13 +351,20 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
                         <UserIcon className="w-4 h-4" />
                         <span>View Profile</span>
                       </Link>
-                      <button
-                        onClick={() => setShowProfileWizard(true)}
-                        className="flex items-center space-x-3 w-full px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                      <Link
+                        href="/dashboard"
+                        className="flex items-center space-x-3 px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
                       >
-                        <PlusIcon className="w-4 h-4" />
-                        <span>Edit Profile</span>
-                      </button>
+                        <ChartBarIcon className="w-4 h-4" />
+                        <span>Analytics & Insights</span>
+                      </Link>
+                      <Link
+                        href="/reviews"
+                        className="flex items-center space-x-3 px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                      >
+                        <HeartIcon className="w-4 h-4" />
+                        <span>Reviews & Feedback</span>
+                      </Link>
                     </div>
 
                     {/* Account Management */}
@@ -376,6 +383,20 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
                         <BookmarkIcon className="w-4 h-4" />
                         <span>Saved Items</span>
                       </Link>
+                      <Link
+                        href="/notifications"
+                        className="flex items-center space-x-3 px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                      >
+                        <BellIcon className="w-4 h-4" />
+                        <span>Notifications</span>
+                      </Link>
+                      <Link
+                        href="/search"
+                        className="flex items-center space-x-3 px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                      >
+                        <MagnifyingGlassIcon className="w-4 h-4" />
+                        <span>Search</span>
+                      </Link>
                     </div>
 
                     {/* Help & Support */}
@@ -393,6 +414,20 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
                       >
                         <ShieldCheckIcon className="w-4 h-4" />
                         <span>Privacy Policy</span>
+                      </Link>
+                      <Link
+                        href="/about"
+                        className="flex items-center space-x-3 px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                      >
+                        <Squares2X2Icon className="w-4 h-4" />
+                        <span>About Kendraa</span>
+                      </Link>
+                      <Link
+                        href="/contact"
+                        className="flex items-center space-x-3 px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                      >
+                        <ExclamationTriangleIcon className="w-4 h-4" />
+                        <span>Contact Us</span>
                       </Link>
                     </div>
 
