@@ -987,6 +987,7 @@ export default function ProfilePage() {
   const [profileViewers, setProfileViewers] = useState<Profile[]>([]);
   const [suggestedConnections, setSuggestedConnections] = useState<Array<Profile & { mutual_connections: number }>>([]);
   const [canSendRequests, setCanSendRequests] = useState(true);
+  const [showAllExperiences, setShowAllExperiences] = useState(false);
   const [actionType, setActionType] = useState<'connect' | 'follow' | 'none'>('none');
 
   // Inline editing states
@@ -1448,52 +1449,11 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className={`min-h-screen ${BACKGROUNDS.page.primary} relative`}>
-      {/* Floating Right Island */}
-      <div className="hidden xl:block fixed right-16 top-24 w-80 z-10 space-y-4">
-        {/* Who Viewed Your Profile Section - Only for own profile */}
-        {isOwnProfile && (
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
-            <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
-              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                <EyeIcon className="w-4 h-4 text-[#007fff]" />
-                Who Viewed Your Profile
-              </h3>
-            </div>
-            <div className="p-3">
-              <ProfileViewers viewers={profileViewers} />
-            </div>
-          </div>
-        )}
-
-        {/* People You May Know Section */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
-            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <UserGroupIcon className="w-4 h-4 text-[#007fff]" />
-              People You May Know
-            </h3>
-          </div>
-          <div className="p-3">
-            {isOwnProfile ? (
-              <PeopleYouMayKnow 
-                suggestions={suggestedConnections} 
-                onConnect={handleSuggestedConnect}
-              />
-            ) : (
-              <SimilarPeople />
-            )}
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-lg">
-          <SidebarCard profile={profile} isOwnProfile={isOwnProfile} />
-        </div>
-      </div>
-
-      {/* Main Content Container */}
-      <div className="px-4 sm:px-6 lg:px-8 py-6">
-        <div className="w-full max-w-4xl mx-auto xl:mr-96 xl:ml-16 space-y-8">
+    <div className={`min-h-screen ${BACKGROUNDS.page.primary}`}>
+      <div className="flex gap-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Main Content */}
+        <div className="flex-1 min-w-0">
+          <div className="space-y-8">
           {/* Profile Header */}
           <div className={`${COMPONENTS.card.base} shadow-xl`}>
             {/* Banner */}
@@ -2045,7 +2005,7 @@ export default function ProfilePage() {
                         </div>
                       ) : experiences.length > 0 ? (
                         <div className="space-y-6">
-                          {experiences.slice(0, 3).map((experience, index) => (
+                          {(showAllExperiences ? experiences : experiences.slice(0, 3)).map((experience, index) => (
                             <ExperienceCard
                               key={experience.id}
                               experience={experience}
@@ -2060,8 +2020,11 @@ export default function ProfilePage() {
                           ))}
                           {experiences.length > 3 && (
                             <div className="text-center pt-4">
-                              <button className="text-[#007fff] hover:text-[#007fff]/80 text-sm font-medium hover:underline transition-colors duration-200">
-                                View all {experiences.length} experiences
+                              <button 
+                                onClick={() => setShowAllExperiences(!showAllExperiences)}
+                                className="text-[#007fff] hover:text-[#007fff]/80 text-sm font-medium hover:underline transition-colors duration-200"
+                              >
+                                {showAllExperiences ? 'Show less' : `View all ${experiences.length} experiences`}
                               </button>
                     </div>
                   )}
@@ -2272,6 +2235,51 @@ export default function ProfilePage() {
                     </div>
           </div>
               </div>
+            </div>
+          </div>
+          </div>
+        </div>
+
+        {/* Right Sidebar */}
+        <div className="hidden xl:block w-80 flex-shrink-0">
+          <div className="sticky top-24 space-y-4">
+            {/* Who Viewed Your Profile Section - Only for own profile */}
+            {isOwnProfile && (
+              <div className="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
+                <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <EyeIcon className="w-4 h-4 text-[#007fff]" />
+                    Who Viewed Your Profile
+                  </h3>
+                </div>
+                <div className="p-3">
+                  <ProfileViewers viewers={profileViewers} />
+                </div>
+              </div>
+            )}
+
+            {/* People You May Know Section */}
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
+              <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+                <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                  <UserGroupIcon className="w-4 h-4 text-[#007fff]" />
+                  People You May Know
+                </h3>
+              </div>
+              <div className="p-3">
+                {isOwnProfile ? (
+                  <PeopleYouMayKnow 
+                    suggestions={suggestedConnections} 
+                    onConnect={handleSuggestedConnect}
+                  />
+                ) : (
+                  <SimilarPeople />
+                )}
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-lg">
+              <SidebarCard profile={profile} isOwnProfile={isOwnProfile} />
             </div>
           </div>
         </div>
