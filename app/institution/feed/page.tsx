@@ -132,20 +132,6 @@ export default function InstitutionFeedPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className={`${TYPOGRAPHY.heading.h1} mb-2`}>Institution Feed</h1>
-            <p className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary} mb-6`}>
-              Share updates, manage content, and engage with your network
-            </p>
-            <button
-              onClick={() => setShowCreatePost(!showCreatePost)}
-              className={`${COMPONENTS.button.primary} flex items-center space-x-2 mx-auto`}
-            >
-              <PlusIcon className="w-5 h-5" />
-              <span>Create Post</span>
-            </button>
-          </div>
 
 
           {/* Create Post Form */}
