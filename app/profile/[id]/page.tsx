@@ -747,14 +747,14 @@ const ActivityCard = React.memo(function ActivityCard({ posts, isOwnProfile, con
       {/* Posts */}
       {posts.length > 0 ? (
         <div>
-          <div className="flex gap-4 overflow-x-auto pb-2">
+          <div className="flex gap-6 overflow-x-auto pb-4">
             {posts.slice(0, 3).map((post, index) => (
               <motion.div 
                 key={post.id}
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.1 }}
-                className="flex-shrink-0 w-80 border border-gray-100 rounded-lg p-4 hover:border-[#007fff]/20 transition-colors"
+                className="flex-shrink-0 w-80 border border-gray-100 rounded-lg p-5 hover:border-[#007fff]/20 transition-colors shadow-sm"
               >
                 <PostCard post={post} />
               </motion.div>
@@ -1391,10 +1391,52 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className={`min-h-screen ${BACKGROUNDS.page.primary}`}>
-      <div className="flex gap-6 px-4 sm:px-6 lg:px-8 py-6">
-        {/* Main Content Container */}
-        <div className="flex-1 max-w-4xl mx-auto space-y-4">
+    <div className={`min-h-screen ${BACKGROUNDS.page.primary} relative`}>
+      {/* Floating Right Island */}
+      <div className="hidden xl:block fixed right-6 top-24 w-80 z-10 space-y-4">
+        {/* Who Viewed Your Profile Section - Only for own profile */}
+        {isOwnProfile && (
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <EyeIcon className="w-4 h-4 text-[#007fff]" />
+                Who Viewed Your Profile
+              </h3>
+            </div>
+            <div className="p-3">
+              <ProfileViewers viewers={profileViewers} />
+            </div>
+          </div>
+        )}
+
+        {/* People You May Know Section */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <UserGroupIcon className="w-4 h-4 text-[#007fff]" />
+              People You May Know
+            </h3>
+          </div>
+          <div className="p-3">
+            {isOwnProfile ? (
+              <PeopleYouMayKnow 
+                suggestions={suggestedConnections} 
+                onConnect={handleSuggestedConnect}
+              />
+            ) : (
+              <SimilarPeople />
+            )}
+          </div>
+        </div>
+        
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-lg">
+          <SidebarCard profile={profile} isOwnProfile={isOwnProfile} />
+        </div>
+      </div>
+
+      {/* Main Content Container */}
+      <div className="px-4 sm:px-6 lg:px-8 py-6">
+        <div className={`w-full ${isOwnProfile ? 'xl:mr-96' : 'xl:mr-96'} max-w-4xl mx-auto space-y-8`}>
           {/* Profile Header */}
           <div className={`${COMPONENTS.card.base} shadow-xl`}>
             {/* Banner */}
@@ -1429,21 +1471,21 @@ export default function ProfilePage() {
             </div>
 
             {/* Profile Content */}
-            <div className="px-4 py-3">
+            <div className="px-6 py-6">
               {/* Avatar positioned to overlap banner */}
-              <div className="flex justify-start -mt-20 mb-3">
+              <div className="flex justify-start -mt-24 mb-6">
                 <div className="relative">
                   <Avatar
                     src={profile.avatar_url}
                     alt={profile.full_name || 'Profile'}
                     size="2xl"
-                    className="border-4 border-white shadow-2xl ring-4 ring-[#007fff]/20 w-32 h-32"
+                    className="border-4 border-white shadow-2xl ring-4 ring-[#007fff]/20 w-36 h-36"
                   />
                   {/* Edit Avatar Button */}
                   {isOwnProfile && (
                     <button
                       onClick={handleEditImages}
-                      className="absolute -bottom-2 -right-2 bg-[#007fff] text-white p-2 rounded-full hover:bg-[#007fff]/90 transition-all duration-300 shadow-lg transform hover:scale-110"
+                      className="absolute -bottom-2 -right-2 bg-[#007fff] text-white p-2.5 rounded-full hover:bg-[#007fff]/90 transition-all duration-300 shadow-lg transform hover:scale-110"
                     >
                       <CameraIcon className="w-4 h-4" />
                     </button>
@@ -1452,9 +1494,9 @@ export default function ProfilePage() {
                 </div>
 
               {/* Profile Information and Actions */}
-              <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+              <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
                 {/* Left Side: Profile Info and Stats */}
-                <div className="flex-1 min-w-0 space-y-3">
+                <div className="flex-1 min-w-0 space-y-4">
                   {/* Name */}
                   <div className="space-y-2">
                     {editingField === 'full_name' ? (
@@ -1668,7 +1710,7 @@ export default function ProfilePage() {
 
                   {/* Action Buttons for non-own profiles */}
                   {!isOwnProfile && (
-                    <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-4">
                       {user ? (
                         // Logged in user actions
                         <>
@@ -1944,7 +1986,7 @@ export default function ProfilePage() {
                           </div>
                         </div>
                       ) : experiences.length > 0 ? (
-                        <div className="space-y-4">
+                        <div className="space-y-6">
                           {experiences.slice(0, 3).map((experience, index) => (
                             <ExperienceCard
                               key={experience.id}
@@ -2133,7 +2175,7 @@ export default function ProfilePage() {
             </div>
                         </div>
                       ) : education.length > 0 ? (
-                        <div className="space-y-4">
+                        <div className="space-y-6">
                           {education.slice(0, 3).map((edu, index) => (
                             <EducationCard
                               key={edu.id}
@@ -2174,46 +2216,6 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
-        </div>
-        
-        {/* Right Sidebar - Outside main content */}
-        <div className="hidden xl:block w-80 space-y-4 sticky top-6 h-fit">
-          {/* Who Viewed Your Profile Section - Only for own profile */}
-          {isOwnProfile && (
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-              <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
-                <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                  <EyeIcon className="w-4 h-4 text-[#007fff]" />
-                  Who Viewed Your Profile
-                </h3>
-              </div>
-              <div className="p-3">
-                <ProfileViewers viewers={profileViewers} />
-              </div>
-            </div>
-          )}
-
-          {/* People You May Know Section */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
-              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                <UserGroupIcon className="w-4 h-4 text-[#007fff]" />
-                People You May Know
-              </h3>
-            </div>
-            <div className="p-3">
-              {isOwnProfile ? (
-                <PeopleYouMayKnow 
-                  suggestions={suggestedConnections} 
-                  onConnect={handleSuggestedConnect}
-                />
-              ) : (
-                <SimilarPeople />
-              )}
-            </div>
-          </div>
-          
-          <SidebarCard profile={profile} isOwnProfile={isOwnProfile} />
         </div>
       </div>
         
