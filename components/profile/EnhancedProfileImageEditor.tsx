@@ -78,67 +78,61 @@ export default function EnhancedProfileImageEditor({
     });
 
   const getCroppedImg = async (
-  imageSrc: string,
-  pixelCrop: CropArea,
-  rotation = 0
-): Promise<Blob> => {
-  const image = await createImage(imageSrc);
-  // Choose output size based on cropType
-  const outputSize = cropType === 'avatar' ? 400 : 1600; // 400x400 for avatar, 1600x900 base for banner
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  if (!ctx) throw new Error('No 2d context');
+    imageSrc: string,
+    pixelCrop: CropArea,
+    rotation = 0
+  ): Promise<Blob> => {
+    const image = await createImage(imageSrc);
+    const outputSize = cropType === 'avatar' ? 400 : 1600;
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('No 2d context');
 
-  if (cropType === 'avatar') {
-    canvas.width = outputSize;
-    canvas.height = outputSize;
-  } else {
-    // banner -> 16:9
-    canvas.width = outputSize;
-    canvas.height = Math.round(outputSize * 9 / 16);
-  }
+    if (cropType === 'avatar') {
+      canvas.width = outputSize;
+      canvas.height = outputSize;
+    } else {
+      canvas.width = outputSize;
+      canvas.height = Math.round(outputSize * 9 / 16);
+    }
 
-  // If rotation exists, apply rotation about center
-  if (rotation !== 0) {
-    ctx.translate(canvas.width / 2, canvas.height / 2);
-    ctx.rotate((rotation * Math.PI) / 180);
-    ctx.translate(-canvas.width / 2, -canvas.height / 2);
-  }
+    if (rotation !== 0) {
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate((rotation * Math.PI) / 180);
+      ctx.translate(-canvas.width / 2, -canvas.height / 2);
+    }
 
-  // react-easy-crop's croppedAreaPixels are in the source image's pixel space (naturalWidth/naturalHeight)
-  const sx = pixelCrop.x;
-  const sy = pixelCrop.y;
-  const sWidth = pixelCrop.width;
-  const sHeight = pixelCrop.height;
+    const sx = pixelCrop.x;
+    const sy = pixelCrop.y;
+    const sWidth = pixelCrop.width;
+    const sHeight = pixelCrop.height;
 
-  // Draw the crop from original image to canvas scaled to output canvas size
-  ctx.drawImage(
-    image,
-    sx,
-    sy,
-    sWidth,
-    sHeight,
-    0,
-    0,
-    canvas.width,
-    canvas.height
-  );
+    ctx.drawImage(
+      image,
+      sx,
+      sy,
+      sWidth,
+      sHeight,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
 
-  return await new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => {
-      if (!blob) return reject(new Error('Canvas is empty'));
-      resolve(blob);
-    }, 'image/jpeg', 0.92);
-  });
-};
+    return new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (!blob) return reject(new Error('Canvas is empty'));
+        resolve(blob);
+      }, 'image/jpeg', 0.92);
+    });
+  };
 
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'banner') => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file
-    const maxSizeMB = type === 'avatar' ? 5 : 10; // Increased limits for better quality
+    const maxSizeMB = type === 'avatar' ? 5 : 10;
     const validation = validateFile(file, maxSizeMB);
 
     if (!validation.valid) {
@@ -146,7 +140,6 @@ export default function EnhancedProfileImageEditor({
       return;
     }
 
-    // Create preview and show cropper
     const reader = new FileReader();
     reader.onloadend = () => {
       setImageToCrop(reader.result as string);
@@ -164,42 +157,36 @@ export default function EnhancedProfileImageEditor({
   }, []);
 
   const handleCropSave = async () => {
-  if (!imageToCrop || !croppedAreaPixels) return;
+    if (!imageToCrop || !croppedAreaPixels) return;
 
-  try {
-    setLoading(true);
-    const croppedImageBlob = await getCroppedImg(imageToCrop, croppedAreaPixels, rotation);
+    try {
+      setLoading(true);
+      const croppedImageBlob = await getCroppedImg(imageToCrop, croppedAreaPixels, rotation);
+      const ext = 'jpg';
+      const filename = `${user?.id || 'anon'}-${cropType}-${Date.now()}.${ext}`;
+      const file = new File([croppedImageBlob], filename, { type: 'image/jpeg' });
+      const previewUrl = URL.createObjectURL(croppedImageBlob);
 
-    // give the file a unique name (timestamp + type)
-    const ext = 'jpg';
-    const filename = `${user?.id || 'anon'}-${cropType}-${Date.now()}.${ext}`;
-    const file = new File([croppedImageBlob], filename, { type: 'image/jpeg' });
+      if (cropType === 'avatar') {
+        if (avatarPreview) URL.revokeObjectURL(avatarPreview);
+        setAvatarFile(file);
+        setAvatarPreview(previewUrl);
+      } else {
+        if (bannerPreview) URL.revokeObjectURL(bannerPreview);
+        setBannerFile(file);
+        setBannerPreview(previewUrl);
+      }
 
-    // Create preview
-    const previewUrl = URL.createObjectURL(croppedImageBlob);
-    // revoke previous preview if any (avoid leaks)
-    if (cropType === 'avatar' && avatarPreview) URL.revokeObjectURL(avatarPreview);
-    if (cropType === 'banner' && bannerPreview) URL.revokeObjectURL(bannerPreview);
-
-    if (cropType === 'avatar') {
-      setAvatarFile(file);
-      setAvatarPreview(previewUrl);
-    } else {
-      setBannerFile(file);
-      setBannerPreview(previewUrl);
+      setShowCropper(false);
+      setImageToCrop(null);
+      toast.success('Image cropped successfully!');
+    } catch (error) {
+      console.error('Error cropping image:', error);
+      toast.error('Failed to crop image');
+    } finally {
+      setLoading(false);
     }
-
-    setShowCropper(false);
-    setImageToCrop(null);
-    toast.success('Image cropped successfully!');
-    console.log('[CropSave] prepared file to upload ->', { filename, size: file.size, type: file.type });
-  } catch (error) {
-    console.error('Error cropping image:', error);
-    toast.error('Failed to crop image');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
 
   const handleRemoveImage = async (type: 'avatar' | 'banner') => {
@@ -213,20 +200,20 @@ export default function EnhancedProfileImageEditor({
 
     setLoadingState(true);
     try {
-      // Extract bucket and path from URL
       const bucket = isAvatar ? 'avatars' : 'banners';
-      const urlParts = currentUrl.split('/');
-      const path = urlParts.slice(-2).join('/'); // Get last two parts (folder/filename)
+      // The path is everything after the bucket name in the URL
+      const path = currentUrl.split(`/${bucket}/`)[1];
+      
+      if (!path) {
+        throw new Error("Could not extract file path from URL.");
+      }
 
-      // Delete from storage
       await deleteFromSupabaseStorage(bucket, path);
 
-      // Update profile
       await updateProfile(user.id, {
         [isAvatar ? 'avatar_url' : 'banner_url']: null,
       });
 
-      // Clear preview
       if (isAvatar) {
         setAvatarPreview(null);
         setAvatarFile(null);
@@ -237,114 +224,107 @@ export default function EnhancedProfileImageEditor({
 
       toast.success(`${type === 'avatar' ? 'Profile picture' : 'Cover photo'} removed successfully`);
       onUpdate();
-    } catch (error) {
-      toast.error(`Failed to remove ${type === 'avatar' ? 'profile picture' : 'cover photo'}`);
+    } catch (error: any) {
+      console.error(`Failed to remove image:`, error);
+      toast.error(`Failed to remove ${type === 'avatar' ? 'profile picture' : 'cover photo'}: ${error.message}`);
     } finally {
       setLoadingState(false);
     }
   };
 
-  // improved handleSaveImage
-// No need to import supabase client here anymore, the helper handles it!
+  const handleSaveImage = async (type: 'avatar' | 'banner') => {
+    if (!user?.id) return toast.error('User not found');
 
-const handleSaveImage = async (type: 'avatar' | 'banner') => {
-  if (!user?.id) return toast.error('User not found');
+    const file = type === 'avatar' ? avatarFile : bannerFile;
+    if (!file) return toast.error('No file to upload');
 
-  const file = type === 'avatar' ? avatarFile : bannerFile;
-  if (!file) return toast.error('No file to upload');
+    const isAvatar = type === 'avatar';
+    const setLoadingState = isAvatar ? setAvatarLoading : setBannerLoading;
+    setLoadingState(true);
 
-  const isAvatar = type === 'avatar';
-  const setLoadingState = isAvatar ? setAvatarLoading : setBannerLoading;
-  setLoadingState(true);
+    try {
+      const folder = isAvatar ? 'avatars' : 'banners';
+      // Use the corrected generateFilePath function
+      const filePath = generateFilePath(user.id, file.name);
+      
+      const result = await uploadToSupabaseStorage(folder, filePath, file);
 
-  try {
-    const folder = isAvatar ? 'avatars' : 'banners';
-    const filePath = generateFilePath(user.id, file.name, folder);
-    
-    // 1. Call your helper function
-    const result = await uploadToSupabaseStorage(folder, filePath, file);
+      if (result.error) {
+        // The error object from Supabase might have a 'message' property
+        const errorMessage = result.error.message || String(result.error);
+        throw new Error(errorMessage);
+      }
+      
+      const uploadedUrl = result.url;
+      if (!uploadedUrl) {
+        throw new Error('Upload succeeded but no URL was returned.');
+      }
+      
+      await updateProfile(user.id, {
+        [isAvatar ? 'avatar_url' : 'banner_url']: uploadedUrl,
+      });
 
-    // 2. Check for the error your helper returns
-    if (result.error) {
-      throw new Error(result.error);
+      if (isAvatar) setAvatarFile(null);
+      else setBannerFile(null);
+
+      toast.success(`${isAvatar ? 'Profile picture' : 'Cover photo'} updated successfully`);
+      onUpdate();
+    } catch (err: any) {
+      console.error(`[handleSaveImage Error]`, err);
+      toast.error(`Upload failed: ${err.message}`);
+    } finally {
+      setLoadingState(false);
     }
-    
-    // 3. Get the URL directly from the result
-    const uploadedUrl = result.url;
-    if (!uploadedUrl) {
-      throw new Error('Upload succeeded but no URL was returned.');
+  };
+
+  const handleSaveAll = async () => {
+    if (!user?.id) return toast.error('User not found');
+
+    setLoading(true);
+    try {
+      const updates: { avatar_url?: string; banner_url?: string } = {};
+
+      if (avatarFile) {
+        const result = await uploadToSupabaseStorage(
+          'avatars',
+          generateFilePath(user.id, avatarFile.name),
+          avatarFile
+        );
+        const errorMessage = result.error?.message || result.error;
+        if (errorMessage) throw new Error(`Avatar upload failed: ${errorMessage}`);
+        if (!result.url) throw new Error('Avatar upload succeeded but no URL was returned.');
+        updates.avatar_url = result.url;
+      }
+
+      if (bannerFile) {
+        const result = await uploadToSupabaseStorage(
+          'banners',
+          generateFilePath(user.id, bannerFile.name),
+          bannerFile
+        );
+        const errorMessage = result.error?.message || result.error;
+        if (errorMessage) throw new Error(`Banner upload failed: ${errorMessage}`);
+        if (!result.url) throw new Error('Banner upload succeeded but no URL was returned.');
+        updates.banner_url = result.url;
+      }
+
+      if (Object.keys(updates).length > 0) {
+        await updateProfile(user.id, updates);
+      }
+
+      setAvatarFile(null);
+      setBannerFile(null);
+
+      toast.success('Profile images updated successfully');
+      onUpdate();
+      onClose();
+    } catch (err: any) {
+      console.error('[handleSaveAll] failed', err);
+      toast.error(`Failed to save images: ${err.message}`);
+    } finally {
+      setLoading(false);
     }
-    
-    // 4. Update the profile
-    await updateProfile(user.id, {
-      [isAvatar ? 'avatar_url' : 'banner_url']: uploadedUrl,
-    });
-
-    if (isAvatar) setAvatarFile(null);
-    else setBannerFile(null);
-
-    toast.success(`${isAvatar ? 'Profile picture' : 'Cover photo'} updated successfully`);
-    onUpdate();
-  } catch (err: any) {
-    console.error(`[handleSaveImage Error]`, err);
-    toast.error(`Upload failed: ${err.message}`);
-  } finally {
-    setLoadingState(false);
-  }
-};
-
-
-
- // improved handleSaveAll (with per-upload logs and detailed errors)
-// No need to import supabase client here anymore
-
-const handleSaveAll = async () => {
-  if (!user?.id) return toast.error('User not found');
-
-  setLoading(true);
-  try {
-    const updates: { avatar_url?: string; banner_url?: string } = {};
-
-    if (avatarFile) {
-      const result = await uploadToSupabaseStorage(
-        'avatars',
-        generateFilePath(user.id, avatarFile.name, 'avatars'),
-        avatarFile
-      );
-      if (result.error) throw new Error(`Avatar upload failed: ${result.error}`);
-      if (!result.url) throw new Error('Avatar upload succeeded but no URL was returned.');
-      updates.avatar_url = result.url;
-    }
-
-    if (bannerFile) {
-      const result = await uploadToSupabaseStorage(
-        'banners',
-        generateFilePath(user.id, bannerFile.name, 'banners'),
-        bannerFile
-      );
-      if (result.error) throw new Error(`Banner upload failed: ${result.error}`);
-      if (!result.url) throw new Error('Banner upload succeeded but no URL was returned.');
-      updates.banner_url = result.url;
-    }
-
-    if (Object.keys(updates).length > 0) {
-      await updateProfile(user.id, updates);
-    }
-
-    setAvatarFile(null);
-    setBannerFile(null);
-
-    toast.success('Profile images updated successfully');
-    onUpdate();
-    onClose();
-  } catch (err: any) {
-    console.error('[handleSaveAll] failed', err);
-    toast.error(`Failed to save images: ${err.message}`);
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   const resetCropSettings = () => {
     setCrop({ x: 0, y: 0 });
@@ -367,11 +347,11 @@ const handleSaveAll = async () => {
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
-          className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden"
+          className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <div className="flex-shrink-0 flex items-center justify-between p-6 border-b border-gray-200">
             <div className="flex items-center space-x-4">
               <div className="p-2 bg-[#007fff]/10 rounded-lg">
                 <CameraIcon className="w-6 h-6 text-[#007fff]" />
@@ -390,7 +370,7 @@ const handleSaveAll = async () => {
           </div>
 
           {/* Content */}
-          <div className="p-6">
+          <div className="flex-1 p-6 overflow-y-auto">
             {showCropper ? (
               /* Cropper Interface */
               <div className="space-y-6">
@@ -403,32 +383,22 @@ const handleSaveAll = async () => {
                   </p>
                 </div>
 
-                {/* Cropper Container */}
                 <div className="relative w-full h-96 bg-gray-100 rounded-lg overflow-hidden">
                   <Cropper
                     image={imageToCrop || ''}
                     crop={crop}
                     zoom={zoom}
                     rotation={rotation}
-                    aspect={cropType === 'avatar' ? 1 : 16/9}
+                    aspect={cropType === 'avatar' ? 1 : 16 / 9}
                     onCropChange={setCrop}
                     onCropComplete={handleCropComplete}
                     onZoomChange={setZoom}
                     onRotationChange={setRotation}
                     showGrid={true}
-                    style={{
-                      containerStyle: {
-                        width: '100%',
-                        height: '100%',
-                        position: 'relative',
-                      },
-                    }}
                   />
                 </div>
 
-                {/* Crop Controls */}
                 <div className="space-y-4">
-                  {/* Zoom Control */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Zoom: {Math.round(zoom * 100)}%
@@ -442,13 +412,12 @@ const handleSaveAll = async () => {
                         step={0.1}
                         value={zoom}
                         onChange={(e) => setZoom(Number(e.target.value))}
-                        className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                        className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                       />
                       <MagnifyingGlassPlusIcon className="w-5 h-5 text-gray-400" />
                     </div>
                   </div>
 
-                  {/* Rotation Control */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Rotation: {rotation}°
@@ -462,14 +431,13 @@ const handleSaveAll = async () => {
                         step={1}
                         value={rotation}
                         onChange={(e) => setRotation(Number(e.target.value))}
-                        className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                        className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                       />
                       <ArrowsPointingOutIcon className="w-5 h-5 text-gray-400" />
                     </div>
                   </div>
                 </div>
 
-                {/* Crop Actions */}
                 <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                   <div className="flex space-x-3">
                     <button
@@ -502,7 +470,6 @@ const handleSaveAll = async () => {
             ) : (
               /* Main Editor Interface */
               <div className="space-y-6">
-                {/* Tabs */}
                 <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
                   <button
                     onClick={() => setActiveTab('avatar')}
@@ -526,7 +493,6 @@ const handleSaveAll = async () => {
                   </button>
                 </div>
 
-                {/* Avatar Editor */}
                 {activeTab === 'avatar' && (
                   <div className="space-y-6">
                     <div className="text-center">
@@ -553,14 +519,21 @@ const handleSaveAll = async () => {
                             <PhotoIcon className="w-16 h-16 text-[#007fff]/40" />
                           </div>
                         )}
-                        <button className="absolute -bottom-1 -right-1 bg-[#007fff] text-white p-2 rounded-full hover:bg-[#007fff]/90 transition-colors">
+                        <label className="absolute -bottom-1 -right-1 bg-[#007fff] text-white p-2 rounded-full hover:bg-[#007fff]/90 transition-colors cursor-pointer">
                           <CameraIcon className="w-4 h-4" />
-                        </button>
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleImageChange(e, 'avatar')}
+                            className="hidden"
+                          />
+                        </label>
                       </div>
 
                       <div className="flex space-x-3">
                         <label className="cursor-pointer">
-                          <span className="px-6 py-3 bg-[#007fff] text-white rounded-xl hover:bg-[#007fff]/90 transition-colors font-medium">
+                          <span className="px-6 py-3 bg-[#007fff]/10 text-[#007fff] rounded-xl hover:bg-[#007fff]/20 transition-colors font-medium">
                             {avatarPreview ? 'Change Photo' : 'Upload Photo'}
                           </span>
                           <input
@@ -600,7 +573,6 @@ const handleSaveAll = async () => {
                   </div>
                 )}
 
-                {/* Banner Editor */}
                 {activeTab === 'banner' && (
                   <div className="space-y-6">
                     <div className="text-center">
@@ -616,9 +588,9 @@ const handleSaveAll = async () => {
                           <Image
                             src={bannerPreview}
                             alt="Banner preview"
-                            width={400}
-                            height={192}
-                            className="w-full h-full object-cover"
+                            layout="fill"
+                            objectFit="cover"
+                            className="w-full h-full"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
@@ -629,7 +601,7 @@ const handleSaveAll = async () => {
 
                       <div className="flex space-x-3 justify-center">
                         <label className="cursor-pointer">
-                          <span className="px-6 py-3 bg-[#007fff] text-white rounded-xl hover:bg-[#007fff]/90 transition-colors font-medium">
+                          <span className="px-6 py-3 bg-[#007fff]/10 text-[#007fff] rounded-xl hover:bg-[#007fff]/20 transition-colors font-medium">
                             {bannerPreview ? 'Change Photo' : 'Upload Photo'}
                           </span>
                           <input
@@ -675,7 +647,7 @@ const handleSaveAll = async () => {
 
           {/* Footer */}
           {!showCropper && (
-            <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
+            <div className="flex-shrink-0 flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
               <div className="text-sm text-gray-600">
                 {avatarFile || bannerFile ? 'You have unsaved changes' : 'All changes saved'}
               </div>
