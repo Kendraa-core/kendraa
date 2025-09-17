@@ -208,7 +208,7 @@ export async function getPosts(limit = 10, offset = 0): Promise<Post[]> {
     // Fetch authors separately
     const { data: authors, error: authorsError } = await getSupabase()
       .from('profiles')
-      .select('id, full_name, avatar_url, headline, user_type')
+      .select('id, full_name, avatar_url, headline, user_type, profile_type')
       .in('id', authorIds);
     
     if (authorsError) {
@@ -218,11 +218,53 @@ export async function getPosts(limit = 10, offset = 0): Promise<Post[]> {
     // Create author lookup map
     const authorMap = new Map(authors?.map(author => [author.id, author]) || []);
     
+    // For institution users, also fetch institution data
+    const institutionAuthorIds = authors?.filter(author => 
+      author.user_type === 'institution' || author.profile_type === 'institution'
+    ).map(author => author.id) || [];
+    
+    let institutionMap = new Map();
+    if (institutionAuthorIds.length > 0) {
+      const { data: institutions, error: institutionsError } = await getSupabase()
+        .from('institutions')
+        .select('id, name, logo_url')
+        .in('id', institutionAuthorIds);
+      
+      if (!institutionsError && institutions) {
+        institutionMap = new Map(institutions.map(inst => [inst.id, inst]));
+      }
+    }
+    
     // Combine posts with author data
-    const postsWithAuthors = posts.map(post => ({
-      ...post,
-      profiles: authorMap.get(post.author_id) || null
-    }));
+    const postsWithAuthors = posts.map(post => {
+      const author = authorMap.get(post.author_id);
+      if (!author) {
+        return {
+          ...post,
+          profiles: null
+        };
+      }
+      
+      // If this is an institution user, enhance the author data with institution info
+      if (author.user_type === 'institution' || author.profile_type === 'institution') {
+        const institution = institutionMap.get(post.author_id);
+        if (institution) {
+          return {
+            ...post,
+            profiles: {
+              ...author,
+              full_name: institution.name || author.full_name,
+              avatar_url: institution.logo_url || author.avatar_url
+            }
+          };
+        }
+      }
+      
+      return {
+        ...post,
+        profiles: author
+      };
+    });
 
     return postsWithAuthors;
   } catch (error) {
@@ -256,7 +298,7 @@ export async function getPostsByAuthor(authorId: string): Promise<PostWithAuthor
     // Fetch author using the same approach as getPosts() - use .in() instead of .single()
     const { data: authors, error: authorError } = await getSupabase()
       .from('profiles')
-      .select('id, full_name, avatar_url, headline, email')
+      .select('id, full_name, avatar_url, headline, email, user_type, profile_type')
       .in('id', [authorId]);
     
     if (authorError) {
@@ -278,10 +320,28 @@ export async function getPostsByAuthor(authorId: string): Promise<PostWithAuthor
     // Get the author from the results (should be first and only result)
     const author = authors && authors.length > 0 ? authors[0] : null;
     
+    // If this is an institution user, also fetch institution data
+    let enhancedAuthor = author;
+    if (author && (author.user_type === 'institution' || author.profile_type === 'institution')) {
+      const { data: institution, error: institutionError } = await getSupabase()
+        .from('institutions')
+        .select('id, name, logo_url')
+        .eq('id', authorId)
+        .single();
+      
+      if (!institutionError && institution) {
+        enhancedAuthor = {
+          ...author,
+          full_name: institution.name || author.full_name,
+          avatar_url: institution.logo_url || author.avatar_url
+        };
+      }
+    }
+    
     // Combine posts with author
     const postsWithAuthor = posts.map(post => ({
       ...post,
-      author: author || {
+      author: enhancedAuthor || {
         id: post.author_id,
         full_name: 'Unknown User',
         avatar_url: '',
@@ -343,9 +403,27 @@ export async function getPostById(postId: string): Promise<(Post & { profiles?: 
       };
     }
     
+    // If this is an institution user, also fetch institution data
+    let enhancedAuthor = author;
+    if (author.user_type === 'institution' || author.profile_type === 'institution') {
+      const { data: institution, error: institutionError } = await getSupabase()
+        .from('institutions')
+        .select('id, name, logo_url')
+        .eq('id', post.author_id)
+        .single();
+      
+      if (!institutionError && institution) {
+        enhancedAuthor = {
+          ...author,
+          full_name: institution.name || author.full_name,
+          avatar_url: institution.logo_url || author.avatar_url
+        };
+      }
+    }
+    
     return {
       ...post,
-      profiles: author
+      profiles: enhancedAuthor
     };
   } catch (error) {
     console.error('Error fetching post by ID:', error);
@@ -3215,7 +3293,7 @@ export async function getSavedPosts(userId: string): Promise<Post[]> {
     // Fetch authors separately
     const { data: authors, error: authorsError } = await getSupabase()
       .from('profiles')
-      .select('id, full_name, avatar_url, headline, user_type')
+      .select('id, full_name, avatar_url, headline, user_type, profile_type')
       .in('id', authorIds);
     
     if (authorsError) {
@@ -3233,11 +3311,53 @@ export async function getSavedPosts(userId: string): Promise<Post[]> {
     // Create author lookup map
     const authorMap = new Map(authors?.map(author => [author.id, author]) || []);
     
+    // For institution users, also fetch institution data
+    const institutionAuthorIds = authors?.filter(author => 
+      author.user_type === 'institution' || author.profile_type === 'institution'
+    ).map(author => author.id) || [];
+    
+    let institutionMap = new Map();
+    if (institutionAuthorIds.length > 0) {
+      const { data: institutions, error: institutionsError } = await getSupabase()
+        .from('institutions')
+        .select('id, name, logo_url')
+        .in('id', institutionAuthorIds);
+      
+      if (!institutionsError && institutions) {
+        institutionMap = new Map(institutions.map(inst => [inst.id, inst]));
+      }
+    }
+    
     // Combine posts with author data
-    const postsWithAuthors = posts.map(post => ({
-      ...post,
-      profiles: authorMap.get(post.author_id) || null
-    }));
+    const postsWithAuthors = posts.map(post => {
+      const author = authorMap.get(post.author_id);
+      if (!author) {
+        return {
+          ...post,
+          profiles: null
+        };
+      }
+      
+      // If this is an institution user, enhance the author data with institution info
+      if (author.user_type === 'institution' || author.profile_type === 'institution') {
+        const institution = institutionMap.get(post.author_id);
+        if (institution) {
+          return {
+            ...post,
+            profiles: {
+              ...author,
+              full_name: institution.name || author.full_name,
+              avatar_url: institution.logo_url || author.avatar_url
+            }
+          };
+        }
+      }
+      
+      return {
+        ...post,
+        profiles: author
+      };
+    });
     
     console.log('[Queries] Saved posts fetched successfully:', postsWithAuthors.length);
     return postsWithAuthors;
