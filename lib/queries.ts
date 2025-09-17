@@ -297,6 +297,337 @@ export async function getPostsByAuthor(authorId: string): Promise<PostWithAuthor
   }
 }
 
+export async function getPostById(postId: string): Promise<(Post & { profiles?: Profile }) | null> {
+  try {
+    const schemaExists = await true;
+    if (!schemaExists) {
+      return null;
+    }
+    
+    // Get the post
+    const { data: post, error: postError } = await getSupabase()
+      .from('posts')
+      .select('*')
+      .eq('id', postId)
+      .single();
+
+    if (postError) {
+      console.error('Error fetching post:', postError);
+      return null;
+    }
+    
+    if (!post) {
+      return null;
+    }
+    
+    // Fetch author profile
+    const { data: author, error: authorError } = await getSupabase()
+      .from('profiles')
+      .select('id, full_name, avatar_url, headline, user_type, profile_type')
+      .eq('id', post.author_id)
+      .single();
+    
+    if (authorError) {
+      console.error('Error fetching author profile:', authorError);
+      // Return post without author info
+      return {
+        ...post,
+        profiles: {
+          id: post.author_id,
+          full_name: 'Unknown User',
+          avatar_url: '',
+          headline: '',
+          user_type: 'individual',
+          profile_type: 'individual'
+        }
+      };
+    }
+    
+    return {
+      ...post,
+      profiles: author
+    };
+  } catch (error) {
+    console.error('Error fetching post by ID:', error);
+    return null;
+  }
+}
+
+// Analytics tracking functions
+export async function trackPostImpression(
+  postId: string, 
+  userId: string | null = null,
+  source: 'feed' | 'profile' | 'search' | 'direct' | 'share' = 'feed',
+  deviceType: 'desktop' | 'mobile' | 'tablet' = 'desktop'
+): Promise<void> {
+  try {
+    const schemaExists = await true;
+    if (!schemaExists) return;
+
+    // Insert impression record
+    await getSupabase()
+      .from('post_impressions')
+      .insert({
+        post_id: postId,
+        user_id: userId,
+        source,
+        device_type: deviceType,
+        created_at: new Date().toISOString()
+      });
+
+    // Update analytics summary
+    await updatePostAnalytics(postId, 'impressions');
+  } catch (error) {
+    console.error('Error tracking post impression:', error);
+  }
+}
+
+export async function trackPostView(
+  postId: string,
+  userId: string | null = null,
+  viewDuration: number = 0,
+  deviceType: 'desktop' | 'mobile' | 'tablet' = 'desktop'
+): Promise<void> {
+  try {
+    const schemaExists = await true;
+    if (!schemaExists) return;
+
+    // Calculate completion rate (assuming average post read time is 30 seconds)
+    const completionRate = Math.min(100, (viewDuration / 30) * 100);
+
+    // Insert view record
+    await getSupabase()
+      .from('post_views')
+      .insert({
+        post_id: postId,
+        user_id: userId,
+        view_duration: viewDuration,
+        completion_rate: completionRate,
+        device_type: deviceType,
+        created_at: new Date().toISOString()
+      });
+
+    // Update analytics summary
+    await updatePostAnalytics(postId, 'views');
+  } catch (error) {
+    console.error('Error tracking post view:', error);
+  }
+}
+
+export async function trackPostShare(
+  postId: string,
+  userId: string,
+  shareType: 'native' | 'copy_link' | 'external' = 'native',
+  platform: string | null = null,
+  recipientCount: number | null = null
+): Promise<void> {
+  try {
+    const schemaExists = await true;
+    if (!schemaExists) return;
+
+    // Insert share record
+    await getSupabase()
+      .from('post_shares')
+      .insert({
+        post_id: postId,
+        user_id: userId,
+        share_type: shareType,
+        platform,
+        recipient_count: recipientCount,
+        created_at: new Date().toISOString()
+      });
+
+    // Update analytics summary
+    await updatePostAnalytics(postId, 'shares');
+  } catch (error) {
+    console.error('Error tracking post share:', error);
+  }
+}
+
+export async function trackProfileView(postId: string, userId: string): Promise<void> {
+  try {
+    const schemaExists = await true;
+    if (!schemaExists) return;
+
+    // Update analytics summary
+    await updatePostAnalytics(postId, 'profile_views');
+  } catch (error) {
+    console.error('Error tracking profile view:', error);
+  }
+}
+
+export async function trackFollowerGained(postId: string): Promise<void> {
+  try {
+    const schemaExists = await true;
+    if (!schemaExists) return;
+
+    // Update analytics summary
+    await updatePostAnalytics(postId, 'followers_gained');
+  } catch (error) {
+    console.error('Error tracking follower gained:', error);
+  }
+}
+
+async function updatePostAnalytics(
+  postId: string, 
+  metric: 'impressions' | 'views' | 'shares' | 'profile_views' | 'followers_gained'
+): Promise<void> {
+  try {
+    // Get or create analytics record
+    let { data: analytics, error: fetchError } = await getSupabase()
+      .from('post_analytics')
+      .select('*')
+      .eq('post_id', postId)
+      .single();
+
+    if (fetchError && fetchError.code === 'PGRST116') {
+      // Record doesn't exist, create it
+      const { error: insertError } = await getSupabase()
+        .from('post_analytics')
+        .insert({
+          post_id: postId,
+          impressions: 0,
+          unique_impressions: 0,
+          profile_views: 0,
+          followers_gained: 0,
+          video_views: 0,
+          total_watch_time: 0,
+          average_watch_time: 0,
+          shares_count: 0,
+          saves_count: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
+
+      if (insertError) {
+        console.error('Error creating analytics record:', insertError);
+        return;
+      }
+
+      // Fetch the newly created record
+      const { data: newAnalytics } = await getSupabase()
+        .from('post_analytics')
+        .select('*')
+        .eq('post_id', postId)
+        .single();
+      
+      analytics = newAnalytics;
+    }
+
+    if (!analytics) return;
+
+    // Update the specific metric
+    const updateData: any = {
+      updated_at: new Date().toISOString()
+    };
+
+    switch (metric) {
+      case 'impressions':
+        updateData.impressions = (analytics.impressions || 0) + 1;
+        break;
+      case 'views':
+        updateData.video_views = (analytics.video_views || 0) + 1;
+        break;
+      case 'shares':
+        updateData.shares_count = (analytics.shares_count || 0) + 1;
+        break;
+      case 'profile_views':
+        updateData.profile_views = (analytics.profile_views || 0) + 1;
+        break;
+      case 'followers_gained':
+        updateData.followers_gained = (analytics.followers_gained || 0) + 1;
+        break;
+    }
+
+    await getSupabase()
+      .from('post_analytics')
+      .update(updateData)
+      .eq('post_id', postId);
+  } catch (error) {
+    console.error('Error updating post analytics:', error);
+  }
+}
+
+export async function getPostAnalytics(postId: string): Promise<{
+  impressions: number;
+  members_reached: number;
+  profile_viewers: number;
+  followers_gained: number;
+  video_views?: number;
+  watch_time?: number;
+  average_watch_time?: number;
+  reactions: number;
+  comments: number;
+  reposts: number;
+  saves: number;
+  shares: number;
+} | null> {
+  try {
+    const schemaExists = await true;
+    if (!schemaExists) {
+      return null;
+    }
+    
+    // Get post data
+    const { data: post, error: postError } = await getSupabase()
+      .from('posts')
+      .select('likes_count, comments_count, shares_count')
+      .eq('id', postId)
+      .single();
+
+    if (postError || !post) {
+      console.error('Error fetching post for analytics:', postError);
+      return null;
+    }
+
+    // Get analytics data
+    const { data: analytics, error: analyticsError } = await getSupabase()
+      .from('post_analytics')
+      .select('*')
+      .eq('post_id', postId)
+      .single();
+
+    // Get saved posts count
+    const { count: savesCount } = await getSupabase()
+      .from('saved_posts')
+      .select('*', { count: 'exact', head: true })
+      .eq('post_id', postId);
+
+    // Get unique impressions count
+    const { count: uniqueImpressions } = await getSupabase()
+      .from('post_impressions')
+      .select('*', { count: 'exact', head: true })
+      .eq('post_id', postId);
+
+    // Get total watch time
+    const { data: views } = await getSupabase()
+      .from('post_views')
+      .select('view_duration')
+      .eq('post_id', postId);
+
+    const totalWatchTime = views?.reduce((sum, view) => sum + (view.view_duration || 0), 0) || 0;
+    const averageWatchTime = views && views.length > 0 ? totalWatchTime / views.length : 0;
+
+    return {
+      impressions: analytics?.impressions || 0,
+      members_reached: uniqueImpressions || 0,
+      profile_viewers: analytics?.profile_views || 0,
+      followers_gained: analytics?.followers_gained || 0,
+      video_views: analytics?.video_views || 0,
+      watch_time: totalWatchTime,
+      average_watch_time: Math.round(averageWatchTime),
+      reactions: post.likes_count || 0,
+      comments: post.comments_count || 0,
+      reposts: post.shares_count || 0,
+      saves: savesCount || 0,
+      shares: analytics?.shares_count || 0,
+    };
+  } catch (error) {
+    console.error('Error fetching post analytics:', error);
+    return null;
+  }
+}
+
 export async function createPost(
   authorId: string,
   content: string,
@@ -593,6 +924,215 @@ export async function rejectConnectionRequest(connectionId: string): Promise<boo
     return true;
   } catch (error) {
     return false;
+  }
+}
+
+// Follow system for institutions (automatic acceptance)
+export async function followInstitution(followerId: string, institutionId: string): Promise<boolean> {
+  try {
+    const schemaExists = await true;
+    if (!schemaExists) {
+      return false;
+    }
+    
+    // Check if already following
+    const { data: existingFollow } = await getSupabase()
+      .from('connections')
+      .select('id')
+      .eq('requester_id', followerId)
+      .eq('recipient_id', institutionId)
+      .eq('status', 'accepted')
+      .single();
+    
+    if (existingFollow) {
+      return true; // Already following
+    }
+    
+    // Create follow relationship (automatically accepted)
+    const { error } = await getSupabase()
+      .from('connections')
+      .insert({
+        requester_id: followerId,
+        recipient_id: institutionId,
+        status: 'accepted', // Automatically accepted for institutions
+        created_at: new Date().toISOString(),
+      });
+
+    if (error) throw error;
+    
+    // Create notification for institution
+    const followerProfile = await getProfile(followerId);
+    if (followerProfile) {
+      await createNotification({
+        user_id: institutionId,
+        type: 'connection_accepted',
+        title: 'New Follower',
+        message: `${followerProfile.full_name || 'Someone'} started following your institution`,
+        read: false,
+        data: { profileId: followerId },
+        action_url: null,
+      });
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error following institution:', error);
+    return false;
+  }
+}
+
+export async function unfollowInstitution(followerId: string, institutionId: string): Promise<boolean> {
+  try {
+    const schemaExists = await true;
+    if (!schemaExists) {
+      return false;
+    }
+    
+    const { error } = await getSupabase()
+      .from('connections')
+      .delete()
+      .eq('requester_id', followerId)
+      .eq('recipient_id', institutionId)
+      .eq('status', 'accepted');
+
+    if (error) throw error;
+    
+    return true;
+  } catch (error) {
+    console.error('Error unfollowing institution:', error);
+    return false;
+  }
+}
+
+export async function getInstitutionFollowers(institutionId: string): Promise<Profile[]> {
+  try {
+    const schemaExists = await true;
+    if (!schemaExists) {
+      return [];
+    }
+    
+    const { data, error } = await getSupabase()
+      .from('connections')
+      .select(`
+        requester_id,
+        requester:profiles!connections_requester_id_fkey(*)
+      `)
+      .eq('recipient_id', institutionId)
+      .eq('status', 'accepted')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      return [];
+    }
+
+    if (!data) return [];
+
+    // Extract follower profiles
+    const followers: Profile[] = data
+      .map(connection => connection.requester as unknown as Profile)
+      .filter(profile => profile !== null);
+    
+    return followers;
+  } catch (error) {
+    return [];
+  }
+}
+
+export async function getFollowStatus(followerId: string, institutionId: string): Promise<boolean> {
+  try {
+    const schemaExists = await true;
+    if (!schemaExists) {
+      return false;
+    }
+    
+    const { data, error } = await getSupabase()
+      .from('connections')
+      .select('id')
+      .eq('requester_id', followerId)
+      .eq('recipient_id', institutionId)
+      .eq('status', 'accepted')
+      .single();
+
+    if (error || !data) {
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+// Get jobs posted by an institution
+export async function getJobsByInstitution(institutionId: string): Promise<JobWithCompany[]> {
+  try {
+    const schemaExists = await true;
+    if (!schemaExists) {
+      return [];
+    }
+    
+    const { data, error } = await getSupabase()
+      .from('jobs')
+      .select(`
+        *,
+        company:institutions!jobs_company_id_fkey(*),
+        posted_by_user:profiles!jobs_posted_by_fkey(*)
+      `)
+      .eq('company_id', institutionId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching institution jobs:', error);
+      return [];
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Error in getJobsByInstitution:', error);
+    return [];
+  }
+}
+
+// Get events organized by an institution
+export async function getEventsByInstitution(institutionId: string): Promise<EventWithOrganizer[]> {
+  try {
+    const schemaExists = await true;
+    if (!schemaExists) {
+      return [];
+    }
+    
+    // First get the institution admin's profile ID
+    const { data: institution, error: institutionError } = await getSupabase()
+      .from('institutions')
+      .select('admin_user_id')
+      .eq('id', institutionId)
+      .single();
+
+    if (institutionError || !institution) {
+      console.error('Error fetching institution admin:', institutionError);
+      return [];
+    }
+    
+    // Then get events organized by the institution admin
+    const { data, error } = await getSupabase()
+      .from('events')
+      .select(`
+        *,
+        organizer:profiles!events_organizer_id_fkey(*)
+      `)
+      .eq('organizer_id', institution.admin_user_id)
+      .eq('organizer_type', 'institution')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching institution events:', error);
+      return [];
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Error in getEventsByInstitution:', error);
+    return [];
   }
 }
 
@@ -1916,15 +2456,9 @@ export async function updateJobApplicationStatus(
 }
 
 // Get job applications for a specific job (for institutions)
-export async function getJobApplications(jobId: string): Promise<JobApplication[]> {
+export async function getJobApplications(jobId: string): Promise<(JobApplication & { applicant: Profile })[]> {
   try {
     console.log('Getting job applications', { jobId });
-    
-    const schemaExists = await true;
-    if (!schemaExists) {
-      console.log('Database schema not found, returning empty applications');
-      return [];
-    }
     
     const { data, error } = await getSupabase()
       .from('job_applications')
@@ -1932,12 +2466,15 @@ export async function getJobApplications(jobId: string): Promise<JobApplication[
       .eq('job_id', jobId)
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching job applications:', error);
+      throw error;
+    }
     
     console.log('Job applications fetched successfully', data);
-    return data || [];
+    return (data || []) as (JobApplication & { applicant: Profile })[];
   } catch (error) {
-    console.log('Error fetching job applications', error);
+    console.error('Error fetching job applications:', error);
     return [];
   }
 }
@@ -2967,6 +3504,137 @@ export async function getEventRegistrations(eventId: string): Promise<any[]> {
   } catch (error) {
     console.error('[Queries] Error in getEventRegistrations:', error);
     return [];
+  }
+}
+
+// Delete post
+export async function deletePost(postId: string, authorId: string): Promise<boolean> {
+  try {
+    console.log('[Queries] Deleting post:', postId, 'by author:', authorId);
+    
+    // First, verify the user is the author of this post
+    const { data: post, error: fetchError } = await getSupabase()
+      .from('posts')
+      .select('author_id')
+      .eq('id', postId)
+      .single();
+
+    if (fetchError) {
+      console.error('[Queries] Error fetching post for deletion:', fetchError);
+      throw new Error('Post not found');
+    }
+
+    if (post.author_id !== authorId) {
+      throw new Error('Unauthorized: You can only delete your own posts');
+    }
+
+    // Delete all post comments first
+    const { error: commentsError } = await getSupabase()
+      .from('post_comments')
+      .delete()
+      .eq('post_id', postId);
+
+    if (commentsError) {
+      console.error('[Queries] Error deleting post comments:', commentsError);
+      throw commentsError;
+    }
+
+    // Delete all post reactions
+    const { error: reactionsError } = await getSupabase()
+      .from('post_reactions')
+      .delete()
+      .eq('post_id', postId);
+
+    if (reactionsError) {
+      console.error('[Queries] Error deleting post reactions:', reactionsError);
+      throw reactionsError;
+    }
+
+    // Delete the post
+    const { error: deleteError } = await getSupabase()
+      .from('posts')
+      .delete()
+      .eq('id', postId);
+
+    if (deleteError) {
+      console.error('[Queries] Error deleting post:', deleteError);
+      throw deleteError;
+    }
+    
+    console.log('[Queries] Post deleted successfully from database');
+    
+    // Verify the post was actually deleted
+    const { data: verifyData, error: verifyError } = await getSupabase()
+      .from('posts')
+      .select('id')
+      .eq('id', postId)
+      .single();
+    
+    if (verifyData) {
+      console.error('[Queries] Post still exists after deletion attempt');
+      throw new Error('Post deletion failed - post still exists');
+    }
+    
+    console.log('[Queries] Post deletion verified - post no longer exists');
+    return true;
+  } catch (error) {
+    console.error('[Queries] Error in deletePost:', error);
+    throw error;
+  }
+}
+
+// Delete event
+export async function deleteEvent(eventId: string, organizerId: string): Promise<boolean> {
+  try {
+    console.log('[Queries] Deleting event:', eventId, 'by organizer:', organizerId);
+    
+    // First, verify the user is the organizer of this event
+    const { data: event, error: fetchError } = await getSupabase()
+      .from('events')
+      .select('organizer_id')
+      .eq('id', eventId)
+      .single();
+
+    if (fetchError) {
+      console.error('[Queries] Error fetching event for deletion:', fetchError);
+      if (fetchError.code === 'PGRST116') {
+        throw new Error('Event not found');
+      }
+      throw new Error('Failed to fetch event for deletion');
+    }
+
+    if (event.organizer_id !== organizerId) {
+      throw new Error('Unauthorized: You can only delete your own events');
+    }
+
+    // Delete all event attendees first
+    const { error: attendeesError } = await getSupabase()
+      .from('event_attendees')
+      .delete()
+      .eq('event_id', eventId);
+
+    if (attendeesError) {
+      console.error('[Queries] Error deleting event attendees:', attendeesError);
+      // Don't throw here, continue with event deletion even if attendees deletion fails
+      console.warn('[Queries] Continuing with event deletion despite attendees deletion error');
+    }
+
+    // Delete the event
+    const { error: deleteError } = await getSupabase()
+      .from('events')
+      .delete()
+      .eq('id', eventId);
+
+    if (deleteError) {
+      console.error('[Queries] Error deleting event:', deleteError);
+      throw new Error(`Failed to delete event: ${deleteError.message}`);
+    }
+    
+    console.log('[Queries] Event deleted successfully from database');
+    return true;
+  } catch (error) {
+    console.error('[Queries] Error in deleteEvent:', error);
+    throw error;
   }
 }
 

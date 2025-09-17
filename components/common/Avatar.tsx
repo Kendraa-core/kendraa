@@ -6,7 +6,8 @@ import { cn } from '@/lib/utils';
 
 interface AvatarProps {
   src?: string | null;
-  alt: string;
+  name?: string | null;
+  alt?: string;
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   className?: string;
   fallbackClassName?: string;
@@ -23,6 +24,7 @@ const sizeClasses = {
 
 export default function Avatar({ 
   src, 
+  name,
   alt, 
   size = 'md', 
   className,
@@ -31,7 +33,10 @@ export default function Avatar({
   const [imageError, setImageError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const getInitials = (name: string) => {
+  const getInitials = (name: string | undefined) => {
+    if (!name || typeof name !== 'string') {
+      return 'U';
+    }
     return name
       .split(' ')
       .map(word => word.charAt(0))
@@ -55,7 +60,7 @@ export default function Avatar({
           fallbackClassName
         )}
       >
-        {getInitials(alt)}
+        {getInitials(name || alt || 'User')}
       </div>
     );
   }
@@ -64,12 +69,12 @@ export default function Avatar({
     <div className={baseClasses}>
       {isLoading && (
         <div className="absolute inset-0 bg-[#007fff] text-white font-semibold flex items-center justify-center">
-          {getInitials(alt)}
+          {getInitials(name || alt || 'User')}
         </div>
       )}
       <Image
         src={src}
-        alt={alt}
+        alt={alt || name || 'Avatar'}
         fill
         className={cn(
           'object-cover transition-opacity duration-200',

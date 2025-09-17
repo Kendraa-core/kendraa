@@ -80,12 +80,24 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const navigationItems = useMemo(() => [
-    { name: 'Home', href: '/feed', icon: HomeIcon },
-    { name: 'My Network', href: '/network', icon: UserGroupIcon },
-    { name: 'Jobs', href: '/jobs', icon: BriefcaseIcon },
-    { name: 'Events', href: '/events', icon: CalendarDaysIcon },
-  ], []);
+  const navigationItems = useMemo(() => {
+    const isInstitution = profile?.user_type === 'institution' || profile?.profile_type === 'institution';
+    
+    if (isInstitution) {
+      return [
+        { name: 'Home', href: '/institution/feed', icon: HomeIcon },
+        { name: 'Jobs', href: '/institution/jobs', icon: BriefcaseIcon },
+        { name: 'Events', href: '/institution/events', icon: CalendarDaysIcon },
+      ];
+    } else {
+      return [
+        { name: 'Home', href: '/feed', icon: HomeIcon },
+        { name: 'My Network', href: '/network', icon: UserGroupIcon },
+        { name: 'Jobs', href: '/jobs', icon: BriefcaseIcon },
+        { name: 'Events', href: '/events', icon: CalendarDaysIcon },
+      ];
+    }
+  }, [profile]);
 
   // Calculate profile completion percentage
   const getProfileCompletion = () => {
@@ -113,7 +125,10 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
           <div className="flex items-center justify-between h-16">
             {/* Left Section - Logo and Search */}
             <div className="flex items-center space-x-4 w-[450px] justify-start">
-              <Link href="/feed" className="flex items-center">
+              <Link 
+                href={profile?.user_type === 'institution' || profile?.profile_type === 'institution' ? '/institution/feed' : '/feed'} 
+                className="flex items-center"
+              >
                 <Logo size="lg" />
               </Link>
               
@@ -266,7 +281,7 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
                     {notifications.length > 0 && (
                       <div className="px-4 py-3 border-t border-gray-100">
                         <Link
-                          href="/notifications"
+                          href={profile?.user_type === 'institution' || profile?.profile_type === 'institution' ? '/institution/notifications' : '/notifications'}
                           className="text-sm text-[#007fff] hover:text-[#007fff]/90 font-medium"
                         >
                           View all notifications
@@ -285,7 +300,7 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
                 >
                   <Avatar
                     src={profile?.avatar_url}
-                    alt={profile?.full_name || user?.email || 'User'}
+                    name={profile?.full_name || user?.email || 'User'}
                     size="sm"
                   />
                   <ChevronDownIcon className="w-4 h-4 text-gray-500" />
@@ -299,7 +314,7 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
                       <div className="flex items-center space-x-3">
                         <Avatar
                           src={profile?.avatar_url}
-                          alt={profile?.full_name || user?.email || 'User'}
+                          name={profile?.full_name || user?.email || 'User'}
                           size="md"
                         />
                         <div className="flex-1 min-w-0">
@@ -327,57 +342,14 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
                       </div>
                     </div>
 
-                    {/* Quick Actions */}
-                    <div className="px-2 py-1">
-                      <Link
-                        href={profile?.user_type === 'institution' || profile?.profile_type === 'institution' ? '/institution/profile' : `/profile/${user?.id}`}
-                        className="flex items-center space-x-3 px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                      >
-                        <UserIcon className="w-4 h-4" />
-                        <span>View Profile</span>
-                      </Link>
-                      <button
-                        onClick={() => setShowProfileWizard(true)}
-                        className="flex items-center space-x-3 w-full px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                      >
-                        <PlusIcon className="w-4 h-4" />
-                        <span>Edit Profile</span>
-                      </button>
-                    </div>
-
-                    {/* Account Management */}
+                    {/* Settings */}
                     <div className="px-2 py-1 border-t border-gray-100">
                       <Link
                         href="/settings"
-                        className="flex items-center space-x-3 px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                        className="flex items-center space-x-3 w-full px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
                       >
                         <Cog6ToothIcon className="w-4 h-4" />
                         <span>Settings</span>
-                      </Link>
-                      <Link
-                        href="/saved-items"
-                        className="flex items-center space-x-3 px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                      >
-                        <BookmarkIcon className="w-4 h-4" />
-                        <span>Saved Items</span>
-                      </Link>
-                    </div>
-
-                    {/* Help & Support */}
-                    <div className="px-2 py-1 border-t border-gray-100">
-                      <Link
-                        href="/help"
-                        className="flex items-center space-x-3 px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                      >
-                        <QuestionMarkCircleIcon className="w-4 h-4" />
-                        <span>Help & Support</span>
-                      </Link>
-                      <Link
-                        href="/privacy"
-                        className="flex items-center space-x-3 px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                      >
-                        <ShieldCheckIcon className="w-4 h-4" />
-                        <span>Privacy Policy</span>
                       </Link>
                     </div>
 

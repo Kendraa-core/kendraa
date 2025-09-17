@@ -57,15 +57,21 @@ import {
   isFollowing,
   getConnectionCount,
   getEventsByOrganizer,
+  getJobsByInstitution,
+  getEventsByInstitution,
   updateProfile,
   createExperience,
   updateExperience,
   createEducation,
   updateEducation,
+  getInstitutionByAdminId,
   type Profile,
   type Experience,
   type Education,
   type PostWithAuthor,
+  type Institution,
+  type JobWithCompany,
+  type EventWithOrganizer,
 } from '@/lib/queries';
 
 // Helper function to format dates to month/year
@@ -73,6 +79,23 @@ const formatDateToMonthYear = (dateString: string | null): string => {
   if (!dateString) return '';
   const date = new Date(dateString);
   return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+};
+
+// Helper function to format institution type as headline
+const formatInstitutionTypeAsHeadline = (type: string | null | undefined): string => {
+  if (!type) return 'Healthcare Organization';
+  
+  const typeMap: Record<string, string> = {
+    'hospital': 'Hospital',
+    'clinic': 'Medical Clinic',
+    'research_center': 'Research Center',
+    'university': 'University',
+    'pharmaceutical': 'Pharmaceutical Company',
+    'medical_device': 'Medical Device Company',
+    'other': 'Healthcare Organization'
+  };
+  
+  return typeMap[type] || 'Healthcare Organization';
 };
 
 // AboutCard Component for Institution
@@ -153,13 +176,112 @@ const AboutCard = React.memo(function AboutCard({
   );
 });
 
+// JobCard Component
+const JobCard = React.memo(function JobCard({ job }: { job: JobWithCompany }) {
+  const formatSalary = (min?: number | null, max?: number | null) => {
+    if (!min && !max) return 'Salary not specified';
+    if (min && max) return `$${min.toLocaleString()} - $${max.toLocaleString()}`;
+    if (min) return `From $${min.toLocaleString()}`;
+    if (max) return `Up to $${max.toLocaleString()}`;
+  };
+
+  return (
+    <Link href={`/jobs/${job.id}`} className="block">
+      <div className="bg-white border border-gray-200 rounded-lg p-4 hover:border-[#007fff]/30 hover:shadow-md transition-all duration-200">
+        <div className="flex items-start justify-between mb-2">
+          <h4 className="font-semibold text-gray-900 text-sm line-clamp-1">{job.title}</h4>
+          <span className="text-xs text-gray-500">{formatDate(job.created_at)}</span>
+        </div>
+        <p className="text-xs text-gray-600 mb-2 line-clamp-2">{job.description}</p>
+        <div className="flex items-center justify-between text-xs text-gray-500">
+          <span>{job.location}</span>
+          <span className="text-[#007fff] font-medium">{formatSalary(job.salary_min, job.salary_max)}</span>
+        </div>
+      </div>
+    </Link>
+  );
+});
+
+// EventCard Component
+const EventCard = React.memo(function EventCard({ event }: { event: EventWithOrganizer }) {
+  const formatEventDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+
+  return (
+    <Link href={`/events/${event.id}`} className="block">
+      <div className="bg-white border border-gray-200 rounded-lg p-4 hover:border-[#007fff]/30 hover:shadow-md transition-all duration-200">
+        <div className="flex items-start justify-between mb-2">
+          <h4 className="font-semibold text-gray-900 text-sm line-clamp-1">{event.title}</h4>
+          <span className="text-xs text-gray-500">{formatEventDate(event.start_date)}</span>
+        </div>
+        <p className="text-xs text-gray-600 mb-2 line-clamp-2">{event.description}</p>
+        <div className="flex items-center justify-between text-xs text-gray-500">
+          <span>{event.location}</span>
+          {event.max_attendees && (
+            <span className="text-[#007fff] font-medium">{event.max_attendees} attendees</span>
+          )}
+        </div>
+      </div>
+    </Link>
+  );
+});
+
 // ActivityCard Component for Institution
-const ActivityCard = React.memo(function ActivityCard({ posts, isOwnProfile, connectionCount, router }: { 
+const ActivityCard = React.memo(function ActivityCard({ 
+  posts, 
+  jobs, 
+  events, 
+  isOwnProfile, 
+  connectionCount, 
+  router 
+}: { 
   posts: PostWithAuthor[]; 
+  jobs: JobWithCompany[];
+  events: EventWithOrganizer[];
   isOwnProfile: boolean; 
   connectionCount: number; 
   router: any; 
 }) {
+  const [activeTab, setActiveTab] = useState<'posts' | 'jobs' | 'events'>('posts');
+
+  const allUpdates = [
+    ...posts.map(post => ({ type: 'post', data: post, date: post.created_at })),
+    ...jobs.map(job => ({ type: 'job', data: job, date: job.created_at })),
+    ...events.map(event => ({ type: 'event', data: event, date: event.created_at }))
+  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  const getCurrentTabData = () => {
+    switch (activeTab) {
+      case 'posts':
+        return posts.slice(0, 5);
+      case 'jobs':
+        return jobs.slice(0, 5);
+      case 'events':
+        return events.slice(0, 5);
+      default:
+        return [];
+    }
+  };
+
+  const getCurrentTabCount = () => {
+    switch (activeTab) {
+      case 'posts':
+        return posts.length;
+      case 'jobs':
+        return jobs.length;
+      case 'events':
+        return events.length;
+      default:
+        return 0;
+    }
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -167,7 +289,7 @@ const ActivityCard = React.memo(function ActivityCard({ posts, isOwnProfile, con
       transition={{ duration: 0.5, delay: 0.4 }}
       className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm"
     >
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-[#007fff]/10 rounded-lg flex items-center justify-center">
             <FireIcon className="w-4 h-4 text-[#007fff]" />
@@ -179,42 +301,124 @@ const ActivityCard = React.memo(function ActivityCard({ posts, isOwnProfile, con
         </div>
       </div>
 
-      {/* Posts */}
-      {posts.length > 0 ? (
+      {/* Tab Navigation */}
+      <div className="flex space-x-1 mb-4 bg-gray-100 p-1 rounded-lg">
+        <button
+          onClick={() => setActiveTab('posts')}
+          className={cn(
+            "flex-1 px-3 py-2 text-sm font-medium rounded-md transition-all duration-200",
+            activeTab === 'posts'
+              ? "bg-white text-[#007fff] shadow-sm"
+              : "text-gray-600 hover:text-gray-900"
+          )}
+        >
+          <div className="flex items-center justify-center gap-2">
+            <DocumentTextIcon className="w-4 h-4" />
+            <span>Posts ({posts.length})</span>
+          </div>
+        </button>
+        <button
+          onClick={() => setActiveTab('jobs')}
+          className={cn(
+            "flex-1 px-3 py-2 text-sm font-medium rounded-md transition-all duration-200",
+            activeTab === 'jobs'
+              ? "bg-white text-[#007fff] shadow-sm"
+              : "text-gray-600 hover:text-gray-900"
+          )}
+        >
+          <div className="flex items-center justify-center gap-2">
+            <BriefcaseIcon className="w-4 h-4" />
+            <span>Jobs ({jobs.length})</span>
+          </div>
+        </button>
+        <button
+          onClick={() => setActiveTab('events')}
+          className={cn(
+            "flex-1 px-3 py-2 text-sm font-medium rounded-md transition-all duration-200",
+            activeTab === 'events'
+              ? "bg-white text-[#007fff] shadow-sm"
+              : "text-gray-600 hover:text-gray-900"
+          )}
+        >
+          <div className="flex items-center justify-center gap-2">
+            <CalendarDaysIcon className="w-4 h-4" />
+            <span>Events ({events.length})</span>
+          </div>
+        </button>
+      </div>
+
+      {/* Tab Content */}
+      {getCurrentTabCount() > 0 ? (
         <div>
-          <div className="flex gap-4 overflow-x-auto pb-2">
-            {posts.slice(0, 3).map((post, index) => (
+          <div className="space-y-3">
+            {getCurrentTabData().map((item, index) => (
               <motion.div 
-                key={post.id}
+                key={`${activeTab}-${item.id}`}
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.1 }}
-                className="flex-shrink-0 w-80 border border-gray-100 rounded-lg p-4 hover:border-[#007fff]/20 transition-colors"
+                className="border border-gray-100 rounded-lg p-3 hover:border-[#007fff]/20 transition-colors"
               >
-                <PostCard post={post} />
+                {activeTab === 'posts' && <PostCard post={item as PostWithAuthor} />}
+                {activeTab === 'jobs' && <JobCard job={item as JobWithCompany} />}
+                {activeTab === 'events' && <EventCard event={item as EventWithOrganizer} />}
               </motion.div>
             ))}
           </div>
-          {posts.length > 3 && (
+          {getCurrentTabCount() > 5 && (
             <div className="mt-4 text-center">
               <button className="text-[#007fff] hover:text-[#007fff]/80 text-sm font-medium hover:underline transition-all duration-200">
-                Show all {posts.length} posts →
+                Show all {getCurrentTabCount()} {activeTab} →
               </button>
             </div>
           )}
         </div>
       ) : (
         <div className="text-center py-8">
-          <FireIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-600 text-lg mb-2">No updates yet</p>
-          <p className="text-gray-500 text-sm mb-4">Share your institution&apos;s news and updates</p>
-          {isOwnProfile && (
-            <button 
-              onClick={() => router.push('/feed')}
-              className="px-4 py-2 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-colors text-sm font-medium"
-            >
-              Create Your First Post
-            </button>
+          {activeTab === 'posts' && (
+            <>
+              <DocumentTextIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-600 text-lg mb-2">No posts yet</p>
+              <p className="text-gray-500 text-sm mb-4">Share your institution&apos;s news and updates</p>
+              {isOwnProfile && (
+                <button 
+                  onClick={() => router.push('/feed')}
+                  className="px-4 py-2 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-colors text-sm font-medium"
+                >
+                  Create Post
+                </button>
+              )}
+            </>
+          )}
+          {activeTab === 'jobs' && (
+            <>
+              <BriefcaseIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-600 text-lg mb-2">No job postings yet</p>
+              <p className="text-gray-500 text-sm mb-4">Post job opportunities to attract top talent</p>
+              {isOwnProfile && (
+                <button 
+                  onClick={() => router.push('/institution/jobs/create')}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                >
+                  Post Job
+                </button>
+              )}
+            </>
+          )}
+          {activeTab === 'events' && (
+            <>
+              <CalendarDaysIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-600 text-lg mb-2">No events yet</p>
+              <p className="text-gray-500 text-sm mb-4">Create events to engage with the healthcare community</p>
+              {isOwnProfile && (
+                <button 
+                  onClick={() => router.push('/institution/events/create')}
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                >
+                  Create Event
+                </button>
+              )}
+            </>
           )}
         </div>
       )}
@@ -247,9 +451,12 @@ export default function InstitutionProfilePage() {
   const { user } = useAuth();
 
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [institution, setInstitution] = useState<Institution | null>(null);
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [education, setEducation] = useState<Education[]>([]);
   const [posts, setPosts] = useState<PostWithAuthor[]>([]);
+  const [jobs, setJobs] = useState<JobWithCompany[]>([]);
+  const [events, setEvents] = useState<EventWithOrganizer[]>([]);
   const [loading, setLoading] = useState(true);
   const [connectionStatus, setConnectionStatus] = useState<string>('none');
   const [followStatus, setFollowStatus] = useState<string>('none');
@@ -284,8 +491,9 @@ export default function InstitutionProfilePage() {
 
     try {
       setLoading(true);
-      const [profileData, experiencesData, educationData, postsData, connectionCountData] = await Promise.all([
+      const [profileData, institutionData, experiencesData, educationData, postsData, connectionCountData] = await Promise.all([
         getProfile(user.id),
+        getInstitutionByAdminId(user.id),
         getExperiences(user.id),
         getEducation(user.id),
         getPostsByAuthor(user.id),
@@ -293,10 +501,21 @@ export default function InstitutionProfilePage() {
       ]);
 
       setProfile(profileData);
+      setInstitution(institutionData);
       setExperiences(experiencesData);
       setEducation(educationData);
       setPosts(postsData);
       setConnectionCount(connectionCountData);
+
+      // Fetch jobs and events if institution exists
+      if (institutionData?.id) {
+        const [jobsData, eventsData] = await Promise.all([
+          getJobsByInstitution(institutionData.id),
+          getEventsByInstitution(institutionData.id)
+        ]);
+        setJobs(jobsData);
+        setEvents(eventsData);
+      }
     } catch (error) {
       console.error('Error fetching profile data:', error);
       toast.error('Failed to load profile data');
@@ -423,7 +642,7 @@ export default function InstitutionProfilePage() {
                 <div className="relative">
                   <Avatar
                     src={profile.avatar_url}
-                    alt={profile.full_name || 'Institution'}
+                    name={profile.full_name || 'Institution'}
                     size="2xl"
                     className="border-4 border-white shadow-2xl ring-4 ring-[#007fff]/20 w-32 h-32"
                   />
@@ -451,7 +670,7 @@ export default function InstitutionProfilePage() {
                     
                     {/* Headline */}
                     <p className="text-lg sm:text-xl text-gray-700 font-medium leading-relaxed">
-                      {profile.headline || 'Healthcare Organization'}
+                      {formatInstitutionTypeAsHeadline(institution?.type)}
                     </p>
                   </div>
 
@@ -467,20 +686,8 @@ export default function InstitutionProfilePage() {
                     </div>
                   </div>
 
-                  {/* Connections and Followers */}
+                  {/* Contact Information */}
                   <div className="flex items-center gap-6 pt-2 text-sm text-gray-600">
-                    <button 
-                      onClick={() => router.push(`/profile/${profile.id}/connections`)}
-                      className="hover:text-[#007fff] transition-colors duration-200"
-                    >
-                      <span className="font-semibold text-[#007fff]">{formatNumber(connectionCount)}</span> connections
-                    </button>
-                    <button 
-                      onClick={() => router.push(`/profile/${profile.id}/followers`)}
-                      className="hover:text-[#007fff] transition-colors duration-200"
-                    >
-                      <span className="font-semibold text-[#007fff]">{formatNumber(connectionCount)}</span> followers
-                    </button>
                     <button 
                       onClick={handleViewContactInfo}
                       className="text-[#007fff] hover:text-[#007fff]/80 hover:underline font-semibold transition-all duration-200 flex items-center gap-2 group"
@@ -498,15 +705,7 @@ export default function InstitutionProfilePage() {
             {/* Profile Content */}
             <div className="px-4 py-4 border-t border-gray-100 bg-gradient-to-br from-gray-50/50 to-white">
               <div className="space-y-3">
-                {/* Activity Section */}
-                <ActivityCard 
-                  posts={posts} 
-                  isOwnProfile={isOwnProfile} 
-                  connectionCount={connectionCount} 
-                  router={router}
-                />
-
-                {/* About Section */}
+                {/* About Section - Moved to top */}
                 <AboutCard
                   profile={profile}
                   isOwnProfile={isOwnProfile}
@@ -515,6 +714,16 @@ export default function InstitutionProfilePage() {
                   onStartEdit={startEdit}
                   onSaveEdit={saveEdit}
                   onCancelEdit={cancelEdit}
+                />
+
+                {/* Activity Section - Now includes posts, jobs, and events */}
+                <ActivityCard 
+                  posts={posts} 
+                  jobs={jobs}
+                  events={events}
+                  isOwnProfile={isOwnProfile} 
+                  connectionCount={connectionCount} 
+                  router={router}
                 />
               </div>
             </div>
@@ -555,7 +764,8 @@ export default function InstitutionProfilePage() {
       )}
 
       {/* Contact Info Modal */}
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      {showContactModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
           <h3 className="text-lg font-bold text-gray-900 mb-4">Contact Information</h3>
           <div className="space-y-3">
@@ -586,6 +796,7 @@ export default function InstitutionProfilePage() {
           </button>
         </div>
       </div>
+      )}
     </div>
   );
 }

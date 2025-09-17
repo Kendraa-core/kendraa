@@ -135,7 +135,7 @@ export default function ProfileImageEditor({
     try {
       // Generate file path
       const folder = isAvatar ? 'avatars' : 'banners';
-      const filePath = generateFilePath(user.id, file.name, folder);
+      const filePath = generateFilePath(user.id, file.name);
 
       // Upload to Supabase storage
       const bucket = isAvatar ? 'avatars' : 'banners';
@@ -176,7 +176,7 @@ export default function ProfileImageEditor({
 
       // Upload avatar if changed
       if (avatarFile) {
-        const filePath = generateFilePath(user.id, avatarFile.name, 'avatars');
+        const filePath = generateFilePath(user.id, avatarFile.name);
         const result = await uploadToSupabaseStorage('avatars', filePath, avatarFile);
         if (result.error) {
           throw new Error(result.error);
@@ -186,7 +186,7 @@ export default function ProfileImageEditor({
 
       // Upload banner if changed
       if (bannerFile) {
-        const filePath = generateFilePath(user.id, bannerFile.name, 'banners');
+        const filePath = generateFilePath(user.id, bannerFile.name);
         const result = await uploadToSupabaseStorage('banners', filePath, bannerFile);
         if (result.error) {
           throw new Error(result.error);

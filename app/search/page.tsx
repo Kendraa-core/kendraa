@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { searchUsers, searchJobs, searchEvents } from '@/lib/queries';
 import Avatar from '@/components/common/Avatar';
 import { 
@@ -9,7 +9,8 @@ import {
   BriefcaseIcon, 
   CalendarDaysIcon,
   MapPinIcon,
-  BuildingOfficeIcon
+  BuildingOfficeIcon,
+  MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 
@@ -29,13 +30,16 @@ interface SearchResult {
 
 export default function SearchPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const query = searchParams.get('q') || '';
+  const [searchInput, setSearchInput] = useState(query);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'all' | 'user' | 'job' | 'event'>('all');
 
   useEffect(() => {
     if (query.trim()) {
+      setSearchInput(query);
       performSearch(query);
     }
   }, [query]);
@@ -98,7 +102,7 @@ export default function SearchPage() {
   const getResultIcon = (type: string) => {
     switch (type) {
       case 'user':
-        return <UserIcon className="w-5 h-5 text-azure-500" />;
+        return <UserIcon className="w-5 h-5 text-[#007fff]" />;
       case 'job':
         return <BriefcaseIcon className="w-5 h-5 text-green-500" />;
       case 'event':
@@ -121,50 +125,107 @@ export default function SearchPage() {
     }
   };
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchInput.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchInput.trim())}`);
+    }
+  };
+
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Search Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">
-          Search Results for &quot;{query}&quot;
-        </h1>
-        <p className="text-gray-600">
-          Found {filteredResults.length} results
-        </p>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Search Header */}
+        <div className="mb-8">
+          
+          {/* Search Form */}
+          <form onSubmit={handleSearch} className="mb-6">
+            <div className="relative">
+              <input
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder="Search people, jobs, events..."
+                className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl bg-white text-gray-900 focus:ring-2 focus:ring-[#007fff] focus:border-[#007fff] outline-none text-lg shadow-sm"
+              />
+              <MagnifyingGlassIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <button
+                type="submit"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 px-4 py-1.5 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-colors text-sm font-medium"
+              >
+                Search
+              </button>
+            </div>
+          </form>
 
-      {/* Search Tabs */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-1 mb-6">
-        <div className="flex">
-          {[
-            { key: 'all', label: 'All', count: results.length },
-            { key: 'user', label: 'People', count: results.filter(r => r.type === 'user').length },
-            { key: 'job', label: 'Jobs', count: results.filter(r => r.type === 'job').length },
-            { key: 'event', label: 'Events', count: results.filter(r => r.type === 'event').length }
-          ].map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key as any)}
-              className={`flex-1 px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
-                activeTab === tab.key
-                  ? 'bg-azure-500 text-white shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
-            >
-              {tab.label} ({tab.count})
-            </button>
-          ))}
+          {query && (
+            <div className="mb-4">
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                Results for &quot;{query}&quot;
+              </h2>
+              <p className="text-gray-600">
+                Found {filteredResults.length} results
+              </p>
+            </div>
+          )}
         </div>
-      </div>
 
-      {/* Search Results */}
-      <div className="space-y-4">
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-azure-500 mx-auto mb-4"></div>
-            <p className="text-gray-600">Searching...</p>
+        {/* Search Tabs - Only show when there are results */}
+        {query && results.length > 0 && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-1 mb-6">
+            <div className="flex">
+              {[
+                { key: 'all', label: 'All', count: results.length },
+                { key: 'user', label: 'People', count: results.filter(r => r.type === 'user').length },
+                { key: 'job', label: 'Jobs', count: results.filter(r => r.type === 'job').length },
+                { key: 'event', label: 'Events', count: results.filter(r => r.type === 'event').length }
+              ].map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key as any)}
+                  className={`flex-1 px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                    activeTab === tab.key
+                      ? 'bg-[#007fff] text-white shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
+                >
+                  {tab.label} ({tab.count})
+                </button>
+              ))}
+            </div>
           </div>
-        ) : filteredResults.length > 0 ? (
+        )}
+
+        {/* Search Results */}
+        {!query ? (
+          <div className="text-center py-16">
+            <div className="w-20 h-20 bg-[#007fff]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+              <MagnifyingGlassIcon className="w-10 h-10 text-[#007fff]" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Start Your Search</h3>
+            <p className="text-gray-600 mb-6 max-w-md mx-auto">
+              Search for people, jobs, and events in the healthcare community. Use the search bar above to get started.
+            </p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {['Healthcare Jobs', 'Medical Events', 'Doctors', 'Nurses', 'Hospitals'].map((suggestion) => (
+                <button
+                  key={suggestion}
+                  onClick={() => setSearchInput(suggestion)}
+                  className="px-3 py-1.5 text-sm text-[#007fff] bg-[#007fff]/10 rounded-full hover:bg-[#007fff]/20 transition-colors"
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {loading ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#007fff] mx-auto mb-4"></div>
+                <p className="text-gray-600">Searching...</p>
+              </div>
+            ) : filteredResults.length > 0 ? (
           filteredResults.map((result) => (
             <Link
               key={`${result.type}-${result.id}`}
@@ -177,7 +238,7 @@ export default function SearchPage() {
                   {result.type === 'user' ? (
                     <Avatar
                       src={result.avatar_url}
-                      alt={result.title}
+                      name={result.title}
                       size="lg"
                     />
                   ) : (
@@ -257,12 +318,14 @@ export default function SearchPage() {
             <p className="text-gray-600 mb-4">
               Try searching with different keywords or check your spelling.
             </p>
-            <Link
-              href="/feed"
-              className="inline-flex items-center px-4 py-2 bg-azure-500 text-white rounded-lg hover:bg-azure-600 transition-colors"
-            >
-              Back to Feed
-            </Link>
+              <Link
+                href="/feed"
+                className="inline-flex items-center px-4 py-2 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-colors"
+              >
+                Back to Feed
+              </Link>
+            </div>
+          )}
           </div>
         )}
       </div>

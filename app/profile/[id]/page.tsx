@@ -9,11 +9,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import Avatar from '@/components/common/Avatar';
 import Breadcrumb from '@/components/common/Breadcrumb';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 import EditProfileModal from '@/components/profile/EditProfileModal';
 import EnhancedProfileImageEditor from '@/components/profile/EnhancedProfileImageEditor';
 import PostCard from '@/components/post/PostCard';
 import SimilarPeople from '@/components/profile/SimilarPeople';
-import { cn, formatDate, formatNumber } from '@/lib/utils';
+import { cn, formatDate, formatNumber, formatRelativeTime } from '@/lib/utils';
+import { 
+  BACKGROUNDS, 
+  TEXT_COLORS, 
+  COMPONENTS, 
+  TYPOGRAPHY, 
+  BORDER_COLORS,
+  ANIMATIONS 
+} from '@/lib/design-system';
 import {
   ArrowLeftIcon,
   PencilIcon,
@@ -40,7 +49,9 @@ import {
   BellIcon,
   XCircleIcon,
   ClockIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  EyeIcon,
+  ArrowRightIcon
 } from '@heroicons/react/24/outline';
 import { CheckBadgeIcon, BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
@@ -55,6 +66,9 @@ import {
   followUser,
   unfollowUser,
   isFollowing,
+  followInstitution,
+  unfollowInstitution,
+  getFollowStatus,
   getConnectionCount,
   getEventsByOrganizer,
   updateProfile,
@@ -62,6 +76,7 @@ import {
   updateExperience,
   createEducation,
   updateEducation,
+  getSuggestedConnectionsWithMutualCounts,
   type Profile,
   type Experience,
   type Education,
@@ -703,11 +718,12 @@ const EducationCard = React.memo(function EducationCard({ education, isOwnProfil
 });
 
 // ActivityCard Component
-const ActivityCard = React.memo(function ActivityCard({ posts, isOwnProfile, connectionCount, router }: { 
+const ActivityCard = React.memo(function ActivityCard({ posts, isOwnProfile, connectionCount, router, profileId }: { 
   posts: PostWithAuthor[]; 
   isOwnProfile: boolean; 
   connectionCount: number; 
   router: any; 
+  profileId: string;
 }) {
   return (
     <motion.div 
@@ -732,22 +748,78 @@ const ActivityCard = React.memo(function ActivityCard({ posts, isOwnProfile, con
       {/* Posts */}
       {posts.length > 0 ? (
         <div>
-          <div className="flex gap-4 overflow-x-auto pb-2">
+          <div className="flex gap-8 overflow-x-auto pb-6">
             {posts.slice(0, 3).map((post, index) => (
               <motion.div 
                 key={post.id}
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.1 }}
-                className="flex-shrink-0 w-80 border border-gray-100 rounded-lg p-4 hover:border-[#007fff]/20 transition-colors"
+                className="flex-shrink-0 w-96 border border-gray-100 rounded-xl p-6 hover:border-[#007fff]/20 transition-colors shadow-sm bg-white cursor-pointer"
+                onClick={() => router.push(`/post/${post.id}`)}
               >
-                <PostCard post={post} />
+                {/* Author Info */}
+                <div className="flex items-center space-x-3 mb-4">
+                  <Avatar
+                    src={'avatar_url' in post.author ? post.author.avatar_url : post.author.logo_url}
+                    name={'full_name' in post.author ? post.author.full_name : post.author.name}
+                    size="md"
+                    className="flex-shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center space-x-2">
+                      <h4 className="text-sm font-semibold text-gray-900 truncate">
+                        {'full_name' in post.author ? post.author.full_name : post.author.name}
+                      </h4>
+                      {('user_type' in post.author && post.author.user_type === 'institution') || 'type' in post.author && (
+                        <CheckBadgeIcon className="w-4 h-4 text-[#007fff] flex-shrink-0" />
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 truncate">
+                      {'headline' in post.author ? post.author.headline : post.author.description || 'Healthcare Professional'}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      {formatRelativeTime(post.created_at)} • Public
+                    </p>
+                  </div>
+                </div>
+
+                {/* Post Content */}
+                <div className="mb-4">
+                  <p className="text-gray-800 text-sm leading-relaxed line-clamp-3">
+                    {post.content}
+                  </p>
+                </div>
+
+                {/* Post Stats */}
+                <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-100">
+                  <div className="flex items-center space-x-4">
+                    <span>{post.likes_count || 0} reactions</span>
+                    <span>{post.comments_count || 0} comments</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <button className="flex items-center space-x-1 text-gray-500 hover:text-[#007fff] transition-colors">
+                      <span>❤️</span>
+                      <span>{post.likes_count || 0}</span>
+                    </button>
+                    <button className="flex items-center space-x-1 text-gray-500 hover:text-[#007fff] transition-colors">
+                      <span>💬</span>
+                      <span>{post.comments_count || 0}</span>
+                    </button>
+                    <button className="flex items-center space-x-1 text-gray-500 hover:text-[#007fff] transition-colors">
+                      <span>🔖</span>
+                    </button>
+                  </div>
+                </div>
               </motion.div>
             ))}
           </div>
           {posts.length > 3 && (
-            <div className="mt-4 text-center">
-              <button className="text-[#007fff] hover:text-[#007fff]/80 text-sm font-medium hover:underline transition-all duration-200">
+            <div className="mt-6 text-center">
+              <button 
+                onClick={() => router.push(`/profile/${profileId}/posts`)}
+                className="text-[#007fff] hover:text-[#007fff]/80 text-sm font-medium hover:underline transition-all duration-200"
+              >
                 Show all {posts.length} posts →
               </button>
             </div>
@@ -769,6 +841,110 @@ const ActivityCard = React.memo(function ActivityCard({ posts, isOwnProfile, con
         </div>
       )}
     </motion.div>
+  );
+});
+
+// Profile Viewers Component
+const ProfileViewers = React.memo(function ProfileViewers({ viewers }: { viewers: Profile[] }) {
+  if (viewers.length === 0) {
+    return (
+      <div className="text-center py-4">
+        <EyeIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+        <p className="text-sm text-gray-500">No recent profile views</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {viewers.slice(0, 5).map((viewer) => (
+        <div key={viewer.id} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+          <Avatar
+            src={viewer.avatar_url}
+            alt={viewer.full_name || 'Profile Viewer'}
+            size="sm"
+            className="flex-shrink-0"
+          />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-gray-900 truncate">
+              {viewer.full_name}
+            </p>
+            <p className="text-xs text-gray-500 truncate">
+              {viewer.headline || 'Healthcare Professional'}
+            </p>
+          </div>
+        </div>
+      ))}
+      {viewers.length > 5 && (
+        <Link
+          href="/network"
+          className="block text-center text-sm text-[#007fff] hover:text-blue-600 font-medium py-2"
+        >
+          View all {viewers.length} viewers
+        </Link>
+      )}
+    </div>
+  );
+});
+
+// People You May Know Component
+const PeopleYouMayKnow = React.memo(function PeopleYouMayKnow({ 
+  suggestions, 
+  onConnect 
+}: { 
+  suggestions: Array<Profile & { mutual_connections: number }>;
+  onConnect: (userId: string) => void;
+}) {
+  if (suggestions.length === 0) {
+    return (
+      <div className="text-center py-4">
+        <UserGroupIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+        <p className="text-sm text-gray-500">No suggestions available</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {suggestions.slice(0, 5).map((person) => (
+        <div key={person.id} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+          <Avatar
+            src={person.avatar_url}
+            alt={person.full_name || 'Suggested Connection'}
+            size="sm"
+            className="flex-shrink-0"
+          />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-gray-900 truncate">
+              {person.full_name}
+            </p>
+            <p className="text-xs text-gray-500 truncate">
+              {person.headline || 'Healthcare Professional'}
+            </p>
+            {person.mutual_connections > 0 && (
+              <p className="text-xs text-[#007fff]">
+                {person.mutual_connections} mutual connection{person.mutual_connections !== 1 ? 's' : ''}
+              </p>
+            )}
+          </div>
+          <button
+            onClick={() => onConnect(person.id)}
+            className="flex-shrink-0 p-1.5 text-[#007fff] hover:bg-blue-50 rounded-full transition-colors"
+            title="Connect"
+          >
+            <UserPlusIcon className="w-4 h-4" />
+          </button>
+        </div>
+      ))}
+      {suggestions.length > 5 && (
+        <Link
+          href="/network"
+          className="block text-center text-sm text-[#007fff] hover:text-blue-600 font-medium py-2"
+        >
+          View all suggestions
+        </Link>
+      )}
+    </div>
   );
 });
 
@@ -808,6 +984,11 @@ export default function ProfilePage() {
   const [connectionCount, setConnectionCount] = useState(0);
   const [showImageEditor, setShowImageEditor] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
+  const [profileViewers, setProfileViewers] = useState<Profile[]>([]);
+  const [suggestedConnections, setSuggestedConnections] = useState<Array<Profile & { mutual_connections: number }>>([]);
+  const [canSendRequests, setCanSendRequests] = useState(true);
+  const [showAllExperiences, setShowAllExperiences] = useState(false);
+  const [actionType, setActionType] = useState<'connect' | 'follow' | 'none'>('none');
 
   // Inline editing states
   const [editingField, setEditingField] = useState<string | null>(null);
@@ -842,7 +1023,7 @@ export default function ProfilePage() {
     if (!id) return;
 
     try {
-    setLoading(true);
+      setLoading(true);
       
       // Fetch profile data
       const profileData = await getProfile(id as string);
@@ -857,25 +1038,49 @@ export default function ProfilePage() {
       setExperiences(experiencesData);
       setEducation(educationData);
       
-      // Fetch connection data
+      // Fetch connection count (public data)
+      const countData = await getConnectionCount(id as string);
+      setConnectionCount(countData);
+      
+      // Fetch connection data and determine action type only if user is logged in
       if (!isOwnProfile && user?.id) {
-        const [connectionData, followData, countData] = await Promise.all([
-          getConnectionStatus(user.id, id as string),
-          isFollowing(user.id, id as string),
-          getConnectionCount(id as string)
-        ]);
-        
-        setConnectionStatus(connectionData || 'none');
-        setFollowStatus(followData ? 'following' : 'none');
-        setConnectionCount(countData);
+        // Check if current user can send requests
+        setCanSendRequests(true); // Assume user can send requests
+        setActionType('connect'); // Default to connect action
+
+        // Fetch connection/follow status based on action type
+        if (actionType === 'follow') {
+          const followData = await getFollowStatus(user.id, id as string);
+          setFollowStatus(followData ? 'following' : 'none');
+          setConnectionStatus('none');
+        } else if (actionType === 'connect') {
+          const connectionData = await getConnectionStatus(user.id, id as string);
+          setConnectionStatus(connectionData || 'none');
+          setFollowStatus('none');
         } else {
-        const countData = await getConnectionCount(id as string);
-        setConnectionCount(countData);
+          setConnectionStatus('none');
+          setFollowStatus('none');
+        }
+      } else {
+        setConnectionStatus('none');
+        setFollowStatus('none');
+        setCanSendRequests(true);
+        setActionType('none');
       }
       
       // Fetch posts for activity
       const postsData = await getPostsByAuthor(id as string);
       setPosts(postsData);
+      
+      // Fetch sidebar data only for own profile
+      if (isOwnProfile && user?.id) {
+        const [viewersData, suggestionsData] = await Promise.all([
+          Promise.resolve([]), // No profile viewers for now
+          getSuggestedConnectionsWithMutualCounts(user.id, 5)
+        ]);
+        setProfileViewers(viewersData);
+        setSuggestedConnections(suggestionsData);
+      }
       
     } catch (error) {
       console.error('Error fetching profile data:', error);
@@ -883,7 +1088,7 @@ export default function ProfilePage() {
     } finally {
       setLoading(false);
     }
-  }, [id, user?.id]);
+  }, [id, user?.id, isOwnProfile]);
 
   useEffect(() => {
     if (id && !profile) {
@@ -892,34 +1097,77 @@ export default function ProfilePage() {
   }, [id, profile, fetchProfileData]);
 
   const handleConnect = async () => {
-    if (!profile || !user) return;
+    if (!profile || !user) {
+      toast.error('Please sign in to connect with this user');
+      return;
+    }
+
+    if (!canSendRequests) {
+      toast.error('Institutions cannot send connection or follow requests');
+      return;
+    }
 
     try {
-      if (profile.profile_type === 'institution') {
-        await followUser(user.id, profile.id, 'individual', 'institution');
+      if (actionType === 'follow') {
+        const success = await followInstitution(user.id, profile.id);
+        if (success) {
           setFollowStatus('following');
-        toast.success('Successfully followed');
+          toast.success('Successfully followed institution');
         } else {
-        await sendConnectionRequest(user.id, profile.id);
+          toast.error('Failed to follow institution');
+        }
+      } else if (actionType === 'connect') {
+        const result = await sendConnectionRequest(user.id, profile.id);
+        if (result) {
           setConnectionStatus('pending');
-        toast.success('Connection request sent');
+          toast.success('Connection request sent');
+        } else {
+          toast.error('Failed to send connection request');
+        }
+      } else {
+        toast.error('Action not allowed');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error connecting:', error);
-      toast.error('Failed to connect');
+      toast.error(error.message || 'Failed to connect');
     }
   };
 
   const handleUnfollow = async () => {
-    if (!profile || !user) return;
+    if (!profile || !user) {
+      toast.error('Please sign in to unfollow this user');
+      return;
+    }
     
     try {
-      await unfollowUser(user.id, profile.id);
+      if (profile.profile_type === 'institution') {
+        await unfollowInstitution(user.id, profile.id);
+      } else {
+        await unfollowUser(user.id, profile.id);
+      }
       setFollowStatus('none');
       toast.success('Unfollowed successfully');
     } catch (error) {
       console.error('Error unfollowing:', error);
       toast.error('Failed to unfollow');
+    }
+  };
+
+  const handleSuggestedConnect = async (userId: string) => {
+    if (!user) {
+      toast.error('Please sign in to connect');
+      return;
+    }
+
+    try {
+      await sendConnectionRequest(user.id, userId);
+      toast.success('Connection request sent');
+      // Refresh suggestions to remove the connected user
+      const updatedSuggestions = await getSuggestedConnectionsWithMutualCounts(user.id, 5);
+      setSuggestedConnections(updatedSuggestions);
+    } catch (error) {
+      console.error('Error sending connection request:', error);
+      toast.error('Failed to send connection request');
     }
   };
 
@@ -1185,14 +1433,7 @@ export default function ProfilePage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-white via-[#007fff]/5 to-[#007fff]/10 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-[#007fff]/20 border-t-[#007fff] rounded-full animate-spin mx-auto"></div>
-          <p className="text-[#007fff] mt-6 text-lg font-medium">Loading medical profile...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner variant="fullscreen" text="Loading medical profile..." />;
   }
 
   if (!profile) {
@@ -1208,12 +1449,13 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-[#007fff]/5">
-      <div className="flex gap-6 px-4 sm:px-6 lg:px-8 py-6">
-        {/* Main Content Container */}
-        <div className="flex-1 max-w-4xl mx-auto space-y-4">
+    <div className={`min-h-screen ${BACKGROUNDS.page.primary}`}>
+      <div className="flex gap-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Main Content */}
+        <div className="flex-1 min-w-0">
+          <div className="space-y-8">
           {/* Profile Header */}
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+          <div className={`${COMPONENTS.card.base} shadow-xl`}>
             {/* Banner */}
             <div className="relative h-56 bg-[#007fff] overflow-hidden">
               {/* Background Pattern */}
@@ -1246,21 +1488,21 @@ export default function ProfilePage() {
             </div>
 
             {/* Profile Content */}
-            <div className="px-4 py-3">
+            <div className="px-6 py-6">
               {/* Avatar positioned to overlap banner */}
-              <div className="flex justify-start -mt-20 mb-3">
+              <div className="flex justify-start -mt-24 mb-6">
                 <div className="relative">
                   <Avatar
                     src={profile.avatar_url}
                     alt={profile.full_name || 'Profile'}
                     size="2xl"
-                    className="border-4 border-white shadow-2xl ring-4 ring-[#007fff]/20 w-32 h-32"
+                    className="border-4 border-white shadow-2xl ring-4 ring-[#007fff]/20 w-36 h-36"
                   />
                   {/* Edit Avatar Button */}
                   {isOwnProfile && (
                     <button
                       onClick={handleEditImages}
-                      className="absolute -bottom-2 -right-2 bg-[#007fff] text-white p-2 rounded-full hover:bg-[#007fff]/90 transition-all duration-300 shadow-lg transform hover:scale-110"
+                      className="absolute -bottom-2 -right-2 bg-[#007fff] text-white p-2.5 rounded-full hover:bg-[#007fff]/90 transition-all duration-300 shadow-lg transform hover:scale-110"
                     >
                       <CameraIcon className="w-4 h-4" />
                     </button>
@@ -1269,9 +1511,9 @@ export default function ProfilePage() {
                 </div>
 
               {/* Profile Information and Actions */}
-              <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+              <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
                 {/* Left Side: Profile Info and Stats */}
-                <div className="flex-1 min-w-0 space-y-3">
+                <div className="flex-1 min-w-0 space-y-4">
                   {/* Name */}
                   <div className="space-y-2">
                     {editingField === 'full_name' ? (
@@ -1485,54 +1727,91 @@ export default function ProfilePage() {
 
                   {/* Action Buttons for non-own profiles */}
                   {!isOwnProfile && (
-                    <div className="flex flex-col gap-3">
-                      {profile.profile_type === 'institution' ? (
-                        followStatus === 'following' ? (
-                          <button
-                            onClick={handleUnfollow}
-                            className="inline-flex items-center justify-center px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 text-sm font-semibold border border-gray-200 w-full group hover:scale-[1.02]"
+                    <div className="flex flex-col gap-4">
+                      {user ? (
+                        // Logged in user actions
+                        <>
+                          {!canSendRequests ? (
+                            // Institution users cannot send requests
+                            <div className="inline-flex items-center justify-center px-6 py-3 bg-gray-100 text-gray-600 rounded-lg text-sm font-semibold border border-gray-200 w-full">
+                              <XCircleIcon className="w-4 h-4 mr-2" />
+                              Institutions Cannot Send Requests
+                            </div>
+                          ) : actionType === 'follow' ? (
+                            // Follow logic for institutions
+                            followStatus === 'following' ? (
+                              <button
+                                onClick={handleUnfollow}
+                                className="inline-flex items-center justify-center px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 text-sm font-semibold border border-gray-200 w-full group hover:scale-[1.02]"
+                              >
+                                <CheckIcon className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
+                                Following
+                              </button>
+                            ) : (
+                              <button
+                                onClick={handleConnect}
+                                className="inline-flex items-center justify-center px-6 py-3 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-semibold w-full group hover:scale-[1.02] shadow-lg hover:shadow-xl"
+                              >
+                                <PlusIcon className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
+                                Follow
+                              </button>
+                            )
+                          ) : actionType === 'connect' ? (
+                            // Connection logic for individuals
+                            connectionStatus === 'connected' ? (
+                              <span className="inline-flex items-center justify-center px-6 py-3 bg-green-100 text-green-700 rounded-lg text-sm font-semibold border border-green-200 w-full">
+                                <CheckIcon className="w-4 h-4 mr-2" />
+                                Connected
+                              </span>
+                            ) : connectionStatus === 'pending' ? (
+                              <span className="inline-flex items-center justify-center px-6 py-3 bg-yellow-100 text-yellow-700 rounded-lg text-sm font-semibold border border-yellow-200 w-full">
+                                <ClockIcon className="w-4 h-4 mr-2" />
+                                Pending
+                              </span>
+                            ) : (
+                              <button
+                                onClick={handleConnect}
+                                className="inline-flex items-center justify-center px-6 py-3 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-semibold w-full group hover:scale-[1.02] shadow-lg hover:shadow-xl"
+                              >
+                                <UserPlusIcon className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
+                                Connect
+                              </button>
+                            )
+                          ) : (
+                            // No action available
+                            <div className="inline-flex items-center justify-center px-6 py-3 bg-gray-100 text-gray-600 rounded-lg text-sm font-semibold border border-gray-200 w-full">
+                              <XCircleIcon className="w-4 h-4 mr-2" />
+                              No Action Available
+                            </div>
+                          )}
+                          <button 
+                            onClick={() => router.push(`/messages?user=${profile.id}`)}
+                            className="inline-flex items-center justify-center px-6 py-3 bg-white text-[#007fff] border-2 border-[#007fff] rounded-lg hover:bg-[#007fff]/5 transition-all duration-200 text-sm font-semibold w-full group hover:scale-[1.02] hover:border-[#007fff]/80"
                           >
-                            <CheckIcon className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
-                            Following
-                    </button>
-                        ) : (
-                          <button
-                            onClick={handleConnect}
-                            className="inline-flex items-center justify-center px-6 py-3 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-semibold w-full group hover:scale-[1.02] shadow-lg hover:shadow-xl"
-                          >
-                            <PlusIcon className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
-                            Follow
+                            <EnvelopeIcon className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
+                            Message
                           </button>
-                        )
+                        </>
                       ) : (
-                        connectionStatus === 'connected' ? (
-                          <span className="inline-flex items-center justify-center px-6 py-3 bg-green-100 text-green-700 rounded-lg text-sm font-semibold border border-green-200 w-full">
-                            <CheckIcon className="w-4 h-4 mr-2" />
-                            Connected
-                          </span>
-                        ) : connectionStatus === 'pending' ? (
-                          <span className="inline-flex items-center justify-center px-6 py-3 bg-yellow-100 text-yellow-700 rounded-lg text-sm font-semibold border border-yellow-200 w-full">
-                            <ClockIcon className="w-4 h-4 mr-2" />
-                            Pending
-                          </span>
-                        ) : (
-                          <button
-                            onClick={handleConnect}
+                        // Non-logged in user actions
+                        <>
+                          <Link
+                            href="/signin"
                             className="inline-flex items-center justify-center px-6 py-3 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-semibold w-full group hover:scale-[1.02] shadow-lg hover:shadow-xl"
                           >
                             <UserPlusIcon className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
-                            Connect
-                          </button>
-                        )
+                            Sign In to {profile.profile_type === 'institution' || profile.user_type === 'institution' ? 'Follow' : 'Connect'}
+                          </Link>
+                          <Link
+                            href="/signin"
+                            className="inline-flex items-center justify-center px-6 py-3 bg-white text-[#007fff] border-2 border-[#007fff] rounded-lg hover:bg-[#007fff]/5 transition-all duration-200 text-sm font-semibold w-full group hover:scale-[1.02] hover:border-[#007fff]/80"
+                          >
+                            <EnvelopeIcon className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
+                            Message
+                          </Link>
+                        </>
                       )}
-                      <button 
-                        onClick={() => router.push(`/messages?user=${profile.id}`)}
-                        className="inline-flex items-center justify-center px-6 py-3 bg-white text-[#007fff] border-2 border-[#007fff] rounded-lg hover:bg-[#007fff]/5 transition-all duration-200 text-sm font-semibold w-full group hover:scale-[1.02] hover:border-[#007fff]/80"
-                      >
-                        <EnvelopeIcon className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
-                        Message
-                      </button>
-                </div>
+                    </div>
                   )}
                     </div>
                   </div>
@@ -1547,6 +1826,7 @@ export default function ProfilePage() {
                     isOwnProfile={isOwnProfile} 
                     connectionCount={connectionCount} 
                     router={router}
+                    profileId={profile.id}
                   />
 
                   {/* About Section */}
@@ -1724,8 +2004,8 @@ export default function ProfilePage() {
                           </div>
                         </div>
                       ) : experiences.length > 0 ? (
-                        <div className="space-y-4">
-                          {experiences.slice(0, 3).map((experience, index) => (
+                        <div className="space-y-6">
+                          {(showAllExperiences ? experiences : experiences.slice(0, 3)).map((experience, index) => (
                             <ExperienceCard
                               key={experience.id}
                               experience={experience}
@@ -1740,8 +2020,11 @@ export default function ProfilePage() {
                           ))}
                           {experiences.length > 3 && (
                             <div className="text-center pt-4">
-                              <button className="text-[#007fff] hover:text-[#007fff]/80 text-sm font-medium hover:underline transition-colors duration-200">
-                                View all {experiences.length} experiences
+                              <button 
+                                onClick={() => setShowAllExperiences(!showAllExperiences)}
+                                className="text-[#007fff] hover:text-[#007fff]/80 text-sm font-medium hover:underline transition-colors duration-200"
+                              >
+                                {showAllExperiences ? 'Show less' : `View all ${experiences.length} experiences`}
                               </button>
                     </div>
                   )}
@@ -1913,7 +2196,7 @@ export default function ProfilePage() {
             </div>
                         </div>
                       ) : education.length > 0 ? (
-                        <div className="space-y-4">
+                        <div className="space-y-6">
                           {education.slice(0, 3).map((edu, index) => (
                             <EducationCard
                               key={edu.id}
@@ -1954,24 +2237,51 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
+          </div>
         </div>
-        
-        {/* Right Sidebar - Outside main content */}
-        <div className="hidden xl:block w-80 space-y-4 sticky top-6 h-fit">
-          {/* People You May Know Section */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
-              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                <UserGroupIcon className="w-4 h-4 text-[#007fff]" />
-                People You May Know
-              </h3>
+
+        {/* Right Sidebar */}
+        <div className="hidden xl:block w-80 flex-shrink-0">
+          <div className="sticky top-24 space-y-4">
+            {/* Who Viewed Your Profile Section - Only for own profile */}
+            {isOwnProfile && (
+              <div className="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
+                <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <EyeIcon className="w-4 h-4 text-[#007fff]" />
+                    Who Viewed Your Profile
+                  </h3>
+                </div>
+                <div className="p-3">
+                  <ProfileViewers viewers={profileViewers} />
+                </div>
+              </div>
+            )}
+
+            {/* People You May Know Section */}
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
+              <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+                <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                  <UserGroupIcon className="w-4 h-4 text-[#007fff]" />
+                  People You May Know
+                </h3>
+              </div>
+              <div className="p-3">
+                {isOwnProfile ? (
+                  <PeopleYouMayKnow 
+                    suggestions={suggestedConnections} 
+                    onConnect={handleSuggestedConnect}
+                  />
+                ) : (
+                  <SimilarPeople />
+                )}
+              </div>
             </div>
-            <div className="p-3">
-              <SimilarPeople />
+            
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-lg">
+              <SidebarCard profile={profile} isOwnProfile={isOwnProfile} />
             </div>
           </div>
-          
-          <SidebarCard profile={profile} isOwnProfile={isOwnProfile} />
         </div>
       </div>
         

@@ -11,6 +11,7 @@ interface ShareButtonProps {
   description?: string;
   className?: string;
   variant?: 'icon' | 'button';
+  onShare?: (shareType: 'native' | 'copy_link' | 'external', platform?: string) => void;
 }
 
 export default function ShareButton({ 
@@ -18,7 +19,8 @@ export default function ShareButton({
   title = 'Check this out', 
       description = 'Shared from <span className="mulish-semibold">kendraa</span>', 
   className = '',
-  variant = 'icon'
+  variant = 'icon',
+  onShare
 }: ShareButtonProps) {
   const [showDropdown, setShowDropdown] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -32,6 +34,7 @@ export default function ShareButton({
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
       toast.success('Link copied to clipboard!');
+      onShare?.('copy_link');
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
       toast.error('Failed to copy link');
@@ -42,6 +45,7 @@ export default function ShareButton({
     const subject = encodeURIComponent(shareTitle);
     const body = encodeURIComponent(`${shareDescription}\n\n${shareUrl}`);
     window.open(`mailto:?subject=${subject}&body=${body}`);
+    onShare?.('external', 'email');
   };
 
   const shareViaNative = async () => {
@@ -52,6 +56,7 @@ export default function ShareButton({
           text: shareDescription,
           url: shareUrl,
         });
+        onShare?.('native');
       } catch (error) {
         if ((error as Error).name !== 'AbortError') {
           toast.error('Failed to share');
@@ -65,11 +70,13 @@ export default function ShareButton({
   const shareViaLinkedIn = () => {
     const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
     window.open(linkedInUrl, '_blank');
+    onShare?.('external', 'linkedin');
   };
 
   const shareViaTwitter = () => {
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareTitle)}&url=${encodeURIComponent(shareUrl)}`;
     window.open(twitterUrl, '_blank');
+    onShare?.('external', 'twitter');
   };
 
   if (variant === 'button') {
