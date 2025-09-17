@@ -3849,11 +3849,24 @@ export async function deleteEvent(eventId: string, organizerId: string): Promise
     const { error: deleteError } = await getSupabase()
       .from('events')
       .delete()
-      .eq('id', eventId);
+      .eq('id', eventId)
+      .eq('organizer_id', organizerId); // Add extra security check
 
     if (deleteError) {
       console.error('[Queries] Error deleting event:', deleteError);
       throw new Error(`Failed to delete event: ${deleteError.message}`);
+    }
+    
+    // Verify the event was actually deleted
+    const { data: verifyData, error: verifyError } = await getSupabase()
+      .from('events')
+      .select('id')
+      .eq('id', eventId)
+      .single();
+
+    if (!verifyError && verifyData) {
+      console.error('[Queries] Event still exists after deletion attempt');
+      throw new Error('Event deletion failed - event still exists');
     }
     
     console.log('[Queries] Event deleted successfully from database');
