@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { createEvent, getInstitutionByAdminId } from '@/lib/queries';
+import { createEvent, getInstitutionByUserId } from '@/lib/queries';
 import { useRouter } from 'next/navigation';
 import { ArrowLeftIcon, BuildingOfficeIcon, CalendarIcon, MapPinIcon, CurrencyDollarIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
@@ -73,7 +73,7 @@ export default function InstitutionCreateEventPage() {
     if (!user?.id) return;
     
     try {
-      const institutionData = await getInstitutionByAdminId(user.id);
+      const institutionData = await getInstitutionByUserId(user.id);
       setInstitution(institutionData);
     } catch (error) {
       console.error('Error fetching institution:', error);

@@ -7,7 +7,7 @@ import {
   getConnectionRequests, 
   acceptConnectionRequest,
   rejectConnectionRequest,
-  getInstitutionByAdminId
+  getInstitutionByUserId
 } from '@/lib/queries';
 import type { ConnectionWithProfile, Institution } from '@/types/database.types';
 import { 
@@ -46,7 +46,7 @@ export default function InstitutionNetworkPage() {
     if (!user?.id) return;
     
     try {
-      const institutionData = await getInstitutionByAdminId(user.id);
+      const institutionData = await getInstitutionByUserId(user.id);
       setInstitution(institutionData);
     } catch (error) {
       console.error('Error fetching institution:', error);

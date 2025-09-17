@@ -6,7 +6,7 @@ import Avatar from '@/components/common/Avatar';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { useAuth } from '@/contexts/AuthContext';
 import {
-  getInstitutionByAdminId,
+  getInstitutionByUserId,
   getJobsByInstitution,
   getJobApplications,
   type JobWithCompany
@@ -39,7 +39,7 @@ export default function MobileInstitutionJobsPage() {
     setLoading(true);
     
     try {
-      const institution = await getInstitutionByAdminId(user.id);
+      const institution = await getInstitutionByUserId(user.id);
       if (!institution) {
         toast.error('Institution not found');
         return;

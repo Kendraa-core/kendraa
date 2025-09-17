@@ -15,7 +15,7 @@ import {
   getConnectionCount, 
   getEventsByOrganizer,
   getEventOrganizer,
-  getInstitutionByAdminId
+  getInstitutionByUserId
 } from '@/lib/queries';
 import { formatNumber } from '@/lib/utils';
 
@@ -56,7 +56,7 @@ export default function LeftSidebar({
           const connectionsCount = await getConnectionCount(user.id);
           setConnectionCount(connectionsCount);
         } else {
-          const institutionData = await getInstitutionByAdminId(user.id);
+          const institutionData = await getInstitutionByUserId(user.id);
           setInstitution(institutionData);
         }
         

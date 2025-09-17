@@ -365,7 +365,7 @@ export async function trackPostImpression(
     if (!schemaExists) return;
 
     // Insert impression record
-    await getSupabase()
+    const { error: insertError } = await getSupabase()
       .from('post_impressions')
       .insert({
         post_id: postId,
@@ -375,10 +375,15 @@ export async function trackPostImpression(
         created_at: new Date().toISOString()
       });
 
+    if (insertError) {
+      console.warn('Could not track post impression (permission denied or table missing):', insertError.message);
+      return;
+    }
+
     // Update analytics summary
     await updatePostAnalytics(postId, 'impressions');
   } catch (error) {
-    console.error('Error tracking post impression:', error);
+    console.warn('Error tracking post impression:', error);
   }
 }
 
@@ -396,7 +401,7 @@ export async function trackPostView(
     const completionRate = Math.min(100, (viewDuration / 30) * 100);
 
     // Insert view record
-    await getSupabase()
+    const { error: insertError } = await getSupabase()
       .from('post_views')
       .insert({
         post_id: postId,
@@ -407,10 +412,15 @@ export async function trackPostView(
         created_at: new Date().toISOString()
       });
 
+    if (insertError) {
+      console.warn('Could not track post view (permission denied or table missing):', insertError.message);
+      return;
+    }
+
     // Update analytics summary
     await updatePostAnalytics(postId, 'views');
   } catch (error) {
-    console.error('Error tracking post view:', error);
+    console.warn('Error tracking post view:', error);
   }
 }
 
@@ -480,38 +490,43 @@ async function updatePostAnalytics(
       .eq('post_id', postId)
       .single();
 
-    if (fetchError && fetchError.code === 'PGRST116') {
-      // Record doesn't exist, create it
-      const { error: insertError } = await getSupabase()
-        .from('post_analytics')
-        .insert({
-          post_id: postId,
-          impressions: 0,
-          unique_impressions: 0,
-          profile_views: 0,
-          followers_gained: 0,
-          video_views: 0,
-          total_watch_time: 0,
-          average_watch_time: 0,
-          shares_count: 0,
-          saves_count: 0,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        });
+    if (fetchError) {
+      if (fetchError.code === 'PGRST116') {
+        // Record doesn't exist, create it
+        const { error: insertError } = await getSupabase()
+          .from('post_analytics')
+          .insert({
+            post_id: postId,
+            impressions: 0,
+            unique_impressions: 0,
+            profile_views: 0,
+            followers_gained: 0,
+            video_views: 0,
+            total_watch_time: 0,
+            average_watch_time: 0,
+            shares_count: 0,
+            saves_count: 0,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
 
-      if (insertError) {
-        console.error('Error creating analytics record:', insertError);
+        if (insertError) {
+          console.warn('Could not create analytics record (permission denied or table missing):', insertError.message);
+          return;
+        }
+
+        // Fetch the newly created record
+        const { data: newAnalytics } = await getSupabase()
+          .from('post_analytics')
+          .select('*')
+          .eq('post_id', postId)
+          .single();
+        
+        analytics = newAnalytics;
+      } else {
+        console.warn('Could not fetch analytics record (permission denied or table missing):', fetchError.message);
         return;
       }
-
-      // Fetch the newly created record
-      const { data: newAnalytics } = await getSupabase()
-        .from('post_analytics')
-        .select('*')
-        .eq('post_id', postId)
-        .single();
-      
-      analytics = newAnalytics;
     }
 
     if (!analytics) return;
@@ -539,12 +554,16 @@ async function updatePostAnalytics(
         break;
     }
 
-    await getSupabase()
+    const { error: updateError } = await getSupabase()
       .from('post_analytics')
       .update(updateData)
       .eq('post_id', postId);
+
+    if (updateError) {
+      console.warn('Could not update analytics record (permission denied or table missing):', updateError.message);
+    }
   } catch (error) {
-    console.error('Error updating post analytics:', error);
+    console.warn('Error updating post analytics:', error);
   }
 }
 
@@ -587,23 +606,51 @@ export async function getPostAnalytics(postId: string): Promise<{
       .eq('post_id', postId)
       .single();
 
+    if (analyticsError && analyticsError.code !== 'PGRST116') {
+      console.warn('Could not fetch analytics data (permission denied or table missing):', analyticsError.message);
+      // Return basic analytics from post data only
+      return {
+        impressions: 0,
+        members_reached: 0,
+        profile_viewers: 0,
+        followers_gained: 0,
+        reactions: post.likes_count || 0,
+        comments: post.comments_count || 0,
+        reposts: 0,
+        saves: 0,
+        shares: post.shares_count || 0
+      };
+    }
+
     // Get saved posts count
-    const { count: savesCount } = await getSupabase()
+    const { count: savesCount, error: savesError } = await getSupabase()
       .from('saved_posts')
       .select('*', { count: 'exact', head: true })
       .eq('post_id', postId);
 
+    if (savesError) {
+      console.warn('Could not fetch saved posts count (permission denied or table missing):', savesError.message);
+    }
+
     // Get unique impressions count
-    const { count: uniqueImpressions } = await getSupabase()
+    const { count: uniqueImpressions, error: impressionsError } = await getSupabase()
       .from('post_impressions')
       .select('*', { count: 'exact', head: true })
       .eq('post_id', postId);
 
+    if (impressionsError) {
+      console.warn('Could not fetch impressions count (permission denied or table missing):', impressionsError.message);
+    }
+
     // Get total watch time
-    const { data: views } = await getSupabase()
+    const { data: views, error: viewsError } = await getSupabase()
       .from('post_views')
       .select('view_duration')
       .eq('post_id', postId);
+
+    if (viewsError) {
+      console.warn('Could not fetch views data (permission denied or table missing):', viewsError.message);
+    }
 
     const totalWatchTime = views?.reduce((sum, view) => sum + (view.view_duration || 0), 0) || 0;
     const averageWatchTime = views && views.length > 0 ? totalWatchTime / views.length : 0;
@@ -1075,8 +1122,7 @@ export async function getJobsByInstitution(institutionId: string): Promise<JobWi
       .from('jobs')
       .select(`
         *,
-        company:institutions!jobs_company_id_fkey(*),
-        posted_by_user:profiles!jobs_posted_by_fkey(*)
+        company:institutions!jobs_company_id_fkey(*)
       `)
       .eq('company_id', institutionId)
       .order('created_at', { ascending: false });
@@ -1098,37 +1144,12 @@ export async function getEventsByInstitution(institutionId: string): Promise<Eve
   try {
     console.log('[Queries] Getting events for institution:', institutionId);
     
-    // First get the institution admin's profile ID
-    const { data: institution, error: institutionError } = await getSupabase()
-      .from('institutions')
-      .select('admin_user_id')
-      .eq('id', institutionId)
-      .single();
-
-    if (institutionError) {
-      console.error('[Queries] Error fetching institution admin:', institutionError);
-      if (institutionError.code === 'PGRST116') {
-        console.log('[Queries] Institution not found:', institutionId);
-        return [];
-      }
-      throw institutionError;
-    }
-
-    if (!institution || !institution.admin_user_id) {
-      console.log('[Queries] No admin user found for institution:', institutionId);
-      return [];
-    }
-    
-    console.log('[Queries] Found institution admin:', institution.admin_user_id);
-    
-    // Then get events organized by the institution admin
+    // Get events organized by the institution directly
     const { data, error } = await getSupabase()
       .from('events')
-      .select(`
-        *,
-        organizer:profiles!events_organizer_id_fkey(*)
-      `)
-      .eq('organizer_id', institution.admin_user_id)
+      .select('*')
+      .eq('organizer_id', institutionId)
+      .eq('organizer_type', 'institution')
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -1718,7 +1739,7 @@ export async function isPostLiked(userId: string, postId: string): Promise<strin
 }
 
 // Institution functions
-export async function createInstitution(institution: Omit<Institution, 'id' | 'created_at' | 'updated_at'>): Promise<Institution | null> {
+export async function createInstitution(institution: Omit<Institution, 'created_at' | 'updated_at'>): Promise<Institution | null> {
   try {
     const schemaExists = await true;
     if (!schemaExists) {
@@ -1770,10 +1791,10 @@ export async function getInstitutions(): Promise<Institution[]> {
   }
 }
 
-// Get institution by admin user ID
-export async function getInstitutionByAdminId(adminUserId: string): Promise<Institution | null> {
+// Get institution by user ID (for users who manage institutions)
+export async function getInstitutionByUserId(userId: string): Promise<Institution | null> {
   try {
-    console.log('Getting institution by admin user ID', { adminUserId });
+    console.log('Getting institution by user ID', { userId });
     
     const schemaExists = await true;
     if (!schemaExists) {
@@ -1781,21 +1802,44 @@ export async function getInstitutionByAdminId(adminUserId: string): Promise<Inst
       return null;
     }
     
+    // First check if user has a profile with institution type
+    const { data: profile, error: profileError } = await getSupabase()
+      .from('profiles')
+      .select('id, user_type, profile_type, institution_type')
+      .eq('id', userId)
+      .single();
+
+    if (profileError || !profile) {
+      console.log('User profile not found or not an institution user');
+      return null;
+    }
+
+    // Check if user is an institution type
+    if (profile.user_type !== 'institution' && profile.profile_type !== 'institution') {
+      console.log('User is not an institution type');
+      return null;
+    }
+
+    // Get the institution by user ID (assuming user ID matches institution ID for institution accounts)
     const { data, error } = await getSupabase()
       .from('institutions')
       .select('*')
-      .eq('admin_user_id', adminUserId)
-      .limit(1);
+      .eq('id', userId)
+      .single();
 
     if (error) {
-      console.log('Error fetching institution by admin user ID', error);
+      if (error.code === 'PGRST116') {
+        console.log('Institution not found for user');
+        return null;
+      }
+      console.log('Error fetching institution by user ID', error);
       return null;
     }
     
     console.log('Institution fetched successfully', data);
-    return data && data.length > 0 ? data[0] : null;
+    return data;
   } catch (error) {
-    console.log('Error fetching institution by admin user ID', error);
+    console.log('Error fetching institution by user ID', error);
     return null;
   }
 }
@@ -1833,7 +1877,7 @@ export async function ensureInstitutionExists(userId: string, profile: Profile):
     console.log('Ensuring institution exists for user', { userId });
     
     // First check if institution already exists
-    const existingInstitution = await getInstitutionByAdminId(userId);
+    const existingInstitution = await getInstitutionByUserId(userId);
     if (existingInstitution) {
       console.log('Institution already exists', existingInstitution);
       return existingInstitution;
@@ -1855,8 +1899,9 @@ export async function ensureInstitutionExists(userId: string, profile: Profile):
       }
     };
     
-    // Create new institution
+    // Create new institution with user ID as institution ID
     const institutionData = {
+      id: userId, // Use user ID as institution ID
       name: profile.full_name || 'Healthcare Institution',
       type: mapInstitutionType(profile.institution_type),
       description: profile.bio || 'Healthcare institution',
@@ -1872,7 +1917,6 @@ export async function ensureInstitutionExists(userId: string, profile: Profile):
       established_year: null,
       size: 'medium' as const,
       verified: false,
-      admin_user_id: userId,
     };
     
     const result = await createInstitution(institutionData);

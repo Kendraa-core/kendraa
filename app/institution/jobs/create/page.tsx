@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { getProfile, getInstitutionByAdminId, createJob } from '@/lib/queries';
+import { getProfile, getInstitutionByUserId, createJob } from '@/lib/queries';
 import type { Job, Profile, Institution } from '@/types/database.types';
 import Link from 'next/link';
 import { ChevronRightIcon, ChevronLeftIcon, MapPinIcon, CalendarIcon, CurrencyDollarIcon, PlusIcon, XMarkIcon, BuildingOfficeIcon } from '@heroicons/react/24/outline';
@@ -71,7 +71,7 @@ export default function InstitutionCreateJobPage() {
     if (!user?.id) return;
     
     try {
-      const institutionData = await getInstitutionByAdminId(user.id);
+      const institutionData = await getInstitutionByUserId(user.id);
       setInstitution(institutionData);
     } catch (error) {
       console.error('Error fetching institution:', error);

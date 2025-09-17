@@ -18,7 +18,7 @@ import Image from 'next/image';
 import { v4 as uuidv4 } from 'uuid';
 import toast from 'react-hot-toast';
 import Logo from '@/components/common/Logo';
-import { getInstitutionByAdminId } from '@/lib/queries';
+import { getInstitutionByUserId } from '@/lib/queries';
 
 const INSTITUTION_TYPES = [
   'Hospital',
@@ -163,7 +163,7 @@ export default function InstitutionOnboardingPage() {
 
       // If institution already exists for this user, load existing data
       try {
-        const existing = await getInstitutionByAdminId(user.id);
+        const existing = await getInstitutionByUserId(user.id);
         if (existing) {
           // If onboarding is already completed, redirect to feed
           if (profile?.onboarding_completed) {
@@ -324,7 +324,7 @@ export default function InstitutionOnboardingPage() {
       // Check if institution exists for this admin
       let existingId: string | null = null;
       try {
-        const existing = await getInstitutionByAdminId(user.id);
+        const existing = await getInstitutionByUserId(user.id);
         existingId = existing?.id ?? null;
       } catch {
         existingId = null;
@@ -458,7 +458,7 @@ export default function InstitutionOnboardingPage() {
       // Check if institution exists for this admin
       let existingId: string | null = null;
       try {
-        const existing = await getInstitutionByAdminId(user.id);
+        const existing = await getInstitutionByUserId(user.id);
         existingId = existing?.id ?? null;
       } catch {
         existingId = null;

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { getJobs, getJobApplications, getInstitutionByAdminId } from '@/lib/queries';
+import { getJobs, getJobApplications, getInstitutionByUserId } from '@/lib/queries';
 import type { JobWithCompany, JobApplication, Institution } from '@/types/database.types';
 import { 
   BriefcaseIcon,
@@ -81,7 +81,7 @@ export default function InstitutionJobsPage() {
     if (!user?.id) return;
     
     try {
-      const institutionData = await getInstitutionByAdminId(user.id);
+      const institutionData = await getInstitutionByUserId(user.id);
       setInstitution(institutionData);
     } catch (error) {
       console.error('Error fetching institution:', error);

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { getJobApplications, updateJobApplicationStatus, getProfile, getInstitutionByAdminId } from '@/lib/queries';
+import { getJobApplications, updateJobApplicationStatus, getProfile, getInstitutionByUserId } from '@/lib/queries';
 import { formatRelativeTime } from '@/lib/utils';
 import toast from 'react-hot-toast';
 import {
@@ -62,7 +62,7 @@ export default function InstitutionJobApplicationsPage() {
     if (!user?.id) return;
     
     try {
-      const institutionData = await getInstitutionByAdminId(user.id);
+      const institutionData = await getInstitutionByUserId(user.id);
       setInstitution(institutionData);
     } catch (error) {
       console.error('Error fetching institution:', error);
