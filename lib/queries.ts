@@ -1096,10 +1096,7 @@ export async function getJobsByInstitution(institutionId: string): Promise<JobWi
 // Get events organized by an institution
 export async function getEventsByInstitution(institutionId: string): Promise<EventWithOrganizer[]> {
   try {
-    const schemaExists = await true;
-    if (!schemaExists) {
-      return [];
-    }
+    console.log('[Queries] Getting events for institution:', institutionId);
     
     // First get the institution admin's profile ID
     const { data: institution, error: institutionError } = await getSupabase()
@@ -1108,10 +1105,21 @@ export async function getEventsByInstitution(institutionId: string): Promise<Eve
       .eq('id', institutionId)
       .single();
 
-    if (institutionError || !institution) {
-      console.error('Error fetching institution admin:', institutionError);
+    if (institutionError) {
+      console.error('[Queries] Error fetching institution admin:', institutionError);
+      if (institutionError.code === 'PGRST116') {
+        console.log('[Queries] Institution not found:', institutionId);
+        return [];
+      }
+      throw institutionError;
+    }
+
+    if (!institution || !institution.admin_user_id) {
+      console.log('[Queries] No admin user found for institution:', institutionId);
       return [];
     }
+    
+    console.log('[Queries] Found institution admin:', institution.admin_user_id);
     
     // Then get events organized by the institution admin
     const { data, error } = await getSupabase()
@@ -1121,17 +1129,23 @@ export async function getEventsByInstitution(institutionId: string): Promise<Eve
         organizer:profiles!events_organizer_id_fkey(*)
       `)
       .eq('organizer_id', institution.admin_user_id)
-      .eq('organizer_type', 'institution')
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching institution events:', error);
+      console.error('[Queries] Error fetching institution events:', error);
+      console.error('[Queries] Error details:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      });
       return [];
     }
     
+    console.log('[Queries] Institution events fetched successfully:', data?.length || 0);
     return data || [];
   } catch (error) {
-    console.error('Error in getEventsByInstitution:', error);
+    console.error('[Queries] Error in getEventsByInstitution:', error);
     return [];
   }
 }
@@ -1782,6 +1796,33 @@ export async function getInstitutionByAdminId(adminUserId: string): Promise<Inst
     return data && data.length > 0 ? data[0] : null;
   } catch (error) {
     console.log('Error fetching institution by admin user ID', error);
+    return null;
+  }
+}
+
+// Get institution by ID
+export async function getInstitutionById(institutionId: string): Promise<Institution | null> {
+  try {
+    console.log('[Queries] Getting institution by ID:', institutionId);
+    
+    const { data, error } = await getSupabase()
+      .from('institutions')
+      .select('*')
+      .eq('id', institutionId)
+      .single();
+
+    if (error) {
+      console.error('[Queries] Error fetching institution by ID:', error);
+      if (error.code === 'PGRST116') {
+        return null;
+      }
+      throw error;
+    }
+    
+    console.log('[Queries] Institution fetched successfully by ID');
+    return data;
+  } catch (error) {
+    console.error('[Queries] Error in getInstitutionById:', error);
     return null;
   }
 }
