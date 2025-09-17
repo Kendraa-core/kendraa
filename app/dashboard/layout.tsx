@@ -49,7 +49,7 @@ export default function DashboardLayout({
   useEffect(() => {
     if (!authLoading && user && profile) {
       if (profile.user_type === 'institution' || profile.profile_type === 'institution') {
-        router.push('/institution/dashboard');
+        router.push('/institution/feed');
         return;
       }
     }

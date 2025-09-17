@@ -12,7 +12,7 @@ import Breadcrumb from '@/components/common/Breadcrumb';
 import EditProfileModal from '@/components/profile/EditProfileModal';
 import EnhancedProfileImageEditor from '@/components/profile/EnhancedProfileImageEditor';
 import PostCard from '@/components/post/PostCard';
-import SimilarPeople from '@/components/profile/SimilarPeople';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { cn, formatDate, formatNumber } from '@/lib/utils';
 import {
   ArrowLeftIcon,
@@ -26,8 +26,6 @@ import {
   AcademicCapIcon,
   UserPlusIcon,
   ShareIcon,
-  UserGroupIcon,
-  BookmarkIcon,
   CalendarDaysIcon,
   CameraIcon,
   CheckIcon,
@@ -426,25 +424,6 @@ const ActivityCard = React.memo(function ActivityCard({
   );
 });
 
-// SidebarCard Component for Institution
-const SidebarCard = React.memo(function SidebarCard({ profile, isOwnProfile }: { 
-  profile: Profile; 
-  isOwnProfile: boolean; 
-}) {
-  return (
-    <div className="space-y-4">
-      <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
-        <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <BuildingOfficeIcon className="w-5 h-5 text-[#007fff]" />
-          Institution Overview
-        </h4>
-        <p className="text-sm text-gray-600">
-          Additional institution information and insights can be displayed here.
-        </p>
-      </div>
-    </div>
-  );
-});
 
 export default function InstitutionProfilePage() {
   const router = useRouter();
@@ -572,23 +551,25 @@ export default function InstitutionProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-[#007fff]/5 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#007fff] mx-auto mb-3"></div>
-          <p className="text-sm text-[#007fff]">Loading institution profile...</p>
-        </div>
-      </div>
+      <LoadingSpinner 
+        variant="fullscreen" 
+        text="Loading institution profile..." 
+      />
     );
   }
 
   if (!profile) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-[#007fff]/5 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600">Institution profile not found</p>
+        <div className="text-center max-w-md mx-auto px-4">
+          <div className="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <BuildingOfficeIcon className="w-10 h-10 text-blue-600" />
+          </div>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-3">Institution Profile Not Found</h2>
+          <p className="text-gray-600 mb-6">It looks like your institution profile hasn&apos;t been set up yet.</p>
           <button 
             onClick={() => router.push('/institution/onboarding')}
-            className="mt-4 px-4 py-2 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-colors"
+            className="px-6 py-3 bg-[#007fff] text-white rounded-xl hover:bg-[#007fff]/90 transition-colors font-medium"
           >
             Complete Institution Setup
           </button>
@@ -599,9 +580,9 @@ export default function InstitutionProfilePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-[#007fff]/5">
-      <div className="flex gap-6 px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Main Content Container */}
-        <div className="flex-1 max-w-4xl mx-auto space-y-4">
+        <div className="space-y-6">
           {/* Profile Header */}
           <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
             {/* Banner */}
@@ -728,24 +709,6 @@ export default function InstitutionProfilePage() {
               </div>
             </div>
           </div>
-        </div>
-        
-        {/* Right Sidebar - Outside main content */}
-        <div className="hidden xl:block w-80 space-y-4 sticky top-6 h-fit">
-          {/* People You May Know Section */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
-              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                <UserGroupIcon className="w-4 h-4 text-[#007fff]" />
-                People You May Know
-              </h3>
-            </div>
-            <div className="p-3">
-              <SimilarPeople />
-            </div>
-          </div>
-          
-          <SidebarCard profile={profile} isOwnProfile={isOwnProfile} />
         </div>
       </div>
         

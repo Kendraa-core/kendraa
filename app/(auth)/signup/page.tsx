@@ -50,7 +50,7 @@ export default function SignUp() {
       // Redirect based on user type
       if (profile.user_type === 'institution' || profile.profile_type === 'institution') {
         if (profile.onboarding_completed) {
-          router.push('/institution/dashboard');
+          router.push('/institution/feed');
         } else {
           router.push('/institution/onboarding');
         }

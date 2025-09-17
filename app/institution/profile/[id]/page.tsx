@@ -61,6 +61,7 @@ import {
   unfollowInstitution,
   getFollowStatus,
   getInstitutionByAdminId,
+  getInstitutionById,
 } from '@/lib/queries';
 import type { Profile, Institution, Experience, Education, Post, JobWithCompany, EventWithOrganizer } from '@/types/database.types';
 
@@ -408,12 +409,17 @@ export default function PublicInstitutionProfilePage() {
 
       // Fetch jobs and events for institutions
       if (institutionData?.id) {
-        const [jobsData, eventsData] = await Promise.all([
-          getJobsByInstitution(institutionData.id),
-          getEventsByInstitution(institutionData.id)
-        ]);
-        setJobs(jobsData);
-        setEvents(eventsData);
+        try {
+          const [jobsData, eventsData] = await Promise.all([
+            getJobsByInstitution(institutionData.id),
+            getEventsByInstitution(institutionData.id)
+          ]);
+          setJobs(jobsData);
+          setEvents(eventsData);
+        } catch (error) {
+          console.error('Error fetching institution jobs/events:', error);
+          // Don't throw here, just log the error and continue
+        }
       }
       
       // Check user permissions and follow status only if user is logged in

@@ -88,7 +88,7 @@ export default function MobileBottomNav({ isInstitution = false }: MobileBottomN
     },
     { 
       name: 'Profile', 
-      href: `${baseRoute}/dashboard`, 
+      href: `${baseRoute}/profile`, 
       icon: UserIcon, 
       activeIcon: UserIconSolid 
     }
