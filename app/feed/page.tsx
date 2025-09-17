@@ -1,38 +1,122 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
-import { getPosts, createPost, getConnections, getSuggestedConnections, getProfile } from '@/lib/queries';
-import type { Post, Profile } from '@/types/database.types';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   PhotoIcon,
   DocumentIcon,
-  PlusIcon
+  PlusIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
-import PostCard from '@/components/post/PostCard';
-import Avatar from '@/components/common/Avatar';
-import MedicalFeed from '@/components/feed/MedicalFeed';
+
+// --- Helper Functions and Types (Stubs for demonstration) ---
+
+// This hook simulates the useAuth hook to provide user and profile data.
+const useAuth = () => ({
+  user: { id: '12345', email: 'test.user@example.com' },
+  profile: {
+    user_type: 'individual',
+    profile_type: 'individual',
+    avatar_url: 'https://placehold.co/100x100/007FFF/FFFFFF?text=AU',
+    full_name: 'Amogh User'
+  }
+});
+
+// This simulates your database query functions.
+const getPosts = async (limit: number, offset: number): Promise<Post[]> => {
+  console.log("Fetching posts...");
+  // Returning an empty array to simulate the initial "No posts yet" state.
+  return []; 
+};
+
+const createPost = async (userId: string, content: string, imageUrl?: string): Promise<Post> => {
+  console.log("Creating post:", { userId, content, imageUrl });
+  // This simulates a successful post creation.
+  const newPost: Post = {
+    id: Math.random().toString(36).substring(2, 9),
+    user_id: userId,
+    content,
+    image_url: imageUrl,
+    created_at: new Date().toISOString(),
+    profiles: {
+      avatar_url: 'https://placehold.co/100x100/007FFF/FFFFFF?text=AU',
+      full_name: 'Amogh User',
+      headline: 'Cardiologist'
+    },
+    likes: [],
+    comments: [],
+  };
+  return newPost;
+};
+
+// This simulates your file utility functions.
+const validateFile = (file: File, maxSizeMB: number = 5) => ({ valid: true });
+const generateFilePath = (userId: string, fileName: string) => `${userId}/${Date.now()}_${fileName}`;
+const uploadToSupabaseStorage = async (bucket: string, path: string, file: File) => {
+    console.log(`Simulating upload for ${file.name} to ${bucket}/${path}`);
+    // In a real app, this returns a public URL from Supabase.
+    return { url: URL.createObjectURL(file), error: null };
+};
+
+// Define the structure of your Post type
+type Post = {
+  id: string;
+  user_id: string;
+  content: string;
+  image_url?: string;
+  created_at: string;
+  profiles: {
+    avatar_url: string | null;
+    full_name: string | null;
+    headline: string | null;
+  };
+  likes: any[];
+  comments: any[];
+};
+
+// --- Placeholder Components (Stubs for demonstration) ---
+
+const Avatar = ({ src, name, size }: { src: string | null | undefined, name: string, size: string }) => (
+  <img src={src || `https://placehold.co/48x48/EFEFEF/31343C?text=${name.charAt(0)}`} alt={name} className="w-12 h-12 rounded-full flex-shrink-0" />
+);
+
+const PostCard = ({ post }: { post: Post }) => (
+  <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+    <div className="flex items-center space-x-3 mb-4">
+      <Avatar src={post.profiles.avatar_url} name={post.profiles.full_name || 'User'} size="md" />
+      <div>
+        <p className="font-bold text-gray-900">{post.profiles.full_name}</p>
+        <p className="text-sm text-gray-500">{post.profiles.headline}</p>
+      </div>
+    </div>
+    <p className="text-gray-700 whitespace-pre-wrap mb-4">{post.content}</p>
+    {post.image_url && <img src={post.image_url} alt="Post content" className="rounded-lg w-full h-auto object-cover mt-4" />}
+  </div>
+);
+
+const MedicalFeed = () => (
+  <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
+    <h3 className="text-lg font-semibold">Medical Feed</h3>
+    <p className="text-gray-600">This is where the medical feed content would appear.</p>
+  </div>
+);
+
+// --- Main Feed Page Component ---
 
 export default function FeedPage() {
   const { user, profile } = useAuth();
-  const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<'posts' | 'medical'>('posts');
+  
   const [postContent, setPostContent] = useState('');
-
-  // Redirect institution users to their dedicated feed
-  useEffect(() => {
-    if (profile && (profile.user_type === 'institution' || profile.profile_type === 'institution')) {
-      router.push('/institution/feed');
-    }
-  }, [profile, router]);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const fetchPosts = useCallback(async () => {
     if (!user?.id) return;
-
     setLoading(true);
     try {
       const postsData = await getPosts(10, 0);
@@ -45,25 +129,74 @@ export default function FeedPage() {
     }
   }, [user?.id]);
 
-  const handleCreatePost = useCallback(async (content: string, imageUrl?: string) => {
-    if (!user?.id) return;
-
-    try {
-      const post = await createPost(user.id, content, imageUrl);
-      if (post) {
-        setPosts(prev => [post, ...prev]);
-        setPostContent('');
-        toast.success('Post created successfully!');
-      }
-    } catch (error) {
-      console.error('Error creating post:', error);
-      toast.error('Failed to create post');
-    }
-  }, [user?.id]);
-
   useEffect(() => {
     fetchPosts();
   }, [fetchPosts]);
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validation = validateFile(file, 10);
+    if (!validation.valid) {
+      toast.error('Invalid file');
+      return;
+    }
+
+    setImageFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    if(imageInputRef.current) {
+        imageInputRef.current.value = '';
+    }
+  };
+
+  const handleCreatePost = useCallback(async () => {
+    if (!user || !profile) {
+      toast.error("You must be logged in to create a post.");
+      return;
+    }
+
+    if (!postContent.trim() && !imageFile) return;
+
+    setIsSubmitting(true);
+    try {
+      let imageUrl: string | undefined = undefined;
+
+      if (imageFile) {
+        const filePath = generateFilePath(user.id, imageFile.name);
+        const { url, error } = await uploadToSupabaseStorage('post-images', filePath, imageFile);
+        
+        if (error) {
+          throw new Error(error.message || 'Image upload failed');
+        }
+        imageUrl = url;
+      }
+
+      const post = await createPost(user.id, postContent, imageUrl);
+      
+      if (post) {
+        setPosts(prev => [post, ...prev]);
+        setPostContent('');
+        handleRemoveImage();
+        toast.success('Post created successfully!');
+      }
+    } catch (error: any) {
+      const errorMessage = error.message || 'An unknown error occurred while creating the post. Please check the database permissions.';
+      console.error('Error creating post:', error);
+      toast.error(`Failed to create post: ${errorMessage}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [user, profile, postContent, imageFile]);
 
   return (
     <div className="space-y-8">
@@ -83,9 +216,32 @@ export default function FeedPage() {
               className="w-full p-4 border border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-[#007fff] focus:border-transparent text-gray-700 placeholder-gray-500 text-base"
               rows={3}
             />
+
+            {imagePreview && (
+              <div className="mt-4 relative w-full sm:w-1/2">
+                <img src={imagePreview} alt="Selected preview" className="rounded-lg w-full h-auto object-cover" />
+                <button 
+                  onClick={handleRemoveImage}
+                  className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1.5 hover:bg-black/75 transition-colors"
+                >
+                  <XMarkIcon className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-4 pt-4 border-t border-gray-100 space-y-3 sm:space-y-0">
               <div className="flex items-center space-x-4">
-                <button className="flex items-center space-x-2 text-gray-500 hover:text-[#007fff] transition-colors p-2 rounded-lg hover:bg-[#007fff]/5">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageSelect}
+                  ref={imageInputRef}
+                  className="hidden"
+                />
+                <button 
+                  onClick={() => imageInputRef.current?.click()}
+                  className="flex items-center space-x-2 text-gray-500 hover:text-[#007fff] transition-colors p-2 rounded-lg hover:bg-[#007fff]/5"
+                >
                   <PhotoIcon className="w-5 h-5" />
                   <span className="text-sm font-medium">Media</span>
                 </button>
@@ -95,18 +251,19 @@ export default function FeedPage() {
                 </button>
               </div>
               <button 
-                onClick={() => handleCreatePost(postContent)}
-                disabled={!postContent.trim()}
-                className="w-full sm:w-auto bg-[#007fff] text-white px-6 py-3 rounded-xl hover:bg-[#007fff]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                onClick={handleCreatePost}
+                disabled={(!postContent.trim() && !imageFile) || isSubmitting}
+                className="w-full sm:w-auto bg-[#007fff] text-white px-6 py-3 rounded-xl hover:bg-[#007fff]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium flex items-center justify-center space-x-2"
               >
-                Post
+                {isSubmitting && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>}
+                <span>{isSubmitting ? 'Posting...' : 'Post'}</span>
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Tab Navigation */}
+      {/* Tab Navigation and Content */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-1">
         <div className="flex">
           <button
@@ -132,7 +289,6 @@ export default function FeedPage() {
         </div>
       </div>
 
-      {/* Content based on active tab */}
       <div>
         {activeTab === 'posts' ? (
           <div className="space-y-8">
@@ -174,7 +330,7 @@ export default function FeedPage() {
                     Be the first to share your thoughts and insights with the community.
                   </p>
                   <button
-                    onClick={() => setActiveTab('posts')}
+                    onClick={() => document.querySelector('textarea')?.focus()}
                     className="bg-[#007fff] text-white px-6 py-3 rounded-xl hover:bg-[#007fff]/90 transition-colors font-medium"
                   >
                     Create your first post
@@ -189,4 +345,5 @@ export default function FeedPage() {
       </div>
     </div>
   );
-} 
+}
+
