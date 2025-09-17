@@ -214,77 +214,106 @@ export default function InstitutionLayout({
           </div>
         </main>
         
-        {/* Innovative Left Sidebar for Feed Page */}
+        {/* Sleek Left Sidebar for Feed Page */}
         {shouldShowInnovativeSidebar && (
-          <div className="hidden lg:block fixed left-0 top-16 w-80 h-[calc(100vh-4rem)] bg-gradient-to-b from-[#007fff]/5 to-[#007fff]/10 border-r border-[#007fff]/20 overflow-y-auto">
-            <div className="p-6 space-y-6">
+          <div className="hidden lg:block fixed left-0 top-16 w-80 h-[calc(100vh-4rem)] bg-white/80 backdrop-blur-xl border-r border-white/20 overflow-y-auto shadow-2xl">
+            <div className="p-8 space-y-8">
               {/* Quick Actions */}
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                  <div className="w-2 h-2 bg-[#007fff] rounded-full mr-3"></div>
-                  Quick Actions
-                </h3>
-                <div className="space-y-3">
+              <div className="bg-gradient-to-br from-white/90 to-white/70 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-white/30">
+                <div className="flex items-center mb-6">
+                  <div className="w-3 h-3 bg-gradient-to-r from-[#007fff] to-[#00a8ff] rounded-full mr-3 shadow-lg"></div>
+                  <h3 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                    Quick Actions
+                  </h3>
+                </div>
+                <div className="space-y-4">
                   <button 
                     onClick={() => router.push('/institution/feed?create=post')}
-                    className="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group"
+                    className="w-full flex items-center space-x-4 p-4 rounded-2xl bg-gradient-to-r from-[#007fff]/10 to-[#00a8ff]/10 hover:from-[#007fff]/20 hover:to-[#00a8ff]/20 transition-all duration-300 group border border-white/20 shadow-sm hover:shadow-md"
                   >
-                    <div className="w-10 h-10 bg-[#007fff]/10 rounded-lg flex items-center justify-center group-hover:bg-[#007fff]/20 transition-colors">
-                      <PlusIcon className="w-5 h-5 text-[#007fff]" />
+                    <div className="w-12 h-12 bg-gradient-to-br from-[#007fff] to-[#00a8ff] rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                      <PlusIcon className="w-6 h-6 text-white" />
                     </div>
-                    <span className="text-sm font-medium text-gray-700">Create Post</span>
+                    <div className="text-left">
+                      <span className="text-base font-semibold text-gray-800 block">Create Post</span>
+                      <span className="text-sm text-gray-500">Share updates</span>
+                    </div>
                   </button>
                   <button 
                     onClick={() => router.push('/institution/jobs/create')}
-                    className="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group"
+                    className="w-full flex items-center space-x-4 p-4 rounded-2xl bg-gradient-to-r from-emerald-50 to-green-50 hover:from-emerald-100 hover:to-green-100 transition-all duration-300 group border border-white/20 shadow-sm hover:shadow-md"
                   >
-                    <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
-                      <BriefcaseIcon className="w-5 h-5 text-green-600" />
+                    <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                      <BriefcaseIcon className="w-6 h-6 text-white" />
                     </div>
-                    <span className="text-sm font-medium text-gray-700">Post Job</span>
+                    <div className="text-left">
+                      <span className="text-base font-semibold text-gray-800 block">Post Job</span>
+                      <span className="text-sm text-gray-500">Hire talent</span>
+                    </div>
                   </button>
                   <button 
                     onClick={() => router.push('/institution/events/create')}
-                    className="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group"
+                    className="w-full flex items-center space-x-4 p-4 rounded-2xl bg-gradient-to-r from-purple-50 to-violet-50 hover:from-purple-100 hover:to-violet-100 transition-all duration-300 group border border-white/20 shadow-sm hover:shadow-md"
                   >
-                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors">
-                      <CalendarDaysIcon className="w-5 h-5 text-purple-600" />
+                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                      <CalendarDaysIcon className="w-6 h-6 text-white" />
                     </div>
-                    <span className="text-sm font-medium text-gray-700">Create Event</span>
+                    <div className="text-left">
+                      <span className="text-base font-semibold text-gray-800 block">Create Event</span>
+                      <span className="text-sm text-gray-500">Organize events</span>
+                    </div>
                   </button>
                 </div>
               </div>
 
               {/* Analytics Overview */}
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
-                  Analytics
-                </h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Total Posts</span>
-                    <span className="text-lg font-bold text-gray-900">{analytics.totalPosts}</span>
+              <div className="bg-gradient-to-br from-white/90 to-white/70 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-white/30">
+                <div className="flex items-center mb-6">
+                  <div className="w-3 h-3 bg-gradient-to-r from-emerald-500 to-green-500 rounded-full mr-3 shadow-lg"></div>
+                  <h3 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                    Analytics
+                  </h3>
+                </div>
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-gray-50/50 to-gray-100/50 border border-white/20">
+                    <div>
+                      <span className="text-sm font-medium text-gray-600 block">Total Posts</span>
+                      <span className="text-2xl font-bold text-gray-900">{analytics.totalPosts}</span>
+                    </div>
+                    <div className="w-12 h-12 bg-gradient-to-br from-[#007fff] to-[#00a8ff] rounded-2xl flex items-center justify-center shadow-lg">
+                      <span className="text-white font-bold text-lg">📝</span>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Engagement</span>
-                    <span className="text-lg font-bold text-green-600">{analytics.engagementRate}%</span>
+                  <div className="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-emerald-50/50 to-green-50/50 border border-white/20">
+                    <div>
+                      <span className="text-sm font-medium text-gray-600 block">Engagement</span>
+                      <span className="text-2xl font-bold text-emerald-600">{analytics.engagementRate}%</span>
+                    </div>
+                    <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
+                      <span className="text-white font-bold text-lg">📈</span>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Reach</span>
-                    <span className="text-lg font-bold text-blue-600">{analytics.totalReach}</span>
+                  <div className="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-blue-50/50 to-indigo-50/50 border border-white/20">
+                    <div>
+                      <span className="text-sm font-medium text-gray-600 block">Reach</span>
+                      <span className="text-2xl font-bold text-blue-600">{analytics.totalReach}</span>
+                    </div>
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                      <span className="text-white font-bold text-lg">👥</span>
+                    </div>
                   </div>
                 </div>
               </div>
 
-
               {/* Recent Activity */}
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full mr-3"></div>
-                  Recent Activity
-                </h3>
-                <div className="space-y-3">
+              <div className="bg-gradient-to-br from-white/90 to-white/70 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-white/30">
+                <div className="flex items-center mb-6">
+                  <div className="w-3 h-3 bg-gradient-to-r from-purple-500 to-violet-500 rounded-full mr-3 shadow-lg"></div>
+                  <h3 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                    Recent Activity
+                  </h3>
+                </div>
+                <div className="space-y-4">
                   {recentActivity.map((activity) => {
                     const IconComponent = activity.icon === 'UserGroupIcon' ? UserGroupIcon :
                                         activity.icon === 'HeartIcon' ? HeartIcon :
@@ -292,10 +321,10 @@ export default function InstitutionLayout({
                                         UserGroupIcon;
                     
                     const colorClasses = {
-                      blue: 'bg-blue-100 text-blue-600',
-                      green: 'bg-green-100 text-green-600',
-                      purple: 'bg-purple-100 text-purple-600',
-                      gray: 'bg-gray-100 text-gray-600'
+                      blue: 'bg-gradient-to-br from-blue-500 to-blue-600',
+                      green: 'bg-gradient-to-br from-emerald-500 to-green-600',
+                      purple: 'bg-gradient-to-br from-purple-500 to-violet-600',
+                      gray: 'bg-gradient-to-br from-gray-500 to-gray-600'
                     };
                     
                     const timeAgo = new Date(activity.time).toLocaleString('en-US', {
@@ -305,13 +334,13 @@ export default function InstitutionLayout({
                     });
                     
                     return (
-                      <div key={activity.id} className="flex items-start space-x-3">
-                        <div className={`w-8 h-8 ${colorClasses[activity.color as keyof typeof colorClasses]} rounded-full flex items-center justify-center`}>
-                          <IconComponent className="w-4 h-4" />
+                      <div key={activity.id} className="flex items-start space-x-4 p-4 rounded-2xl bg-gradient-to-r from-gray-50/50 to-gray-100/50 border border-white/20 hover:shadow-md transition-all duration-300">
+                        <div className={`w-10 h-10 ${colorClasses[activity.color as keyof typeof colorClasses]} rounded-2xl flex items-center justify-center shadow-lg`}>
+                          <IconComponent className="w-5 h-5 text-white" />
                         </div>
                         <div className="flex-1">
-                          <p className="text-sm text-gray-700">{activity.message}</p>
-                          <p className="text-xs text-gray-500">{timeAgo}</p>
+                          <p className="text-sm font-medium text-gray-800 mb-1">{activity.message}</p>
+                          <p className="text-xs text-gray-500 font-medium">{timeAgo}</p>
                         </div>
                       </div>
                     );
