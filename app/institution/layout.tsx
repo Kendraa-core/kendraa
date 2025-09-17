@@ -12,7 +12,6 @@ import {
   getUserEventsCount,
   getInstitutionByAdminId,
   getUserAnalytics,
-  getTrendingTopics,
   getRecentActivity,
   getPostStats
 } from '@/lib/queries';
@@ -58,7 +57,6 @@ export default function InstitutionLayout({
     engagementRate: 0,
     totalReach: 0
   });
-  const [trendingTopics, setTrendingTopics] = useState<Array<{topic: string, count: number}>>([]);
   const [recentActivity, setRecentActivity] = useState<Array<{
     id: string,
     type: string,
@@ -139,15 +137,13 @@ export default function InstitutionLayout({
         
         // Load analytics and feed data (only for feed page)
         if (pathname === '/institution/feed') {
-          const [analyticsData, topics, activity, stats] = await Promise.all([
+          const [analyticsData, activity, stats] = await Promise.all([
             getUserAnalytics(user.id),
-            getTrendingTopics(5),
             getRecentActivity(user.id, 5),
             getPostStats(user.id)
           ]);
           
           setAnalytics(analyticsData);
-          setTrendingTopics(topics);
           setRecentActivity(activity);
           setPostStats(stats);
         }
@@ -281,23 +277,6 @@ export default function InstitutionLayout({
                 </div>
               </div>
 
-              {/* Trending Topics */}
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                  <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
-                  Trending Topics
-                </h3>
-                <div className="space-y-3">
-                  {trendingTopics.map((topic, index) => (
-                    <div key={topic.topic} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                      <span className="text-sm text-gray-700">#{topic.topic}</span>
-                      <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                        {topic.count}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
 
               {/* Recent Activity */}
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
