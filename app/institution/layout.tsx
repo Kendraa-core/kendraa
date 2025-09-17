@@ -10,7 +10,7 @@ import {
   getUserPagesCount,
   getUserNewslettersCount,
   getUserEventsCount,
-  getInstitutionByAdminId,
+  getInstitutionByUserId,
   getUserAnalytics,
   getRecentActivity,
   getPostStats
@@ -114,7 +114,7 @@ export default function InstitutionLayout({
         }
 
         // Load institution data
-        const institutionData = await getInstitutionByAdminId(user.id);
+        const institutionData = await getInstitutionByUserId(user.id);
         setInstitution(institutionData);
         
         const [

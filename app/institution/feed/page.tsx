@@ -7,7 +7,7 @@ import {
   getPosts, 
   createPost, 
   getPostsByAuthor, 
-  getInstitutionByAdminId
+  getInstitutionByUserId
 } from '@/lib/queries';
 import type { Post, PostWithAuthor, Institution } from '@/types/database.types';
 import { 
@@ -56,7 +56,7 @@ export default function InstitutionFeedPage() {
 
     try {
       setLoading(true);
-      const institutionData = await getInstitutionByAdminId(user.id);
+      const institutionData = await getInstitutionByUserId(user.id);
       setInstitution(institutionData);
     } catch (error) {
       console.error('Error fetching institution data:', error);

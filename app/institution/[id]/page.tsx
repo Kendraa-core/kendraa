@@ -49,7 +49,6 @@ import {
   followInstitution,
   unfollowInstitution,
   getFollowStatus,
-  getInstitutionByAdminId,
   getInstitutionById,
 } from '@/lib/queries';
 import type { Profile, Institution, Experience, Education, Post, JobWithCompany, EventWithOrganizer } from '@/types/database.types';
@@ -365,7 +364,7 @@ export default function PublicInstitutionProfilePage() {
       setProfile(profileData);
       
       // Fetch institution data
-      const institutionData = await getInstitutionByAdminId(id);
+      const institutionData = await getInstitutionById(id);
       setInstitution(institutionData);
       
       // Fetch experiences and education

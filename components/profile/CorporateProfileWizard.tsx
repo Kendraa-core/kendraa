@@ -142,6 +142,7 @@ export default function CorporateProfileWizard() {
     setIsSubmitting(true);
     try {
       const institutionData = {
+        id: user.id, // Use user ID as institution ID
         name: profileData.organizationName,
         email: profileData.organizationEmail,
         ceo_name: profileData.ceoName,

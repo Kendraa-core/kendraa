@@ -8,7 +8,7 @@ import {
   applyToJob, 
   hasAppliedToJob, 
   getJobApplications,
-  getInstitutionByAdminId
+  getInstitutionByUserId
 } from '@/lib/queries';
 import { uploadToSupabaseStorage } from '@/lib/utils';
 import { 
@@ -102,7 +102,7 @@ export default function JobsPage() {
         jobsData = jobsData.map(job => ({ ...job, isApplied: true }));
       } else if (activeTab === 'my-jobs') {
         // Fetch jobs posted by user's institution
-        const institution = await getInstitutionByAdminId(user.id);
+        const institution = await getInstitutionByUserId(user.id);
         if (institution) {
           jobsData = await getJobsByInstitution(institution.id);
         }

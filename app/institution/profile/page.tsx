@@ -62,7 +62,7 @@ import {
   updateExperience,
   createEducation,
   updateEducation,
-  getInstitutionByAdminId,
+  getInstitutionByUserId,
   type Profile,
   type Experience,
   type Education,
@@ -472,7 +472,7 @@ export default function InstitutionProfilePage() {
       setLoading(true);
       const [profileData, institutionData, experiencesData, educationData, postsData, connectionCountData] = await Promise.all([
         getProfile(user.id),
-        getInstitutionByAdminId(user.id),
+        getInstitutionByUserId(user.id),
         getExperiences(user.id),
         getEducation(user.id),
         getPostsByAuthor(user.id),

@@ -230,7 +230,7 @@ export interface Institution {
   established_year: number | null;
   size: 'small' | 'medium' | 'large' | 'enterprise' | null;
   verified: boolean;
-  admin_user_id: string; // Foreign key to profiles table
+  admin_user_id?: string; // Foreign key to profiles table (optional for independent institutions)
   
   // Corporate Profile Fields (from requirements) - Optional for backward compatibility
   organization_email?: string | null;

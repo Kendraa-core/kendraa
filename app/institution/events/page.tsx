@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { getEventsByOrganizer, getInstitutionByAdminId, deleteEvent } from '@/lib/queries';
+import { getEventsByOrganizer, getInstitutionByUserId, deleteEvent } from '@/lib/queries';
 import type { EventWithOrganizer, Institution } from '@/types/database.types';
 import { 
   CalendarIcon,
@@ -36,7 +36,7 @@ export default function InstitutionEventsPage() {
     if (!user?.id) return;
     
     try {
-      const institutionData = await getInstitutionByAdminId(user.id);
+      const institutionData = await getInstitutionByUserId(user.id);
       setInstitution(institutionData);
     } catch (error) {
       console.error('Error fetching institution:', error);

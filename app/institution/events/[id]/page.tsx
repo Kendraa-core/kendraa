@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { getEventById, getEventRegistrations, deleteEvent, getInstitutionByAdminId } from '@/lib/queries';
+import { getEventById, getEventRegistrations, deleteEvent, getInstitutionByUserId } from '@/lib/queries';
 import type { Event, Institution } from '@/types/database.types';
 import { 
   CalendarIcon,
@@ -56,7 +56,7 @@ export default function EventDetailPage() {
     if (!user?.id) return;
     
     try {
-      const institutionData = await getInstitutionByAdminId(user.id);
+        const institutionData = await getInstitutionByUserId(user.id);
       setInstitution(institutionData);
     } catch (error) {
       console.error('Error fetching institution:', error);

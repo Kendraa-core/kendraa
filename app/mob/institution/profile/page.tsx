@@ -7,7 +7,7 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import PostCard from '@/components/post/PostCard';
 import { useAuth } from '@/contexts/AuthContext';
 import {
-  getInstitutionByAdminId,
+  getInstitutionByUserId,
   getProfile,
   getPostsByAuthor,
   getConnectionCount,
@@ -53,7 +53,7 @@ export default function MobileInstitutionProfilePage() {
         setLoading(true);
         
         const [institutionData, profileData] = await Promise.all([
-          getInstitutionByAdminId(user.id),
+          getInstitutionByUserId(user.id),
           getProfile(user.id)
         ]);
 
