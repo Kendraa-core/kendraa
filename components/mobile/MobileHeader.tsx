@@ -59,7 +59,7 @@ export default function MobileHeader({
   const handleSignOut = async () => {
     await signOut();
     setIsMenuOpen(false);
-    router.push('/mob');
+    // AuthContext will handle the redirect to landing page
   };
 
   return (

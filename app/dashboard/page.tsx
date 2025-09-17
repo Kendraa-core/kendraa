@@ -147,7 +147,7 @@ export default function UserDashboard() {
     setSignOutLoading(true);
     try {
       await signOut();
-      window.location.href = '/';
+      // AuthContext will handle the redirect to landing page
     } catch (error) {
       console.error('Error signing out:', error);
     } finally {

@@ -30,8 +30,7 @@ export default function SettingsPage() {
     setLoading(true);
     try {
       await signOut();
-      router.push('/');
-      toast.success('Signed out successfully');
+      // AuthContext will handle the redirect to landing page
     } catch (error) {
       console.error('Error signing out:', error);
       toast.error('Failed to sign out');

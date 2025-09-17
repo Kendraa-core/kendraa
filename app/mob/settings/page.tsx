@@ -29,8 +29,7 @@ export default function MobileSettingsPage() {
   const handleSignOut = async () => {
     try {
       await signOut();
-      router.push('/mob');
-      toast.success('Signed out successfully');
+      // AuthContext will handle the redirect to landing page
     } catch (error) {
       toast.error('Failed to sign out');
     }
