@@ -42,7 +42,6 @@ export default function MobileHeader({
   const baseRoute = isInstitution ? '/mob/institution' : '/mob';
 
   const navigationItems = isInstitution ? [
-    { name: 'Dashboard', href: `${baseRoute}/dashboard`, icon: HomeIcon },
     { name: 'Feed', href: `${baseRoute}/feed`, icon: HomeIcon },
     { name: 'Network', href: `${baseRoute}/network`, icon: UserGroupIcon },
     { name: 'Jobs', href: `${baseRoute}/jobs`, icon: BriefcaseIcon },
@@ -53,7 +52,6 @@ export default function MobileHeader({
     { name: 'Network', href: `${baseRoute}/network`, icon: UserGroupIcon },
     { name: 'Jobs', href: `${baseRoute}/jobs`, icon: BriefcaseIcon },
     { name: 'Events', href: `${baseRoute}/events`, icon: CalendarDaysIcon },
-    { name: 'Dashboard', href: `${baseRoute}/dashboard`, icon: UserIcon },
   ];
 
   const handleSignOut = async () => {

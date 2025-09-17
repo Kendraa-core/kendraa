@@ -75,9 +75,7 @@ export default function InstitutionLayout({
     if (!authLoading && user && profile) {
       if (profile.user_type !== 'institution' && profile.profile_type !== 'institution') {
         // Redirect to appropriate page based on current path
-        if (pathname.startsWith('/institution/dashboard')) {
-          router.push('/dashboard');
-        } else if (pathname.startsWith('/institution/jobs')) {
+        if (pathname.startsWith('/institution/jobs')) {
           router.push('/jobs');
         } else if (pathname.startsWith('/institution/events')) {
           router.push('/events');
@@ -88,7 +86,7 @@ export default function InstitutionLayout({
         } else if (pathname.startsWith('/institution/feed')) {
           router.push('/feed');
         } else {
-          router.push('/dashboard');
+          router.push('/feed');
         }
         return;
       }

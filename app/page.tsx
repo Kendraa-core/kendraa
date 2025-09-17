@@ -34,7 +34,7 @@ export default function LandingPage() {
       if (profile.onboarding_completed) {
         // Redirect based on user type
         if (profile.user_type === 'institution' || profile.profile_type === 'institution') {
-          router.push('/institution/dashboard');
+          router.push('/institution/feed');
         } else {
         router.push('/feed');
         }
