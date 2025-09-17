@@ -167,8 +167,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     
     try {
-      // 1. Sign up the user. This will fire the server-side trigger you created,
-      // which automatically inserts a basic row into public.profiles.
+      
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
@@ -186,13 +185,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (!data.user) {
-        // Handle a rare edge case where signup succeeds but returns no user object.
+
         throw new Error("Account created, but user data not available immediately. Please try signing in.");
       }
 
-      // 2. Now, UPDATE the profile that the trigger just created.
-      // We are enriching the existing row with details from the signup form.
-      // This avoids the conflict and is the recommended pattern.
+      
       const { error: updateError } = await supabase
         .from('profiles')
         .update({
@@ -200,11 +197,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           profile_type: profileType,
           user_type: profileType, // Assuming profile_type and user_type are the same at signup
         })
-        .eq('id', data.user.id); // Make sure to update the correct user's profile
+        .eq('id', data.user.id);
 
       if (updateError) {
-        // The account was created, but the profile details couldn't be saved.
-        // This is not a critical failure. The user can update their profile later.
+        
         console.error("Error updating profile after signup:", updateError);
         toast.error('Account created, but failed to set profile details. You can update your profile later.');
       } else {
