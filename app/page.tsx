@@ -184,28 +184,6 @@ export default function LandingPage() {
                   </Link>
                 </div>
                 
-                {/* Member Benefits */}
-                <div className="mt-12 pt-8 border-t border-gray-200">
-                  <p className="text-sm text-gray-500 mb-4">Member Benefits</p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                    <div className="flex items-center space-x-2">
-                      <CheckCircleIcon className="w-4 h-4 text-green-500" />
-                      <span className="text-gray-600">Shape product development</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <CheckCircleIcon className="w-4 h-4 text-green-500" />
-                      <span className="text-gray-600">Lifetime premium features</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <CheckCircleIcon className="w-4 h-4 text-green-500" />
-                      <span className="text-gray-600">Direct founder access</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <CheckCircleIcon className="w-4 h-4 text-green-500" />
-                      <span className="text-gray-600">Beta feature previews</span>
-                    </div>
-                  </div>
-                </div>
               </motion.div>
             </div>
             
@@ -491,9 +469,6 @@ export default function LandingPage() {
               </Link>
             </div>
             
-            <div className="mt-8 text-sm text-white/70">
-              <p>🔒 Your email will never be shared • 🎁 Lifetime benefits for early supporters</p>
-            </div>
           </motion.div>
         </div>
       </section>
