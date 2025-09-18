@@ -101,9 +101,6 @@ export default function LandingPage() {
               <Link href="#vision" className="text-gray-600 hover:text-[#007fff] transition-colors font-medium">
                 Our Vision
               </Link>
-              <Link href="#roadmap" className="text-gray-600 hover:text-[#007fff] transition-colors font-medium">
-                Roadmap
-              </Link>
               <Link href="/about" className="text-gray-600 hover:text-[#007fff] transition-colors font-medium">
                 About
               </Link>
@@ -452,97 +449,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Roadmap Section */}
-      <section id="roadmap" className="py-20 bg-white/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <span className="inline-flex items-center px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-medium mb-4">
-              🗺️ Development Roadmap
-            </span>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Our Journey to Launch
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Transparent development timeline showing what we're building and when. 
-              Early access members get exclusive previews of each milestone.
-            </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              {
-                phase: "Phase 1",
-                title: "Foundation",
-                status: "In Progress",
-                timeline: "Q1 2024",
-                features: ["User authentication", "Basic profiles", "Core infrastructure", "Early access program"],
-                statusColor: "bg-yellow-100 text-yellow-800"
-              },
-              {
-                phase: "Phase 2", 
-                title: "Networking Core",
-                status: "Next",
-                timeline: "Q2 2024",
-                features: ["Professional connections", "Institution profiles", "Search & discovery", "Mobile app beta"],
-                statusColor: "bg-blue-100 text-blue-800"
-              },
-              {
-                phase: "Phase 3",
-                title: "Career Platform",
-                status: "Planned",
-                timeline: "Q3 2024",
-                features: ["Job board", "Application system", "Career matching", "Professional analytics"],
-                statusColor: "bg-gray-100 text-gray-800"
-              },
-              {
-                phase: "Phase 4",
-                title: "Full Platform",
-                status: "Future",
-                timeline: "Q4 2024",
-                features: ["Events platform", "Knowledge base", "Research tools", "Advanced features"],
-                statusColor: "bg-purple-100 text-purple-800"
-              }
-            ].map((roadmap, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true }}
-              >
-                <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-2 border-gray-200/50 bg-white h-full">
-                  <CardContent className="p-6">
-                    <div className="mb-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-gray-500">{roadmap.phase}</span>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${roadmap.statusColor}`}>
-                          {roadmap.status}
-                        </span>
-                      </div>
-                      <h3 className="text-xl font-bold text-gray-900 mb-1">{roadmap.title}</h3>
-                      <p className="text-sm text-[#007fff] font-medium">{roadmap.timeline}</p>
-                    </div>
-                    <ul className="space-y-2">
-                      {roadmap.features.map((feature, featureIndex) => (
-                        <li key={featureIndex} className="text-sm text-gray-600 flex items-start">
-                          <CheckCircleIcon className="w-4 h-4 text-[#007fff] mr-2 mt-0.5 flex-shrink-0" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-br from-[#007fff] to-purple-600 text-white">
@@ -606,7 +512,6 @@ export default function LandingPage() {
               <ul className="space-y-2 text-gray-400">
                 <li><Link href="#features" className="hover:text-white transition-colors">Features</Link></li>
                 <li><Link href="#vision" className="hover:text-white transition-colors">Vision</Link></li>
-                <li><Link href="#roadmap" className="hover:text-white transition-colors">Roadmap</Link></li>
                 <li><Link href="/signup" className="hover:text-white transition-colors">Early Access</Link></li>
               </ul>
             </div>
