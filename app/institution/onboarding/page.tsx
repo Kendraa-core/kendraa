@@ -1,23 +1,32 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '@/contexts/AuthContext';
+import { uploadToSupabaseStorage, validateFile } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
 import { 
   BuildingOfficeIcon, 
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  XMarkIcon,
+  ArrowRightIcon,
+  PhotoIcon,
   ChevronLeftIcon, 
   ChevronRightIcon,
-  CheckCircleIcon,
-  MapPinIcon,
   GlobeAltIcon,
+  PhoneIcon,
+  EnvelopeIcon,
+  MapPinIcon,
+  CalendarIcon,
   UserGroupIcon,
-  CalendarIcon
+  AcademicCapIcon,
+  InformationCircleIcon,
+  StarIcon,
+  DocumentTextIcon
 } from '@heroicons/react/24/outline';
-import Image from 'next/image';
-import { v4 as uuidv4 } from 'uuid';
 import toast from 'react-hot-toast';
-import Logo from '@/components/common/Logo';
 import { getInstitutionByUserId } from '@/lib/queries';
 
 const INSTITUTION_TYPES = [
@@ -34,105 +43,167 @@ const INSTITUTION_TYPES = [
   'Other'
 ];
 
-const INSTITUTION_FOCUS_AREAS = [
-  'Patient Care & Treatment',
-  'Medical Research & Development',
-  'Medical Education & Training',
-  'Public Health & Prevention',
-  'Healthcare Innovation & Technology',
-  'Medical Equipment & Devices',
-  'Pharmaceutical Development',
-  'Healthcare Policy & Administration',
-  'Mental Health Services',
-  'Emergency & Critical Care',
-  'Other'
-];
-
 const EMPLOYEE_COUNT_OPTIONS = [
-  '0 - 10',
-  '10 - 100',
-  '100 - 1000',
-  '1000 - 10000',
-  '10000+'
+  '1-10',
+  '11-50',
+  '51-200',
+  '201-500',
+  '501-1000',
+  '1000+'
 ];
 
 const ONBOARDING_STEPS = [
   {
-    id: 'basic_info',
+    id: 'welcome',
+    title: 'Welcome to <span class="mulish-semibold text-[#007fff]">kendraa</span>',
+    subtitle: 'Let\'s set up your institution profile to connect with healthcare professionals',
+    type: 'welcome',
+    required: false
+  },
+  {
+    id: 'basic-info',
     title: 'Basic Information',
-    subtitle: 'Tell us about your healthcare organization',
-    type: 'basic_info',
+    subtitle: 'Tell us about your institution',
+    type: 'basic-info',
     required: true
   },
   {
-    id: 'institution_details',
-    title: 'Institution / Organization Details',
-    subtitle: 'Provide detailed information about your institution',
-    type: 'institution_details',
+    id: 'institution-type',
+    title: 'Institution Type',
+    subtitle: 'What type of healthcare institution are you?',
+    type: 'institution-type',
+    required: true
+  },
+  {
+    id: 'description',
+    title: 'About Your Institution',
+    subtitle: 'Describe your mission, services, and what makes you unique',
+    type: 'description',
+    required: true
+  },
+  {
+    id: 'contact',
+    title: 'Contact Information',
+    subtitle: 'How can professionals reach your institution?',
+    type: 'contact',
     required: true
   },
   {
     id: 'branding',
     title: 'Branding & Visual Identity',
-    subtitle: 'Upload your logo and customize your visual identity',
+    subtitle: 'Add your logo and brand colors',
     type: 'branding',
     required: true
   },
   {
-    id: 'about_institution',
-    title: 'About the Institution / Organization',
-    subtitle: 'Share your mission, services, and contact information',
-    type: 'about_institution',
-    required: true
-  },
-  {
-    id: 'complete',
-    title: 'Welcome to Kendraa!',
+    id: 'completion',
+    title: 'You\'re All Set!',
     subtitle: 'Your institution profile is ready to connect with healthcare professionals',
-    type: 'complete',
+    type: 'completion',
     required: false
   }
 ];
 
 export default function InstitutionOnboardingPage() {
-  const { user, profile } = useAuth();
-  const router = useRouter();
+  const { user, profile, updateProfile } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [bannerFile, setBannerFile] = useState<File | null>(null);
-  const [uploadingLogo, setUploadingLogo] = useState(false);
-  const [uploadingBanner, setUploadingBanner] = useState(false);
   const [formData, setFormData] = useState({
-    // Basic Info
-    institutionName: '',
-    shortTagline: '',
+    // Basic Information
+    name: '',
+    type: '',
+    establishedYear: '',
+    size: '',
+    location: '',
     
-    // Institution Details
-    institutionType: '',
-    establishmentYear: '',
-    accreditation: '',
+    // Description
+    shortDescription: '',
+    detailedDescription: '',
+    
+    // Contact Information
+    website: '',
+    email: '',
+    phone: '',
     
     // Branding
     logoUrl: '',
     bannerUrl: '',
     themeColor: '#007fff',
     
-    // About Institution
-    shortDescription: '',
-    detailedDescription: '',
-    website: '',
-    socialMediaLinks: '',
-    headquarters: '',
-    employeeCount: '',
-    contactEmail: '',
-    contactPhone: ''
+    // Additional
+    accreditation: '',
+    specialties: ''
   });
+  
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [existingInstitution, setExistingInstitution] = useState<any>(null);
+
+  const router = useRouter();
+
+  // Map database size values back to form values
+  const mapSizeFromDatabase = (dbSize: string): string => {
+    switch (dbSize) {
+      case 'small': return '1-10'; // Default to first small option
+      case 'medium': return '51-200'; // Default to first medium option
+      case 'large': return '501-1000';
+      case 'enterprise': return '1000+';
+      default: return '';
+    }
+  };
+
+  // Load existing data
+  useEffect(() => {
+    const loadExistingData = async () => {
+      if (!user?.id) return;
+
+      try {
+        setLoading(true);
+        
+        // Load existing institution data
+        const institution = await getInstitutionByUserId(user.id);
+        if (institution) {
+          setExistingInstitution(institution);
+          setFormData({
+            name: institution.name || '',
+            type: institution.type || '',
+            establishedYear: institution.established_year?.toString() || '',
+            size: mapSizeFromDatabase(institution.size || ''),
+            location: institution.location || '',
+            shortDescription: institution.short_description || '',
+            detailedDescription: institution.description || '',
+            website: institution.website || '',
+            email: institution.email || '',
+            phone: institution.phone || '',
+            logoUrl: institution.logo_url || '',
+            bannerUrl: institution.banner_url || '',
+            themeColor: institution.theme_color || '#007fff',
+            accreditation: institution.accreditation?.join(', ') || '',
+            specialties: institution.specialties?.join(', ') || ''
+          });
+          
+          if (institution.logo_url) {
+            setLogoPreview(institution.logo_url);
+          }
+          if (institution.banner_url) {
+            setBannerPreview(institution.banner_url);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading institution data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadExistingData();
+  }, [user?.id]);
 
   // Redirect if not logged in or not an institution user
   useEffect(() => {
-    const guardAndPrefill = async () => {
       if (!user) {
         router.push('/signin');
         return;
@@ -148,678 +219,733 @@ export default function InstitutionOnboardingPage() {
         router.push('/institution/feed');
         return;
       }
+  }, [user, profile, router]);
 
-      // Prefill from existing profile
-      if (profile) {
+  const handleInputChange = (field: string, value: any) => {
         setFormData(prev => ({
           ...prev,
-          institutionName: profile.full_name || prev.institutionName,
-          shortDescription: profile.bio || prev.shortDescription,
-          headquarters: profile.location || prev.headquarters,
-          website: profile.website || prev.website,
-          contactEmail: profile.email || prev.contactEmail,
-        }));
-      }
+      [field]: value
+    }));
+  };
 
-      // If institution already exists for this user, load existing data
-      try {
-        const existing = await getInstitutionByUserId(user.id);
-        if (existing) {
-          // If onboarding is already completed, redirect to feed
-          if (profile?.onboarding_completed) {
-            router.push('/institution/feed');
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'banner') => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const validation = validateFile(file, 5);
+      if (!validation.valid) {
+        toast.error(validation.error || 'Invalid file');
             return;
           }
           
-          // Load existing institution data to continue onboarding
-          setFormData(prev => ({
-            ...prev,
-            institutionName: existing.name || prev.institutionName,
-            shortTagline: (existing as any).short_tagline || prev.shortTagline,
-            institutionType: existing.type || prev.institutionType,
-            establishmentYear: existing.established_year?.toString() || prev.establishmentYear,
-            accreditation: Array.isArray(existing.accreditation) ? existing.accreditation.join(', ') : (existing.accreditation || prev.accreditation),
-            logoUrl: existing.logo_url || prev.logoUrl,
-            bannerUrl: existing.banner_url || prev.bannerUrl,
-            themeColor: (existing as any).theme_color || prev.themeColor,
-            shortDescription: (existing as any).short_description || prev.shortDescription,
-            detailedDescription: existing.description || prev.detailedDescription,
-            website: existing.website || prev.website,
-            socialMediaLinks: (existing as any).social_media_links ? JSON.stringify((existing as any).social_media_links) : prev.socialMediaLinks,
-            headquarters: existing.location || prev.headquarters,
-            employeeCount: existing.size || prev.employeeCount,
-            contactEmail: existing.email || prev.contactEmail,
-            contactPhone: existing.phone || prev.contactPhone,
-          }));
-        }
-      } catch {
-        // silent
+      if (type === 'logo') {
+        setLogoFile(file);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setLogoPreview(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        setBannerFile(file);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setBannerPreview(reader.result as string);
+        };
+        reader.readAsDataURL(file);
       }
-    };
-
-    guardAndPrefill();
-  }, [user, profile, router]);
-
-  const currentStepData = ONBOARDING_STEPS[currentStep];
-  const isLastStep = currentStep === ONBOARDING_STEPS.length - 1;
-  const isFirstStep = currentStep === 0;
-
-  const calculateCompletion = () => {
-    const completedSteps = ONBOARDING_STEPS.filter((_, index) => {
-      if (index === ONBOARDING_STEPS.length - 1) return true; // Complete step
-      return isStepCompleted(index);
-    }).length;
-    return Math.round((completedSteps / ONBOARDING_STEPS.length) * 100);
-  };
-
-  const isStepCompleted = (stepIndex: number) => {
-    const step = ONBOARDING_STEPS[stepIndex];
-    switch (step.type) {
-      case 'basic_info':
-        return formData.institutionName.trim() !== '' && formData.shortTagline.trim() !== '';
-      case 'institution_details':
-        return formData.institutionType !== '' && formData.establishmentYear !== '';
-      case 'branding':
-        return (logoFile !== null || formData.logoUrl.trim() !== '') && (bannerFile !== null || formData.bannerUrl.trim() !== '');
-      case 'about_institution':
-        return formData.shortDescription.trim() !== '' && formData.detailedDescription.trim() !== '' && formData.headquarters.trim() !== '';
-      default:
-        return false;
     }
   };
 
-  const uploadFile = async (file: File, bucketName: string) => {
-    if (!supabase || !user?.id) {
-      toast.error('Supabase client or user not available.');
-      return null;
-    }
-
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${uuidv4()}.${fileExt}`;
-    const filePath = `${user.id}/${fileName}`;
-
-    try {
-      const { error: uploadError } = await supabase.storage
-        .from(bucketName)
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false,
-        });
-
-      if (uploadError) {
-        throw uploadError;
-      }
-
-      const { data } = supabase.storage.from(bucketName).getPublicUrl(filePath);
-      return data.publicUrl;
-
-    } catch (error: any) {
-      console.error(`Error uploading file to ${bucketName}:`, error);
-      toast.error(`Error uploading ${bucketName.slice(0, -1)}: ${error.message}`);
-      return null;
-    }
-  };
-
-  const savePartialData = async () => {
+  const saveInstitutionData = async (markCompleted = false) => {
     if (!user?.id || !supabase) return;
 
-    setSaving(true);
-    let currentLogoUrl = formData.logoUrl;
-    let currentBannerUrl = formData.bannerUrl;
-    
     try {
-      const categorySlug = (formData.institutionType || '').toLowerCase().replace(/\s+/g, '_');
+      setUploading(true);
 
-      // Upload logo if a new file is selected
+      // Handle logo upload
+      let logoUrl = formData.logoUrl;
       if (logoFile) {
-        setUploadingLogo(true);
-        const publicUrl = await uploadFile(logoFile, 'avatars');
-        if (publicUrl) {
-          currentLogoUrl = publicUrl;
-          setFormData(prev => ({ ...prev, logoUrl: publicUrl }));
-        }
-        setUploadingLogo(false);
+        const fileExt = logoFile.name.split('.').pop();
+        const fileName = `logo_${user.id}_${Date.now()}.${fileExt}`;
+        const filePath = `institutions/${user.id}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+          .from('institution-assets')
+          .upload(filePath, logoFile, { upsert: true });
+
+        if (uploadError) throw uploadError;
+
+        const { data } = supabase.storage
+          .from('institution-assets')
+          .getPublicUrl(filePath);
+
+        logoUrl = data.publicUrl;
       }
 
-      // Upload banner if a new file is selected
+      // Handle banner upload
+      let bannerUrl = formData.bannerUrl;
       if (bannerFile) {
-        setUploadingBanner(true);
-        const publicUrl = await uploadFile(bannerFile, 'banners');
-        if (publicUrl) {
-          currentBannerUrl = publicUrl;
-          setFormData(prev => ({ ...prev, bannerUrl: publicUrl }));
-        }
-        setUploadingBanner(false);
+        const fileExt = bannerFile.name.split('.').pop();
+        const fileName = `banner_${user.id}_${Date.now()}.${fileExt}`;
+        const filePath = `institutions/${user.id}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('institution-assets')
+          .upload(filePath, bannerFile, { upsert: true });
+
+        if (uploadError) throw uploadError;
+
+        const { data } = supabase.storage
+          .from('institution-assets')
+          .getPublicUrl(filePath);
+
+        bannerUrl = data.publicUrl;
       }
 
-      // Build partial institution payload
-      const institutionPayload: any = {
-        name: formData.institutionName || null,
-        description: formData.detailedDescription || null,
-        type: categorySlug || 'hospital',
-        location: formData.headquarters || null,
-        website: formData.website || null,
-        established_year: formData.establishmentYear ? parseInt(formData.establishmentYear) : null,
-        size: formData.employeeCount || null,
-        admin_user_id: user.id,
-        email: formData.contactEmail || user.email || null,
-        verified: false,
-        // Additional fields
-        short_tagline: formData.shortTagline || null,
-        accreditation: formData.accreditation || null,
-        logo_url: currentLogoUrl || null,
-        banner_url: currentBannerUrl || null,
-        theme_color: formData.themeColor || '#007fff',
-        short_description: formData.shortDescription || null,
-        social_media_links: formData.socialMediaLinks ? (() => {
-          try {
-            return JSON.parse(formData.socialMediaLinks);
-          } catch {
-            return null;
-          }
-        })() : null,
-        phone: formData.contactPhone || null
+      // Map institution type to database format
+      const mapInstitutionType = (formType: string): string => {
+        switch (formType) {
+          case 'Hospital': return 'hospital';
+          case 'Medical Center': return 'hospital';
+          case 'Clinic': return 'clinic';
+          case 'Research Institute': return 'research_center';
+          case 'Medical School/University': return 'university';
+          case 'Pharmaceutical Company': return 'pharmaceutical';
+          case 'Medical Device Company': return 'medical_device';
+          case 'Healthcare Technology': return 'medical_device';
+          case 'Government Health Agency': return 'other';
+          case 'Non-Profit Health Organization': return 'other';
+          case 'Other': return 'other';
+          default: return 'hospital';
+        }
       };
 
-      // Check if institution exists for this admin
-      let existingId: string | null = null;
-      try {
-        const existing = await getInstitutionByUserId(user.id);
-        existingId = existing?.id ?? null;
-      } catch {
-        existingId = null;
-      }
+      // Map organization size to database format
+      const mapOrganizationSize = (formSize: string): string => {
+        switch (formSize) {
+          case '1-10': return 'small';
+          case '11-50': return 'small';
+          case '51-200': return 'medium';
+          case '201-500': return 'medium';
+          case '501-1000': return 'large';
+          case '1000+': return 'enterprise';
+          default: return 'small';
+        }
+      };
 
-      if (existingId) {
+      // Prepare institution data
+      const institutionData = {
+        name: formData.name,
+        type: mapInstitutionType(formData.type),
+        description: formData.detailedDescription,
+        location: formData.location,
+        website: formData.website,
+        phone: formData.phone,
+        email: formData.email,
+        logo_url: logoUrl,
+        banner_url: bannerUrl,
+        established_year: formData.establishedYear ? parseInt(formData.establishedYear, 10) : null,
+        size: mapOrganizationSize(formData.size),
+        short_description: formData.shortDescription,
+        theme_color: formData.themeColor,
+        accreditation: formData.accreditation ? formData.accreditation.split(',').map(a => a.trim()) : [],
+        specialties: formData.specialties ? formData.specialties.split(',').map(s => s.trim()) : [],
+        verified: false,
+        updated_at: new Date().toISOString()
+      };
+
+      if (existingInstitution) {
         // Update existing institution
         const { error: updateError } = await supabase
           .from('institutions')
-          .update(institutionPayload)
-          .eq('id', existingId);
+          .update(institutionData)
+          .eq('id', existingInstitution.id);
         
-        if (updateError) {
-          console.error('Error updating institution:', updateError);
-          // Don't show error to user for partial saves
-        }
+        if (updateError) throw updateError;
       } else {
         // Create new institution
         const { error: insertError } = await supabase
           .from('institutions')
-          .insert(institutionPayload);
+          .insert({
+            ...institutionData,
+            admin_user_id: user.id
+          });
         
-        if (insertError) {
-          console.error('Error creating institution:', insertError);
-          // Don't show error to user for partial saves
-        }
+        if (insertError) throw insertError;
       }
 
-      // Update user profile with basic fields
+      // Update profile if needed
+      if (markCompleted) {
       const { error: profileError } = await supabase
         .from('profiles')
         .update({ 
-          full_name: formData.institutionName || null,
-          bio: formData.shortDescription || null,
-          location: formData.headquarters || null,
-          website: formData.website || null,
-          phone: formData.contactPhone || null
+            onboarding_completed: true,
+            updated_at: new Date().toISOString()
         })
         .eq('id', user.id);
 
-      if (profileError) {
-        console.error('Error updating profile:', profileError);
-        // Don't show error to user for partial saves
+        if (profileError) throw profileError;
+
+        await updateProfile({ onboarding_completed: true });
       }
-    } catch (error) {
-      console.error('Error saving partial data:', error);
-      // Don't show error to user for partial saves
+
+      toast.success('Institution data saved successfully!');
+    } catch (error: any) {
+      console.error('Error saving institution data:', error);
+      toast.error('Failed to save institution data');
+      throw error;
     } finally {
-      setSaving(false);
+      setUploading(false);
     }
   };
 
   const handleNext = async () => {
-    // Save data before proceeding to next step
-    await savePartialData();
-    
-    if (isLastStep) {
-      handleComplete();
-    } else {
-      setCurrentStep(prev => prev + 1);
-    }
+    await saveInstitutionData(false);
+    const nextStep = Math.min(currentStep + 1, ONBOARDING_STEPS.length - 1);
+    setCurrentStep(nextStep);
   };
 
   const handlePrevious = () => {
-    if (!isFirstStep) {
-      setCurrentStep(prev => prev - 1);
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
     }
   };
 
-  const handleComplete = async () => {
-    if (!user?.id || !supabase) return;
-
-    setLoading(true);
-    let currentLogoUrl = formData.logoUrl;
-    let currentBannerUrl = formData.bannerUrl;
+  const canProceed = () => {
+    const step = ONBOARDING_STEPS[currentStep];
     
-    try {
-      const categorySlug = (formData.institutionType || '').toLowerCase().replace(/\s+/g, '_');
+    if (!step.required) return true;
+    
+    switch (step.type) {
+      case 'basic-info':
+        return !!(formData.name && formData.location);
+      case 'institution-type':
+        return !!(formData.type && formData.establishedYear && formData.size);
+      case 'description':
+        return !!(formData.shortDescription && formData.detailedDescription);
+      case 'contact':
+        return !!(formData.email && formData.phone);
+      case 'branding':
+        return !!(formData.logoUrl || logoPreview);
+      default:
+        return true;
+    }
+  };
 
-      // Upload logo if a new file is selected
-      if (logoFile) {
-        setUploadingLogo(true);
-        const publicUrl = await uploadFile(logoFile, 'avatars');
-        if (publicUrl) {
-          currentLogoUrl = publicUrl;
-          setFormData(prev => ({ ...prev, logoUrl: publicUrl }));
-        }
-        setUploadingLogo(false);
-      }
+  const renderStep = () => {
+    const step = ONBOARDING_STEPS[currentStep];
 
-      // Upload banner if a new file is selected
-      if (bannerFile) {
-        setUploadingBanner(true);
-        const publicUrl = await uploadFile(bannerFile, 'banners');
-        if (publicUrl) {
-          currentBannerUrl = publicUrl;
-          setFormData(prev => ({ ...prev, bannerUrl: publicUrl }));
-        }
-        setUploadingBanner(false);
-      }
-
-      // Build institution payload
-      const institutionPayload: any = {
-        name: formData.institutionName,
-        description: formData.detailedDescription,
-        type: categorySlug || 'hospital',
-        location: formData.headquarters || null,
-        website: formData.website || null,
-        established_year: formData.establishmentYear ? parseInt(formData.establishmentYear) : null,
-        size: formData.employeeCount || null,
-        admin_user_id: user.id,
-        email: formData.contactEmail || user.email || null,
-        verified: false,
-        // Additional fields
-        short_tagline: formData.shortTagline,
-        accreditation: formData.accreditation,
-        logo_url: currentLogoUrl,
-        banner_url: currentBannerUrl,
-        theme_color: formData.themeColor,
-        short_description: formData.shortDescription,
-        social_media_links: formData.socialMediaLinks ? (() => {
-          try {
-            return JSON.parse(formData.socialMediaLinks);
-          } catch {
-            return null;
-          }
-        })() : null,
-        phone: formData.contactPhone
-      };
-
-      // Check if institution exists for this admin
-      let existingId: string | null = null;
-      try {
-        const existing = await getInstitutionByUserId(user.id);
-        existingId = existing?.id ?? null;
-      } catch {
-        existingId = null;
-      }
-
-      if (existingId) {
-        const { error: updateError } = await supabase
-          .from('institutions')
-          .update(institutionPayload)
-          .eq('id', existingId);
-        if (updateError) {
-          console.error('Error updating institution:', updateError);
-          toast.error('Failed to update institution profile');
-          setLoading(false);
-          return;
-        }
-      } else {
-        const { error: insertError } = await supabase
-          .from('institutions')
-          .insert(institutionPayload);
-        if (insertError) {
-          console.error('Error creating institution:', insertError);
-          toast.error('Failed to create institution profile');
-          setLoading(false);
-          return;
-        }
-      }
-
-      // Update user profile to mark onboarding as completed and sync basic fields
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({ 
-          onboarding_completed: true,
-          full_name: formData.institutionName,
-          bio: formData.shortDescription,
-          location: formData.headquarters,
-          website: formData.website,
-          phone: formData.contactPhone
-        })
-        .eq('id', user.id);
-
-      if (profileError) {
-        console.error('Error updating profile:', profileError);
-        toast.error('Failed to complete onboarding');
-        setLoading(false);
-        return;
-      }
-
-      toast.success('Institution profile saved!');
-      router.push('/institution/profile');
-      } catch (error) {
-      console.error('Error completing onboarding:', error);
-      toast.error('Failed to complete onboarding');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-  const renderStepContent = () => {
-    switch (currentStepData.type) {
-      case 'basic_info':
+    switch (step.type) {
+      case 'welcome':
         return (
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Institution Name (Official Legal Name) *
-              </label>
-              <input
-                type="text"
-                value={formData.institutionName}
-                onChange={(e) => setFormData(prev => ({ ...prev, institutionName: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
-                placeholder="e.g., City General Hospital, MedTech Innovations Inc."
+          <div className="text-center max-w-4xl mx-auto px-6">
+            <div className="mb-12">
+              <img 
+                src="/Kendraa Logo (1).png" 
+                alt="Kendraa Logo" 
+                className="h-24 md:h-32 lg:h-40 w-auto mx-auto drop-shadow-lg"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Short Tagline *
-              </label>
-              <input
-                type="text"
-                value={formData.shortTagline}
-                onChange={(e) => setFormData(prev => ({ ...prev, shortTagline: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
-                placeholder="One line about your institution"
-                maxLength={100}
-              />
-              <p className="text-sm text-gray-500 mt-1">
-                A brief, compelling description of your institution (max 100 characters)
+            
+            <div className="space-y-6">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight" 
+                  dangerouslySetInnerHTML={{ __html: step.title }}>
+              </h2>
+              <p className="text-xl md:text-2xl text-gray-600 leading-relaxed max-w-3xl mx-auto">
+                {step.subtitle}
               </p>
+            </div>
+            
+            <div className="mt-12">
+              <div className="inline-flex items-center space-x-2 text-[#007fff] font-semibold text-lg">
+                <span>Let&apos;s get started</span>
+                <ArrowRightIcon className="w-5 h-5" />
+              </div>
             </div>
           </div>
         );
 
-      case 'institution_details':
+      case 'basic-info':
         return (
+          <div className="max-w-3xl mx-auto">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center mb-8"
+            >
+              <div className="w-16 h-16 bg-[#007fff] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <BuildingOfficeIcon className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-3xl font-bold text-black mb-2">{step.title}</h2>
+              <p className="text-lg text-gray-700 max-w-2xl mx-auto">{step.subtitle}</p>
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white border-2 border-[#007fff]/10 rounded-2xl p-6 hover:border-[#007fff]/20 hover:shadow-lg transition-all duration-300"
+            >
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Type *
+                  <label className="block text-sm font-semibold text-[#007fff] mb-2">
+                    Institution Name *
               </label>
-              <div className="grid grid-cols-1 gap-3">
-                {INSTITUTION_TYPES.map((option) => (
+              <input
+                type="text"
+                    value={formData.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    placeholder="e.g., City General Hospital"
+                    className="w-full px-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 bg-white transition-all duration-200 hover:border-[#007fff]/40"
+              />
+            </div>
+
+            <div>
+                  <label className="block text-sm font-semibold text-[#007fff] mb-2">
+                    Location *
+              </label>
+              <input
+                type="text"
+                    value={formData.location}
+                    onChange={(e) => handleInputChange('location', e.target.value)}
+                    placeholder="e.g., New York, NY, USA"
+                    className="w-full px-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 bg-white transition-all duration-200 hover:border-[#007fff]/40"
+                  />
+            </div>
+              </div>
+            </motion.div>
+          </div>
+        );
+
+      case 'institution-type':
+        return (
+          <div className="max-w-4xl mx-auto">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center mb-8"
+            >
+              <div className="w-16 h-16 bg-[#007fff] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <AcademicCapIcon className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-3xl font-bold text-black mb-2">{step.title}</h2>
+              <p className="text-lg text-gray-700 max-w-2xl mx-auto">{step.subtitle}</p>
+            </motion.div>
+            
+            <div className="space-y-6">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.2 }}
+                className="bg-white border-2 border-[#007fff]/10 rounded-2xl p-6 hover:border-[#007fff]/20 hover:shadow-lg transition-all duration-300"
+              >
+          <div className="space-y-6">
+            <div>
+                    <label className="block text-sm font-semibold text-[#007fff] mb-3">
+                      Institution Type *
+              </label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {INSTITUTION_TYPES.map((type) => (
                   <button
-                    key={option}
-                    onClick={() => setFormData(prev => ({ ...prev, institutionType: option }))}
-                    className={`p-4 text-left border rounded-lg transition-all ${
-                      formData.institutionType === option
-                        ? 'border-[#007fff] bg-[#007fff]/5 text-[#007fff]'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    {option}
+                          key={type}
+                          onClick={() => handleInputChange('type', type)}
+                          className={`p-4 text-left border-2 rounded-xl transition-all duration-200 ${
+                            formData.type === type
+                              ? 'border-[#007fff] bg-[#007fff]/10 text-[#007fff]'
+                              : 'border-gray-200 hover:border-[#007fff]/40 hover:bg-[#007fff]/5'
+                          }`}
+                        >
+                          <span className="font-medium">{type}</span>
                   </button>
                 ))}
               </div>
             </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Year of Establishment *
+                      <label className="block text-sm font-semibold text-[#007fff] mb-2">
+                        Year Established *
               </label>
               <input
                 type="number"
-                value={formData.establishmentYear}
-                onChange={(e) => setFormData(prev => ({ ...prev, establishmentYear: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
+                        value={formData.establishedYear}
+                        onChange={(e) => handleInputChange('establishedYear', e.target.value)}
                 placeholder="e.g., 1995"
                 min="1800"
                 max={new Date().getFullYear()}
+                        className="w-full px-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 bg-white transition-all duration-200 hover:border-[#007fff]/40"
               />
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Accreditation
+                      <label className="block text-sm font-semibold text-[#007fff] mb-3">
+                        Organization Size *
               </label>
-              <input
-                type="text"
-                value={formData.accreditation}
-                onChange={(e) => setFormData(prev => ({ ...prev, accreditation: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
-                placeholder="e.g., NABH, ISO, NABL, etc."
-              />
+                      <div className="grid grid-cols-2 gap-3">
+                        {EMPLOYEE_COUNT_OPTIONS.map((size) => (
+                          <button
+                            key={size}
+                            onClick={() => handleInputChange('size', size)}
+                            className={`p-3 text-center border-2 rounded-lg transition-all duration-200 ${
+                              formData.size === size
+                                ? 'border-[#007fff] bg-[#007fff]/10 text-[#007fff]'
+                                : 'border-gray-200 hover:border-[#007fff]/40 hover:bg-[#007fff]/5'
+                            }`}
+                          >
+                            <span className="text-sm font-medium">{size}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        );
+
+      case 'description':
+        return (
+          <div className="max-w-3xl mx-auto">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center mb-8"
+            >
+              <div className="w-16 h-16 bg-[#007fff] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <DocumentTextIcon className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-3xl font-bold text-black mb-2">{step.title}</h2>
+              <p className="text-lg text-gray-700 max-w-2xl mx-auto">{step.subtitle}</p>
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white border-2 border-[#007fff]/10 rounded-2xl p-6 hover:border-[#007fff]/20 hover:shadow-lg transition-all duration-300"
+            >
+          <div className="space-y-6">
+            <div>
+                  <label className="block text-sm font-semibold text-[#007fff] mb-2">
+                    Short Description (Max 200 Characters) *
+              </label>
+                  <textarea
+                    value={formData.shortDescription}
+                    onChange={(e) => handleInputChange('shortDescription', e.target.value)}
+                    placeholder="Brief description shown in search results..."
+                    maxLength={200}
+                    rows={3}
+                    className="w-full px-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 bg-white transition-all duration-200 hover:border-[#007fff]/40 resize-none"
+                  />
               <p className="text-sm text-gray-500 mt-1">
-                List any accreditations or certifications your institution holds
+                    {formData.shortDescription.length}/200 characters
               </p>
             </div>
+
+            <div>
+                  <label className="block text-sm font-semibold text-[#007fff] mb-2">
+                    Detailed Description *
+              </label>
+                  <textarea
+                    value={formData.detailedDescription}
+                    onChange={(e) => handleInputChange('detailedDescription', e.target.value)}
+                    placeholder="Describe your mission, services, specialties, and what makes your institution unique..."
+                    rows={6}
+                    className="w-full px-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 bg-white transition-all duration-200 hover:border-[#007fff]/40 resize-none"
+                  />
+                </div>
+
+            <div>
+                  <label className="block text-sm font-semibold text-[#007fff] mb-2">
+                    Specialties & Services
+              </label>
+                <input
+                    type="text"
+                    value={formData.specialties}
+                    onChange={(e) => handleInputChange('specialties', e.target.value)}
+                    placeholder="e.g., Cardiology, Oncology, Emergency Medicine (comma-separated)"
+                    className="w-full px-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 bg-white transition-all duration-200 hover:border-[#007fff]/40"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-[#007fff] mb-2">
+                    Accreditations
+                  </label>
+                <input
+                  type="text"
+                    value={formData.accreditation}
+                    onChange={(e) => handleInputChange('accreditation', e.target.value)}
+                    placeholder="e.g., NABH, ISO, NABL (comma-separated)"
+                    className="w-full px-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 bg-white transition-all duration-200 hover:border-[#007fff]/40"
+                />
+              </div>
+            </div>
+            </motion.div>
+          </div>
+        );
+
+      case 'contact':
+        return (
+          <div className="max-w-3xl mx-auto">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center mb-8"
+            >
+              <div className="w-16 h-16 bg-[#007fff] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <EnvelopeIcon className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-3xl font-bold text-black mb-2">{step.title}</h2>
+              <p className="text-lg text-gray-700 max-w-2xl mx-auto">{step.subtitle}</p>
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white border-2 border-[#007fff]/10 rounded-2xl p-6 hover:border-[#007fff]/20 hover:shadow-lg transition-all duration-300"
+            >
+          <div className="space-y-6">
+            <div>
+                  <label className="block text-sm font-semibold text-[#007fff] mb-2">
+                    Email Address *
+              </label>
+                  <div className="relative">
+                    <EnvelopeIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => handleInputChange('email', e.target.value)}
+                      placeholder="contact@yourinstitution.com"
+                      className="w-full pl-10 pr-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 bg-white transition-all duration-200 hover:border-[#007fff]/40"
+                    />
+            </div>
+                </div>
+
+            <div>
+                  <label className="block text-sm font-semibold text-[#007fff] mb-2">
+                    Phone Number *
+              </label>
+                  <div className="relative">
+                    <PhoneIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => handleInputChange('phone', e.target.value)}
+                      placeholder="+1 (555) 123-4567"
+                      className="w-full pl-10 pr-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 bg-white transition-all duration-200 hover:border-[#007fff]/40"
+              />
+            </div>
+                </div>
+
+            <div>
+                  <label className="block text-sm font-semibold text-[#007fff] mb-2">
+                    Website
+              </label>
+                  <div className="relative">
+                    <GlobeAltIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="url"
+                value={formData.website}
+                      onChange={(e) => handleInputChange('website', e.target.value)}
+                placeholder="https://www.yourinstitution.com"
+                      className="w-full pl-10 pr-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 bg-white transition-all duration-200 hover:border-[#007fff]/40"
+              />
+            </div>
+                </div>
+              </div>
+            </motion.div>
           </div>
         );
 
       case 'branding':
         return (
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Upload Logo (Square, High-Res) *
-              </label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  if (e.target.files && e.target.files.length > 0) {
-                    const file = e.target.files[0];
-                    setLogoFile(file);
-                    setFormData(prev => ({ ...prev, logoUrl: URL.createObjectURL(file) }));
-                  } else {
-                    setLogoFile(null);
-                    setFormData(prev => ({ ...prev, logoUrl: '' }));
-                  }
-                }}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#007fff]/10 file:text-[#007fff] hover:file:bg-[#007fff]/20"
-              />
-              {uploadingLogo && <p className="text-sm text-gray-500 mt-2">Uploading logo...</p>}
-              {(formData.logoUrl && !uploadingLogo) && (
-                <div className="mt-4 w-24 h-24 relative rounded-full overflow-hidden border border-gray-200">
-                  <Image src={formData.logoUrl} alt="Logo Preview" fill className="object-cover" />
-                </div>
-              )}
-              <p className="text-sm text-gray-500 mt-1">
-                Upload a square, high-resolution logo for your institution
-              </p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Upload Cover Banner (Wide, Professional Image) *
-              </label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  if (e.target.files && e.target.files.length > 0) {
-                    const file = e.target.files[0];
-                    setBannerFile(file);
-                    setFormData(prev => ({ ...prev, bannerUrl: URL.createObjectURL(file) }));
-                  } else {
-                    setBannerFile(null);
-                    setFormData(prev => ({ ...prev, bannerUrl: '' }));
-                  }
-                }}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#007fff]/10 file:text-[#007fff] hover:file:bg-[#007fff]/20"
-              />
-              {uploadingBanner && <p className="text-sm text-gray-500 mt-2">Uploading banner...</p>}
-              {(formData.bannerUrl && !uploadingBanner) && (
-                <div className="mt-4 w-full h-32 relative rounded-lg overflow-hidden border border-gray-200">
-                  <Image src={formData.bannerUrl} alt="Banner Preview" fill className="object-cover" />
-                </div>
-              )}
-              <p className="text-sm text-gray-500 mt-1">
-                Upload a wide, professional banner image for your profile
-              </p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Select Theme Color (Optional)
-              </label>
-              <div className="flex items-center gap-4">
-                <input
-                  type="color"
-                  value={formData.themeColor}
-                  onChange={(e) => setFormData(prev => ({ ...prev, themeColor: e.target.value }))}
-                  className="w-12 h-12 border border-gray-300 rounded-lg cursor-pointer"
-                />
-                <input
-                  type="text"
-                  value={formData.themeColor}
-                  onChange={(e) => setFormData(prev => ({ ...prev, themeColor: e.target.value }))}
-                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
-                  placeholder="#007fff"
-                />
+          <div className="max-w-3xl mx-auto">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center mb-8"
+            >
+              <div className="w-16 h-16 bg-[#007fff] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <PhotoIcon className="w-8 h-8 text-white" />
               </div>
-              <p className="text-sm text-gray-500 mt-1">
-                Choose a theme color for your institution&apos;s page styling
-              </p>
+              <h2 className="text-3xl font-bold text-black mb-2">{step.title}</h2>
+              <p className="text-lg text-gray-700 max-w-2xl mx-auto">{step.subtitle}</p>
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white border-2 border-[#007fff]/10 rounded-2xl p-6 hover:border-[#007fff]/20 hover:shadow-lg transition-all duration-300"
+            >
+              <div className="space-y-8">
+                {/* Logo Upload */}
+            <div>
+                  <label className="block text-sm font-semibold text-[#007fff] mb-3">
+                    Institution Logo *
+              </label>
+                  <div className="space-y-4">
+                    {logoPreview ? (
+                      <div className="relative w-32 h-32 mx-auto">
+                        <img
+                          src={logoPreview}
+                          alt="Logo preview"
+                          className="w-full h-full object-contain border-2 border-[#007fff] rounded-xl"
+                        />
+                        <button
+                          onClick={() => {
+                            setLogoFile(null);
+                            setLogoPreview(null);
+                            handleInputChange('logoUrl', '');
+                          }}
+                          className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                        >
+                          <XMarkIcon className="w-4 h-4" />
+                        </button>
             </div>
-          </div>
-        );
+                    ) : (
+                      <div className="w-32 h-32 mx-auto border-2 border-dashed border-[#007fff]/30 rounded-xl flex items-center justify-center">
+                        <PhotoIcon className="w-8 h-8 text-gray-400" />
+                      </div>
+                    )}
+                    
+              <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageUpload(e, 'logo')}
+                      className="hidden"
+                      id="logo-upload"
+                    />
+                    
+                    <label
+                      htmlFor="logo-upload"
+                      className="block w-full px-4 py-3 bg-[#007fff] text-white text-center rounded-xl hover:bg-[#007fff]/90 transition-colors cursor-pointer font-semibold"
+                    >
+                      {logoPreview ? 'Change Logo' : 'Upload Logo'}
+                    </label>
+            </div>
+                </div>
 
-      case 'about_institution':
-        return (
-          <div className="space-y-6">
+                {/* Banner Upload */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Short Description (Max 200 Characters) *
+                  <label className="block text-sm font-semibold text-[#007fff] mb-3">
+                    Banner Image
               </label>
-              <textarea
-                value={formData.shortDescription}
-                onChange={(e) => setFormData(prev => ({ ...prev, shortDescription: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent h-20 resize-none"
-                placeholder="Brief description shown in search results..."
-                maxLength={200}
-              />
-              <p className="text-sm text-gray-500 mt-1">
-                {formData.shortDescription.length}/200 characters - This will be shown in search results
-              </p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Detailed &quot;About Us&quot; (Mission, Services, Specialties) *
-              </label>
-              <textarea
-                value={formData.detailedDescription}
-                onChange={(e) => setFormData(prev => ({ ...prev, detailedDescription: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent h-32 resize-none"
-                placeholder="Describe your mission, services, specialties, and what makes your institution unique..."
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Website URL
-              </label>
-              <input
-                type="url"
-                value={formData.website}
-                onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
-                placeholder="https://www.yourinstitution.com"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Social Media Links
-              </label>
-              <textarea
-                value={formData.socialMediaLinks}
-                onChange={(e) => setFormData(prev => ({ ...prev, socialMediaLinks: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent h-20 resize-none"
-                placeholder="LinkedIn: https://linkedin.com/company/yourinstitution&#10;Twitter: https://twitter.com/yourinstitution"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Headquarters *
-              </label>
-              <input
-                type="text"
-                value={formData.headquarters}
-                onChange={(e) => setFormData(prev => ({ ...prev, headquarters: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
-                placeholder="e.g., New York, NY, USA"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Number of Employees
-              </label>
-              <div className="grid grid-cols-1 gap-3">
-                {EMPLOYEE_COUNT_OPTIONS.map((option) => (
+                  <div className="space-y-4">
+                    {bannerPreview ? (
+                      <div className="relative w-full h-32">
+                        <img
+                          src={bannerPreview}
+                          alt="Banner preview"
+                          className="w-full h-full object-cover border-2 border-[#007fff] rounded-xl"
+                        />
                   <button
-                    key={option}
-                    onClick={() => setFormData(prev => ({ ...prev, employeeCount: option }))}
-                    className={`p-4 text-left border rounded-lg transition-all ${
-                      formData.employeeCount === option
-                        ? 'border-[#007fff] bg-[#007fff]/5 text-[#007fff]'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    {option}
+                          onClick={() => {
+                            setBannerFile(null);
+                            setBannerPreview(null);
+                            handleInputChange('bannerUrl', '');
+                          }}
+                          className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                        >
+                          <XMarkIcon className="w-4 h-4" />
                   </button>
-                ))}
               </div>
+                    ) : (
+                      <div className="w-full h-32 border-2 border-dashed border-[#007fff]/30 rounded-xl flex items-center justify-center">
+                        <PhotoIcon className="w-8 h-8 text-gray-400" />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Contact Email
-                </label>
+                    )}
+                    
                 <input
-                  type="email"
-                  value={formData.contactEmail}
-                  onChange={(e) => setFormData(prev => ({ ...prev, contactEmail: e.target.value }))}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
-                  placeholder="contact@yourinstitution.com"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageUpload(e, 'banner')}
+                      className="hidden"
+                      id="banner-upload"
+                    />
+                    
+                    <label
+                      htmlFor="banner-upload"
+                      className="block w-full px-4 py-3 bg-[#007fff]/20 text-[#007fff] text-center rounded-xl hover:bg-[#007fff]/30 transition-colors cursor-pointer font-semibold"
+                    >
+                      {bannerPreview ? 'Change Banner' : 'Upload Banner'}
+                    </label>
+              </div>
+                </div>
+
+                {/* Theme Color */}
+              <div>
+                  <label className="block text-sm font-semibold text-[#007fff] mb-3">
+                    Brand Color
+                </label>
+                  <div className="flex items-center space-x-4">
+                <input
+                      type="color"
+                      value={formData.themeColor}
+                      onChange={(e) => handleInputChange('themeColor', e.target.value)}
+                      className="w-12 h-12 border-2 border-gray-300 rounded-lg cursor-pointer"
+                    />
+                    <input
+                      type="text"
+                      value={formData.themeColor}
+                      onChange={(e) => handleInputChange('themeColor', e.target.value)}
+                      className="flex-1 px-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 bg-white transition-all duration-200 hover:border-[#007fff]/40"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Contact Phone Number
-                </label>
-                <input
-                  type="tel"
-                  value={formData.contactPhone}
-                  onChange={(e) => setFormData(prev => ({ ...prev, contactPhone: e.target.value }))}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007fff] focus:border-transparent"
-                  placeholder="+1 (555) 123-4567"
-                />
-              </div>
             </div>
+              </div>
+            </motion.div>
           </div>
         );
 
-      case 'complete':
+      case 'completion':
         return (
-          <div className="text-center space-y-6">
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-              <CheckCircleIcon className="w-10 h-10 text-green-600" />
+          <div className="text-center max-w-4xl mx-auto px-6">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6 }}
+              className="mb-8"
+            >
+              <div className="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CheckCircleIcon className="w-12 h-12 text-white" />
             </div>
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Welcome to Kendraa!</h3>
-              <p className="text-gray-600">
-                Your institution profile has been created successfully. You can now start connecting with healthcare professionals, sharing your organization&apos;s updates, and building your network in the healthcare community.
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">You&apos;re All Set!</h2>
+              <p className="text-xl text-gray-600 leading-relaxed max-w-2xl mx-auto">
+                {step.subtitle}
               </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-white border-2 border-[#007fff]/10 rounded-2xl p-8 max-w-2xl mx-auto"
+            >
+              <h3 className="text-2xl font-bold text-[#007fff] mb-4">What&apos;s Next?</h3>
+              <div className="space-y-4 text-left">
+                <div className="flex items-start space-x-3">
+                  <div className="w-6 h-6 bg-[#007fff] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-white text-sm font-bold">1</span>
             </div>
+                  <p className="text-gray-700">Start posting updates about your institution</p>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="w-6 h-6 bg-[#007fff] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-white text-sm font-bold">2</span>
+                  </div>
+                  <p className="text-gray-700">Connect with healthcare professionals in your field</p>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="w-6 h-6 bg-[#007fff] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-white text-sm font-bold">3</span>
+                  </div>
+                  <p className="text-gray-700">Post job openings and events to attract talent</p>
+                </div>
+              </div>
+            </motion.div>
           </div>
         );
 
@@ -828,103 +954,135 @@ export default function InstitutionOnboardingPage() {
     }
   };
 
-  if (!user) {
+  // Show loading while checking profile completion
+  if (!profile || !user || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#007fff] mx-auto mb-3"></div>
-          <p className="text-sm text-[#007fff]">Loading...</p>
+          <div className="w-8 h-8 border-4 border-[#007fff] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your institution profile...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-[#007fff]/5">
+    <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-[#007fff]/5 flex flex-col">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-4">
+      <div className="bg-white/90 backdrop-blur-md shadow-sm border-b border-gray-100">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
           <div className="flex items-center justify-between">
-            <Logo />
-            <div className="text-sm text-gray-600">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={handlePrevious}
+                disabled={currentStep === 0}
+                className={`p-3 rounded-xl transition-all duration-200 ${
+                  currentStep === 0
+                    ? 'text-gray-400 cursor-not-allowed'
+                    : 'text-gray-600 hover:bg-[#007fff]/10 hover:text-[#007fff]'
+                }`}
+              >
+                <ChevronLeftIcon className="w-6 h-6" />
+              </button>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">Institution Onboarding</h1>
+                <p className="text-sm text-gray-600">
               Step {currentStep + 1} of {ONBOARDING_STEPS.length}
+                </p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Progress Bar */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-2">
-          <div className="w-full bg-gray-200 rounded-full h-2">
+        <div className="w-full bg-gray-100 h-1">
             <div 
-              className="bg-[#007fff] h-2 rounded-full transition-all duration-300"
+            className="bg-[#007fff] h-1 transition-all duration-500 ease-out"
               style={{ width: `${((currentStep + 1) / ONBOARDING_STEPS.length) * 100}%` }}
-            />
-          </div>
+          ></div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-          {/* Step Header */}
-          <div className="px-8 py-6 border-b border-gray-100">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              {currentStepData.title}
-            </h1>
-            <p className="text-lg text-gray-600">
-              {currentStepData.subtitle}
-            </p>
+      {/* Content */}
+      <div className="flex-1 flex items-center justify-center py-16 px-4 sm:px-6">
+        <div className="w-full max-w-5xl">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentStep}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+              className="flex items-center justify-center min-h-[600px]"
+            >
+              <div className="w-full bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/30 p-8 md:p-12">
+                {renderStep()}
+          </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
           </div>
 
-          {/* Step Content */}
-          <div className="px-8 py-8">
-            {renderStepContent()}
-          </div>
-
-          {/* Navigation */}
-          <div className="px-8 py-6 border-t border-gray-100 bg-gray-50">
-            <div className="flex items-center justify-between">
+      {/* Footer */}
+      <div className="bg-white/90 backdrop-blur-md border-t border-gray-100">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
+          <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-3">
+            <div className="flex justify-center space-x-3 w-full">
+              {currentStep < ONBOARDING_STEPS.length - 1 ? (
+                <>
               <button
                 onClick={handlePrevious}
-                disabled={isFirstStep}
-                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-colors ${
-                  isFirstStep
-                    ? 'text-gray-400 cursor-not-allowed'
-                    : 'text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                <ChevronLeftIcon className="w-5 h-5" />
+                    disabled={currentStep === 0}
+                    className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
+                      currentStep === 0
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md'
+                    }`}
+                  >
                 Previous
               </button>
-
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <div className="w-2 h-2 bg-[#007fff] rounded-full"></div>
-                {calculateCompletion()}% Complete
-              </div>
-
               <button
                 onClick={handleNext}
-                disabled={(!isStepCompleted(currentStep) && !isLastStep) || saving}
-                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-colors ${
-                  (!isStepCompleted(currentStep) && !isLastStep) || saving
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-[#007fff] text-white hover:bg-[#007fff]/90'
-                }`}
-              >
-                {saving ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    Saving...
+                    disabled={!canProceed() || loading || uploading}
+                    className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg ${
+                      canProceed() && !loading && !uploading
+                        ? 'bg-[#007fff] text-white hover:bg-[#007fff]/90 hover:shadow-xl transform hover:scale-105'
+                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    }`}
+                  >
+                    {loading || uploading ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span>Saving...</span>
                   </>
                 ) : (
                   <>
-                    {isLastStep ? 'Complete Setup' : 'Next'}
-                    {!isLastStep && <ChevronRightIcon className="w-5 h-5" />}
+                        <span>{currentStep === ONBOARDING_STEPS.length - 2 ? 'Complete' : 'Next'}</span>
+                        <ArrowRightIcon className="w-4 h-4" />
                   </>
                 )}
               </button>
+                </>
+              ) : (
+                <button
+                  onClick={async () => {
+                    setLoading(true);
+                    try {
+                      await saveInstitutionData(true);
+                      toast.success('Welcome to Kendraa!');
+                      router.push('/institution/feed');
+                    } catch (error) {
+                      toast.error('Failed to complete onboarding.');
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  disabled={loading || uploading}
+                  className="px-8 py-3 bg-[#007fff] text-white rounded-xl font-semibold hover:bg-[#007fff]/90 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                >
+                  {loading || uploading ? 'Completing...' : 'Get Started'}
+                </button>
+              )}
             </div>
           </div>
         </div>

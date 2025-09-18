@@ -23,10 +23,13 @@ export default function FeedPage() {
   const [activeTab, setActiveTab] = useState<'posts' | 'medical'>('posts');
   const [postContent, setPostContent] = useState('');
 
-  // Redirect institution users to their dedicated feed
+  // Redirect institution users to their dedicated feed (but respect onboarding status)
   useEffect(() => {
     if (profile && (profile.user_type === 'institution' || profile.profile_type === 'institution')) {
-      router.push('/institution/feed');
+      // Let the onboarding protection hook handle the redirect
+      // It will redirect to /institution/onboarding if not completed
+      // or to /institution/feed if completed
+      return;
     }
   }, [profile, router]);
 

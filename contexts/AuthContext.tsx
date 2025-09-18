@@ -171,6 +171,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            full_name: fullName,
+            profile_type: profileType,
+          }
+        }
       });
 
       if (signUpError) {
@@ -185,25 +191,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (!data.user) {
-
         throw new Error("Account created, but user data not available immediately. Please try signing in.");
       }
 
-      
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({
-          full_name: fullName,
-          profile_type: profileType,
-          user_type: profileType, // Assuming profile_type and user_type are the same at signup
-        })
-        .eq('id', data.user.id);
-
-      if (updateError) {
-        
-        console.error("Error updating profile after signup:", updateError);
-        toast.error('Account created, but failed to set profile details. You can update your profile later.');
-      } else {
+      // Use ensureProfileExists to create the profile if it doesn't exist
+      // The trigger should create the profile automatically, but we'll update it with the correct data
+      try {
+        const { ensureProfileExists } = await import('@/lib/queries');
+        await ensureProfileExists(data.user.id, email, fullName, profileType);
+        toast.success('Account created successfully! Please check your email to verify your account.');
+      } catch (profileError) {
+        console.error("Error creating profile after signup:", profileError);
+        // Don't show error to user if profile creation fails - the trigger should handle it
         toast.success('Account created successfully! Please check your email to verify your account.');
       }
       

@@ -218,6 +218,7 @@ export interface Institution {
   name: string;
   type: 'hospital' | 'clinic' | 'research_center' | 'university' | 'pharmaceutical' | 'medical_device' | 'other';
   description: string | null;
+  short_description: string | null;
   location: string | null;
   website: string | null;
   phone: string | null;
@@ -230,6 +231,7 @@ export interface Institution {
   established_year: number | null;
   size: 'small' | 'medium' | 'large' | 'enterprise' | null;
   verified: boolean;
+  theme_color: string | null;
   admin_user_id?: string; // Foreign key to profiles table (optional for independent institutions)
   
   // Corporate Profile Fields (from requirements) - Optional for backward compatibility

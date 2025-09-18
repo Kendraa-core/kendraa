@@ -36,14 +36,14 @@ export default function LandingPage() {
         if (profile.user_type === 'institution' || profile.profile_type === 'institution') {
           router.push('/institution/feed');
         } else {
-        router.push('/feed');
+          router.push('/feed');
         }
       } else {
         // Redirect based on user type
         if (profile.user_type === 'institution' || profile.profile_type === 'institution') {
           router.push('/institution/onboarding');
-      } else {
-        router.push('/onboarding');
+        } else {
+          router.push('/onboarding');
         }
       }
     }

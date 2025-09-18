@@ -40,6 +40,12 @@ async function setupStorageBuckets() {
       public: true,
       fileSizeLimit: 10485760, // 10MB
       allowedMimeTypes: ['image/*']
+    },
+    {
+      name: 'institution-assets',
+      public: true,
+      fileSizeLimit: 10485760, // 10MB
+      allowedMimeTypes: ['image/*']
     }
   ];
 
