@@ -58,9 +58,10 @@ interface PostCardProps {
     profiles?: Profile;
   };
   onInteraction?: () => void;
+  onPostDeleted: (postId: string) => void; 
 }
 
-export default function PostCard({ post, onInteraction }: PostCardProps) {
+export default function PostCard({ post, onInteraction,onPostDeleted }: PostCardProps) {
   const { user } = useAuth();
   const router = useRouter();
   
@@ -267,6 +268,9 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
     }
   };
 
+  
+
+
   const getAuthorName = () => {
     return post.profiles?.full_name || 'Unknown User';
   };
@@ -338,7 +342,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
     setShowDropdown(false);
   };
 
-  const handleDeletePost = async () => {
+   const handleDeletePost = async () => {
     if (!user?.id) return;
 
     const confirmed = window.confirm(
@@ -352,10 +356,10 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
       await deletePost(post.id, user.id);
       toast.success('Post deleted successfully');
       
-      // Call the onInteraction callback to refresh the parent component
-      if (onInteraction) {
-        onInteraction();
-      }
+      // ✅ THE FIX: Call the new prop with the post's ID
+      // This tells the parent component which post to remove from its state.
+      onPostDeleted(post.id);
+
     } catch (error: any) {
       console.error('Error deleting post:', error);
       toast.error(error.message || 'Failed to delete post');

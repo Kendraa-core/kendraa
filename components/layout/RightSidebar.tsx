@@ -12,12 +12,15 @@ import { getSuggestedConnections, followUser } from '@/lib/queries';
 import { formatNumber } from '@/lib/utils';
 import type { Profile } from '@/types/database.types';
 
+// Updated interface to match GNews API structure
 interface NewsItem {
   title: string;
-  description: string;
   url: string;
   publishedAt: string;
-  source: string;
+  source: {
+    name: string;
+  };
+  // Adding a random reader count for display purposes
   readers: number;
 }
 
@@ -33,21 +36,91 @@ export default function RightSidebar({ connectionCount = 0, isInstitution = fals
   const [loading, setLoading] = useState(true);
   const [connectingUsers, setConnectingUsers] = useState<Set<string>>(new Set());
 
+  // This new function fetches news from GNews and uses the same cache as your NewsPage
+  const fetchTopHealthcareNews = async (): Promise<NewsItem[]> => {
+    // Define shared cache keys and duration
+    const CACHE_KEY_ARTICLES = 'gnews_articles_cache';
+    const CACHE_KEY_TIMESTAMP = 'gnews_timestamp_cache';
+    const CACHE_DURATION_MS = 12 * 60 * 60 * 1000; // 12 hours
+
+    if (typeof window !== 'undefined') {
+      const cachedArticlesJSON = localStorage.getItem(CACHE_KEY_ARTICLES);
+      const cachedTimestamp = localStorage.getItem(CACHE_KEY_TIMESTAMP);
+      const now = new Date().getTime();
+
+      // If valid cache exists, use it
+      if (cachedArticlesJSON && cachedTimestamp) {
+        if (now - parseInt(cachedTimestamp, 10) < CACHE_DURATION_MS) {
+          console.log("Loading sidebar news from cache.");
+          const cachedArticles = JSON.parse(cachedArticlesJSON);
+          // Map to NewsItem and add random readers
+          return cachedArticles.slice(0, 5).map((article: any) => ({
+            ...article,
+            readers: Math.floor(Math.random() * 5000) + 1000,
+          }));
+        }
+      }
+    }
+
+    // If cache is stale or empty, fetch from API
+    console.log("Fetching new sidebar news from GNews API.");
+    const apiKey = process.env.NEXT_PUBLIC_GNEWS_API_KEY;
+    if (!apiKey) {
+      console.error("GNews API key is not configured.");
+      return []; // Return empty if no key
+    }
+
+    const query = "healthcare OR medical OR pharma OR clinical trial OR hospital";
+    const apiUrl = `https://gnews.io/api/v4/search?q=${encodeURIComponent(query)}&lang=en&sortby=publishedAt&apikey=${apiKey}`;
+
+    try {
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.errors ? data.errors[0] : 'Failed to fetch news');
+      }
+
+      const validArticles = data.articles.filter((article: any) => article.image && article.description);
+
+      // Save the full result to cache for the main news page to use
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(CACHE_KEY_ARTICLES, JSON.stringify(validArticles));
+        localStorage.setItem(CACHE_KEY_TIMESTAMP, new Date().getTime().toString());
+      }
+      
+      // Map and return the top 5 for the sidebar
+      return validArticles.slice(0, 5).map((article: any) => ({
+        ...article,
+        readers: Math.floor(Math.random() * 5000) + 1000,
+      }));
+
+    } catch (error) {
+      console.error("Failed to fetch sidebar news:", error);
+      return []; // Return empty on error
+    }
+  };
+
+
   useEffect(() => {
     const loadData = async () => {
-      if (!user?.id) return;
+      if (!user?.id) {
+          setLoading(false);
+          return;
+      };
       
       try {
         setLoading(true);
         
-        // Load data in parallel, but only fetch connections for non-institution users
-        const news = await fetchTopHealthcareNews();
-        setTopNews(news);
+        // Load data in parallel
+        const newsPromise = fetchTopHealthcareNews();
+        const connectionsPromise = isInstitution ? Promise.resolve([]) : getSuggestedConnections(user.id, 3);
         
-        if (!isInstitution) {
-          const connections = await getSuggestedConnections(user.id, 3);
-          setSuggestedConnections(connections);
-        }
+        const [news, connections] = await Promise.all([newsPromise, connectionsPromise]);
+        
+        setTopNews(news);
+        setSuggestedConnections(connections);
+
       } catch (error) {
         console.error('Error loading right sidebar data:', error);
       } finally {
@@ -57,88 +130,6 @@ export default function RightSidebar({ connectionCount = 0, isInstitution = fals
 
     loadData();
   }, [user?.id, isInstitution]);
-
-  const fetchTopHealthcareNews = async (): Promise<NewsItem[]> => {
-    try {
-      // Check if we have a valid API key
-      const apiKey = process.env.NEXT_PUBLIC_NEWS_API_KEY;
-      if (!apiKey || apiKey === 'demo' || apiKey === 'your_news_api_key_here') {
-        // Use demo data if no valid API key
-        return getDemoHealthcareNews();
-      }
-
-      // Using NewsAPI.org for healthcare news
-      const response = await fetch(
-        `https://newsapi.org/v2/everything?q=healthcare+medical&language=en&sortBy=publishedAt&pageSize=5&apiKey=${apiKey}`
-      );
-      
-      if (!response.ok) {
-        return getDemoHealthcareNews();
-      }
-      
-      const data = await response.json();
-      
-      if (data.articles && data.articles.length > 0) {
-        return data.articles.map((article: any, index: number) => ({
-          title: article.title,
-          description: article.description || article.content?.substring(0, 100) + '...' || 'No description available',
-          url: article.url,
-          publishedAt: article.publishedAt,
-          source: article.source?.name || 'Unknown Source',
-          readers: Math.floor(Math.random() * 50000) + 1000 // Random reader count for demo
-        }));
-      }
-      
-      return getDemoHealthcareNews();
-    } catch (error) {
-      return getDemoHealthcareNews();
-    }
-  };
-
-  const getDemoHealthcareNews = (): NewsItem[] => {
-    return [
-      {
-        title: "OpenAI to launch first India office",
-        description: "AI company expands global presence with new office in India",
-        url: "#",
-        publishedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        source: "Tech News",
-        readers: 71350
-      },
-      {
-        title: "Benefits or pay - what matters more to employees",
-        description: "New study reveals employee preferences in compensation packages",
-        url: "#",
-        publishedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        source: "HR News",
-        readers: 4844
-      },
-      {
-        title: "AI-focused upskilling surges in healthcare",
-        description: "Healthcare professionals increasingly seek AI training",
-        url: "#",
-        publishedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        source: "Healthcare News",
-        readers: 2392
-      },
-      {
-        title: "Real estate eyes bumper sales in Q4",
-        description: "Property market shows strong recovery signs",
-        url: "#",
-        publishedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        source: "Real Estate News",
-        readers: 1503
-      },
-      {
-        title: "Global beauty brands bet on India market",
-        description: "International beauty companies expand Indian operations",
-        url: "#",
-        publishedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-        source: "Business News",
-        readers: 1164
-      }
-    ];
-  };
 
   const formatTimeAgo = (dateString: string): string => {
     const date = new Date(dateString);
@@ -179,10 +170,10 @@ export default function RightSidebar({ connectionCount = 0, isInstitution = fals
         {[1, 2].map((i) => (
           <div key={i} className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
             <div className="animate-pulse">
-              <div className="h-6 bg-gray-200 rounded mb-4"></div>
-              <div className="space-y-3">
+              <div className="h-5 bg-gray-200 rounded w-1/3 mb-6"></div>
+              <div className="space-y-4">
                 {[1, 2, 3].map((j) => (
-                  <div key={j} className="h-4 bg-gray-200 rounded"></div>
+                  <div key={j} className="h-8 bg-gray-200 rounded"></div>
                 ))}
               </div>
             </div>
@@ -208,30 +199,28 @@ export default function RightSidebar({ connectionCount = 0, isInstitution = fals
         {topNews.length > 0 ? (
           <div className="space-y-3">
             {topNews.map((news, index) => (
-              <div 
+              <a 
                 key={index} 
-                className="group cursor-pointer"
-                onClick={() => window.open(news.url, '_blank')}
+                href={news.url} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="group block p-2 hover:bg-gray-50 rounded-lg transition-all duration-200"
               >
-                <div className="p-2 hover:bg-gray-50 rounded-lg transition-all duration-200">
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-xs font-medium text-gray-900 group-hover:text-azure-600 transition-colors line-clamp-2 mb-1">
-                      {news.title}
-                    </h4>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-500">
-                        {formatTimeAgo(news.publishedAt)}
-                      </span>
-                      <span className="text-xs text-gray-400">
-                        {formatNumber(news.readers)} readers
-                      </span>
-                    </div>
-                  </div>
+                <h4 className="text-xs font-medium text-gray-900 group-hover:text-[#007fff] transition-colors line-clamp-2 mb-1">
+                  {news.title}
+                </h4>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-500">
+                    {formatTimeAgo(news.publishedAt)}
+                  </span>
+                  <span className="text-xs text-gray-400">
+                    {formatNumber(news.readers)} readers
+                  </span>
                 </div>
-              </div>
+              </a>
             ))}
             <div className="pt-2">
-              <Link href="/news" className="text-xs text-azure-500 hover:text-azure-600 font-medium">
+              <Link href="/news" className="text-xs text-[#007fff] hover:text-[#007fff]/80 font-medium">
                 Show more
               </Link>
             </div>
@@ -251,7 +240,7 @@ export default function RightSidebar({ connectionCount = 0, isInstitution = fals
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-gray-900">People You May Know</h3>
-            <Link href="/network" className="text-xs text-azure-500 hover:text-azure-600 font-medium">
+            <Link href="/network" className="text-xs text-[#007fff] hover:text-[#007fff]/80 font-medium">
               See all
             </Link>
           </div>
@@ -260,7 +249,7 @@ export default function RightSidebar({ connectionCount = 0, isInstitution = fals
             <div className="space-y-3">
               {suggestedConnections.map((connection) => (
                 <Link key={connection.id} href={`/profile/${connection.id}`} className="block">
-                  <div className="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all duration-200 cursor-pointer">
+                  <div className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 transition-all duration-200 cursor-pointer">
                     <Avatar
                       src={connection.avatar_url}
                       name={connection.full_name || 'User'}
@@ -280,8 +269,9 @@ export default function RightSidebar({ connectionCount = 0, isInstitution = fals
                         e.stopPropagation();
                         handleConnect(connection.id);
                       }}
-                      disabled={connectingUsers.has(connection.id)}
-                      className="text-xs font-medium text-azure-500 hover:text-azure-600 bg-white px-2 py-1 rounded-lg border border-azure-200 hover:border-azure-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+
+                      className="text-xs font-medium text-[#007fff] hover:text-[#007fff]/80 bg-white px-2 py-1 rounded-lg border border-gray-200 hover:border-gray-300 transition-all duration-200"
+
                     >
                       {connectingUsers.has(connection.id) ? 'Connecting...' : 'Connect'}
                     </button>
@@ -302,4 +292,4 @@ export default function RightSidebar({ connectionCount = 0, isInstitution = fals
       )}
     </div>
   );
-} 
+}
