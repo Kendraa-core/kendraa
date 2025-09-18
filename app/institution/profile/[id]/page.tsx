@@ -318,114 +318,163 @@ const AboutCard: React.FC<AboutCardProps> = ({ profile, institution, isOwnProfil
         )}
       </div>
       <div className={COMPONENTS.card.content}>
-        <div className="space-y-6">
-          {/* Institution Description */}
-          {institution?.description && (
-            <div>
-              <p className="text-gray-600 leading-relaxed">{institution.description}</p>
-            </div>
-          )}
+        {/* Institution Description - Full Width */}
+        {institution?.description && (
+          <div className="mb-8">
+            <p className="text-gray-600 leading-relaxed text-lg">{institution.description}</p>
+          </div>
+        )}
 
-          {/* Institution Type */}
-          {institution?.type && (
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-2 flex items-center">
-                <BuildingOfficeIcon className="w-4 h-4 mr-2 text-gray-400" />
-                Institution Type
-              </h3>
-              <p className="text-gray-600">{formatInstitutionType(institution.type)}</p>
-            </div>
-          )}
-
-          {/* Institution Size */}
-          {institution?.size && (
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-2 flex items-center">
-                <UserGroupIcon className="w-4 h-4 mr-2 text-gray-400" />
-                Institution Size
-              </h3>
-              <p className="text-gray-600">{formatInstitutionSize(institution.size)}</p>
-            </div>
-          )}
-
-          {/* Established Year */}
-          {institution?.established_year && (
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-2 flex items-center">
-                <CalendarIcon className="w-4 h-4 mr-2 text-gray-400" />
-                Established
-              </h3>
-              <p className="text-gray-600">{institution.established_year}</p>
-            </div>
-          )}
-
-          {/* Location */}
-          {institution?.location && (
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-2 flex items-center">
-                <MapPinIcon className="w-4 h-4 mr-2 text-gray-400" />
-                Location
-              </h3>
-              <p className="text-gray-600">{institution.location}</p>
-            </div>
-          )}
-
-          {/* Website */}
-          {institution?.website && (
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-2 flex items-center">
-                <GlobeAltIcon className="w-4 h-4 mr-2 text-gray-400" />
-                Website
-              </h3>
-              <a 
-                href={institution.website} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-[#007fff] hover:text-[#007fff]/80 transition-colors"
-              >
-                {institution.website}
-              </a>
-            </div>
-          )}
-
-          {/* Contact Information */}
-          {(institution?.email || institution?.phone) && (
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-2 flex items-center">
-                <EnvelopeIcon className="w-4 h-4 mr-2 text-gray-400" />
-                Contact Information
-              </h3>
-              <div className="space-y-2">
-                {institution.email && (
-                  <div className="flex items-center text-gray-600">
-                    <EnvelopeIcon className="w-4 h-4 mr-2 text-gray-400" />
-                    <a href={`mailto:${institution.email}`} className="hover:text-[#007fff] transition-colors">
-                      {institution.email}
-                    </a>
+        {/* Grid Layout for Institution Details */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Left Column */}
+          <div className="space-y-6">
+            {/* Institution Type */}
+            {institution?.type && (
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
+                <div className="flex items-center mb-3">
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                    <BuildingOfficeIcon className="w-5 h-5 text-blue-600" />
                   </div>
-                )}
-                {institution.phone && (
-                  <div className="flex items-center text-gray-600">
-                    <PhoneIcon className="w-4 h-4 mr-2 text-gray-400" />
-                    <a href={`tel:${institution.phone}`} className="hover:text-[#007fff] transition-colors">
-                      {institution.phone}
-                    </a>
-                  </div>
-                )}
+                  <h3 className="font-semibold text-gray-900">Institution Type</h3>
+                </div>
+                <p className="text-gray-700 font-medium">{formatInstitutionType(institution.type)}</p>
               </div>
-            </div>
-          )}
+            )}
 
+            {/* Institution Size */}
+            {institution?.size && (
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 border border-green-100">
+                <div className="flex items-center mb-3">
+                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                    <UserGroupIcon className="w-5 h-5 text-green-600" />
+                  </div>
+                  <h3 className="font-semibold text-gray-900">Institution Size</h3>
+                </div>
+                <p className="text-gray-700 font-medium">{formatInstitutionSize(institution.size)}</p>
+              </div>
+            )}
+
+            {/* Established Year */}
+            {institution?.established_year && (
+              <div className="bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl p-4 border border-purple-100">
+                <div className="flex items-center mb-3">
+                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                    <CalendarIcon className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <h3 className="font-semibold text-gray-900">Established</h3>
+                </div>
+                <p className="text-gray-700 font-medium">{institution.established_year}</p>
+              </div>
+            )}
+
+            {/* Location */}
+            {institution?.location && (
+              <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl p-4 border border-orange-100">
+                <div className="flex items-center mb-3">
+                  <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                    <MapPinIcon className="w-5 h-5 text-orange-600" />
+                  </div>
+                  <h3 className="font-semibold text-gray-900">Location</h3>
+                </div>
+                <p className="text-gray-700 font-medium">{institution.location}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Right Column */}
+          <div className="space-y-6">
+            {/* Website */}
+            {institution?.website && (
+              <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl p-4 border border-cyan-100">
+                <div className="flex items-center mb-3">
+                  <div className="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center mr-3">
+                    <GlobeAltIcon className="w-5 h-5 text-cyan-600" />
+                  </div>
+                  <h3 className="font-semibold text-gray-900">Website</h3>
+                </div>
+                <a 
+                  href={institution.website} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-[#007fff] hover:text-[#007fff]/80 transition-colors font-medium break-all"
+                >
+                  {institution.website}
+                </a>
+              </div>
+            )}
+
+            {/* Contact Information */}
+            {(institution?.email || institution?.phone) && (
+              <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl p-4 border border-pink-100">
+                <div className="flex items-center mb-3">
+                  <div className="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center mr-3">
+                    <EnvelopeIcon className="w-5 h-5 text-pink-600" />
+                  </div>
+                  <h3 className="font-semibold text-gray-900">Contact Information</h3>
+                </div>
+                <div className="space-y-2">
+                  {institution.email && (
+                    <div className="flex items-center">
+                      <EnvelopeIcon className="w-4 h-4 mr-2 text-gray-400" />
+                      <a href={`mailto:${institution.email}`} className="text-[#007fff] hover:text-[#007fff]/80 transition-colors font-medium">
+                        {institution.email}
+                      </a>
+                    </div>
+                  )}
+                  {institution.phone && (
+                    <div className="flex items-center">
+                      <PhoneIcon className="w-4 h-4 mr-2 text-gray-400" />
+                      <a href={`tel:${institution.phone}`} className="text-[#007fff] hover:text-[#007fff]/80 transition-colors font-medium">
+                        {institution.phone}
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Verification Status */}
+            {institution?.verified !== undefined && (
+              <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl p-4 border border-emerald-100">
+                <div className="flex items-center mb-3">
+                  <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center mr-3">
+                    <CheckBadgeIcon className="w-5 h-5 text-emerald-600" />
+                  </div>
+                  <h3 className="font-semibold text-gray-900">Verification Status</h3>
+                </div>
+                <div className="flex items-center">
+                  {institution.verified ? (
+                    <span className="inline-flex items-center px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                      <CheckIcon className="w-4 h-4 mr-1" />
+                      Verified Institution
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-medium">
+                      <ClockIcon className="w-4 h-4 mr-1" />
+                      Pending Verification
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Specialties and Accreditation - Full Width */}
+        <div className="mt-8 space-y-6">
           {/* Specialties */}
           {institution?.specialties && institution.specialties.length > 0 && (
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-2 flex items-center">
-                <AcademicCapIcon className="w-4 h-4 mr-2 text-gray-400" />
-                Specialties
-              </h3>
-              <div className="flex flex-wrap gap-2">
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
+              <div className="flex items-center mb-4">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                  <AcademicCapIcon className="w-5 h-5 text-blue-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900 text-lg">Specialties</h3>
+              </div>
+              <div className="flex flex-wrap gap-3">
                 {institution.specialties.map((specialty, index) => (
-                  <span key={index} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+                  <span key={index} className="px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors">
                     {specialty}
                   </span>
                 ))}
@@ -435,40 +484,19 @@ const AboutCard: React.FC<AboutCardProps> = ({ profile, institution, isOwnProfil
 
           {/* Accreditation */}
           {institution?.accreditation && institution.accreditation.length > 0 && (
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-2 flex items-center">
-                <CheckBadgeIcon className="w-4 h-4 mr-2 text-gray-400" />
-                Accreditation
-              </h3>
-              <div className="flex flex-wrap gap-2">
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-100">
+              <div className="flex items-center mb-4">
+                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                  <CheckBadgeIcon className="w-5 h-5 text-green-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900 text-lg">Accreditation</h3>
+              </div>
+              <div className="flex flex-wrap gap-3">
                 {institution.accreditation.map((accred, index) => (
-                  <span key={index} className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                  <span key={index} className="px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-medium hover:bg-green-200 transition-colors">
                     {accred}
                   </span>
                 ))}
-              </div>
-            </div>
-          )}
-
-          {/* Verification Status */}
-          {institution?.verified !== undefined && (
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-2 flex items-center">
-                <CheckBadgeIcon className="w-4 h-4 mr-2 text-gray-400" />
-                Verification Status
-              </h3>
-              <div className="flex items-center">
-                {institution.verified ? (
-                  <span className="inline-flex items-center px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
-                    <CheckIcon className="w-4 h-4 mr-1" />
-                    Verified Institution
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-medium">
-                    <ClockIcon className="w-4 h-4 mr-1" />
-                    Pending Verification
-                  </span>
-                )}
               </div>
             </div>
           )}
@@ -761,56 +789,58 @@ export default function PublicInstitutionProfilePage() {
                     </div>
                   </div>
                   
-                  {/* Right Side: Action Buttons */}
-                  <div className="flex flex-col gap-3 min-w-[320px]">
-                    {user ? (
-                      <div className="space-y-3">
-                        {!canSendRequests ? (
-                          <div className="w-full px-6 py-3 bg-gray-100 text-gray-600 rounded-xl font-semibold text-center">
-                            <XCircleIcon className="w-4 h-4 inline mr-2" />
-                            Institutions Cannot Follow Other Institutions
-                          </div>
-                        ) : followStatus === 'following' ? (
-                          <button
-                            onClick={handleUnfollow}
-                            className="w-full px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-semibold"
-                          >
-                            <CheckIcon className="w-4 h-4 inline mr-2" />
-                            Following
+                  {/* Right Side: Action Buttons - Only show for other users */}
+                  {!isOwnProfile && (
+                    <div className="flex flex-col gap-3 min-w-[320px]">
+                      {user ? (
+                        <div className="space-y-3">
+                          {!canSendRequests ? (
+                            <div className="w-full px-6 py-3 bg-gray-100 text-gray-600 rounded-xl font-semibold text-center">
+                              <XCircleIcon className="w-4 h-4 inline mr-2" />
+                              Institutions Cannot Follow Other Institutions
+                            </div>
+                          ) : followStatus === 'following' ? (
+                            <button
+                              onClick={handleUnfollow}
+                              className="w-full px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-semibold"
+                            >
+                              <CheckIcon className="w-4 h-4 inline mr-2" />
+                              Following
+                            </button>
+                          ) : (
+                            <button
+                              onClick={handleFollow}
+                              className="w-full px-6 py-3 bg-gradient-to-r from-[#007fff] to-[#00a8ff] text-white rounded-xl hover:from-[#007fff]/90 hover:to-[#00a8ff]/90 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                            >
+                              <PlusIcon className="w-4 h-4 inline mr-2" />
+                              Follow Institution
+                            </button>
+                          )}
+                          <button className="w-full px-6 py-3 bg-white text-[#007fff] border-2 border-[#007fff] rounded-xl hover:bg-[#007fff]/5 transition-all duration-200 font-semibold transform hover:scale-[1.02] hover:border-[#007fff]/80">
+                            <ShareIcon className="w-4 h-4 inline mr-2" />
+                            Share
                           </button>
-                        ) : (
-                          <button
-                            onClick={handleFollow}
-                            className="w-full px-6 py-3 bg-gradient-to-r from-[#007fff] to-[#00a8ff] text-white rounded-xl hover:from-[#007fff]/90 hover:to-[#00a8ff]/90 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <Link
+                            href="/signin"
+                            className="w-full inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-[#007fff] to-[#00a8ff] text-white rounded-xl hover:from-[#007fff]/90 hover:to-[#00a8ff]/90 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
                           >
-                            <PlusIcon className="w-4 h-4 inline mr-2" />
-                            Follow Institution
-                          </button>
-                        )}
-                        <button className="w-full px-6 py-3 bg-white text-[#007fff] border-2 border-[#007fff] rounded-xl hover:bg-[#007fff]/5 transition-all duration-200 font-semibold transform hover:scale-[1.02] hover:border-[#007fff]/80">
-                          <ShareIcon className="w-4 h-4 inline mr-2" />
-                          Share
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        <Link
-                          href="/signin"
-                          className="w-full inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-[#007fff] to-[#00a8ff] text-white rounded-xl hover:from-[#007fff]/90 hover:to-[#00a8ff]/90 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
-                        >
-                          <PlusIcon className="w-4 h-4 mr-2" />
-                          Sign In to Follow
-                        </Link>
-                        <Link
-                          href="/signin"
-                          className="w-full inline-flex items-center justify-center px-6 py-3 bg-white text-[#007fff] border-2 border-[#007fff] rounded-xl hover:bg-[#007fff]/5 transition-all duration-200 font-semibold transform hover:scale-[1.02] hover:border-[#007fff]/80"
-                        >
-                          <EnvelopeIcon className="w-4 h-4 mr-2" />
-                          Message
-                        </Link>
-                      </div>
-                    )}
-                  </div>
+                            <PlusIcon className="w-4 h-4 mr-2" />
+                            Sign In to Follow
+                          </Link>
+                          <Link
+                            href="/signin"
+                            className="w-full inline-flex items-center justify-center px-6 py-3 bg-white text-[#007fff] border-2 border-[#007fff] rounded-xl hover:bg-[#007fff]/5 transition-all duration-200 font-semibold transform hover:scale-[1.02] hover:border-[#007fff]/80"
+                          >
+                            <EnvelopeIcon className="w-4 h-4 mr-2" />
+                            Message
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             
