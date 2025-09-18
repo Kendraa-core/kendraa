@@ -73,7 +73,7 @@ export default function EventsPage() {
   const [events, setEvents] = useState<EventWithRegistration[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<EventWithRegistration | null>(null);
-  const [activeTab, setActiveTab] = useState<'upcoming' | 'registered' | 'my-events'>('upcoming');
+  const [activeTab, setActiveTab] = useState<'upcoming' | 'registered' | 'my-events' | 'past' | 'favorites'>('upcoming');
   const [selectedType, setSelectedType] = useState<string>('all');
   const [selectedFormat, setSelectedFormat] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -102,17 +102,31 @@ export default function EventsPage() {
         } else if (activeTab === 'my-events') {
           allEvents = await getEventsByOrganizer(user.id);
         } else {
+          // For upcoming, past, and favorites, get all events
           allEvents = await getEvents();
         }
         
         const eventsWithOrganizers = await fetchOrganizerInfo(allEvents);
         
-        // Filter out ended events (completed/cancelled) from the default "upcoming" tab
+        // Filter events based on current date and active tab
         let filteredEvents = eventsWithOrganizers;
+        const currentDate = new Date();
+        
         if (activeTab === 'upcoming') {
-          filteredEvents = eventsWithOrganizers.filter(event => 
-            event.status === 'upcoming' || event.status === 'ongoing'
-          );
+          // Show only upcoming/ongoing events that haven't ended yet
+          filteredEvents = eventsWithOrganizers.filter(event => {
+            const eventEndDate = new Date(event.end_date);
+            return (event.status === 'upcoming' || event.status === 'ongoing') && eventEndDate > currentDate;
+          });
+        } else if (activeTab === 'past') {
+          // Show only past events that have ended or are completed
+          filteredEvents = eventsWithOrganizers.filter(event => {
+            const eventEndDate = new Date(event.end_date);
+            return eventEndDate <= currentDate || event.status === 'completed' || event.status === 'cancelled';
+          });
+        } else if (activeTab === 'favorites') {
+          // Show only liked events
+          filteredEvents = eventsWithOrganizers.filter(event => likedEvents.has(event.id));
         }
         
         if (activeTab !== 'my-events') {
@@ -319,12 +333,25 @@ export default function EventsPage() {
     let displayEvents: EventWithRegistration[] = [];
     
     // Get base events based on active tab
+    const currentDate = new Date();
+    
     if (activeTab === 'registered') {
       displayEvents = events.filter(event => event.isRegistered);
     } else if (activeTab === 'my-events') {
       displayEvents = events.filter(e => e.organizer_id === user?.id);
+    } else if (activeTab === 'past') {
+      displayEvents = events.filter(event => {
+        const eventEndDate = new Date(event.end_date);
+        return eventEndDate <= currentDate || event.status === 'completed' || event.status === 'cancelled';
+      });
+    } else if (activeTab === 'favorites') {
+      displayEvents = events.filter(event => likedEvents.has(event.id));
     } else {
-      displayEvents = events;
+      // upcoming tab - filter by date and status
+      displayEvents = events.filter(event => {
+        const eventEndDate = new Date(event.end_date);
+        return (event.status === 'upcoming' || event.status === 'ongoing') && eventEndDate > currentDate;
+      });
     }
 
     // Apply search filter
@@ -418,41 +445,84 @@ export default function EventsPage() {
               <div className="p-6">
                 <h3 className={`${TYPOGRAPHY.heading.h3} mb-4`}>Manage my events</h3>
                 
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between py-2">
-                    <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary}`}>My Events</span>
+                <div className="space-y-1">
+                  <button
+                    onClick={() => setActiveTab('my-events')}
+                    className={`w-full flex items-center justify-between py-3 px-3 rounded-lg transition-colors ${
+                      activeTab === 'my-events'
+                        ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                        : 'hover:bg-gray-50 text-gray-700'
+                    }`}
+                  >
+                    <span className={`${TYPOGRAPHY.body.medium}`}>My Events</span>
                     <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
                       {events.filter(e => e.organizer_id === user?.id).length}
                     </span>
-                  </div>
+                  </button>
                   
-                  <div className="flex items-center justify-between py-2">
-                    <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary}`}>Registered Events</span>
+                  <button
+                    onClick={() => setActiveTab('registered')}
+                    className={`w-full flex items-center justify-between py-3 px-3 rounded-lg transition-colors ${
+                      activeTab === 'registered'
+                        ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                        : 'hover:bg-gray-50 text-gray-700'
+                    }`}
+                  >
+                    <span className={`${TYPOGRAPHY.body.medium}`}>Registered Events</span>
                     <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
                       {events.filter(e => e.isRegistered).length}
                     </span>
-                  </div>
+                  </button>
                   
-                  <div className="flex items-center justify-between py-2">
-                    <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary}`}>Upcoming Events</span>
+                  <button
+                    onClick={() => setActiveTab('upcoming')}
+                    className={`w-full flex items-center justify-between py-3 px-3 rounded-lg transition-colors ${
+                      activeTab === 'upcoming'
+                        ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                        : 'hover:bg-gray-50 text-gray-700'
+                    }`}
+                  >
+                    <span className={`${TYPOGRAPHY.body.medium}`}>Upcoming Events</span>
                     <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
-                      {events.filter(e => e.status === 'upcoming' || e.status === 'ongoing').length}
+                      {events.filter(e => {
+                        const eventEndDate = new Date(e.end_date);
+                        const currentDate = new Date();
+                        return (e.status === 'upcoming' || e.status === 'ongoing') && eventEndDate > currentDate;
+                      }).length}
                     </span>
-                  </div>
+                  </button>
                   
-                  <div className="flex items-center justify-between py-2">
-                    <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary}`}>Past Events</span>
+                  <button
+                    onClick={() => setActiveTab('past')}
+                    className={`w-full flex items-center justify-between py-3 px-3 rounded-lg transition-colors ${
+                      activeTab === 'past'
+                        ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                        : 'hover:bg-gray-50 text-gray-700'
+                    }`}
+                  >
+                    <span className={`${TYPOGRAPHY.body.medium}`}>Past Events</span>
                     <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
-                      {events.filter(e => e.status === 'completed' || e.status === 'cancelled').length}
+                      {events.filter(e => {
+                        const eventEndDate = new Date(e.end_date);
+                        const currentDate = new Date();
+                        return eventEndDate <= currentDate || e.status === 'completed' || e.status === 'cancelled';
+                      }).length}
                     </span>
-                  </div>
+                  </button>
                   
-                  <div className="flex items-center justify-between py-2">
-                    <span className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.primary}`}>Favorites</span>
+                  <button
+                    onClick={() => setActiveTab('favorites')}
+                    className={`w-full flex items-center justify-between py-3 px-3 rounded-lg transition-colors ${
+                      activeTab === 'favorites'
+                        ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                        : 'hover:bg-gray-50 text-gray-700'
+                    }`}
+                  >
+                    <span className={`${TYPOGRAPHY.body.medium}`}>Favorites</span>
                     <span className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
                       {likedEvents.size}
                     </span>
-                  </div>
+                  </button>
                 </div>
                 
                 <div className="mt-6 pt-6 border-t border-gray-200">
