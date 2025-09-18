@@ -29,7 +29,10 @@ import {
   StarIcon,
   MapPinIcon,
   EnvelopeIcon,
-  PhoneIcon
+  PhoneIcon,
+  RocketLaunchIcon,
+  EyeIcon,
+  HandRaisedIcon
 } from '@heroicons/react/24/outline';
 
 export default function LandingPage() {
@@ -95,14 +98,14 @@ export default function LandingPage() {
               <Link href="#features" className="text-gray-600 hover:text-[#007fff] transition-colors font-medium">
                 Features
               </Link>
-              <Link href="#specialties" className="text-gray-600 hover:text-[#007fff] transition-colors font-medium">
-                Specialties
+              <Link href="#vision" className="text-gray-600 hover:text-[#007fff] transition-colors font-medium">
+                Our Vision
               </Link>
-              <Link href="#about" className="text-gray-600 hover:text-[#007fff] transition-colors font-medium">
-                About
+              <Link href="#roadmap" className="text-gray-600 hover:text-[#007fff] transition-colors font-medium">
+                Roadmap
               </Link>
               <Link href="/about" className="text-gray-600 hover:text-[#007fff] transition-colors font-medium">
-                Contact
+                About
               </Link>
             </div>
             <div className="flex items-center space-x-3">
@@ -116,7 +119,7 @@ export default function LandingPage() {
                 href="/signup"
                 className="bg-[#007fff] text-white px-6 py-2 rounded-full hover:bg-[#007fff]/90 transition-all duration-300 font-medium shadow-lg hover:shadow-xl"
               >
-                Join Kendraa
+                Join Early Access
               </Link>
             </div>
           </div>
@@ -142,59 +145,66 @@ export default function LandingPage() {
               >
                 <div className="mb-6">
                   <span className="inline-flex items-center px-4 py-2 bg-[#007fff]/10 text-[#007fff] rounded-full text-sm font-medium mb-6">
-                    🏥 Royal Network for Healthcare Professionals
+                    🚀 Early Access • Building the Future of Healthcare Networking
                   </span>
                 </div>
                 
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                  Connect. <span className="text-[#007fff]">Collaborate.</span><br />
+                  The Healthcare Network
+                  <span className="text-[#007fff]"> We're Building</span><br />
                   <span className="bg-gradient-to-r from-[#007fff] to-purple-600 bg-clip-text text-transparent">
-                    Advance Healthcare.
+                    Together
                   </span>
                 </h1>
                 
                 <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto lg:mx-0">
-                  Join the premier networking platform designed exclusively for healthcare professionals. 
-                  Connect with peers, discover opportunities, and advance your medical career.
+                  Join us in creating the premier networking platform for healthcare professionals. 
+                  Be among the first to shape the future of medical collaboration and career advancement.
                 </p>
                 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                   <Link
                     href="/signup"
-                    className="bg-[#007fff] hover:bg-[#007fff]/90 text-white px-8 py-3 rounded-full font-semibold transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
+                    className="bg-[#007fff] hover:bg-[#007fff]/90 text-white px-8 py-3 rounded-full font-semibold transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl inline-flex items-center justify-center"
                   >
-                    Start Networking Today
+                    <RocketLaunchIcon className="w-5 h-5 mr-2" />
+                    Join Early Access
                   </Link>
                   <Link
-                    href="/about"
-                    className="border-2 border-[#007fff] text-[#007fff] hover:bg-[#007fff]/5 px-8 py-3 rounded-full font-semibold transition-all duration-300"
+                    href="#vision"
+                    className="border-2 border-[#007fff] text-[#007fff] hover:bg-[#007fff]/5 px-8 py-3 rounded-full font-semibold transition-all duration-300 inline-flex items-center justify-center"
                   >
-                    Learn More
+                    <EyeIcon className="w-5 h-5 mr-2" />
+                    See Our Vision
                   </Link>
                 </div>
                 
-                {/* Trust Indicators */}
+                {/* Early Access Benefits */}
                 <div className="mt-12 pt-8 border-t border-gray-200">
-                  <p className="text-sm text-gray-500 mb-4">Trusted by healthcare professionals worldwide</p>
-                  <div className="flex items-center justify-center lg:justify-start space-x-8 text-gray-500">
+                  <p className="text-sm text-gray-500 mb-4">Early Access Benefits</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                     <div className="flex items-center space-x-2">
-                      <span className="font-semibold text-[#007fff]">50K+</span>
-                      <span className="text-sm">Medical Professionals</span>
+                      <CheckCircleIcon className="w-4 h-4 text-green-500" />
+                      <span className="text-gray-600">Shape product development</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <span className="font-semibold text-[#007fff]">500+</span>
-                      <span className="text-sm">Healthcare Institutions</span>
+                      <CheckCircleIcon className="w-4 h-4 text-green-500" />
+                      <span className="text-gray-600">Lifetime premium features</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <span className="font-semibold text-[#007fff]">23+</span>
-                      <span className="text-sm">Medical Specialties</span>
+                      <CheckCircleIcon className="w-4 h-4 text-green-500" />
+                      <span className="text-gray-600">Direct founder access</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <CheckCircleIcon className="w-4 h-4 text-green-500" />
+                      <span className="text-gray-600">Beta feature previews</span>
                     </div>
                   </div>
                 </div>
               </motion.div>
             </div>
             
-            {/* Hero Illustration */}
+            {/* Vision Illustration */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -203,30 +213,40 @@ export default function LandingPage() {
             >
               <Card className="overflow-hidden shadow-2xl border-0 bg-gradient-to-br from-white to-blue-50">
                 <div className="p-8 text-center">
-                  <div className="grid grid-cols-2 gap-6 mb-8">
-                    <div className="bg-[#007fff]/10 rounded-2xl p-6">
-                      <UsersIcon className="w-8 h-8 text-[#007fff] mx-auto mb-2" />
-                      <div className="text-2xl font-bold text-gray-900">50K+</div>
-                      <div className="text-sm text-gray-600">Professionals</div>
+                  <div className="mb-6">
+                    <div className="w-20 h-20 bg-[#007fff]/10 rounded-3xl flex items-center justify-center mx-auto mb-4">
+                      <HeartIcon className="w-10 h-10 text-[#007fff]" />
                     </div>
-                    <div className="bg-purple-100 rounded-2xl p-6">
-                      <BuildingOfficeIcon className="w-8 h-8 text-purple-600 mx-auto mb-2" />
-                      <div className="text-2xl font-bold text-gray-900">500+</div>
-                      <div className="text-sm text-gray-600">Institutions</div>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">Our Mission</h3>
+                    <p className="text-gray-600">Connecting healthcare professionals to advance medicine and improve patient care worldwide</p>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="bg-[#007fff]/5 rounded-xl p-4">
+                      <UsersIcon className="w-6 h-6 text-[#007fff] mx-auto mb-2" />
+                      <div className="text-sm font-medium text-gray-900">Professional</div>
+                      <div className="text-xs text-gray-600">Networking</div>
                     </div>
-                    <div className="bg-green-100 rounded-2xl p-6">
-                      <AcademicCapIcon className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                      <div className="text-2xl font-bold text-gray-900">23+</div>
-                      <div className="text-sm text-gray-600">Specialties</div>
+                    <div className="bg-purple-50 rounded-xl p-4">
+                      <AcademicCapIcon className="w-6 h-6 text-purple-600 mx-auto mb-2" />
+                      <div className="text-sm font-medium text-gray-900">Knowledge</div>
+                      <div className="text-xs text-gray-600">Sharing</div>
                     </div>
-                    <div className="bg-orange-100 rounded-2xl p-6">
-                      <HeartIcon className="w-8 h-8 text-orange-600 mx-auto mb-2" />
-                      <div className="text-2xl font-bold text-gray-900">99.9%</div>
-                      <div className="text-sm text-gray-600">Uptime</div>
+                    <div className="bg-green-50 rounded-xl p-4">
+                      <BriefcaseIcon className="w-6 h-6 text-green-600 mx-auto mb-2" />
+                      <div className="text-sm font-medium text-gray-900">Career</div>
+                      <div className="text-xs text-gray-600">Growth</div>
+                    </div>
+                    <div className="bg-orange-50 rounded-xl p-4">
+                      <BeakerIcon className="w-6 h-6 text-orange-600 mx-auto mb-2" />
+                      <div className="text-sm font-medium text-gray-900">Research</div>
+                      <div className="text-xs text-gray-600">Collaboration</div>
                     </div>
                   </div>
-                  <div className="text-lg font-semibold text-gray-800 mb-2">Healthcare Innovation Award</div>
-                  <div className="text-sm text-gray-600">Best Professional Network 2024</div>
+                  
+                  <div className="text-sm text-gray-600 italic">
+                    "Building something meaningful takes time. Join us on this journey."
+                  </div>
                 </div>
               </Card>
               
@@ -249,15 +269,15 @@ export default function LandingPage() {
             className="text-center mb-16"
           >
             <span className="inline-flex items-center px-4 py-2 bg-[#007fff]/10 text-[#007fff] rounded-full text-sm font-medium mb-4">
-              ✨ Platform Features
+              🛠️ What We're Building
             </span>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Everything You Need for
-              <span className="text-[#007fff]"> Professional Growth</span>
+              Features Designed for
+              <span className="text-[#007fff]"> Healthcare Professionals</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Kendraa provides comprehensive tools and features designed specifically for healthcare professionals 
-              to network, collaborate, and advance their careers.
+              We're creating comprehensive tools specifically for the healthcare industry, 
+              built with input from medical professionals like you.
             </p>
           </motion.div>
 
@@ -266,32 +286,38 @@ export default function LandingPage() {
               {
                 icon: UsersIcon,
                 title: "Professional Networking",
-                description: "Connect with healthcare professionals globally. Build meaningful relationships across 23+ medical specialties."
+                description: "Connect with healthcare professionals across all medical specialties. Build meaningful professional relationships.",
+                status: "In Development"
               },
               {
                 icon: BriefcaseIcon,
-                title: "Career Opportunities",
-                description: "Discover job openings, apply for positions, and advance your medical career with our comprehensive job board."
+                title: "Healthcare Job Board",
+                description: "Specialized job platform for medical positions. Find opportunities that match your expertise and career goals.",
+                status: "Coming Soon"
               },
               {
                 icon: CalendarDaysIcon,
                 title: "Medical Events",
-                description: "Attend conferences, workshops, and CME events. Stay updated with the latest in medical education and research."
+                description: "Discover conferences, CME courses, and medical workshops. Stay updated with continuing education.",
+                status: "Planned"
               },
               {
                 icon: BuildingOfficeIcon,
                 title: "Institution Profiles",
-                description: "Healthcare institutions can showcase their services, post jobs, and connect with qualified professionals."
+                description: "Healthcare institutions can showcase services, post positions, and connect with professionals.",
+                status: "In Development"
               },
               {
                 icon: DevicePhoneMobileIcon,
                 title: "Mobile Experience",
-                description: "Access Kendraa on-the-go with our optimized mobile interface. Network anywhere, anytime."
+                description: "Full mobile app experience for networking on-the-go. Available on iOS and Android.",
+                status: "Coming Soon"
               },
               {
                 icon: ShieldCheckIcon,
-                title: "Privacy & Security",
-                description: "HIPAA compliant platform ensuring your professional data is secure and protected at all times."
+                title: "HIPAA Compliance",
+                description: "Built with healthcare privacy standards in mind. Your professional data stays secure.",
+                status: "Core Feature"
               }
             ].map((feature, index) => (
               <motion.div
@@ -305,6 +331,16 @@ export default function LandingPage() {
                   <CardHeader className="text-center">
                     <div className="w-16 h-16 bg-[#007fff]/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-[#007fff]/20 transition-colors duration-300">
                       <feature.icon className="w-8 h-8 text-[#007fff]" />
+                    </div>
+                    <div className="mb-2">
+                      <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                        feature.status === 'In Development' ? 'bg-yellow-100 text-yellow-800' :
+                        feature.status === 'Coming Soon' ? 'bg-blue-100 text-blue-800' :
+                        feature.status === 'Planned' ? 'bg-gray-100 text-gray-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {feature.status}
+                      </span>
                     </div>
                     <CardTitle className="text-xl text-gray-900 group-hover:text-[#007fff] transition-colors">
                       {feature.title}
@@ -322,76 +358,47 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Specialties Section */}
-      <section id="specialties" className="py-20 bg-gradient-to-br from-gray-50 to-blue-50/30">
+      {/* Vision Section */}
+      <section id="vision" className="py-20 bg-gradient-to-br from-gray-50 to-blue-50/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="text-center mb-16"
           >
-            <span className="inline-flex items-center px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-medium mb-4">
-              🩺 Medical Specialties
+            <span className="inline-flex items-center px-4 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-medium mb-4">
+              🎯 Our Vision
             </span>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Supporting <span className="text-[#007fff]">23+ Medical Specialties</span>
+              Transforming Healthcare Through
+              <span className="text-[#007fff]"> Connection</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Connect with professionals across all major medical specialties and subspecialties.
+              We envision a world where every healthcare professional has access to the network, 
+              knowledge, and opportunities they need to provide the best possible patient care.
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 mb-16">
-            {[
-              "Cardiology", "Neurology", "Oncology", "Pediatrics",
-              "Psychiatry", "Surgery", "Emergency Medicine", "Family Medicine",
-              "Internal Medicine", "Radiology", "Anesthesiology", "Pathology",
-              "Dermatology", "Ophthalmology", "Orthopedics", "OB/GYN",
-              "Endocrinology", "Gastroenterology", "Pulmonology", "Rheumatology",
-              "Urology", "Nephrology", "Infectious Disease", "Physical Medicine"
-            ].map((specialty, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3, delay: index * 0.02 }}
-                viewport={{ once: true }}
-              >
-                <Card className="group hover:shadow-md transition-all duration-300 hover:-translate-y-1 cursor-pointer border-gray-200/50 bg-white/50">
-                  <CardContent className="p-4 text-center">
-                    <span className="text-sm font-medium text-gray-600 group-hover:text-[#007fff] transition-colors">
-                      {specialty}
-                    </span>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* User Types */}
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-8 mb-16">
             {[
               {
-                icon: UserIcon,
-                title: "Medical Professionals",
-                description: "Doctors, nurses, residents, fellows, and medical students",
-                features: ["Professional networking", "Career opportunities", "CME events", "Research collaboration"]
+                icon: GlobeAltIcon,
+                title: "Global Healthcare Network",
+                description: "Breaking down geographical barriers to connect medical professionals worldwide, fostering international collaboration and knowledge exchange."
               },
               {
-                icon: BuildingOfficeIcon,
-                title: "Healthcare Institutions",
-                description: "Hospitals, clinics, research centers, and medical schools",
-                features: ["Talent recruitment", "Institution promotion", "Event hosting", "Professional partnerships"]
+                icon: LightBulbIcon,
+                title: "Knowledge Democratization",
+                description: "Making medical expertise and research accessible to all healthcare professionals, regardless of location or institution size."
               },
               {
-                icon: BeakerIcon,
-                title: "Medical Researchers",
-                description: "Research scientists, principal investigators, and academicians",
-                features: ["Research networking", "Collaboration opportunities", "Publication sharing", "Grant partnerships"]
+                icon: HeartIcon,
+                title: "Better Patient Outcomes",
+                description: "Ultimately improving patient care by enabling better collaboration, knowledge sharing, and professional development among healthcare teams."
               }
-            ].map((type, index) => (
+            ].map((vision, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
@@ -399,21 +406,132 @@ export default function LandingPage() {
                 transition={{ duration: 0.5, delay: index * 0.2 }}
                 viewport={{ once: true }}
               >
-                <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-2 border-gray-200/50 bg-white/80">
-                  <CardContent className="p-8 text-center">
+                <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-2 border-gray-200/50 bg-white/80 text-center h-full">
+                  <CardContent className="p-8">
                     <div className="w-16 h-16 bg-[#007fff]/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-[#007fff]/20 transition-colors duration-300">
-                      <type.icon className="w-8 h-8 text-[#007fff]" />
+                      <vision.icon className="w-8 h-8 text-[#007fff]" />
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-[#007fff] transition-colors">
-                      {type.title}
+                    <h3 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-[#007fff] transition-colors">
+                      {vision.title}
                     </h3>
-                    <p className="text-gray-600 mb-6">
-                      {type.description}
+                    <p className="text-gray-600 leading-relaxed">
+                      {vision.description}
                     </p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Call to Action */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center"
+          >
+            <Card className="inline-block p-8 bg-gradient-to-r from-[#007fff] to-purple-600 border-0 shadow-2xl text-white">
+              <div className="max-w-2xl">
+                <HandRaisedIcon className="w-12 h-12 mx-auto mb-4 opacity-80" />
+                <h3 className="text-2xl font-bold mb-4">Be Part of Something Bigger</h3>
+                <p className="text-white/90 mb-6">
+                  Join our early access community and help us build the healthcare networking platform 
+                  that the medical community deserves. Your input will shape our development.
+                </p>
+                <Link
+                  href="/signup"
+                  className="bg-white text-[#007fff] px-8 py-3 rounded-full font-semibold hover:bg-white/90 transition-colors shadow-lg hover:shadow-xl inline-flex items-center"
+                >
+                  <RocketLaunchIcon className="w-5 h-5 mr-2" />
+                  Join Early Access
+                </Link>
+              </div>
+            </Card>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Roadmap Section */}
+      <section id="roadmap" className="py-20 bg-white/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <span className="inline-flex items-center px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-medium mb-4">
+              🗺️ Development Roadmap
+            </span>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Our Journey to Launch
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Transparent development timeline showing what we're building and when. 
+              Early access members get exclusive previews of each milestone.
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              {
+                phase: "Phase 1",
+                title: "Foundation",
+                status: "In Progress",
+                timeline: "Q1 2024",
+                features: ["User authentication", "Basic profiles", "Core infrastructure", "Early access program"],
+                statusColor: "bg-yellow-100 text-yellow-800"
+              },
+              {
+                phase: "Phase 2", 
+                title: "Networking Core",
+                status: "Next",
+                timeline: "Q2 2024",
+                features: ["Professional connections", "Institution profiles", "Search & discovery", "Mobile app beta"],
+                statusColor: "bg-blue-100 text-blue-800"
+              },
+              {
+                phase: "Phase 3",
+                title: "Career Platform",
+                status: "Planned",
+                timeline: "Q3 2024",
+                features: ["Job board", "Application system", "Career matching", "Professional analytics"],
+                statusColor: "bg-gray-100 text-gray-800"
+              },
+              {
+                phase: "Phase 4",
+                title: "Full Platform",
+                status: "Future",
+                timeline: "Q4 2024",
+                features: ["Events platform", "Knowledge base", "Research tools", "Advanced features"],
+                statusColor: "bg-purple-100 text-purple-800"
+              }
+            ].map((roadmap, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                viewport={{ once: true }}
+              >
+                <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-2 border-gray-200/50 bg-white h-full">
+                  <CardContent className="p-6">
+                    <div className="mb-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-gray-500">{roadmap.phase}</span>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${roadmap.statusColor}`}>
+                          {roadmap.status}
+                        </span>
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-1">{roadmap.title}</h3>
+                      <p className="text-sm text-[#007fff] font-medium">{roadmap.timeline}</p>
+                    </div>
                     <ul className="space-y-2">
-                      {type.features.map((feature, featureIndex) => (
-                        <li key={featureIndex} className="text-sm text-gray-600 flex items-center justify-center">
-                          <span className="w-1.5 h-1.5 bg-[#007fff] rounded-full mr-2"></span>
+                      {roadmap.features.map((feature, featureIndex) => (
+                        <li key={featureIndex} className="text-sm text-gray-600 flex items-start">
+                          <CheckCircleIcon className="w-4 h-4 text-[#007fff] mr-2 mt-0.5 flex-shrink-0" />
                           {feature}
                         </li>
                       ))}
@@ -426,138 +544,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Stats & Testimonials Section */}
-      <section className="py-20 bg-gradient-to-r from-[#007fff]/5 via-purple-50/50 to-[#007fff]/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Stats */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center mb-20"
-          >
-            <span className="inline-flex items-center px-4 py-2 bg-[#007fff]/10 text-[#007fff] rounded-full text-sm font-medium mb-4">
-              📊 Platform Statistics
-            </span>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Trusted by Healthcare Professionals
-              <span className="text-[#007fff]"> Worldwide</span>
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-12">
-              Join a thriving community of medical professionals who are already networking, 
-              learning, and growing their careers on Kendraa.
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[
-                { number: "50,000+", label: "Healthcare Professionals", description: "Medical professionals from around the world" },
-                { number: "500+", label: "Healthcare Institutions", description: "Hospitals, clinics, and research centers" },
-                { number: "23+", label: "Medical Specialties", description: "Comprehensive coverage across all fields" },
-                { number: "10,000+", label: "Job Opportunities", description: "Active healthcare positions posted" },
-                { number: "1,000+", label: "Medical Events", description: "Conferences, CME courses, and workshops" },
-                { number: "99.9%", label: "Uptime Reliability", description: "Always available when you need it" }
-              ].map((stat, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                >
-                  <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-gray-200/50 bg-white/80 backdrop-blur-sm">
-                    <CardContent className="p-6 text-center">
-                      <div className="text-3xl md:text-4xl font-bold text-[#007fff] mb-2 group-hover:scale-110 transition-transform duration-300">
-                        {stat.number}
-                      </div>
-                      <div className="text-lg font-semibold text-gray-900 mb-2">
-                        {stat.label}
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        {stat.description}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Testimonials */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <span className="inline-flex items-center px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-medium mb-4">
-              💬 What Our Users Say
-            </span>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Real Stories from
-              <span className="text-[#007fff]"> Healthcare Professionals</span>
-            </h2>
-          </motion.div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                quote: "Kendraa has transformed how I connect with fellow cardiologists. I've found incredible collaboration opportunities and advanced my research significantly.",
-                name: "Dr. Sarah Chen",
-                title: "Cardiologist, Mayo Clinic",
-                specialty: "Cardiology"
-              },
-              {
-                quote: "As a hospital administrator, Kendraa helps us recruit top talent and showcase our institution to qualified professionals worldwide.",
-                name: "Michael Rodriguez",
-                title: "Chief Medical Officer",
-                specialty: "Administration",
-                institution: "Johns Hopkins Hospital"
-              },
-              {
-                quote: "The platform's job board helped me land my dream position in pediatric surgery. The networking features are unmatched in healthcare.",
-                name: "Dr. Aisha Patel",
-                title: "Pediatric Surgeon",
-                specialty: "Pediatric Surgery"
-              }
-            ].map((testimonial, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.2 }}
-                viewport={{ once: true }}
-              >
-                <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-2 border-gray-200/50 bg-white/90 backdrop-blur-sm h-full">
-                  <CardContent className="p-6">
-                    <div className="mb-4">
-                      <div className="flex text-[#007fff] text-lg mb-3">
-                        {[...Array(5)].map((_, i) => (
-                          <StarIcon key={i} className="w-5 h-5 fill-current" />
-                        ))}
-                      </div>
-                      <blockquote className="text-gray-600 leading-relaxed mb-6">
-                        "{testimonial.quote}"
-                      </blockquote>
-                    </div>
-                    <div className="border-t border-gray-200 pt-4">
-                      <div className="font-semibold text-gray-900">{testimonial.name}</div>
-                      <div className="text-sm text-gray-600">{testimonial.title}</div>
-                      <div className="text-xs text-[#007fff] mt-1">
-                        {testimonial.specialty} {testimonial.institution && `• ${testimonial.institution}`}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* CTA Section */}
-      <section id="about" className="py-20 bg-gradient-to-br from-[#007fff] to-purple-600 text-white">
+      <section className="py-20 bg-gradient-to-br from-[#007fff] to-purple-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -566,24 +554,31 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="text-center"
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Transform Your Healthcare Career?</h2>
+            <RocketLaunchIcon className="w-16 h-16 mx-auto mb-6 opacity-80" />
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Shape the Future of Healthcare Networking?</h2>
             <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-              Join thousands of healthcare professionals who are already networking, 
-              learning, and growing their careers on Kendraa.
+              Join our early access program and be part of building something that will transform 
+              how healthcare professionals connect, collaborate, and grow their careers.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/signup"
-                className="bg-white text-[#007fff] px-8 py-3 rounded-full font-semibold hover:bg-white/90 transition-colors shadow-lg hover:shadow-xl"
+                className="bg-white text-[#007fff] px-8 py-3 rounded-full font-semibold hover:bg-white/90 transition-colors shadow-lg hover:shadow-xl inline-flex items-center justify-center"
               >
-                Get Started Free
+                <RocketLaunchIcon className="w-5 h-5 mr-2" />
+                Join Early Access
               </Link>
               <Link
                 href="/about"
-                className="border-2 border-white text-white hover:bg-white/10 px-8 py-3 rounded-full font-semibold transition-colors"
+                className="border-2 border-white text-white hover:bg-white/10 px-8 py-3 rounded-full font-semibold transition-colors inline-flex items-center justify-center"
               >
-                Learn More About Us
+                <EnvelopeIcon className="w-5 h-5 mr-2" />
+                Contact Us
               </Link>
+            </div>
+            
+            <div className="mt-8 text-sm text-white/70">
+              <p>🔒 Your email will never be shared • 🎁 Lifetime benefits for early supporters</p>
             </div>
           </motion.div>
         </div>
@@ -599,50 +594,43 @@ export default function LandingPage() {
                 <span className="text-xl font-bold">Kendraa</span>
               </div>
               <p className="text-gray-400 mb-4">
-                The premier networking platform for healthcare professionals worldwide.
+                Building the future of healthcare professional networking. Join us on this journey.
               </p>
-              <div className="flex space-x-4">
-                <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
-                  <span className="text-sm">🌐</span>
-                </div>
-                <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
-                  <span className="text-sm">📧</span>
-                </div>
-                <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
-                  <span className="text-sm">📱</span>
-                </div>
+              <div className="text-sm text-gray-500">
+                <p>🚀 Currently in development</p>
+                <p>🎯 Launching Q4 2024</p>
               </div>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">Platform</h3>
+              <h3 className="font-semibold mb-4">Product</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><Link href="/about" className="hover:text-white transition-colors">About</Link></li>
                 <li><Link href="#features" className="hover:text-white transition-colors">Features</Link></li>
-                <li><Link href="#specialties" className="hover:text-white transition-colors">Specialties</Link></li>
+                <li><Link href="#vision" className="hover:text-white transition-colors">Vision</Link></li>
+                <li><Link href="#roadmap" className="hover:text-white transition-colors">Roadmap</Link></li>
+                <li><Link href="/signup" className="hover:text-white transition-colors">Early Access</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-4">Company</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
+                <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
                 <li><Link href="/help" className="hover:text-white transition-colors">Help Center</Link></li>
+                <li><span className="text-gray-500">Blog (Coming Soon)</span></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">For Professionals</h3>
+              <h3 className="font-semibold mb-4">Legal</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><Link href="/signup" className="hover:text-white transition-colors">Join Network</Link></li>
-                <li><Link href="/jobs" className="hover:text-white transition-colors">Find Jobs</Link></li>
-                <li><Link href="/events" className="hover:text-white transition-colors">Medical Events</Link></li>
-                <li><Link href="/specializations" className="hover:text-white transition-colors">Specializations</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4">For Institutions</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li><Link href="/signup" className="hover:text-white transition-colors">Create Profile</Link></li>
-                <li><Link href="/jobs/create" className="hover:text-white transition-colors">Post Jobs</Link></li>
-                <li><Link href="/events/create" className="hover:text-white transition-colors">Host Events</Link></li>
-                <li><Link href="/contact" className="hover:text-white transition-colors">Contact Sales</Link></li>
+                <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+                <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
+                <li><span className="text-gray-500">HIPAA Compliance</span></li>
+                <li><span className="text-gray-500">Security</span></li>
               </ul>
             </div>
           </div>
           <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 Kendraa. All rights reserved. | <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link> | <Link href="/help" className="hover:text-white transition-colors">Terms of Service</Link></p>
+            <p>&copy; 2024 Kendraa. All rights reserved. • Early stage startup building something amazing.</p>
           </div>
         </div>
       </footer>
