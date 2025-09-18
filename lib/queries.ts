@@ -1226,8 +1226,7 @@ export async function getEventsByInstitution(institutionId: string): Promise<Eve
     const { data, error } = await getSupabase()
       .from('events')
       .select('*')
-      .eq('organizer_id', institutionId)
-      .eq('organizer_type', 'institution')
+      .eq('institution_id', institutionId)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -1898,11 +1897,11 @@ export async function getInstitutionByUserId(userId: string): Promise<Institutio
       return null;
     }
 
-    // Get the institution by user ID (assuming user ID matches institution ID for institution accounts)
+    // Get the institution by admin user ID
     const { data, error } = await getSupabase()
       .from('institutions')
       .select('*')
-      .eq('id', userId)
+      .eq('admin_user_id', userId)
       .single();
 
     if (error) {
@@ -1995,6 +1994,8 @@ export async function ensureInstitutionExists(userId: string, profile: Profile):
       established_year: null,
       size: 'medium' as const,
       verified: false,
+      short_description: null,
+      theme_color: '#007fff',
     };
     
     const result = await createInstitution(institutionData);
@@ -2126,6 +2127,8 @@ export async function getJobs(): Promise<JobWithCompany[]> {
             established_year: 1852,
             size: 'large',
             verified: true,
+            short_description: 'Leading healthcare institution in New York',
+            theme_color: '#007fff',
             admin_user_id: 'user-1',
           },
           posted_by_user: {
@@ -2196,6 +2199,8 @@ export async function getJobs(): Promise<JobWithCompany[]> {
             established_year: 1901,
             size: 'large',
             verified: true,
+            short_description: 'Premier pediatric hospital in Southern California',
+            theme_color: '#007fff',
             admin_user_id: 'user-2',
           },
           posted_by_user: {
@@ -4490,6 +4495,9 @@ export async function getInstitutionByAdmin(adminUserId: string) {
 
   return data;
 }
+
+// Alias for getInstitutionByAdmin to maintain backward compatibility
+export const getInstitutionByAdminId = getInstitutionByAdmin;
 
 export async function updateInstitutionProfile(institutionId: string, updates: any) {
   if (!supabase) {

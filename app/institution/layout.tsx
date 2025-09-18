@@ -19,6 +19,7 @@ import { useOnboardingProtection } from '@/hooks/useOnboardingProtection';
 import Header from '@/components/layout/Header';
 import RightSidebar from '@/components/layout/RightSidebar';
 import LeftSidebar from '@/components/layout/LeftSidebar';
+import FloatingQuickActions from '@/components/layout/FloatingQuickActions';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { 
   UserGroupIcon,
@@ -68,13 +69,27 @@ export default function InstitutionLayout({
   const [postStats, setPostStats] = useState({ posts: 0, comments: 0, likes: 0 });
 
   // Use the new, cleaner onboarding protection hook
+  // But only apply it for non-public pages
+  const isPublicProfilePage = pathname.startsWith('/institution/profile/') && pathname !== '/institution/profile';
   const { isProtected, isLoading: isOnboardingLoading } = useOnboardingProtection();
 
-  // Redirect non-institution users
+  // Redirect non-institution users (but allow public access to institution profile pages)
   useEffect(() => {
     if (!authLoading && user && profile) {
       if (profile.user_type !== 'institution' && profile.profile_type !== 'institution') {
-        // Redirect to appropriate page based on current path
+        // Allow public access to institution profile pages (viewing other institutions)
+        if (pathname.startsWith('/institution/profile/') && pathname !== '/institution/profile') {
+          // This is a public institution profile page - allow access
+          return;
+        }
+        
+        // Allow access to onboarding page for all users
+        if (pathname === '/institution/onboarding') {
+          // This is the onboarding page - allow access
+          return;
+        }
+        
+        // Redirect to appropriate page based on current path for other institution pages
         if (pathname.startsWith('/institution/jobs')) {
           router.push('/jobs');
         } else if (pathname.startsWith('/institution/events')) {
@@ -85,6 +100,9 @@ export default function InstitutionLayout({
           router.push('/notifications');
         } else if (pathname.startsWith('/institution/feed')) {
           router.push('/feed');
+        } else if (pathname === '/institution/profile') {
+          // Redirect to individual profile if trying to access own institution profile
+          router.push(`/profile/${user.id}`);
         } else {
           router.push('/feed');
         }
@@ -113,37 +131,41 @@ export default function InstitutionLayout({
           updateProfile(userProfile);
         }
 
-        // Load institution data
-        const institutionData = await getInstitutionByUserId(user.id);
-        setInstitution(institutionData);
-        
-        const [
-          connections, groups, events, pages, newsletters
-        ] = await Promise.all([
-          getConnectionCount(user.id),
-          getUserGroupsCount(user.id),
-          getUserEventsCount(user.id),
-          getUserPagesCount(user.id),
-          getUserNewslettersCount(user.id)
-        ]);
-        
-        setConnectionCount(connections);
-        setGroupsCount(groups);
-        setEventsCount(events);
-        setPagesCount(pages);
-        setNewslettersCount(newsletters);
-        
-        // Load analytics and feed data (only for feed page)
-        if (pathname === '/institution/feed') {
-          const [analyticsData, activity, stats] = await Promise.all([
-            getUserAnalytics(user.id),
-            getRecentActivity(user.id, 5),
-            getPostStats(user.id)
+        // Only load institution data if user is an institution user
+        // For public institution profile pages, we don't need to load this data
+        if (userProfile && (userProfile.user_type === 'institution' || userProfile.profile_type === 'institution')) {
+          // Load institution data
+          const institutionData = await getInstitutionByUserId(user.id);
+          setInstitution(institutionData);
+          
+          const [
+            connections, groups, events, pages, newsletters
+          ] = await Promise.all([
+            getConnectionCount(user.id),
+            getUserGroupsCount(user.id),
+            getUserEventsCount(user.id),
+            getUserPagesCount(user.id),
+            getUserNewslettersCount(user.id)
           ]);
           
-          setAnalytics(analyticsData);
-          setRecentActivity(activity);
-          setPostStats(stats);
+          setConnectionCount(connections);
+          setGroupsCount(groups);
+          setEventsCount(events);
+          setPagesCount(pages);
+          setNewslettersCount(newsletters);
+          
+          // Load analytics and feed data (only for feed page)
+          if (pathname === '/institution/feed') {
+            const [analyticsData, activity, stats] = await Promise.all([
+              getUserAnalytics(user.id),
+              getRecentActivity(user.id, 5),
+              getPostStats(user.id)
+            ]);
+            
+            setAnalytics(analyticsData);
+            setRecentActivity(activity);
+            setPostStats(stats);
+          }
         }
       } catch (error) {
         console.error('Error loading institution layout data:', error);
@@ -163,14 +185,16 @@ export default function InstitutionLayout({
   const isJobsPage = pathname === '/institution/jobs';
   const isProfilePage = pathname === '/institution/profile';
   const isEventsPage = pathname === '/institution/events';
-  const shouldShowSidebars = !isNetworkPage && !isFeedPage && !isJobsPage && !isProfilePage && !isEventsPage;
-  // Show innovative left sidebar on the feed page
-  const shouldShowInnovativeSidebar = pathname === '/institution/feed';
+  const isOnboardingPage = pathname === '/institution/onboarding';
+  const shouldShowSidebars = !isNetworkPage && !isFeedPage && !isJobsPage && !isProfilePage && !isEventsPage && !isPublicProfilePage && !isOnboardingPage;
+  // Show floating quick actions on the feed page instead of sidebar
+  const shouldShowFloatingActions = pathname === '/institution/feed';
   // Show profile card right sidebar on the feed page
   const shouldShowProfileCardSidebar = pathname === '/institution/feed';
 
   // Show a loading screen while the hook is checking the user's status
-  if (isOnboardingLoading || loading || authLoading) {
+  // But skip this for public profile pages and onboarding page
+  if (!isPublicProfilePage && !isOnboardingPage && (isOnboardingLoading || loading || authLoading)) {
     return (
       <LoadingSpinner 
         variant="fullscreen" 
@@ -180,17 +204,19 @@ export default function InstitutionLayout({
   }
   
   // The hook handles the redirect, so we just return null to prevent rendering the dashboard
-  if (!isProtected) {
+  // But skip this for public profile pages and onboarding page
+  if (!isPublicProfilePage && !isOnboardingPage && !isProtected) {
     return null;
   }
   
-  if (!user) {
+  // For public profile pages and onboarding page, we don't need a user to be logged in
+  if (!isPublicProfilePage && !isOnboardingPage && !user) {
     return null;
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      {!isOnboardingPage && <Header />}
       
       <div className="flex">
         {/* Left Sidebar */}
@@ -206,148 +232,12 @@ export default function InstitutionLayout({
         )}
         
         {/* Main Content */}
-        <main className={`flex-1 ${shouldShowSidebars ? 'lg:ml-64' : ''} ${shouldShowInnovativeSidebar ? 'lg:ml-80' : ''} ${shouldShowProfileCardSidebar ? 'lg:mr-80' : ''}`}>
+        <main className={`flex-1 ${shouldShowSidebars ? 'lg:ml-64' : ''} ${shouldShowProfileCardSidebar ? 'lg:mr-80' : ''}`}>
           <div className="min-h-screen">
             {children}
           </div>
         </main>
         
-        {/* Sleek Left Sidebar for Feed Page */}
-        {shouldShowInnovativeSidebar && (
-          <div className="hidden lg:block fixed left-0 top-16 w-80 h-[calc(100vh-4rem)] bg-white/80 backdrop-blur-xl border-r border-white/20 overflow-y-auto shadow-2xl">
-            <div className="p-8 space-y-8">
-              {/* Quick Actions */}
-              <div className="bg-gradient-to-br from-white/90 to-white/70 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-white/30">
-                <div className="flex items-center mb-6">
-                  <div className="w-3 h-3 bg-gradient-to-r from-[#007fff] to-[#00a8ff] rounded-full mr-3 shadow-lg"></div>
-                  <h3 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                    Quick Actions
-                  </h3>
-                </div>
-                <div className="space-y-4">
-                  <button 
-                    onClick={() => router.push('/institution/feed?create=post')}
-                    className="w-full flex items-center space-x-4 p-4 rounded-2xl bg-gradient-to-r from-[#007fff]/10 to-[#00a8ff]/10 hover:from-[#007fff]/20 hover:to-[#00a8ff]/20 transition-all duration-300 group border border-white/20 shadow-sm hover:shadow-md"
-                  >
-                    <div className="w-12 h-12 bg-gradient-to-br from-[#007fff] to-[#00a8ff] rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                      <PlusIcon className="w-6 h-6 text-white" />
-                    </div>
-                    <div className="text-left">
-                      <span className="text-base font-semibold text-gray-800 block">Create Post</span>
-                      <span className="text-sm text-gray-500">Share updates</span>
-                    </div>
-                  </button>
-                  <button 
-                    onClick={() => router.push('/institution/jobs/create')}
-                    className="w-full flex items-center space-x-4 p-4 rounded-2xl bg-gradient-to-r from-emerald-50 to-green-50 hover:from-emerald-100 hover:to-green-100 transition-all duration-300 group border border-white/20 shadow-sm hover:shadow-md"
-                  >
-                    <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                      <BriefcaseIcon className="w-6 h-6 text-white" />
-                    </div>
-                    <div className="text-left">
-                      <span className="text-base font-semibold text-gray-800 block">Post Job</span>
-                      <span className="text-sm text-gray-500">Hire talent</span>
-                    </div>
-                  </button>
-                  <button 
-                    onClick={() => router.push('/institution/events/create')}
-                    className="w-full flex items-center space-x-4 p-4 rounded-2xl bg-gradient-to-r from-purple-50 to-violet-50 hover:from-purple-100 hover:to-violet-100 transition-all duration-300 group border border-white/20 shadow-sm hover:shadow-md"
-                  >
-                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                      <CalendarDaysIcon className="w-6 h-6 text-white" />
-                    </div>
-                    <div className="text-left">
-                      <span className="text-base font-semibold text-gray-800 block">Create Event</span>
-                      <span className="text-sm text-gray-500">Organize events</span>
-                    </div>
-                  </button>
-                </div>
-              </div>
-
-              {/* Analytics Overview */}
-              <div className="bg-gradient-to-br from-white/90 to-white/70 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-white/30">
-                <div className="flex items-center mb-6">
-                  <div className="w-3 h-3 bg-gradient-to-r from-emerald-500 to-green-500 rounded-full mr-3 shadow-lg"></div>
-                  <h3 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                    Analytics
-                  </h3>
-                </div>
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-gray-50/50 to-gray-100/50 border border-white/20">
-                    <div>
-                      <span className="text-sm font-medium text-gray-600 block">Total Posts</span>
-                      <span className="text-2xl font-bold text-gray-900">{analytics.totalPosts}</span>
-                    </div>
-                    <div className="w-12 h-12 bg-gradient-to-br from-[#007fff] to-[#00a8ff] rounded-2xl flex items-center justify-center shadow-lg">
-                      <span className="text-white font-bold text-lg">📝</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-emerald-50/50 to-green-50/50 border border-white/20">
-                    <div>
-                      <span className="text-sm font-medium text-gray-600 block">Engagement</span>
-                      <span className="text-2xl font-bold text-emerald-600">{analytics.engagementRate}%</span>
-                    </div>
-                    <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
-                      <span className="text-white font-bold text-lg">📈</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-blue-50/50 to-indigo-50/50 border border-white/20">
-                    <div>
-                      <span className="text-sm font-medium text-gray-600 block">Reach</span>
-                      <span className="text-2xl font-bold text-blue-600">{analytics.totalReach}</span>
-                    </div>
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-                      <span className="text-white font-bold text-lg">👥</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Recent Activity */}
-              <div className="bg-gradient-to-br from-white/90 to-white/70 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-white/30">
-                <div className="flex items-center mb-6">
-                  <div className="w-3 h-3 bg-gradient-to-r from-purple-500 to-violet-500 rounded-full mr-3 shadow-lg"></div>
-                  <h3 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                    Recent Activity
-                  </h3>
-                </div>
-                <div className="space-y-4">
-                  {recentActivity.map((activity) => {
-                    const IconComponent = activity.icon === 'UserGroupIcon' ? UserGroupIcon :
-                                        activity.icon === 'HeartIcon' ? HeartIcon :
-                                        activity.icon === 'ChatBubbleLeftIcon' ? ChatBubbleLeftIcon :
-                                        UserGroupIcon;
-                    
-                    const colorClasses = {
-                      blue: 'bg-gradient-to-br from-blue-500 to-blue-600',
-                      green: 'bg-gradient-to-br from-emerald-500 to-green-600',
-                      purple: 'bg-gradient-to-br from-purple-500 to-violet-600',
-                      gray: 'bg-gradient-to-br from-gray-500 to-gray-600'
-                    };
-                    
-                    const timeAgo = new Date(activity.time).toLocaleString('en-US', {
-                      hour: 'numeric',
-                      minute: '2-digit',
-                      hour12: true
-                    });
-                    
-                    return (
-                      <div key={activity.id} className="flex items-start space-x-4 p-4 rounded-2xl bg-gradient-to-r from-gray-50/50 to-gray-100/50 border border-white/20 hover:shadow-md transition-all duration-300">
-                        <div className={`w-10 h-10 ${colorClasses[activity.color as keyof typeof colorClasses]} rounded-2xl flex items-center justify-center shadow-lg`}>
-                          <IconComponent className="w-5 h-5 text-white" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-800 mb-1">{activity.message}</p>
-                          <p className="text-xs text-gray-500 font-medium">{timeAgo}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
         
         {/* Profile Card Right Sidebar for Feed Page */}
         {shouldShowProfileCardSidebar && (
@@ -413,6 +303,11 @@ export default function InstitutionLayout({
           />
         )}
       </div>
+      
+      {/* Floating Quick Actions for Feed Page */}
+      {shouldShowFloatingActions && (
+        <FloatingQuickActions isInstitution={true} />
+      )}
     </div>
   );
 }

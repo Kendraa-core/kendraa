@@ -19,11 +19,19 @@ export default function AuthLayout({
     // to access the signin or signup pages.
     if (!loading && user && profile) {
       if (pathname === '/signin' || pathname === '/signup') {
-        // Redirect based on user type
+        // Redirect based on user type and onboarding status
         if (profile.user_type === 'institution' || profile.profile_type === 'institution') {
-          router.push('/institution/feed');
+          if (profile.onboarding_completed) {
+            router.push('/institution/feed');
+          } else {
+            router.push('/institution/onboarding');
+          }
         } else {
-          router.push('/feed');
+          if (profile.onboarding_completed) {
+            router.push('/feed');
+          } else {
+            router.push('/onboarding');
+          }
         }
       }
       // It will NOT redirect if the user is on /reset-password,
