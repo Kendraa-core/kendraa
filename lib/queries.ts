@@ -1062,24 +1062,22 @@ export async function followInstitution(followerId: string, institutionId: strin
     
     // Check if already following
     const { data: existingFollow } = await getSupabase()
-      .from('connections')
+      .from('follows')
       .select('id')
-      .eq('requester_id', followerId)
-      .eq('recipient_id', institutionId)
-      .eq('status', 'accepted')
+      .eq('follower_id', followerId)
+      .eq('following_id', institutionId)
       .single();
     
     if (existingFollow) {
       return true; // Already following
     }
     
-    // Create follow relationship (automatically accepted)
+    // Create follow relationship
     const { error } = await getSupabase()
-      .from('connections')
+      .from('follows')
       .insert({
-        requester_id: followerId,
-        recipient_id: institutionId,
-        status: 'accepted', // Automatically accepted for institutions
+        follower_id: followerId,
+        following_id: institutionId,
         created_at: new Date().toISOString(),
       });
 
@@ -1114,11 +1112,10 @@ export async function unfollowInstitution(followerId: string, institutionId: str
     }
     
     const { error } = await getSupabase()
-      .from('connections')
+      .from('follows')
       .delete()
-      .eq('requester_id', followerId)
-      .eq('recipient_id', institutionId)
-      .eq('status', 'accepted');
+      .eq('follower_id', followerId)
+      .eq('following_id', institutionId);
 
     if (error) throw error;
     
@@ -1171,11 +1168,10 @@ export async function getFollowStatus(followerId: string, institutionId: string)
     }
     
     const { data, error } = await getSupabase()
-      .from('connections')
+      .from('follows')
       .select('id')
-      .eq('requester_id', followerId)
-      .eq('recipient_id', institutionId)
-      .eq('status', 'accepted')
+      .eq('follower_id', followerId)
+      .eq('following_id', institutionId)
       .single();
 
     if (error || !data) {
@@ -2898,9 +2894,18 @@ export async function getConnectionCount(userId: string): Promise<number> {
   try {
     console.log('[Queries] Getting connection count for user:', userId);
     
-    const connections = await getConnections(userId);
-    const count = connections.length;
+    // For institutions, use the follows table
+    const { data, error } = await getSupabase()
+      .from('follows')
+      .select('id')
+      .eq('following_id', userId);
+
+    if (error) {
+      console.error('[Queries] Error getting connection count:', error);
+      return 0;
+    }
     
+    const count = data?.length || 0;
     console.log('[Queries] Connection count:', count);
     return count;
   } catch (error) {
