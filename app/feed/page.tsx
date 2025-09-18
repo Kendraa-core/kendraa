@@ -30,6 +30,12 @@ export default function FeedPage() {
     }
   }, [profile, router]);
 
+  const handlePostDeleted = (deletedPostId: string) => {
+    setPosts(currentPosts => 
+      currentPosts.filter(post => post.id !== deletedPostId)
+    );
+  };
+
   const fetchPosts = useCallback(async () => {
     if (!user?.id) return;
 
@@ -138,20 +144,17 @@ export default function FeedPage() {
           <div className="space-y-8">
             {loading ? (
               <div className="space-y-8">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                    <div className="animate-pulse">
-                      <div className="flex items-center space-x-3 mb-4">
-                        <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
-                        <div className="flex-1">
-                          <div className="h-4 bg-gray-200 rounded w-1/3 mb-2"></div>
-                          <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                {/* Loading skeleton */}
+                {[...Array(3)].map((_, index) => (
+                  <div key={index} className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 animate-pulse">
+                    <div className="flex items-start space-x-4">
+                      <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
+                      <div className="flex-1 space-y-3">
+                        <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                        <div className="space-y-2">
+                          <div className="h-4 bg-gray-200 rounded"></div>
+                          <div className="h-4 bg-gray-200 rounded w-5/6"></div>
                         </div>
-                      </div>
-                      <div className="space-y-3">
-                        <div className="h-4 bg-gray-200 rounded"></div>
-                        <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-                        <div className="h-4 bg-gray-200 rounded w-4/6"></div>
                       </div>
                     </div>
                   </div>
@@ -160,26 +163,28 @@ export default function FeedPage() {
             ) : posts.length > 0 ? (
               <div className="space-y-8">
                 {posts.map((post) => (
-                  <PostCard key={post.id} post={post} />
+                  <PostCard 
+                    key={post.id} 
+                    post={post} 
+                    onPostDeleted={handlePostDeleted} 
+                  />
                 ))}
               </div>
             ) : (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
-                <div className="max-w-md mx-auto">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <PlusIcon className="w-8 h-8 text-gray-400" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-black mb-2">No posts yet</h3>
-                  <p className="text-gray-600 mb-6">
-                    Be the first to share your thoughts and insights with the community.
-                  </p>
-                  <button
-                    onClick={() => setActiveTab('posts')}
-                    className="bg-[#007fff] text-white px-6 py-3 rounded-xl hover:bg-[#007fff]/90 transition-colors font-medium"
-                  >
-                    Create your first post
-                  </button>
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-12 text-center">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <PlusIcon className="w-8 h-8 text-gray-400" />
                 </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No posts yet</h3>
+                <p className="text-gray-600 mb-6">
+                  Be the first to share something with your network!
+                </p>
+                <button 
+                  onClick={() => document.querySelector('textarea')?.focus()}
+                  className="bg-[#007fff] text-white px-6 py-2 rounded-xl hover:bg-[#007fff]/90 transition-colors"
+                >
+                  Create your first post
+                </button>
               </div>
             )}
           </div>
@@ -189,4 +194,4 @@ export default function FeedPage() {
       </div>
     </div>
   );
-} 
+}
