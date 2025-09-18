@@ -913,35 +913,25 @@ export async function getSuggestedConnections(userId: string, limit = 10): Promi
       return [];
     }
     
-    // Get existing connections to exclude them from suggestions
-    const { data: existingConnections } = await getSupabase()
-      .from('connections')
-      .select('requester_id, recipient_id')
-      .or(`requester_id.eq.${userId},recipient_id.eq.${userId}`)
-      .eq('status', 'accepted');
+    // Get existing follows to exclude them from suggestions
+    const { data: existingFollows } = await getSupabase()
+      .from('follows')
+      .select('follower_id, following_id')
+      .or(`follower_id.eq.${userId},following_id.eq.${userId}`);
     
-    const connectedUserIds = existingConnections?.map(conn => 
-      conn.requester_id === userId ? conn.recipient_id : conn.requester_id
-    ) || [];
-    
-    // Get pending connection requests to exclude them
-    const { data: pendingRequests } = await getSupabase()
-      .from('connections')
-      .select('requester_id, recipient_id')
-      .or(`requester_id.eq.${userId},recipient_id.eq.${userId}`)
-      .eq('status', 'pending');
-    
-    const pendingUserIds = pendingRequests?.map(conn => 
-      conn.requester_id === userId ? conn.recipient_id : conn.requester_id
+    const connectedUserIds = existingFollows?.map(follow => 
+      follow.follower_id === userId ? follow.following_id : follow.follower_id
     ) || [];
     
     // Combine all users to exclude
-    const excludeUserIds = [userId, ...connectedUserIds, ...pendingUserIds];
+    const excludeUserIds = [userId, ...connectedUserIds];
     
     const { data, error } = await getSupabase()
       .from('profiles')
       .select('*')
       .not('id', 'in', `(${excludeUserIds.join(',')})`)
+      .neq('user_type', 'institution') // Exclude institutions
+      .neq('profile_type', 'institution') // Also exclude by profile_type
       .limit(limit);
 
     if (error) {
@@ -953,6 +943,7 @@ export async function getSuggestedConnections(userId: string, limit = 10): Promi
     return [];
   }
 }
+
 
 export async function getConnectionRequests(userId: string): Promise<ConnectionWithProfile[]> {
   try {
