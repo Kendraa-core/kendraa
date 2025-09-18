@@ -63,6 +63,7 @@ export default function MobileInstitutionFeedPage() {
                       <PostCard
                         post={post}
                         onInteraction={handlePostInteraction}
+                        onPostDeleted={() => {}}
                       />
                     </div>
                   ))}

@@ -215,7 +215,7 @@ export default function EventDetailPage() {
   };
 
   if (loading) {
-    return <LoadingSpinner variant="fullscreen" text="Loading event details..." />;
+    return <LoadingSpinner  text="Loading event details..." />;
   }
 
   if (!event) {

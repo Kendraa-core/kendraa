@@ -197,7 +197,6 @@ export default function InstitutionLayout({
   if (!isPublicProfilePage && !isOnboardingPage && (isOnboardingLoading || loading || authLoading)) {
     return (
       <LoadingSpinner 
-        variant="fullscreen" 
         text="Loading your institution dashboard..." 
       />
     );

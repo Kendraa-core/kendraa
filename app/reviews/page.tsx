@@ -56,7 +56,7 @@ export default function Reviews() {
   }
 
   if (loading) {
-    return <LoadingSpinner variant="fullscreen" text="Loading reviews..." />;
+    return <LoadingSpinner  text="Loading reviews..." />;
   }
 
   return (

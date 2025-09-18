@@ -651,7 +651,7 @@ export default function MedicalProfileWizard({ onComplete, onCancel }: MedicalPr
               className="bg-emerald-600 hover:bg-emerald-700"
             >
               {loading ? (
-                <><LoadingSpinner className="w-4 h-4 mr-2" /> Creating Profile...</>
+                <><LoadingSpinner size={16} /> Creating Profile...</>
               ) : (
                 <>
                   <HeartIcon className="w-4 h-4 mr-2" />

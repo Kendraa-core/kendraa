@@ -364,7 +364,7 @@ export default function JobsPage() {
   }
 
   if (loading) {
-    return <LoadingSpinner variant="fullscreen" text="Loading jobs..." />;
+    return <LoadingSpinner  text="Loading jobs..." />;
   }
 
   return (

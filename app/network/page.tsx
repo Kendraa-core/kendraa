@@ -285,7 +285,7 @@ export default function NetworkPage() {
   }
 
   if (loading) {
-    return <LoadingSpinner variant="fullscreen" text="Loading your network..." />;
+    return <LoadingSpinner  text="Loading your network..." />;
   }
 
   return (

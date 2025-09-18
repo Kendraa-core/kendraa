@@ -81,6 +81,7 @@ export default function SavedItemsPage() {
                   // Refresh saved posts when interaction occurs
                   window.location.reload();
                 }}
+                onPostDeleted={() => {}}
               />
             ))}
           </div>

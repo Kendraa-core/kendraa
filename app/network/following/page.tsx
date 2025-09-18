@@ -131,7 +131,7 @@ export default function FollowingPage() {
   }
 
   if (loading) {
-    return <LoadingSpinner variant="fullscreen" text="Loading following..." />;
+    return <LoadingSpinner  text="Loading following..." />;
   }
 
   return (

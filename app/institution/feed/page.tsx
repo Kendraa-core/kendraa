@@ -189,6 +189,7 @@ export default function InstitutionFeedPage() {
                       key={`institution-${post.id}`}
                       post={post}
                       onInteraction={handlePostInteraction}
+                      onPostDeleted={() => {}}
                     />
                   ))}
                   
@@ -198,6 +199,7 @@ export default function InstitutionFeedPage() {
                       key={`general-${post.id}`}
                       post={post}
                       onInteraction={handlePostInteraction}
+                      onPostDeleted={() => {}}
                     />
                   ))}
                 </div>

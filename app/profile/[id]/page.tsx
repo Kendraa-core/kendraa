@@ -1433,7 +1433,7 @@ export default function ProfilePage() {
   };
 
   if (loading) {
-    return <LoadingSpinner variant="fullscreen" text="Loading medical profile..." />;
+    return <LoadingSpinner  text="Loading medical profile..." />;
   }
 
   if (!profile) {

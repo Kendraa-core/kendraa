@@ -57,7 +57,7 @@ export default function UserPostsPage() {
   }, [id]);
 
   if (loading) {
-    return <LoadingSpinner variant="fullscreen" text="Loading posts..." />;
+    return <LoadingSpinner  text="Loading posts..." />;
   }
 
   if (!profile) {
@@ -115,7 +115,7 @@ export default function UserPostsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.1 }}
               >
-                <PostCard post={post} />
+                <PostCard post={post} onPostDeleted={() => {}} />
               </motion.div>
             ))}
           </div>

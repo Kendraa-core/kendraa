@@ -113,6 +113,7 @@ export default function PostPage() {
             // Refresh post data if needed
             window.location.reload();
           }} 
+          onPostDeleted={() => {}}
         />
       </div>
     </div>

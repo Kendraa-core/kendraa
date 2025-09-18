@@ -353,6 +353,7 @@ export default function MobileProfilePage() {
                   <PostCard
                     post={post}
                     onInteraction={handlePostInteraction}
+                    onPostDeleted={() => {}}
                   />
                 </div>
               ))}

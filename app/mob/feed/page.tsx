@@ -75,6 +75,7 @@ export default function MobileFeedPage() {
                       <PostCard
                         post={post}
                         onInteraction={handlePostInteraction}
+                        onPostDeleted={() => {}}
                       />
                     </div>
                   ))}

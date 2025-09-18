@@ -40,12 +40,12 @@ export default function MobileLayout({
 
   // Show loading while checking authentication or mobile detection
   if (loading || (requireAuth && !user)) {
-    return <LoadingSpinner variant="fullscreen" text="Loading..." />;
+    return <LoadingSpinner  text="Loading..." />;
   }
 
   // Don't render on desktop (will be redirected)
   if (!isMobile && typeof window !== 'undefined') {
-    return <LoadingSpinner variant="fullscreen" text="Redirecting..." />;
+    return <LoadingSpinner  text="Redirecting..." />;
   }
 
   return (

@@ -55,7 +55,7 @@ export default function DashboardLayout({
         return;
       }
     }
-  }, [profile, authLoading, router]);
+  }, [profile, authLoading, router, user]);
 
   // Fetch all necessary data for the sidebars in one place
   useEffect(() => {

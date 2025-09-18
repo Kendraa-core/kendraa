@@ -81,7 +81,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ posts, jobs, events }) => {
               </div>
             ) : (
               posts.slice(0, 3).map((post) => (
-                <PostCard key={post.id} post={post} />
+                <PostCard key={post.id} post={post} onPostDeleted={() => {}} />
               ))
             )}
             {posts.length > 3 && (

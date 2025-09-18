@@ -24,7 +24,6 @@ export default function InstitutionProfilePage() {
   // Show loading while redirecting
     return (
       <LoadingSpinner 
-        variant="fullscreen" 
       text="Redirecting to institution profile..." 
     />
   );

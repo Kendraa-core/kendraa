@@ -35,13 +35,13 @@ export default function Loading({
       : {
           scale: [1, 1.12, 1],
           opacity: [0.25, 0.6, 0.25],
-          transition: { duration: 4, repeat: Infinity, ease: 'easeInOut' },
+          transition: { duration: 4, repeat: Infinity, ease: 'easeInOut' as const },
         },
   };
 
   const ringRotate = reduce
     ? {}
-    : { rotate: [0, 360], transition: { duration: 3, repeat: Infinity, ease: 'linear' } };
+    : { rotate: [0, 360], transition: { duration: 3, repeat: Infinity, ease: 'linear' as const } };
 
   const dotPulse = (i: number) =>
     reduce
@@ -49,7 +49,7 @@ export default function Loading({
       : {
           scale: [1, 1.35, 1],
           opacity: [0.4, 1, 0.4],
-          transition: { duration: 1.5, repeat: Infinity, delay: i * 0.15, ease: 'easeInOut' },
+          transition: { duration: 1.5, repeat: Infinity, delay: i * 0.15, ease: 'easeInOut' as const },
         };
 
   // Pixel values for core size
@@ -72,7 +72,7 @@ export default function Loading({
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.75, ease: 'easeOut' }}
+          transition={{ duration: 0.75, ease: 'easeOut' as const }}
           className="mb-8 flex items-center justify-center"
         >
           <div className="relative flex items-center justify-center">
@@ -116,7 +116,7 @@ export default function Loading({
               viewBox="0 0 100 100"
               className="absolute inset-0 m-auto"
               style={{ top: 0, left: 0, right: 0, bottom: 0 }}
-              animate={reduce ? {} : { rotate: -360, transition: { duration: 2.2, repeat: Infinity, ease: 'linear' } }}
+              animate={reduce ? {} : { rotate: -360, transition: { duration: 2.2, repeat: Infinity, ease: 'linear' as const } }}
             >
               <circle cx="50" cy="50" r="38" strokeWidth="2.5" stroke="#007fff55" fill="none" />
             </motion.svg>

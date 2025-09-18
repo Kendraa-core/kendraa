@@ -241,7 +241,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ posts, jobs, events, isOwnP
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
               >
-                {activeTab === 'posts' && <PostCard post={item as Post} onInteraction={() => {}} />}
+                {activeTab === 'posts' && <PostCard post={item as Post} onInteraction={() => {}} onPostDeleted={() => {}} />}
                 {activeTab === 'jobs' && <JobCard job={item as JobWithCompany} />}
                 {activeTab === 'events' && <EventCard event={item as EventWithOrganizer} />}
               </motion.div>
@@ -637,7 +637,7 @@ export default function PublicInstitutionProfilePage() {
   };
 
   if (loading) {
-    return <LoadingSpinner variant="fullscreen" text="Loading institution profile..." />;
+    return <LoadingSpinner  text="Loading institution profile..." />;
   }
 
   if (!profile) {

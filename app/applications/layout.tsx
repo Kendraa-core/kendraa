@@ -112,7 +112,7 @@ export default function DashboardLayout({
   // Show a loading screen while the hook is checking the user's status
   if (isOnboardingLoading || loading || authLoading) {
     return (
-      <LoadingSpinner variant="fullscreen" text="Loading your dashboard..." />
+      <LoadingSpinner text="Loading your dashboard..." />
     );
   }
   

@@ -18,7 +18,7 @@ export default function Specializations() {
 
   if (loading) {
     return (
-      <LoadingSpinner variant="fullscreen" text="Loading specializations..." />
+      <LoadingSpinner  text="Loading specializations..." />
     );
   }
 

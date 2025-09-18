@@ -132,7 +132,7 @@ export default function ConnectionsPage() {
   }
 
   if (loading) {
-    return <LoadingSpinner variant="fullscreen" text="Loading connections..." />;
+    return <LoadingSpinner  text="Loading connections..." />;
   }
 
   return (

@@ -25,5 +25,5 @@ export default function MobileHomePage() {
     }
   }, [user, loading, router]);
 
-  return <LoadingSpinner variant="fullscreen" text="Redirecting..." />;
+  return <LoadingSpinner  text="Redirecting..." />;
 }

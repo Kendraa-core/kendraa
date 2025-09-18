@@ -275,6 +275,7 @@ export default function MobileInstitutionProfilePage() {
                     <PostCard
                       post={post}
                       onInteraction={handlePostInteraction}
+                      onPostDeleted={() => {}}
                     />
                   </div>
                 ))
