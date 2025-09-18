@@ -87,34 +87,42 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-2">
-              <Logo size="sm" className="h-8" />
-              <span className="text-sm text-gray-500 hidden sm:inline">🏥</span>
+          <div className="flex items-center justify-between h-20">
+            {/* Logo Section - More Prominent */}
+            <div className="flex items-center space-x-3">
+              <Logo size="md" className="h-10 w-10" />
+              <div className="flex flex-col">
+                <span className="text-xl font-bold text-gray-900">Kendraa</span>
+                <span className="text-xs text-gray-500 -mt-1">Healthcare Network</span>
+              </div>
             </div>
-            <div className="hidden md:flex items-center space-x-8">
-              <Link href="#features" className="text-gray-600 hover:text-[#007fff] transition-colors font-medium">
+            
+            {/* Navigation Links - Better Spacing */}
+            <div className="hidden md:flex items-center space-x-10">
+              <Link href="#features" className="text-gray-600 hover:text-[#007fff] transition-colors font-medium text-sm">
                 Features
               </Link>
-              <Link href="#vision" className="text-gray-600 hover:text-[#007fff] transition-colors font-medium">
+              <Link href="#vision" className="text-gray-600 hover:text-[#007fff] transition-colors font-medium text-sm">
                 Our Vision
               </Link>
-              <Link href="/about" className="text-gray-600 hover:text-[#007fff] transition-colors font-medium">
+              <Link href="/about" className="text-gray-600 hover:text-[#007fff] transition-colors font-medium text-sm">
                 About
               </Link>
             </div>
-            <div className="flex items-center space-x-3">
+            
+            {/* Action Buttons - Better Alignment */}
+            <div className="flex items-center space-x-4">
               <Link 
                 href="/signin"
-                className="text-gray-600 hover:text-gray-900 transition-colors font-medium"
+                className="border border-gray-300 text-gray-700 hover:text-[#007fff] hover:border-[#007fff] px-4 py-2 rounded-lg transition-all duration-300 font-medium text-sm"
               >
                 Sign in
               </Link>
               <Link 
                 href="/signup"
-                className="bg-[#007fff] text-white px-6 py-2 rounded-full hover:bg-[#007fff]/90 transition-all duration-300 font-medium shadow-lg hover:shadow-xl"
+                className="bg-[#007fff] text-white px-6 py-2 rounded-lg hover:bg-[#007fff]/90 transition-all duration-300 font-medium shadow-lg hover:shadow-xl text-sm"
               >
                 Join Now
               </Link>
@@ -131,7 +139,7 @@ export default function LandingPage() {
           <div className="absolute -bottom-8 -right-8 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
         </div>
         
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-20">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Text Content */}
             <div className="text-center lg:text-left">
