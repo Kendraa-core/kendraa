@@ -90,39 +90,36 @@ export default function LandingPage() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
-            {/* Logo Section - More Prominent */}
+            {/* Logo Section - Clean and Simple */}
             <div className="flex items-center space-x-3">
               <Logo size="md" className="h-10 w-10" />
-              <div className="flex flex-col">
-                <span className="text-xl font-bold text-gray-900">Kendraa</span>
-                <span className="text-xs text-gray-500 -mt-1">Healthcare Network</span>
-              </div>
+              <span className="text-xl font-bold text-gray-900">Kendraa</span>
             </div>
             
-            {/* Navigation Links - Better Spacing */}
-            <div className="hidden md:flex items-center space-x-10">
-              <Link href="#features" className="text-gray-600 hover:text-[#007fff] transition-colors font-medium text-sm">
+            {/* Navigation Links - Centered and Consistent */}
+            <div className="hidden md:flex items-center space-x-8">
+              <Link href="#features" className="text-gray-600 hover:text-[#007fff] transition-colors font-medium">
                 Features
               </Link>
-              <Link href="#vision" className="text-gray-600 hover:text-[#007fff] transition-colors font-medium text-sm">
+              <Link href="#vision" className="text-gray-600 hover:text-[#007fff] transition-colors font-medium">
                 Our Vision
               </Link>
-              <Link href="/about" className="text-gray-600 hover:text-[#007fff] transition-colors font-medium text-sm">
+              <Link href="/about" className="text-gray-600 hover:text-[#007fff] transition-colors font-medium">
                 About
               </Link>
             </div>
             
-            {/* Action Buttons - Better Alignment */}
-            <div className="flex items-center space-x-4">
+            {/* Action Buttons - Consistent Alignment */}
+            <div className="flex items-center space-x-3">
               <Link 
                 href="/signin"
-                className="border border-gray-300 text-gray-700 hover:text-[#007fff] hover:border-[#007fff] px-4 py-2 rounded-lg transition-all duration-300 font-medium text-sm"
+                className="border border-gray-300 text-gray-700 hover:text-[#007fff] hover:border-[#007fff] px-4 py-2 rounded-lg transition-all duration-300 font-medium"
               >
                 Sign in
               </Link>
               <Link 
                 href="/signup"
-                className="bg-[#007fff] text-white px-6 py-2 rounded-lg hover:bg-[#007fff]/90 transition-all duration-300 font-medium shadow-lg hover:shadow-xl text-sm"
+                className="bg-[#007fff] text-white px-6 py-2 rounded-lg hover:bg-[#007fff]/90 transition-all duration-300 font-medium shadow-lg hover:shadow-xl"
               >
                 Join Now
               </Link>
