@@ -287,68 +287,188 @@ interface AboutCardProps {
 const AboutCard: React.FC<AboutCardProps> = ({ profile, institution, isOwnProfile }) => {
   if (!profile) return null;
 
+  // Helper function to format institution size
+  const formatInstitutionSize = (size: string) => {
+    switch (size) {
+      case 'small': return '1-50 employees';
+      case 'medium': return '51-500 employees';
+      case 'large': return '501-2000 employees';
+      case 'enterprise': return '2000+ employees';
+      default: return size;
+    }
+  };
+
+  // Helper function to format institution type
+  const formatInstitutionType = (type: string) => {
+    return type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+
   return (
     <div className={COMPONENTS.card.base}>
       <div className={COMPONENTS.card.header}>
         <h2 className={`${TYPOGRAPHY.heading.h3} flex items-center gap-2`}>
           <BuildingOfficeIcon className={COMPONENTS.icon.primary} />
-          About
+          About Our Institution
         </h2>
+        {isOwnProfile && (
+          <button className="text-[#007fff] hover:text-[#007fff]/80 transition-colors text-sm font-medium">
+            Edit
+          </button>
+        )}
       </div>
       <div className={COMPONENTS.card.content}>
-        <div className="space-y-4">
-          {profile.bio && (
+        <div className="space-y-6">
+          {/* Institution Description */}
+          {institution?.description && (
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Bio</h3>
-              <p className="text-gray-600 leading-relaxed">{profile.bio}</p>
+              <p className="text-gray-600 leading-relaxed">{institution.description}</p>
             </div>
           )}
-          
-          {institution && (
-            <>
-              {institution.website && (
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Website</h3>
-                  <a 
-                    href={institution.website} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-[#007fff] hover:text-[#007fff]/80 transition-colors"
-                  >
-                    {institution.website}
-                  </a>
-                </div>
-              )}
-              
-              {institution.specialties && institution.specialties.length > 0 && (
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Specialties</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {institution.specialties.map((specialty, index) => (
-                      <span key={index} className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
-                        {specialty}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {institution.size && (
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Company Size</h3>
-                  <p className="text-gray-600 capitalize">{institution.size}</p>
-                </div>
-              )}
-            </>
-          )}
-          
-          {profile.location && (
+
+          {/* Institution Type */}
+          {institution?.type && (
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Location</h3>
-              <p className="text-gray-600 flex items-center">
+              <h3 className="font-semibold text-gray-900 mb-2 flex items-center">
+                <BuildingOfficeIcon className="w-4 h-4 mr-2 text-gray-400" />
+                Institution Type
+              </h3>
+              <p className="text-gray-600">{formatInstitutionType(institution.type)}</p>
+            </div>
+          )}
+
+          {/* Institution Size */}
+          {institution?.size && (
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-2 flex items-center">
+                <UserGroupIcon className="w-4 h-4 mr-2 text-gray-400" />
+                Institution Size
+              </h3>
+              <p className="text-gray-600">{formatInstitutionSize(institution.size)}</p>
+            </div>
+          )}
+
+          {/* Established Year */}
+          {institution?.established_year && (
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-2 flex items-center">
+                <CalendarIcon className="w-4 h-4 mr-2 text-gray-400" />
+                Established
+              </h3>
+              <p className="text-gray-600">{institution.established_year}</p>
+            </div>
+          )}
+
+          {/* Location */}
+          {institution?.location && (
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-2 flex items-center">
                 <MapPinIcon className="w-4 h-4 mr-2 text-gray-400" />
-                {profile.location}
-              </p>
+                Location
+              </h3>
+              <p className="text-gray-600">{institution.location}</p>
+            </div>
+          )}
+
+          {/* Website */}
+          {institution?.website && (
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-2 flex items-center">
+                <GlobeAltIcon className="w-4 h-4 mr-2 text-gray-400" />
+                Website
+              </h3>
+              <a 
+                href={institution.website} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-[#007fff] hover:text-[#007fff]/80 transition-colors"
+              >
+                {institution.website}
+              </a>
+            </div>
+          )}
+
+          {/* Contact Information */}
+          {(institution?.email || institution?.phone) && (
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-2 flex items-center">
+                <EnvelopeIcon className="w-4 h-4 mr-2 text-gray-400" />
+                Contact Information
+              </h3>
+              <div className="space-y-2">
+                {institution.email && (
+                  <div className="flex items-center text-gray-600">
+                    <EnvelopeIcon className="w-4 h-4 mr-2 text-gray-400" />
+                    <a href={`mailto:${institution.email}`} className="hover:text-[#007fff] transition-colors">
+                      {institution.email}
+                    </a>
+                  </div>
+                )}
+                {institution.phone && (
+                  <div className="flex items-center text-gray-600">
+                    <PhoneIcon className="w-4 h-4 mr-2 text-gray-400" />
+                    <a href={`tel:${institution.phone}`} className="hover:text-[#007fff] transition-colors">
+                      {institution.phone}
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Specialties */}
+          {institution?.specialties && institution.specialties.length > 0 && (
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-2 flex items-center">
+                <AcademicCapIcon className="w-4 h-4 mr-2 text-gray-400" />
+                Specialties
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {institution.specialties.map((specialty, index) => (
+                  <span key={index} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+                    {specialty}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Accreditation */}
+          {institution?.accreditation && institution.accreditation.length > 0 && (
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-2 flex items-center">
+                <CheckBadgeIcon className="w-4 h-4 mr-2 text-gray-400" />
+                Accreditation
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {institution.accreditation.map((accred, index) => (
+                  <span key={index} className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                    {accred}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Verification Status */}
+          {institution?.verified !== undefined && (
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-2 flex items-center">
+                <CheckBadgeIcon className="w-4 h-4 mr-2 text-gray-400" />
+                Verification Status
+              </h3>
+              <div className="flex items-center">
+                {institution.verified ? (
+                  <span className="inline-flex items-center px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                    <CheckIcon className="w-4 h-4 mr-1" />
+                    Verified Institution
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-medium">
+                    <ClockIcon className="w-4 h-4 mr-1" />
+                    Pending Verification
+                  </span>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -557,18 +677,50 @@ export default function PublicInstitutionProfilePage() {
                       <h1 className={`${TYPOGRAPHY.heading.h1} mb-2`}>
                         {profile.full_name}
                       </h1>
-                      <p className={`${TYPOGRAPHY.body.large} mb-4`}>
+                      <p className={`${TYPOGRAPHY.body.large} mb-2`}>
                         {institution?.type ? institution.type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Healthcare Organization'}
                       </p>
+                      
+                      {/* Institution Details */}
+                      <div className="flex items-center space-x-4 text-sm text-gray-500 mb-4">
+                        {institution?.location && (
+                          <div className="flex items-center">
+                            <MapPinIcon className="w-4 h-4 mr-1" />
+                            <span>{institution.location}</span>
+                          </div>
+                        )}
+                        {institution?.established_year && (
+                          <div className="flex items-center">
+                            <CalendarIcon className="w-4 h-4 mr-1" />
+                            <span>Est. {institution.established_year}</span>
+                          </div>
+                        )}
+                        {institution?.size && (
+                          <div className="flex items-center">
+                            <UserGroupIcon className="w-4 h-4 mr-1" />
+                            <span>
+                              {institution.size === 'small' ? '1-50 employees' :
+                               institution.size === 'medium' ? '51-500 employees' :
+                               institution.size === 'large' ? '501-2000 employees' :
+                               institution.size === 'enterprise' ? '2000+ employees' :
+                               institution.size}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Followers and Contact */}
                       <div className="flex items-center space-x-6 text-sm text-gray-500">
                         <div className="flex items-center">
                           <UserGroupIcon className="w-4 h-4 mr-2" />
                           <span>{connectionCount} followers</span>
                         </div>
-                        {profile.location && (
+                        {institution?.email && (
                           <div className="flex items-center">
-                            <MapPinIcon className="w-4 h-4 mr-2" />
-                            <span>{profile.location}</span>
+                            <EnvelopeIcon className="w-4 h-4 mr-2" />
+                            <a href={`mailto:${institution.email}`} className="text-[#007fff] hover:text-[#007fff]/80 transition-colors">
+                              Contact info
+                            </a>
                           </div>
                         )}
                       </div>
