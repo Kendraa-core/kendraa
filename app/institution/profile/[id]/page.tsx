@@ -657,17 +657,22 @@ export default function PublicInstitutionProfilePage() {
       return;
     }
 
+    console.log('Attempting to follow institution:', { userId: user.id, profileId: profile.id });
+
     try {
       const success = await followInstitution(user.id, profile.id);
       if (success) {
         setFollowStatus('following');
         toast.success('Successfully followed institution');
+        // Refresh the page data to update follower count
+        fetchProfileData();
       } else {
         toast.error('Failed to follow institution');
       }
     } catch (error: any) {
-      console.error('Error following:', error);
-      toast.error(error.message || 'Failed to follow institution');
+      console.error('Error following institution:', error);
+      const errorMessage = error?.message || error?.toString() || 'Failed to follow institution';
+      toast.error(errorMessage);
     }
   };
 
