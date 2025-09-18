@@ -817,6 +817,9 @@ export default function PublicInstitutionProfilePage() {
               {/* Profile Content */}
               <div className="px-6 py-4 border-t border-gray-100 bg-gradient-to-br from-gray-50/50 to-white">
                 <div className="space-y-6">
+                  {/* About Section */}
+                  <AboutCard profile={profile} institution={institution} isOwnProfile={isOwnProfile} />
+
                   {/* Activity Section */}
                   <ActivityCard 
                     posts={posts} 
@@ -826,9 +829,6 @@ export default function PublicInstitutionProfilePage() {
                     connectionCount={connectionCount} 
                     router={router}
                   />
-
-                  {/* About Section */}
-                  <AboutCard profile={profile} institution={institution} isOwnProfile={isOwnProfile} />
                 </div>
               </div>
             </div>
