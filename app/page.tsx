@@ -116,7 +116,7 @@ export default function LandingPage() {
                 href="/signup"
                 className="bg-[#007fff] text-white px-6 py-2 rounded-full hover:bg-[#007fff]/90 transition-all duration-300 font-medium shadow-lg hover:shadow-xl"
               >
-                Join Early Access
+                Join Now
               </Link>
             </div>
           </div>
@@ -142,7 +142,7 @@ export default function LandingPage() {
               >
                 <div className="mb-6">
                   <span className="inline-flex items-center px-4 py-2 bg-[#007fff]/10 text-[#007fff] rounded-full text-sm font-medium mb-6">
-                    🚀 Early Access • Building the Future of Healthcare Networking
+                    🚀 Join Now • Building the Future of Healthcare Networking
                   </span>
                 </div>
                 
@@ -165,7 +165,7 @@ export default function LandingPage() {
                     className="bg-[#007fff] hover:bg-[#007fff]/90 text-white px-8 py-3 rounded-full font-semibold transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl inline-flex items-center justify-center"
                   >
                     <RocketLaunchIcon className="w-5 h-5 mr-2" />
-                    Join Early Access
+                    Join Now
                   </Link>
                   <Link
                     href="#vision"
@@ -176,9 +176,9 @@ export default function LandingPage() {
                   </Link>
                 </div>
                 
-                {/* Early Access Benefits */}
+                {/* Member Benefits */}
                 <div className="mt-12 pt-8 border-t border-gray-200">
-                  <p className="text-sm text-gray-500 mb-4">Early Access Benefits</p>
+                  <p className="text-sm text-gray-500 mb-4">Member Benefits</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                     <div className="flex items-center space-x-2">
                       <CheckCircleIcon className="w-4 h-4 text-green-500" />
@@ -441,7 +441,7 @@ export default function LandingPage() {
                   className="bg-white text-[#007fff] px-8 py-3 rounded-full font-semibold hover:bg-white/90 transition-colors shadow-lg hover:shadow-xl inline-flex items-center"
                 >
                   <RocketLaunchIcon className="w-5 h-5 mr-2" />
-                  Join Early Access
+                  Join Now
                 </Link>
               </div>
             </Card>
@@ -472,7 +472,7 @@ export default function LandingPage() {
                 className="bg-white text-[#007fff] px-8 py-3 rounded-full font-semibold hover:bg-white/90 transition-colors shadow-lg hover:shadow-xl inline-flex items-center justify-center"
               >
                 <RocketLaunchIcon className="w-5 h-5 mr-2" />
-                Join Early Access
+                Join Now
               </Link>
               <Link
                 href="/about"
@@ -512,7 +512,7 @@ export default function LandingPage() {
               <ul className="space-y-2 text-gray-400">
                 <li><Link href="#features" className="hover:text-white transition-colors">Features</Link></li>
                 <li><Link href="#vision" className="hover:text-white transition-colors">Vision</Link></li>
-                <li><Link href="/signup" className="hover:text-white transition-colors">Early Access</Link></li>
+                <li><Link href="/signup" className="hover:text-white transition-colors">Join Now</Link></li>
               </ul>
             </div>
             <div>
