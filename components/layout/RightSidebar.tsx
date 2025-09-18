@@ -8,7 +8,7 @@ import {
 } from '@heroicons/react/24/outline';
 import Avatar from '@/components/common/Avatar';
 import { useAuth } from '@/contexts/AuthContext';
-import { getSuggestedConnections } from '@/lib/queries';
+import { getSuggestedConnections, followUser } from '@/lib/queries';
 import { formatNumber } from '@/lib/utils';
 import type { Profile } from '@/types/database.types';
 
@@ -34,6 +34,7 @@ export default function RightSidebar({ connectionCount = 0, isInstitution = fals
   const [topNews, setTopNews] = useState<NewsItem[]>([]);
   const [suggestedConnections, setSuggestedConnections] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [connectingUsers, setConnectingUsers] = useState<Set<string>>(new Set());
 
   // This new function fetches news from GNews and uses the same cache as your NewsPage
   const fetchTopHealthcareNews = async (): Promise<NewsItem[]> => {
@@ -141,6 +142,28 @@ export default function RightSidebar({ connectionCount = 0, isInstitution = fals
     return `${diffInDays}d ago`;
   };
 
+  const handleConnect = async (userId: string) => {
+    if (!user?.id || connectingUsers.has(userId)) return;
+    
+    setConnectingUsers(prev => new Set(prev).add(userId));
+    
+    try {
+      const result = await followUser(user.id, userId, 'individual', 'individual');
+      if (result) {
+        // Remove the user from suggestions
+        setSuggestedConnections(prev => prev.filter(conn => conn.id !== userId));
+      }
+    } catch (error) {
+      console.error('Error connecting to user:', error);
+    } finally {
+      setConnectingUsers(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(userId);
+        return newSet;
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-8">
@@ -244,11 +267,13 @@ export default function RightSidebar({ connectionCount = 0, isInstitution = fals
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        // TODO: Implement connection request
+                        handleConnect(connection.id);
                       }}
+
                       className="text-xs font-medium text-[#007fff] hover:text-[#007fff]/80 bg-white px-2 py-1 rounded-lg border border-gray-200 hover:border-gray-300 transition-all duration-200"
+
                     >
-                      Connect
+                      {connectingUsers.has(connection.id) ? 'Connecting...' : 'Connect'}
                     </button>
                   </div>
                 </Link>

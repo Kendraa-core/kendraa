@@ -171,7 +171,9 @@ export default function CorporateProfileWizard() {
         accreditation: null,
         established_year: parseInt(profileData.yearEstablished) || null,
         size: 'medium' as const,
-        verified: false
+        verified: false,
+        short_description: null,
+        theme_color: '#007fff'
       };
 
       const result = await createInstitution(institutionData);

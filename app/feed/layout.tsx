@@ -45,10 +45,15 @@ export default function DashboardLayout({
   // This custom hook cleanly handles the logic for protecting routes
   const { isProtected, isLoading: isOnboardingLoading } = useOnboardingProtection();
 
-  // Redirect non-individual users away from this layout
+  // Redirect institution users to institution pages (but respect onboarding status)
   useEffect(() => {
-    if (!authLoading && profile && profile.user_type === 'institution') {
-      router.push('/institution/feed');
+    if (!authLoading && user && profile) {
+      if (profile.user_type === 'institution' || profile.profile_type === 'institution') {
+        // Let the onboarding protection hook handle the redirect
+        // It will redirect to /institution/onboarding if not completed
+        // or to /institution/feed if completed
+        return;
+      }
     }
   }, [profile, authLoading, router]);
 

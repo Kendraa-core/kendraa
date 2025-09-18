@@ -23,18 +23,23 @@ export default function FeedPage() {
   const [activeTab, setActiveTab] = useState<'posts' | 'medical'>('posts');
   const [postContent, setPostContent] = useState('');
 
-  // Redirect institution users to their dedicated feed
-  useEffect(() => {
-    if (profile && (profile.user_type === 'institution' || profile.profile_type === 'institution')) {
-      router.push('/institution/feed');
-    }
-  }, [profile, router]);
 
   const handlePostDeleted = (deletedPostId: string) => {
     setPosts(currentPosts => 
       currentPosts.filter(post => post.id !== deletedPostId)
     );
   };
+  
+  // Redirect institution users to their dedicated feed (but respect onboarding status)
+  useEffect(() => {
+    if (profile && (profile.user_type === 'institution' || profile.profile_type === 'institution')) {
+      // Let the onboarding protection hook handle the redirect
+      // It will redirect to /institution/onboarding if not completed
+      // or to /institution/feed if completed
+      return;
+    }
+  }, [profile, router]);
+
 
   const fetchPosts = useCallback(async () => {
     if (!user?.id) return;
@@ -171,9 +176,23 @@ export default function FeedPage() {
                 ))}
               </div>
             ) : (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-12 text-center">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <PlusIcon className="w-8 h-8 text-gray-400" />
+
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
+                <div className="max-w-md mx-auto">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <PlusIcon className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-black mb-2">No posts yet</h3>
+                  <p className="text-gray-600 mb-6">
+                    Be the first to share your thoughts and insights with the community.
+                  </p>
+                  <button
+                    onClick={() => setActiveTab('posts')}
+                    className="bg-[#007fff] text-white px-6 py-3 rounded-xl hover:bg-[#007fff]/90 transition-colors font-medium"
+                  >
+                    Create your first post
+                  </button>
+
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No posts yet</h3>
                 <p className="text-gray-600 mb-6">
@@ -194,4 +213,6 @@ export default function FeedPage() {
       </div>
     </div>
   );
-}
+
+} 
+
