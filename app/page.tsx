@@ -269,38 +269,32 @@ export default function LandingPage() {
               {
                 icon: UsersIcon,
                 title: "Professional Networking",
-                description: "Connect with healthcare professionals across all medical specialties. Build meaningful professional relationships.",
-                status: "In Development"
+                description: "Connect with healthcare professionals across all medical specialties. Build meaningful professional relationships."
               },
               {
                 icon: BriefcaseIcon,
                 title: "Healthcare Job Board",
-                description: "Specialized job platform for medical positions. Find opportunities that match your expertise and career goals.",
-                status: "Coming Soon"
+                description: "Specialized job platform for medical positions. Find opportunities that match your expertise and career goals."
               },
               {
                 icon: CalendarDaysIcon,
                 title: "Medical Events",
-                description: "Discover conferences, CME courses, and medical workshops. Stay updated with continuing education.",
-                status: "Planned"
+                description: "Discover conferences, CME courses, and medical workshops. Stay updated with continuing education."
               },
               {
                 icon: BuildingOfficeIcon,
                 title: "Institution Profiles",
-                description: "Healthcare institutions can showcase services, post positions, and connect with professionals.",
-                status: "In Development"
+                description: "Healthcare institutions can showcase services, post positions, and connect with professionals."
               },
               {
                 icon: DevicePhoneMobileIcon,
                 title: "Mobile Experience",
-                description: "Full mobile app experience for networking on-the-go. Available on iOS and Android.",
-                status: "Coming Soon"
+                description: "Full mobile app experience for networking on-the-go. Available on iOS and Android."
               },
               {
                 icon: ShieldCheckIcon,
                 title: "HIPAA Compliance",
-                description: "Built with healthcare privacy standards in mind. Your professional data stays secure.",
-                status: "Core Feature"
+                description: "Built with healthcare privacy standards in mind. Your professional data stays secure."
               }
             ].map((feature, index) => (
               <motion.div
@@ -312,18 +306,8 @@ export default function LandingPage() {
               >
                 <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-2 border-gray-200/50 bg-white/80 backdrop-blur-sm h-full">
                   <CardHeader className="text-center">
-                    <div className="w-16 h-16 bg-[#007fff]/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-[#007fff]/20 transition-colors duration-300">
+                    <div className="w-16 h-16 bg-[#007fff]/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-[#007fff]/20 transition-colors duration-300">
                       <feature.icon className="w-8 h-8 text-[#007fff]" />
-                    </div>
-                    <div className="mb-2">
-                      <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                        feature.status === 'In Development' ? 'bg-yellow-100 text-yellow-800' :
-                        feature.status === 'Coming Soon' ? 'bg-blue-100 text-blue-800' :
-                        feature.status === 'Planned' ? 'bg-gray-100 text-gray-800' :
-                        'bg-green-100 text-green-800'
-                      }`}>
-                        {feature.status}
-                      </span>
                     </div>
                     <CardTitle className="text-xl text-gray-900 group-hover:text-[#007fff] transition-colors">
                       {feature.title}
