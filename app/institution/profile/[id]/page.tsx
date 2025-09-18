@@ -304,203 +304,254 @@ const AboutCard: React.FC<AboutCardProps> = ({ profile, institution, isOwnProfil
     return type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
 
+  // Helper function to check if we have any information to display
+  const hasBasicInfo = institution?.type || institution?.size || institution?.established_year || institution?.location;
+  const hasContactInfo = institution?.website || institution?.email || institution?.phone;
+  const hasSpecialties = institution?.specialties && institution.specialties.length > 0;
+  const hasAccreditation = institution?.accreditation && institution.accreditation.length > 0;
+  const hasVerification = institution?.verified !== undefined;
+
+  // Don't show the card if there's no information to display
+  if (!institution?.description && !hasBasicInfo && !hasContactInfo && !hasSpecialties && !hasAccreditation && !hasVerification) {
+    return null;
+  }
+
   return (
-    <div className={COMPONENTS.card.base}>
-      <div className={COMPONENTS.card.header}>
-        <h2 className={`${TYPOGRAPHY.heading.h3} flex items-center gap-2`}>
-          <BuildingOfficeIcon className={COMPONENTS.icon.primary} />
-          About Our Institution
-        </h2>
-        {isOwnProfile && (
-          <button className="text-[#007fff] hover:text-[#007fff]/80 transition-colors text-sm font-medium">
-            Edit
-          </button>
-        )}
+    <div className={`${COMPONENTS.card.base} overflow-hidden`}>
+      {/* Header with gradient background */}
+      <div className="bg-gradient-to-r from-[#007fff]/5 via-purple-50/50 to-[#007fff]/5 px-6 py-5 border-b border-gray-100">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-[#007fff]/10 rounded-xl flex items-center justify-center">
+              <BuildingOfficeIcon className="w-5 h-5 text-[#007fff]" />
+            </div>
+            <div>
+              <h2 className={`${TYPOGRAPHY.heading.h3} text-xl text-gray-900`}>About Our Institution</h2>
+              <p className="text-sm text-gray-600">Learn more about who we are</p>
+            </div>
+          </div>
+          {isOwnProfile && (
+            <button className="text-[#007fff] hover:text-[#007fff]/80 transition-colors text-sm font-medium px-3 py-1 rounded-lg hover:bg-[#007fff]/5">
+              Edit
+            </button>
+          )}
+        </div>
       </div>
-      <div className={COMPONENTS.card.content}>
-        {/* Institution Description - Full Width */}
+
+      <div className="p-6 space-y-8">
+        {/* Institution Description */}
         {institution?.description && (
-          <div className="mb-8">
-            <p className="text-gray-600 leading-relaxed text-lg">{institution.description}</p>
+          <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 border border-gray-100">
+            <p className="text-gray-700 leading-relaxed text-base">{institution.description}</p>
           </div>
         )}
 
-        {/* Grid Layout for Institution Details */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Left Column */}
-          <div className="space-y-6">
-            {/* Institution Type */}
-            {institution?.type && (
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
-                <div className="flex items-center mb-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                    <BuildingOfficeIcon className="w-5 h-5 text-blue-600" />
+        {/* Basic Information Grid - Only show if we have data */}
+        {hasBasicInfo && (
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <div className="w-2 h-2 bg-[#007fff] rounded-full mr-3"></div>
+              Institution Details
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Institution Type */}
+              {institution?.type && (
+                <div className="bg-white rounded-xl p-4 border border-[#007fff]/10 hover:border-[#007fff]/20 transition-all duration-300 hover:shadow-md group">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-[#007fff]/10 rounded-lg flex items-center justify-center group-hover:bg-[#007fff]/15 transition-colors">
+                      <BuildingOfficeIcon className="w-4 h-4 text-[#007fff]" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">Type</p>
+                      <p className="text-gray-900 font-semibold">{formatInstitutionType(institution.type)}</p>
+                    </div>
                   </div>
-                  <h3 className="font-semibold text-gray-900">Institution Type</h3>
                 </div>
-                <p className="text-gray-700 font-medium">{formatInstitutionType(institution.type)}</p>
-              </div>
-            )}
+              )}
 
-            {/* Institution Size */}
-            {institution?.size && (
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 border border-green-100">
-                <div className="flex items-center mb-3">
-                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                    <UserGroupIcon className="w-5 h-5 text-green-600" />
+              {/* Institution Size */}
+              {institution?.size && (
+                <div className="bg-white rounded-xl p-4 border border-[#007fff]/10 hover:border-[#007fff]/20 transition-all duration-300 hover:shadow-md group">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-[#007fff]/10 rounded-lg flex items-center justify-center group-hover:bg-[#007fff]/15 transition-colors">
+                      <UserGroupIcon className="w-4 h-4 text-[#007fff]" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">Size</p>
+                      <p className="text-gray-900 font-semibold">{formatInstitutionSize(institution.size)}</p>
+                    </div>
                   </div>
-                  <h3 className="font-semibold text-gray-900">Institution Size</h3>
                 </div>
-                <p className="text-gray-700 font-medium">{formatInstitutionSize(institution.size)}</p>
-              </div>
-            )}
+              )}
 
-            {/* Established Year */}
-            {institution?.established_year && (
-              <div className="bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl p-4 border border-purple-100">
-                <div className="flex items-center mb-3">
-                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
-                    <CalendarIcon className="w-5 h-5 text-purple-600" />
+              {/* Established Year */}
+              {institution?.established_year && (
+                <div className="bg-white rounded-xl p-4 border border-[#007fff]/10 hover:border-[#007fff]/20 transition-all duration-300 hover:shadow-md group">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-[#007fff]/10 rounded-lg flex items-center justify-center group-hover:bg-[#007fff]/15 transition-colors">
+                      <CalendarIcon className="w-4 h-4 text-[#007fff]" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">Established</p>
+                      <p className="text-gray-900 font-semibold">{institution.established_year}</p>
+                    </div>
                   </div>
-                  <h3 className="font-semibold text-gray-900">Established</h3>
                 </div>
-                <p className="text-gray-700 font-medium">{institution.established_year}</p>
-              </div>
-            )}
+              )}
 
-            {/* Location */}
-            {institution?.location && (
-              <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl p-4 border border-orange-100">
-                <div className="flex items-center mb-3">
-                  <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
-                    <MapPinIcon className="w-5 h-5 text-orange-600" />
+              {/* Location */}
+              {institution?.location && (
+                <div className="bg-white rounded-xl p-4 border border-[#007fff]/10 hover:border-[#007fff]/20 transition-all duration-300 hover:shadow-md group">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-[#007fff]/10 rounded-lg flex items-center justify-center group-hover:bg-[#007fff]/15 transition-colors">
+                      <MapPinIcon className="w-4 h-4 text-[#007fff]" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">Location</p>
+                      <p className="text-gray-900 font-semibold">{institution.location}</p>
+                    </div>
                   </div>
-                  <h3 className="font-semibold text-gray-900">Location</h3>
                 </div>
-                <p className="text-gray-700 font-medium">{institution.location}</p>
-              </div>
-            )}
+              )}
+            </div>
           </div>
+        )}
 
-          {/* Right Column */}
-          <div className="space-y-6">
-            {/* Website */}
-            {institution?.website && (
-              <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl p-4 border border-cyan-100">
-                <div className="flex items-center mb-3">
-                  <div className="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center mr-3">
-                    <GlobeAltIcon className="w-5 h-5 text-cyan-600" />
+        {/* Contact Information - Only show if we have contact data */}
+        {hasContactInfo && (
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <div className="w-2 h-2 bg-[#007fff] rounded-full mr-3"></div>
+              Contact & Online Presence
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Website */}
+              {institution?.website && (
+                <div className="bg-white rounded-xl p-4 border border-[#007fff]/10 hover:border-[#007fff]/20 transition-all duration-300 hover:shadow-md group">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-[#007fff]/10 rounded-lg flex items-center justify-center group-hover:bg-[#007fff]/15 transition-colors">
+                      <GlobeAltIcon className="w-4 h-4 text-[#007fff]" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">Website</p>
+                      <a 
+                        href={institution.website} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-[#007fff] hover:text-[#007fff]/80 transition-colors font-semibold text-sm truncate block"
+                      >
+                        {institution.website.replace(/^https?:\/\//, '')}
+                      </a>
+                    </div>
                   </div>
-                  <h3 className="font-semibold text-gray-900">Website</h3>
                 </div>
-                <a 
-                  href={institution.website} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-[#007fff] hover:text-[#007fff]/80 transition-colors font-medium break-all"
-                >
-                  {institution.website}
-                </a>
-              </div>
-            )}
+              )}
 
-            {/* Contact Information */}
-            {(institution?.email || institution?.phone) && (
-              <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl p-4 border border-pink-100">
-                <div className="flex items-center mb-3">
-                  <div className="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center mr-3">
-                    <EnvelopeIcon className="w-5 h-5 text-pink-600" />
-                  </div>
-                  <h3 className="font-semibold text-gray-900">Contact Information</h3>
-                </div>
-                <div className="space-y-2">
-                  {institution.email && (
-                    <div className="flex items-center">
-                      <EnvelopeIcon className="w-4 h-4 mr-2 text-gray-400" />
-                      <a href={`mailto:${institution.email}`} className="text-[#007fff] hover:text-[#007fff]/80 transition-colors font-medium">
+              {/* Email */}
+              {institution?.email && (
+                <div className="bg-white rounded-xl p-4 border border-[#007fff]/10 hover:border-[#007fff]/20 transition-all duration-300 hover:shadow-md group">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-[#007fff]/10 rounded-lg flex items-center justify-center group-hover:bg-[#007fff]/15 transition-colors">
+                      <EnvelopeIcon className="w-4 h-4 text-[#007fff]" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">Email</p>
+                      <a href={`mailto:${institution.email}`} className="text-[#007fff] hover:text-[#007fff]/80 transition-colors font-semibold text-sm truncate block">
                         {institution.email}
                       </a>
                     </div>
-                  )}
-                  {institution.phone && (
-                    <div className="flex items-center">
-                      <PhoneIcon className="w-4 h-4 mr-2 text-gray-400" />
-                      <a href={`tel:${institution.phone}`} className="text-[#007fff] hover:text-[#007fff]/80 transition-colors font-medium">
+                  </div>
+                </div>
+              )}
+
+              {/* Phone */}
+              {institution?.phone && (
+                <div className="bg-white rounded-xl p-4 border border-[#007fff]/10 hover:border-[#007fff]/20 transition-all duration-300 hover:shadow-md group">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-[#007fff]/10 rounded-lg flex items-center justify-center group-hover:bg-[#007fff]/15 transition-colors">
+                      <PhoneIcon className="w-4 h-4 text-[#007fff]" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">Phone</p>
+                      <a href={`tel:${institution.phone}`} className="text-[#007fff] hover:text-[#007fff]/80 transition-colors font-semibold">
                         {institution.phone}
                       </a>
                     </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Verification Status */}
-            {institution?.verified !== undefined && (
-              <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl p-4 border border-emerald-100">
-                <div className="flex items-center mb-3">
-                  <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center mr-3">
-                    <CheckBadgeIcon className="w-5 h-5 text-emerald-600" />
                   </div>
-                  <h3 className="font-semibold text-gray-900">Verification Status</h3>
                 </div>
-                <div className="flex items-center">
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Verification Status - Only show if verification info exists */}
+        {hasVerification && (
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <div className="w-2 h-2 bg-[#007fff] rounded-full mr-3"></div>
+              Verification
+            </h3>
+            <div className="bg-white rounded-xl p-4 border border-[#007fff]/10">
+              <div className="flex items-center space-x-3">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${institution.verified ? 'bg-green-100' : 'bg-yellow-100'}`}>
+                  <CheckBadgeIcon className={`w-4 h-4 ${institution.verified ? 'text-green-600' : 'text-yellow-600'}`} />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">Status</p>
                   {institution.verified ? (
-                    <span className="inline-flex items-center px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
-                      <CheckIcon className="w-4 h-4 mr-1" />
+                    <span className="inline-flex items-center text-green-700 font-semibold text-sm">
+                      <CheckIcon className="w-3 h-3 mr-1" />
                       Verified Institution
                     </span>
                   ) : (
-                    <span className="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-medium">
-                      <ClockIcon className="w-4 h-4 mr-1" />
+                    <span className="inline-flex items-center text-yellow-700 font-semibold text-sm">
+                      <ClockIcon className="w-3 h-3 mr-1" />
                       Pending Verification
                     </span>
                   )}
                 </div>
               </div>
-            )}
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Specialties and Accreditation - Full Width */}
-        <div className="mt-8 space-y-6">
-          {/* Specialties */}
-          {institution?.specialties && institution.specialties.length > 0 && (
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
-              <div className="flex items-center mb-4">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                  <AcademicCapIcon className="w-5 h-5 text-blue-600" />
-                </div>
-                <h3 className="font-semibold text-gray-900 text-lg">Specialties</h3>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                {institution.specialties.map((specialty, index) => (
-                  <span key={index} className="px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors">
+        {/* Specialties - Only show if we have specialties */}
+        {hasSpecialties && (
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <div className="w-2 h-2 bg-[#007fff] rounded-full mr-3"></div>
+              Specialties
+            </h3>
+            <div className="bg-gradient-to-br from-[#007fff]/5 to-purple-50/50 rounded-2xl p-6 border border-[#007fff]/10">
+              <div className="flex flex-wrap gap-2">
+                {institution.specialties?.map((specialty, index) => (
+                  <span key={index} className="px-4 py-2 bg-white text-[#007fff] border border-[#007fff]/20 rounded-full text-sm font-medium hover:bg-[#007fff]/5 transition-colors shadow-sm">
                     {specialty}
                   </span>
                 ))}
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Accreditation */}
-          {institution?.accreditation && institution.accreditation.length > 0 && (
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-100">
-              <div className="flex items-center mb-4">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                  <CheckBadgeIcon className="w-5 h-5 text-green-600" />
-                </div>
-                <h3 className="font-semibold text-gray-900 text-lg">Accreditation</h3>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                {institution.accreditation.map((accred, index) => (
-                  <span key={index} className="px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-medium hover:bg-green-200 transition-colors">
+        {/* Accreditation - Only show if we have accreditation */}
+        {hasAccreditation && (
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <div className="w-2 h-2 bg-[#007fff] rounded-full mr-3"></div>
+              Accreditation
+            </h3>
+            <div className="bg-gradient-to-br from-green-50/50 to-emerald-50/50 rounded-2xl p-6 border border-green-100">
+              <div className="flex flex-wrap gap-2">
+                {institution.accreditation?.map((accred, index) => (
+                  <span key={index} className="px-4 py-2 bg-white text-green-700 border border-green-200 rounded-full text-sm font-medium hover:bg-green-50 transition-colors shadow-sm">
                     {accred}
                   </span>
                 ))}
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -606,17 +657,22 @@ export default function PublicInstitutionProfilePage() {
       return;
     }
 
+    console.log('Attempting to follow institution:', { userId: user.id, profileId: profile.id });
+
     try {
       const success = await followInstitution(user.id, profile.id);
       if (success) {
         setFollowStatus('following');
         toast.success('Successfully followed institution');
+        // Refresh the page data to update follower count
+        fetchProfileData();
       } else {
         toast.error('Failed to follow institution');
       }
     } catch (error: any) {
-      console.error('Error following:', error);
-      toast.error(error.message || 'Failed to follow institution');
+      console.error('Error following institution:', error);
+      const errorMessage = error?.message || error?.toString() || 'Failed to follow institution';
+      toast.error(errorMessage);
     }
   };
 

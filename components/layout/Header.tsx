@@ -327,19 +327,21 @@ export default function Header({ onRightSidebarToggle }: HeaderProps) {
                         </div>
                       </div>
                       
-                      {/* Profile Completion Bar */}
-                      <div className="mt-3">
-                        <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
-                          <span>Profile completion</span>
-                          <span>{profileCompletion}%</span>
+                      {/* Profile Completion Bar - Hide if 100% complete or for institution users */}
+                      {profileCompletion < 100 && profile?.user_type !== 'institution' && profile?.profile_type !== 'institution' && (
+                        <div className="mt-3">
+                          <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                            <span>Profile completion</span>
+                            <span>{profileCompletion}%</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div 
+                              className="bg-[#007fff] h-2 rounded-full transition-all duration-300"
+                              style={{ width: `${profileCompletion}%` }}
+                            ></div>
+                          </div>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-[#007fff] h-2 rounded-full transition-all duration-300"
-                            style={{ width: `${profileCompletion}%` }}
-                          ></div>
-                        </div>
-                      </div>
+                      )}
                     </div>
 
                     {/* View Profile */}

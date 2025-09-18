@@ -1047,52 +1047,86 @@ export async function rejectConnectionRequest(connectionId: string): Promise<boo
 // Follow system for institutions (automatic acceptance)
 export async function followInstitution(followerId: string, institutionId: string): Promise<boolean> {
   try {
-    const schemaExists = await true;
-    if (!schemaExists) {
-      return false;
+    console.log('followInstitution called with:', { followerId, institutionId });
+    
+    // Validate input parameters
+    if (!followerId || !institutionId) {
+      console.error('Invalid parameters:', { followerId, institutionId });
+      throw new Error('Follower ID and Institution ID are required');
+    }
+    
+    if (followerId === institutionId) {
+      console.error('Cannot follow yourself');
+      throw new Error('Cannot follow yourself');
     }
     
     // Check if already following
-    const { data: existingFollow } = await getSupabase()
+    const { data: existingFollow, error: checkError } = await getSupabase()
       .from('follows')
       .select('id')
       .eq('follower_id', followerId)
       .eq('following_id', institutionId)
-      .single();
+      .maybeSingle(); // Use maybeSingle instead of single to avoid error when no match
+    
+    if (checkError) {
+      console.error('Error checking existing follow:', checkError);
+      throw new Error(`Database error checking existing follow: ${checkError.message}`);
+    }
     
     if (existingFollow) {
+      console.log('Already following this institution');
       return true; // Already following
     }
     
     // Create follow relationship
-    const { error } = await getSupabase()
+    const { data: insertData, error: insertError } = await getSupabase()
       .from('follows')
       .insert({
         follower_id: followerId,
         following_id: institutionId,
         created_at: new Date().toISOString(),
-      });
+      })
+      .select()
+      .single();
 
-    if (error) throw error;
+    if (insertError) {
+      console.error('Error inserting follow relationship:', insertError);
+      throw new Error(`Failed to create follow relationship: ${insertError.message}`);
+    }
     
-    // Create notification for institution
-    const followerProfile = await getProfile(followerId);
-    if (followerProfile) {
-      await createNotification({
-        user_id: institutionId,
-        type: 'connection_accepted',
-        title: 'New Follower',
-        message: `${followerProfile.full_name || 'Someone'} started following your institution`,
-        read: false,
-        data: { profileId: followerId },
-        action_url: null,
-      });
+    console.log('Follow relationship created:', insertData);
+    
+    // Create notification for institution (non-blocking)
+    try {
+      const followerProfile = await getProfile(followerId);
+      if (followerProfile) {
+        await createNotification({
+          user_id: institutionId,
+          type: 'connection_accepted',
+          title: 'New Follower',
+          message: `${followerProfile.full_name || 'Someone'} started following your institution`,
+          read: false,
+          data: { profileId: followerId },
+          action_url: null,
+        });
+        console.log('Notification created successfully');
+      } else {
+        console.warn('Could not get follower profile for notification');
+      }
+    } catch (notificationError) {
+      console.error('Error creating notification (non-blocking):', notificationError);
+      // Don't throw here - the follow was successful even if notification failed
     }
     
     return true;
   } catch (error) {
     console.error('Error following institution:', error);
-    return false;
+    // Re-throw the error with more context
+    if (error instanceof Error) {
+      throw error;
+    } else {
+      throw new Error(`Unknown error occurred while following institution: ${JSON.stringify(error)}`);
+    }
   }
 }
 
@@ -1154,8 +1188,11 @@ export async function getInstitutionFollowers(institutionId: string): Promise<Pr
 
 export async function getFollowStatus(followerId: string, institutionId: string): Promise<boolean> {
   try {
-    const schemaExists = await true;
-    if (!schemaExists) {
+    console.log('Checking follow status:', { followerId, institutionId });
+    
+    // Validate input parameters
+    if (!followerId || !institutionId) {
+      console.error('Invalid parameters for getFollowStatus:', { followerId, institutionId });
       return false;
     }
     
@@ -1164,14 +1201,18 @@ export async function getFollowStatus(followerId: string, institutionId: string)
       .select('id')
       .eq('follower_id', followerId)
       .eq('following_id', institutionId)
-      .single();
+      .maybeSingle(); // Use maybeSingle to avoid error when no record found
 
-    if (error || !data) {
+    if (error) {
+      console.error('Error checking follow status:', error);
       return false;
     }
     
-    return true;
+    const isFollowing = !!data;
+    console.log('Follow status result:', isFollowing);
+    return isFollowing;
   } catch (error) {
+    console.error('Exception in getFollowStatus:', error);
     return false;
   }
 }

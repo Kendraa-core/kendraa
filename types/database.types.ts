@@ -96,6 +96,11 @@ export interface Database {
         Insert: Omit<PostShare, 'id' | 'created_at'>;
         Update: Partial<Omit<PostShare, 'id' | 'created_at'>>;
       };
+      follows: {
+        Row: Follow;
+        Insert: Omit<Follow, 'id' | 'created_at'>;
+        Update: Partial<Omit<Follow, 'id' | 'created_at'>>;
+      };
 
     };
   };
@@ -385,8 +390,6 @@ export interface Follow {
   created_at: string;
   follower_id: string; // User who is following
   following_id: string; // User being followed (usually institution)
-  follower_type: 'individual' | 'institution';
-  following_type: 'individual' | 'institution';
 }
 
 export interface FollowWithProfile extends Follow {
