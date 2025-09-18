@@ -932,6 +932,7 @@ export async function getSuggestedConnections(userId: string, limit = 10): Promi
       .not('id', 'in', `(${excludeUserIds.join(',')})`)
       .neq('user_type', 'institution') // Exclude institutions
       .neq('profile_type', 'institution') // Also exclude by profile_type
+      .eq('onboarding_completed', true) // Only show users who completed onboarding
       .limit(limit);
 
     if (error) {
@@ -2498,6 +2499,7 @@ export async function getSuggestedInstitutions(userId: string, limit: number = 1
       .from('profiles')
       .select('*')
       .eq('profile_type', 'institution')
+      .eq('onboarding_completed', true) // Only show institutions that completed onboarding
       .limit(limit);
     
     if (followingIds.length > 0) {

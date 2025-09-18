@@ -515,7 +515,7 @@ export default function NetworkPage() {
                             </span>
                           </div>
                           <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} mb-2`}>
-                        {request.requester.headline || 'Healthcare Professional'}
+                        {request.requester.headline || (request.requester.specialization && request.requester.specialization.length > 0 ? request.requester.specialization[0] : null) || 'Healthcare Professional'}
                       </p>
                           <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
                             {request.requester.location && (
@@ -589,7 +589,7 @@ export default function NetworkPage() {
                             {profile.full_name}
                           </h4>
                           <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} mb-2 line-clamp-2`}>
-                            {profile.headline || 'Healthcare Institution'}
+                            {profile.headline || profile.specialization || 'Healthcare Institution'}
                           </p>
                           <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} mb-3`}>
                             {profile.location && (
@@ -660,7 +660,7 @@ export default function NetworkPage() {
                             {profile.full_name}
                           </h4>
                           <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} mb-2 line-clamp-2`}>
-                    {profile.headline || 'Healthcare Professional'}
+                    {profile.headline || (profile.specialization && profile.specialization.length > 0 ? profile.specialization[0] : null) || 'Healthcare Professional'}
                   </p>
                           <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} mb-3`}>
                             {(profile.mutual_connections || 0) > 0 && (
@@ -730,7 +730,7 @@ export default function NetworkPage() {
                             {profile.full_name}
                           </h4>
                           <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} mb-2 line-clamp-2`}>
-                            {profile.headline || 'Healthcare Professional'}
+                            {profile.headline || (profile.specialization && profile.specialization.length > 0 ? profile.specialization[0] : null) || 'Healthcare Professional'}
                           </p>
                           <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary} mb-3`}>
                             {(profile.mutual_connections || 0) > 0 && (
