@@ -477,20 +477,22 @@ export default function PostCard({ post, onInteraction,onPostDeleted }: PostCard
       </div>
 
       {/* Post Content */}
-      <div className="mb-4 cursor-pointer" onClick={handlePostClick}>
-        <p className="text-gray-900 whitespace-pre-wrap break-words leading-relaxed">{post.content}</p>
-        
-        {post.image_url && (
-          <div className="mt-3 relative aspect-video">
-            <Image
-              src={post.image_url}
-              alt="Post media"
-              layout="fill"
-              className="rounded-lg object-cover"
-            />
-          </div>
-        )}
-      </div>
+     <div className="mb-4 cursor-pointer" onClick={handlePostClick}>
+  <p className="text-gray-900 whitespace-pre-wrap break-words leading-relaxed">{post.content}</p>
+  
+  {post.image_url && (
+    <div className="mt-3 relative aspect-video">
+      <Image
+        src={post.image_url}
+        alt="Post media"
+        fill // 1. Changed layout="fill" to just fill
+        className="rounded-lg object-cover"
+        // 2. Added the sizes prop
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      />
+    </div>
+  )}
+</div>
 
       {/* Post Stats */}
       <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
