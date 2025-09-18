@@ -499,51 +499,44 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-16">
+      <footer className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Brand Section */}
+            <div className="md:col-span-1">
               <div className="flex items-center space-x-2 mb-4">
                 <Logo size="sm" className="h-8" />
                 <span className="text-xl font-bold">Kendraa</span>
               </div>
               <p className="text-gray-400 mb-4">
-                Building the future of healthcare professional networking. Join us on this journey.
+                Connecting healthcare professionals worldwide to advance medicine and improve patient care.
               </p>
-              <div className="text-sm text-gray-500">
-                <p>🚀 Currently in development</p>
-                <p>🎯 Launching Q4 2024</p>
-              </div>
             </div>
+            
+            {/* Navigation Links */}
             <div>
-              <h3 className="font-semibold mb-4">Product</h3>
+              <h3 className="font-semibold mb-4">Platform</h3>
               <ul className="space-y-2 text-gray-400">
                 <li><Link href="#features" className="hover:text-white transition-colors">Features</Link></li>
-                <li><Link href="#vision" className="hover:text-white transition-colors">Vision</Link></li>
+                <li><Link href="#vision" className="hover:text-white transition-colors">Our Vision</Link></li>
                 <li><Link href="/signup" className="hover:text-white transition-colors">Join Now</Link></li>
               </ul>
             </div>
+            
+            {/* Company Links */}
             <div>
               <h3 className="font-semibold mb-4">Company</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
+                <li><Link href="/about" className="hover:text-white transition-colors">About</Link></li>
                 <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
-                <li><Link href="/help" className="hover:text-white transition-colors">Help Center</Link></li>
-                <li><span className="text-gray-500">Blog (Coming Soon)</span></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4">Legal</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-                <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
-                <li><span className="text-gray-500">HIPAA Compliance</span></li>
-                <li><span className="text-gray-500">Security</span></li>
+                <li><Link href="/help" className="hover:text-white transition-colors">Help</Link></li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 Kendraa. All rights reserved. • Early stage startup building something amazing.</p>
+          
+          {/* Copyright */}
+          <div className="border-t border-gray-800 mt-8 pt-6 text-center text-gray-400">
+            <p>&copy; 2025 Kendraa. All rights reserved.</p>
           </div>
         </div>
       </footer>
