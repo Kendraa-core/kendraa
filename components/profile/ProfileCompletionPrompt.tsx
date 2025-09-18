@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import ProfileWizard from './ProfileWizard';
 import {
@@ -29,7 +29,7 @@ export default function ProfileCompletionPrompt() {
     return requiredFields.every(field => field);
   };
 
-  const getCompletionPercentage = () => {
+  const getCompletionPercentage = useCallback(() => {
     if (!profile) return 0;
     
     const fields = [
@@ -48,7 +48,7 @@ export default function ProfileCompletionPrompt() {
     }).length;
     
     return Math.round((completed / fields.length) * 100);
-  };
+  }, [profile]);
 
   // Show prompt if profile completion is below 50% and onboarding hasn't been completed
   useEffect(() => {
@@ -73,7 +73,7 @@ export default function ProfileCompletionPrompt() {
     };
 
     checkProfileCompletion();
-  }, [profile]);
+  }, [profile, getCompletionPercentage, user?.id]);
 
   const handleClose = () => {
     setShowPrompt(false);

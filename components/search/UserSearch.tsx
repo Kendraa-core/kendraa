@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import Avatar from '@/components/common/Avatar';
@@ -39,6 +39,14 @@ export default function UserSearch() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const handleResultClick = useCallback((result: SearchResult) => {
+    router.push(`/profile/${result.id}`);
+    setIsOpen(false);
+    setQuery('');
+    setResults([]);
+    setSelectedIndex(-1);
+  }, [router]);
+
   // Handle keyboard navigation
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -72,7 +80,7 @@ export default function UserSearch() {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, results, selectedIndex]);
+  }, [isOpen, results, selectedIndex, handleResultClick]);
 
   // Search with debouncing
   useEffect(() => {
@@ -96,14 +104,6 @@ export default function UserSearch() {
 
     return () => clearTimeout(timeoutId);
   }, [query]);
-
-  const handleResultClick = (result: SearchResult) => {
-    router.push(`/profile/${result.id}`);
-    setIsOpen(false);
-    setQuery('');
-    setResults([]);
-    setSelectedIndex(-1);
-  };
 
   const handleSearchClick = () => {
     setIsOpen(true);

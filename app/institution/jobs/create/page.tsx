@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
@@ -58,16 +58,7 @@ export default function InstitutionCreateJobPage() {
     start_date: '',
   });
 
-  useEffect(() => {
-    if (!user) {
-      router.push('/signin');
-      return;
-    }
-
-    fetchInstitution();
-  }, [user, router]);
-
-  const fetchInstitution = async () => {
+  const fetchInstitution = useCallback(async () => {
     if (!user?.id) return;
     
     try {
@@ -76,7 +67,16 @@ export default function InstitutionCreateJobPage() {
     } catch (error) {
       console.error('Error fetching institution:', error);
     }
-  };
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!user) {
+      router.push('/signin');
+      return;
+    }
+
+    fetchInstitution();
+  }, [user, router, fetchInstitution]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({

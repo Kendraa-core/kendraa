@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { HeartIcon, AcademicCapIcon, BeakerIcon, UserGroupIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 import { BeakerIcon as BeakerIconSolid, HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
 import { useAuth } from '@/contexts/AuthContext';
@@ -52,11 +52,7 @@ export default function MedicalFeed() {
   const [researchUpdates, setResearchUpdates] = useState<ResearchUpdate[]>([]);
   const [cmeSpotlight, setCmeSpotlight] = useState<CMESpotlight[]>([]);
 
-  useEffect(() => {
-    loadFeedContent();
-  }, [activeTab, user]);
-
-  const loadFeedContent = async () => {
+  const loadFeedContent = useCallback(async () => {
     setLoading(true);
     try {
       // Simulate API calls - replace with actual medical content APIs
@@ -150,7 +146,11 @@ export default function MedicalFeed() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeTab]);
+
+  useEffect(() => {
+    loadFeedContent();
+  }, [activeTab, user, loadFeedContent]);
 
   const renderNewsItem = (item: MedicalNewsItem) => (
     <div key={item.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">

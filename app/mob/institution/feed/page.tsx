@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import MobileLayout from '@/components/mobile/MobileLayout';
 import PostCard from '@/components/post/PostCard';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,7 +14,7 @@ export default function MobileInstitutionFeedPage() {
   const [posts, setPosts] = useState<PostWithAuthor[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
     if (!user?.id) return;
     
     try {
@@ -26,7 +26,7 @@ export default function MobileInstitutionFeedPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id]);
 
   const handlePostInteraction = () => {
     fetchPosts();
@@ -34,7 +34,7 @@ export default function MobileInstitutionFeedPage() {
 
   useEffect(() => {
     fetchPosts();
-  }, [user?.id]);
+  }, [user?.id, fetchPosts]);
 
   return (
     <MobileLayout title="Institution Feed" isInstitution={true}>

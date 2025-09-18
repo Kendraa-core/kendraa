@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
@@ -182,7 +183,7 @@ export default function OnboardingPage() {
   };
 
   // Check if profile is 80% complete
-  const isProfileComplete = async () => {
+  const isProfileComplete = useCallback(async () => {
     if (!profile || !user?.id) return false;
     
     // Check if user is a current student
@@ -204,9 +205,9 @@ export default function OnboardingPage() {
     const completed = requiredFields.filter(field => field).length;
     const percentage = (completed / requiredFields.length) * 100;
     return percentage >= 80;
-  };
+  }, [profile, user?.id, educations.length, experiences.length]);
 
-  const getCompletionPercentage = () => {
+  const getCompletionPercentage = useCallback(() => {
     if (!profile || !user?.id) return 0;
     
     // Use current form data for more accurate completion calculation
@@ -233,20 +234,20 @@ export default function OnboardingPage() {
     
     const completed = requiredFields.filter(field => field).length;
     return Math.round((completed / requiredFields.length) * 100);
-  };
+  }, [profile, user?.id, formData, educations.length, experiences.length, isStudent]);
 
   const recalculateCompletionPercentage = useCallback(() => {
     const percentage = getCompletionPercentage();
     setCompletionPercentage(percentage);
     return percentage;
-  }, [formData, experiences, educations, isStudent, profile, user?.id]);
+  }, [getCompletionPercentage]);
 
   // Recalculate completion percentage when form data, experiences, or educations change
   useEffect(() => {
     if (profile && user?.id) {
       recalculateCompletionPercentage();
     }
-  }, [formData, experiences, educations, isStudent, profile, user?.id]);
+  }, [formData, experiences, educations, isStudent, profile, user?.id, recalculateCompletionPercentage]);
 
   // Redirect if profile is already complete or onboarding has been completed before
   useEffect(() => {
@@ -281,7 +282,7 @@ export default function OnboardingPage() {
     if (profile && user?.id) {
       checkProfileCompletion();
     }
-  }, [profile, user?.id, supabase, router]);
+  }, [profile, user?.id, router, isProfileComplete]);
 
   // Initialize form data when profile loads
   useEffect(() => {
@@ -718,9 +719,11 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
           <div className="text-center max-w-4xl mx-auto px-6">
             {/* Logo Section */}
             <div className="mb-12">
-              <img 
+              <Image 
                 src="/Kendraa Logo (1).png" 
                 alt="Kendraa Logo" 
+                width={160}
+                height={160}
                 className="h-24 md:h-32 lg:h-40 w-auto mx-auto drop-shadow-lg"
               />
             </div>
@@ -993,9 +996,11 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
               {avatarPreview ? (
                   <div className="relative mx-auto w-40 h-40">
                     <div className="w-40 h-40 rounded-full mx-auto overflow-hidden border-4 border-[#007fff] shadow-lg">
-                    <img
+                    <Image
                       src={avatarPreview}
                       alt="Profile preview"
+                      width={160}
+                      height={160}
                       className="w-full h-full object-cover"
                     />
                   </div>

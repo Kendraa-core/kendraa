@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { createEvent, getInstitutionByUserId } from '@/lib/queries';
 import { useRouter } from 'next/navigation';
@@ -60,16 +60,7 @@ export default function InstitutionCreateEventPage() {
     banner_url: '',
   });
 
-  useEffect(() => {
-    if (!user) {
-      router.push('/signin');
-      return;
-    }
-
-    fetchInstitution();
-  }, [user, router]);
-
-  const fetchInstitution = async () => {
+  const fetchInstitution = useCallback(async () => {
     if (!user?.id) return;
     
     try {
@@ -78,7 +69,16 @@ export default function InstitutionCreateEventPage() {
     } catch (error) {
       console.error('Error fetching institution:', error);
     }
-  };
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!user) {
+      router.push('/signin');
+      return;
+    }
+
+    fetchInstitution();
+  }, [user, router, fetchInstitution]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { 
   UserCircleIcon, 
@@ -33,32 +33,7 @@ export default function RightSidebar({ connectionCount = 0, isInstitution = fals
   const [loading, setLoading] = useState(true);
   const [connectingUsers, setConnectingUsers] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
-    const loadData = async () => {
-      if (!user?.id) return;
-      
-      try {
-        setLoading(true);
-        
-        // Load data in parallel, but only fetch connections for non-institution users
-        const news = await fetchTopHealthcareNews();
-        setTopNews(news);
-        
-        if (!isInstitution) {
-          const connections = await getSuggestedConnections(user.id, 3);
-          setSuggestedConnections(connections);
-        }
-      } catch (error) {
-        console.error('Error loading right sidebar data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
-  }, [user?.id, isInstitution]);
-
-  const fetchTopHealthcareNews = async (): Promise<NewsItem[]> => {
+  const fetchTopHealthcareNews = useCallback(async (): Promise<NewsItem[]> => {
     try {
       // Check if we have a valid API key
       const apiKey = process.env.NEXT_PUBLIC_NEWS_API_KEY;
@@ -93,7 +68,32 @@ export default function RightSidebar({ connectionCount = 0, isInstitution = fals
     } catch (error) {
       return getDemoHealthcareNews();
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const loadData = async () => {
+      if (!user?.id) return;
+      
+      try {
+        setLoading(true);
+        
+        // Load data in parallel, but only fetch connections for non-institution users
+        const news = await fetchTopHealthcareNews();
+        setTopNews(news);
+        
+        if (!isInstitution) {
+          const connections = await getSuggestedConnections(user.id, 3);
+          setSuggestedConnections(connections);
+        }
+      } catch (error) {
+        console.error('Error loading right sidebar data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [user?.id, isInstitution, fetchTopHealthcareNews]);
 
   const getDemoHealthcareNews = (): NewsItem[] => {
     return [

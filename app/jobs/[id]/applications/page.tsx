@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { getJobApplications, updateJobApplicationStatus, getProfile } from '@/lib/queries';
@@ -35,16 +35,7 @@ export default function JobApplicationsPage() {
     notes: ''
   });
 
-  useEffect(() => {
-    if (!user) {
-      router.push('/signin');
-      return;
-    }
-
-    fetchApplications();
-  }, [user, jobId]);
-
-  const fetchApplications = async () => {
+  const fetchApplications = useCallback(async () => {
     if (!jobId) return;
 
     try {
@@ -57,7 +48,16 @@ export default function JobApplicationsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [jobId]);
+
+  useEffect(() => {
+    if (!user) {
+      router.push('/signin');
+      return;
+    }
+
+    fetchApplications();
+  }, [user, jobId, fetchApplications, router]);
 
   const handleStatusUpdate = async () => {
     if (!selectedApplication || !user?.id) return;

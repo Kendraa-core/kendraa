@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -81,6 +81,20 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
   const [userReaction, setUserReaction] = useState<string | null>(null);
   const [isReacting, setIsReacting] = useState(false);
 
+  const loadComments = useCallback(async () => {
+    if (!post?.id) return;
+    setIsLoadingComments(true);
+    try {
+      const fetchedComments = await getPostComments(post.id);
+      const topLevelComments = fetchedComments.filter(comment => !comment.parent_id);
+      setComments(topLevelComments);
+    } catch (error: any) {
+      toast.error("Failed to load comments.");
+    } finally {
+      setIsLoadingComments(false);
+    }
+  }, [post?.id]);
+
   // Initialize post state on mount
   useEffect(() => {
     if (!post?.id) return;
@@ -116,7 +130,7 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
       setShowComments(true);
       loadComments();
     }
-  }, [post?.id, post?.comments_count]);
+  }, [post?.id, post?.comments_count, loadComments]);
 
   // Refresh post data when post changes
   useEffect(() => {
@@ -202,20 +216,6 @@ export default function PostCard({ post, onInteraction }: PostCardProps) {
     } catch (error) {
       setIsBookmarked(originalBookmarkState);
       toast.error('Failed to update bookmark.');
-    }
-  };
-
-  const loadComments = async () => {
-    if (!post?.id) return;
-    setIsLoadingComments(true);
-    try {
-      const fetchedComments = await getPostComments(post.id);
-      const topLevelComments = fetchedComments.filter(comment => !comment.parent_id);
-      setComments(topLevelComments);
-    } catch (error: any) {
-      toast.error("Failed to load comments.");
-    } finally {
-      setIsLoadingComments(false);
     }
   };
 

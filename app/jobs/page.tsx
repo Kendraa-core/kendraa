@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
   getJobs, 
@@ -84,7 +84,7 @@ export default function JobsPage() {
   const [uploadingResume, setUploadingResume] = useState(false);
   const [submittingApplication, setSubmittingApplication] = useState(false);
 
-  const fetchJobs = async () => {
+  const fetchJobs = useCallback(async () => {
     if (!user?.id) return;
     
     setLoading(true);
@@ -135,11 +135,11 @@ export default function JobsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id, activeTab, selectedJob]);
 
   useEffect(() => {
     fetchJobs();
-  }, [activeTab, user?.id]);
+  }, [activeTab, user?.id, fetchJobs]);
 
   const handleApply = (job: JobWithApplication) => {
     setApplicationJob(job);

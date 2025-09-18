@@ -178,7 +178,7 @@ export default function InstitutionLayout({
     if (!authLoading) {
         loadData();
     }
-  }, [user, profile, authLoading, router, updateProfile, isLoadingProfile]);
+  }, [user, profile, authLoading, router, updateProfile, isLoadingProfile, pathname]);
 
   const isNetworkPage = pathname === '/institution/network';
   const isFeedPage = pathname === '/institution/feed';

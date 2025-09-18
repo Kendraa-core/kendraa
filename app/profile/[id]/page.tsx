@@ -1088,7 +1088,7 @@ export default function ProfilePage() {
     } finally {
       setLoading(false);
     }
-  }, [id, user?.id, isOwnProfile]);
+  }, [id, user?.id, isOwnProfile, actionType]);
 
   useEffect(() => {
     if (id && !profile) {

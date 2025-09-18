@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Avatar from '@/components/common/Avatar';
 import ClickableProfileName from '@/components/common/ClickableProfileName';
@@ -39,21 +39,21 @@ export default function Comment({ comment, onReplyAdded, onReactionChange }: Com
     ? comment.author.user_type 
     : 'individual';
 
-  // Load replies count when component mounts (only for top-level comments)
-  useEffect(() => {
-    if (comment.parent_id === null) {
-      loadRepliesCount();
-    }
-  }, [comment.id]);
-
-  const loadRepliesCount = async () => {
+  const loadRepliesCount = useCallback(async () => {
     try {
       const fetchedReplies = await getCommentReplies(comment.id);
       setRepliesCount(fetchedReplies.length);
     } catch (error) {
       // Silent error handling for replies count
     }
-  };
+  }, [comment.id]);
+
+  // Load replies count when component mounts (only for top-level comments)
+  useEffect(() => {
+    if (comment.parent_id === null) {
+      loadRepliesCount();
+    }
+  }, [comment.id, comment.parent_id, loadRepliesCount]);
 
   const handleReply = async () => {
     if (!replyContent.trim()) {

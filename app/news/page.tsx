@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { 
   NewspaperIcon, 
@@ -193,7 +194,7 @@ export default function NewsPage() {
                 {featuredNews.map((article, index) => (
                   <motion.article key={article.url} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4, delay: index * 0.1 }} className="bg-white rounded-2xl border border-[#007fff]/10 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group flex flex-col">
                     <div className="relative h-48 w-full">
-                      <img src={article.image} alt={article.title} className="w-full h-full object-cover"/>
+                      <Image src={article.image} alt={article.title} width={400} height={192} className="w-full h-full object-cover"/>
                       <div className="absolute top-4 left-4">
                         <span className="px-3 py-1 bg-[#007fff] text-white rounded-full text-xs font-medium line-clamp-1">{article.source.name}</span>
                       </div>
@@ -224,7 +225,7 @@ export default function NewsPage() {
                   <motion.article key={article.url} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4, delay: index * 0.1 }} className="bg-white rounded-2xl border border-[#007fff]/10 p-6 shadow-lg hover:shadow-xl transition-all duration-300 group">
                     <div className="flex flex-col sm:flex-row items-start gap-6">
                       <a href={article.url} target="_blank" rel="noopener noreferrer" className="block sm:w-48 sm:h-32 w-full h-48 flex-shrink-0">
-                        <img src={article.image} alt={article.title} className="w-full h-full object-cover rounded-lg"/>
+                        <Image src={article.image} alt={article.title} width={192} height={128} className="w-full h-full object-cover rounded-lg"/>
                       </a>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-4 mb-3">

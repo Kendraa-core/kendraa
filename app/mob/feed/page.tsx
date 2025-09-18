@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import MobileLayout from '@/components/mobile/MobileLayout';
 import MedicalFeed from '@/components/feed/MedicalFeed';
 import PostCard from '@/components/post/PostCard';
@@ -16,7 +16,7 @@ export default function MobileFeedPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
     if (!user?.id) return;
     
     try {
@@ -29,7 +29,7 @@ export default function MobileFeedPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -43,7 +43,7 @@ export default function MobileFeedPage() {
 
   useEffect(() => {
     fetchPosts();
-  }, [user?.id]);
+  }, [user?.id, fetchPosts]);
 
   return (
     <MobileLayout title="Feed">

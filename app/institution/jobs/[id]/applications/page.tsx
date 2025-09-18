@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { getJobApplications, updateJobApplicationStatus, getProfile, getInstitutionByUserId } from '@/lib/queries';
@@ -48,17 +48,7 @@ export default function InstitutionJobApplicationsPage() {
     notes: ''
   });
 
-  useEffect(() => {
-    if (!user) {
-      router.push('/signin');
-      return;
-    }
-
-    fetchInstitution();
-    fetchApplications();
-  }, [user, jobId]);
-
-  const fetchInstitution = async () => {
+  const fetchInstitution = useCallback(async () => {
     if (!user?.id) return;
     
     try {
@@ -67,9 +57,9 @@ export default function InstitutionJobApplicationsPage() {
     } catch (error) {
       console.error('Error fetching institution:', error);
     }
-  };
+  }, [user?.id]);
 
-  const fetchApplications = async () => {
+  const fetchApplications = useCallback(async () => {
     if (!jobId) return;
 
     try {
@@ -82,7 +72,17 @@ export default function InstitutionJobApplicationsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [jobId]);
+
+  useEffect(() => {
+    if (!user) {
+      router.push('/signin');
+      return;
+    }
+
+    fetchInstitution();
+    fetchApplications();
+  }, [user, jobId, fetchInstitution, fetchApplications, router]);
 
   const handleStatusUpdate = async () => {
     if (!selectedApplication || !user?.id) return;

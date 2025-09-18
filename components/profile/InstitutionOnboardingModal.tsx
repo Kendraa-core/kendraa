@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { 
@@ -119,7 +119,7 @@ export default function InstitutionOnboardingModal({
   });
 
   // Calculate completion percentage
-  const calculateCompletion = () => {
+  const calculateCompletion = useCallback(() => {
     const requiredFields = [
       institutionData.about,
       institutionData.focus,
@@ -132,11 +132,11 @@ export default function InstitutionOnboardingModal({
     const completed = requiredFields.filter(field => field.trim() !== '').length;
     const percentage = Math.round((completed / requiredFields.length) * 100);
     setCompletionPercentage(percentage);
-  };
+  }, [institutionData]);
 
   useEffect(() => {
     calculateCompletion();
-  }, [institutionData]);
+  }, [institutionData, calculateCompletion]);
 
   const handleNext = async () => {
     // Immediately advance to next step for seamless navigation

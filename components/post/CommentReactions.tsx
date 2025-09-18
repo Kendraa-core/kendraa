@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   HeartIcon,
@@ -42,20 +42,20 @@ export default function CommentReactions({ commentId, likesCount, onReactionChan
   const [isReacting, setIsReacting] = useState(false);
   const [showReactions, setShowReactions] = useState(false);
 
-  useEffect(() => {
-    if (user?.id && commentId) {
-      loadUserReaction();
-    }
-  }, [user?.id, commentId]);
-
-  const loadUserReaction = async () => {
+  const loadUserReaction = useCallback(async () => {
     try {
       const reaction = await isCommentLiked(commentId, user!.id);
       setCurrentReaction(reaction);
     } catch (error) {
       // Silent error handling for user reaction
     }
-  };
+  }, [commentId, user]);
+
+  useEffect(() => {
+    if (user?.id && commentId) {
+      loadUserReaction();
+    }
+  }, [user?.id, commentId, loadUserReaction]);
 
   const handleReaction = async (reactionType: string) => {
     if (!user?.id) {

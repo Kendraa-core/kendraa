@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
@@ -439,9 +440,11 @@ export default function InstitutionOnboardingPage() {
         return (
           <div className="text-center max-w-4xl mx-auto px-6">
             <div className="mb-12">
-              <img 
+              <Image 
                 src="/Kendraa Logo (1).png" 
                 alt="Kendraa Logo" 
+                width={160}
+                height={160}
                 className="h-24 md:h-32 lg:h-40 w-auto mx-auto drop-shadow-lg"
               />
             </div>
@@ -789,9 +792,11 @@ export default function InstitutionOnboardingPage() {
                   <div className="space-y-4">
                     {logoPreview ? (
                       <div className="relative w-32 h-32 mx-auto">
-                        <img
+                        <Image
                           src={logoPreview}
                           alt="Logo preview"
+                          width={128}
+                          height={128}
                           className="w-full h-full object-contain border-2 border-[#007fff] rounded-xl"
                         />
                         <button
@@ -836,9 +841,11 @@ export default function InstitutionOnboardingPage() {
                   <div className="space-y-4">
                     {bannerPreview ? (
                       <div className="relative w-full h-32">
-                        <img
+                        <Image
                           src={bannerPreview}
                           alt="Banner preview"
+                          width={512}
+                          height={128}
                           className="w-full h-full object-cover border-2 border-[#007fff] rounded-xl"
                         />
                   <button
