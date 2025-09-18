@@ -3850,6 +3850,8 @@ export async function deletePost(postId: string, authorId: string): Promise<bool
       throw commentsError;
     }
 
+    // THIS ENTIRE BLOCK IS REMOVED
+    /*
     // Delete all post reactions
     const { error: reactionsError } = await getSupabase()
       .from('post_reactions')
@@ -3860,6 +3862,7 @@ export async function deletePost(postId: string, authorId: string): Promise<bool
       console.error('[Queries] Error deleting post reactions:', reactionsError);
       throw reactionsError;
     }
+    */
 
     // Delete the post
     const { error: deleteError } = await getSupabase()
@@ -3874,8 +3877,8 @@ export async function deletePost(postId: string, authorId: string): Promise<bool
     
     console.log('[Queries] Post deleted successfully from database');
     
-    // Verify the post was actually deleted
-    const { data: verifyData, error: verifyError } = await getSupabase()
+    // The verification step is still a good idea
+    const { data: verifyData } = await getSupabase()
       .from('posts')
       .select('id')
       .eq('id', postId)
