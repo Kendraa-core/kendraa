@@ -53,6 +53,11 @@ export default function ProfileCompletionPrompt() {
   // Show prompt if profile completion is below 50% and onboarding hasn't been completed
   useEffect(() => {
     const checkProfileCompletion = () => {
+      // Don't show for institution users
+      if (profile?.user_type === 'institution' || profile?.profile_type === 'institution') {
+        return;
+      }
+      
       // Check if user has completed onboarding before
       const hasCompletedOnboarding = localStorage.getItem(`onboarding_completed_${user?.id}`);
       
@@ -62,14 +67,17 @@ export default function ProfileCompletionPrompt() {
       }
       
       const completionPercentage = getCompletionPercentage();
-      if (completionPercentage < 50) {
-        // Delay showing the prompt to avoid immediate popup
-        const timer = setTimeout(() => {
-          setShowPrompt(true);
-        }, 3000); // Increased delay to 3 seconds
-        
-        return () => clearTimeout(timer);
+      // Don't show if profile is 100% complete or below 50%
+      if (completionPercentage >= 100 || completionPercentage < 50) {
+        return;
       }
+      
+      // Delay showing the prompt to avoid immediate popup
+      const timer = setTimeout(() => {
+        setShowPrompt(true);
+      }, 3000); // Increased delay to 3 seconds
+      
+      return () => clearTimeout(timer);
     };
 
     checkProfileCompletion();
@@ -92,11 +100,17 @@ export default function ProfileCompletionPrompt() {
     }
   };
 
-  if (isProfileComplete()) {
-    return null; // Don't show anything if profile is complete
+  // Don't show for institution users or if profile is 100% complete
+  if (profile?.user_type === 'institution' || profile?.profile_type === 'institution' || isProfileComplete()) {
+    return null;
   }
 
   const completionPercentage = getCompletionPercentage();
+  
+  // Don't show if 100% complete
+  if (completionPercentage >= 100) {
+    return null;
+  }
 
   return (
     <>
