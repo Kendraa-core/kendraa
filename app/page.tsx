@@ -152,7 +152,7 @@ export default function LandingPage() {
                 
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
                   The Healthcare Network
-                  <span className="text-[#007fff]"> We're Building</span><br />
+                  <span className="text-[#007fff]"> We&apos;re Building</span><br />
                   <span className="bg-gradient-to-r from-[#007fff] to-purple-600 bg-clip-text text-transparent">
                     Together
                   </span>
@@ -224,7 +224,7 @@ export default function LandingPage() {
                   </div>
                   
                   <div className="text-sm text-gray-600 italic">
-                    "Building something meaningful takes time. Join us on this journey."
+                    &quot;Building something meaningful takes time. Join us on this journey.&quot;
                   </div>
                 </div>
               </Card>
@@ -248,14 +248,14 @@ export default function LandingPage() {
             className="text-center mb-16"
           >
             <span className="inline-flex items-center px-4 py-2 bg-[#007fff]/10 text-[#007fff] rounded-full text-sm font-medium mb-4">
-              🛠️ What We're Building
+              🛠️ What We&apos;re Building
             </span>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Features Designed for
               <span className="text-[#007fff]"> Healthcare Professionals</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              We're creating comprehensive tools specifically for the healthcare industry, 
+              We&apos;re creating comprehensive tools specifically for the healthcare industry, 
               built with input from medical professionals like you.
             </p>
           </motion.div>

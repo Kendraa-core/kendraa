@@ -346,21 +346,9 @@ Available at `/help` with comprehensive guides for:
 
 ## 🔮 **Roadmap**
 
-### Upcoming Features
-- **Video Consultations**: Integrated telemedicine capabilities
-- **Research Collaboration**: Enhanced research project management
-- **CME Tracking**: Continuing medical education credits
-- **AI Recommendations**: Advanced AI-powered networking
-- **Mobile Apps**: Native iOS and Android applications
-- **API Access**: Public API for third-party integrations
-
 ### Version History
 - **v0.1.0**: Initial release with core features
 - **Future**: Enhanced mobile experience, AI features
-
-## 🏆 **Awards & Recognition**
-
-*Healthcare Innovation Award - Best Professional Network 2024*
 
 ---
 
