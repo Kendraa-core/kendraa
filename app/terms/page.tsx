@@ -20,8 +20,8 @@ export default function TermsPage() {
           <h1 className="text-3xl font-bold text-gray-900 mb-8">Terms and Conditions of Use</h1>
           
           <div className="text-sm text-gray-600 mb-8">
-            <p><strong>Last Updated:</strong> January 2025</p>
-            <p><strong>Effective Date:</strong> January 2025</p>
+            <p><strong>Last Updated:</strong> September 2025</p>
+            <p><strong>Effective Date:</strong> September 2025</p>
           </div>
 
           <div className="space-y-8">
@@ -208,7 +208,7 @@ export default function TermsPage() {
               <div className="mt-4 p-4 bg-gray-50 rounded-lg">
                 <p className="text-gray-700">
                   <strong>Kendraa</strong><br />
-                  Email: legal@kendraa.com<br />
+                  Email: support@kendraa.in<br />
                   Website: <Link href="/contact" className="text-[#007fff] hover:underline">Contact Us</Link>
                 </p>
               </div>
