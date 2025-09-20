@@ -840,9 +840,9 @@ export async function getConnectionStatus(userId: string, targetUserId: string):
       .select('status')
       .eq('requester_id', userId)
       .eq('recipient_id', targetUserId)
-      .single();
+      .maybeSingle();
 
-    if (data1) {
+    if (data1 && !error1) {
       return data1.status;
     }
 
@@ -851,9 +851,9 @@ export async function getConnectionStatus(userId: string, targetUserId: string):
       .select('status')
       .eq('requester_id', targetUserId)
       .eq('recipient_id', userId)
-      .single();
+      .maybeSingle();
 
-    if (data2) {
+    if (data2 && !error2) {
       return data2.status;
     }
 
