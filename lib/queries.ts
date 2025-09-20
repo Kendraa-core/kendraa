@@ -1078,12 +1078,21 @@ export async function followInstitution(followerId: string, institutionId: strin
       return true; // Already following
     }
     
+    // Get follower profile to determine follower type
+    const followerProfile = await getProfile(followerId);
+    if (!followerProfile) {
+      throw new Error('Follower profile not found');
+    }
+    
+    const followerType = followerProfile.user_type === 'institution' ? 'institution' : 'individual';
+    
     // Create follow relationship
     const { data: insertData, error: insertError } = await getSupabase()
       .from('follows')
       .insert({
         follower_id: followerId,
         following_id: institutionId,
+        follower_type: followerType,
         created_at: new Date().toISOString(),
       })
       .select()
@@ -1098,7 +1107,6 @@ export async function followInstitution(followerId: string, institutionId: strin
     
     // Create notification for institution (non-blocking)
     try {
-      const followerProfile = await getProfile(followerId);
       if (followerProfile) {
         await createNotification({
           user_id: institutionId,
