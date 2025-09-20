@@ -20,7 +20,22 @@ export async function uploadToSupabaseStorage(
   file: File
 ): Promise<{ url: string; error: any | null }> {
   try {
+    console.log('Uploading to bucket:', bucket, 'with path:', path);
     const supabase = getSupabase();
+    
+    // First, let's check if the bucket exists and is accessible
+    const { data: buckets, error: listError } = await supabase.storage.listBuckets();
+    if (listError) {
+      console.error('Error listing buckets:', listError);
+    } else {
+      console.log('Available buckets:', buckets?.map(b => b.name));
+      const bucketExists = buckets?.some(b => b.name === bucket);
+      if (!bucketExists) {
+        console.error(`Bucket '${bucket}' does not exist. Available buckets:`, buckets?.map(b => b.name));
+        return { url: '', error: new Error(`Bucket '${bucket}' does not exist`) };
+      }
+    }
+    
     const { error: uploadError } = await supabase.storage
       .from(bucket)
       .upload(path, file, {
@@ -41,6 +56,7 @@ export async function uploadToSupabaseStorage(
       return { url: '', error: urlError };
     }
 
+    console.log('Upload successful, URL:', data.publicUrl);
     return { url: data.publicUrl, error: null };
     
   } catch (error) {
