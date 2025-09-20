@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useOnboardingProtection } from '@/hooks/useOnboardingProtection';
 import { 
   getPosts, 
   createPost, 
@@ -14,7 +15,17 @@ import type { Post, PostWithAuthor, Institution } from '@/types/database.types';
 import { 
   UserGroupIcon,
   PhotoIcon,
-  XMarkIcon
+  XMarkIcon,
+  DocumentTextIcon,
+  CalendarIcon,
+  MegaphoneIcon,
+  LightBulbIcon,
+  ChartBarIcon,
+  AcademicCapIcon,
+  HeartIcon,
+  SparklesIcon,
+  PlusIcon,
+  ArrowRightIcon
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import PostCard from '@/components/post/PostCard';
@@ -32,6 +43,7 @@ import Link from 'next/link';
 export default function InstitutionFeedPage() {
   const { user, profile } = useAuth();
   const router = useRouter();
+  const { isProtected, isLoading } = useOnboardingProtection();
   const [posts, setPosts] = useState<Post[]>([]);
   const [institutionPosts, setInstitutionPosts] = useState<PostWithAuthor[]>([]);
   const [institution, setInstitution] = useState<Institution | null>(null);
@@ -42,7 +54,67 @@ export default function InstitutionFeedPage() {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isPosting, setIsPosting] = useState(false);
   const [showCreatePost, setShowCreatePost] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Post templates for institutions
+  const postTemplates = [
+    {
+      id: 'announcement',
+      title: 'Announcement',
+      icon: MegaphoneIcon,
+      placeholder: 'Share important updates, news, or announcements with your network...',
+      color: 'bg-blue-500',
+      textColor: 'text-blue-600',
+      bgColor: 'bg-blue-50'
+    },
+    {
+      id: 'research',
+      title: 'Research Update',
+      icon: AcademicCapIcon,
+      placeholder: 'Share your latest research findings, studies, or academic insights...',
+      color: 'bg-purple-500',
+      textColor: 'text-purple-600',
+      bgColor: 'bg-purple-50'
+    },
+    {
+      id: 'event',
+      title: 'Event',
+      icon: CalendarIcon,
+      placeholder: 'Promote upcoming events, conferences, or educational sessions...',
+      color: 'bg-green-500',
+      textColor: 'text-green-600',
+      bgColor: 'bg-green-50'
+    },
+    {
+      id: 'insight',
+      title: 'Industry Insight',
+      icon: LightBulbIcon,
+      placeholder: 'Share valuable insights, trends, or analysis in your field...',
+      color: 'bg-orange-500',
+      textColor: 'text-orange-600',
+      bgColor: 'bg-orange-50'
+    },
+    {
+      id: 'achievement',
+      title: 'Achievement',
+      icon: ChartBarIcon,
+      placeholder: 'Celebrate milestones, awards, or significant accomplishments...',
+      color: 'bg-pink-500',
+      textColor: 'text-pink-600',
+      bgColor: 'bg-pink-50'
+    },
+    {
+      id: 'community',
+      title: 'Community',
+      icon: HeartIcon,
+      placeholder: 'Engage with your community, share stories, or highlight partnerships...',
+      color: 'bg-red-500',
+      textColor: 'text-red-600',
+      bgColor: 'bg-red-50'
+    }
+  ];
 
   // Check URL params for create post trigger
   useEffect(() => {
@@ -125,10 +197,7 @@ export default function InstitutionFeedPage() {
       const post = await createPost(user.id, content.trim(), finalImageUrl);
       if (post) {
         setPosts(prev => [post, ...prev]);
-        setPostContent('');
-        setSelectedImage(null);
-        setImagePreview(null);
-        setShowCreatePost(false);
+        resetPostForm();
         toast.success('Post created successfully!');
         fetchPosts();
       } else {
@@ -185,20 +254,57 @@ export default function InstitutionFeedPage() {
     fileInputRef.current?.click();
   };
 
+  const handleTemplateSelect = (templateId: string) => {
+    setSelectedTemplate(templateId);
+    setShowTemplates(false);
+    setShowCreatePost(true);
+    
+    // Set placeholder text based on template
+    const template = postTemplates.find(t => t.id === templateId);
+    if (template) {
+      // We'll use the placeholder in the UI
+    }
+  };
+
+  const getCurrentTemplate = () => {
+    return postTemplates.find(t => t.id === selectedTemplate) || postTemplates[0];
+  };
+
+  const resetPostForm = () => {
+    setPostContent('');
+    setSelectedImage(null);
+    setImagePreview(null);
+    setSelectedTemplate(null);
+    setShowCreatePost(false);
+    setShowTemplates(false);
+  };
+
   useEffect(() => {
     fetchInstitutionData();
     fetchPosts();
   }, [fetchInstitutionData, fetchPosts]);
 
-  if (!user) {
+  // Show loading while checking onboarding status
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
+        <div className="text-center max-w-md mx-auto">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-3"></div>
+          <p className="text-sm text-blue-600 font-medium">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user || !isProtected) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center p-4">
         <div className="text-center max-w-md mx-auto">
           <div className="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
             <UserGroupIcon className="w-10 h-10 text-blue-600" />
           </div>
-          <h2 className="text-2xl font-semibold text-gray-900 mb-3">Sign In Required</h2>
-          <p className="text-gray-600 mb-6">Please sign in to access the institution feed</p>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-3">Access Required</h2>
+          <p className="text-gray-600 mb-6">Please sign in and complete onboarding to access the institution feed</p>
           <Link
             href="/signin"
             className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium"
@@ -217,10 +323,10 @@ export default function InstitutionFeedPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          {/* Create Post Button */}
-          {!showCreatePost && (
+          {/* Innovative Create Post Interface */}
+          {!showCreatePost && !showTemplates && (
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-4 mb-4">
                 <Avatar
                   src={profile?.avatar_url}
                   name={profile?.full_name || user?.email || 'User'}
@@ -233,27 +339,123 @@ export default function InstitutionFeedPage() {
                   Share your thoughts, insights, or professional updates...
                 </button>
               </div>
+              
+              {/* Quick Action Buttons */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={handleMediaButtonClick}
+                    className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-[#007fff] hover:bg-[#007fff]/5 rounded-lg transition-colors"
+                  >
+                    <PhotoIcon className="w-5 h-5" />
+                    <span className="text-sm font-medium">Media</span>
+                  </button>
+                  
+                  <button
+                    onClick={() => setShowTemplates(true)}
+                    className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-[#007fff] hover:bg-[#007fff]/5 rounded-lg transition-colors"
+                  >
+                    <SparklesIcon className="w-5 h-5" />
+                    <span className="text-sm font-medium">Templates</span>
+                  </button>
+                </div>
+                
+                <button
+                  onClick={() => setShowCreatePost(true)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-colors"
+                >
+                  <PlusIcon className="w-4 h-4" />
+                  <span className="text-sm font-medium">Create Post</span>
+                </button>
+              </div>
+              
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageSelect}
+                className="hidden"
+              />
+            </div>
+          )}
+
+          {/* Post Templates Selection */}
+          {showTemplates && (
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-gray-900">Choose a Post Template</h3>
+                <button
+                  onClick={() => setShowTemplates(false)}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <XMarkIcon className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {postTemplates.map((template) => (
+                  <motion.button
+                    key={template.id}
+                    onClick={() => handleTemplateSelect(template.id)}
+                    className={`p-4 rounded-xl border-2 border-gray-200 hover:border-[#007fff] transition-all duration-200 text-left group ${template.bgColor}`}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <div className="flex items-center space-x-3 mb-2">
+                      <div className={`p-2 rounded-lg ${template.color} text-white`}>
+                        <template.icon className="w-5 h-5" />
+                      </div>
+                      <span className={`font-medium ${template.textColor}`}>{template.title}</span>
+                    </div>
+                    <p className="text-sm text-gray-600 group-hover:text-gray-700">
+                      {template.placeholder.substring(0, 60)}...
+                    </p>
+                  </motion.button>
+                ))}
+              </div>
             </div>
           )}
 
           {/* Create Post Form */}
           {showCreatePost && (
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
-              <div className="flex items-start space-x-4">
-                <Avatar
-                  src={profile?.avatar_url}
-                  name={profile?.full_name || user?.email || 'User'}
-                  size="md"
-                />
-                <div className="flex-1">
-                  <textarea
-                    placeholder="Share your thoughts, insights, or professional updates..."
-                    value={postContent}
-                    onChange={(e) => setPostContent(e.target.value)}
-                    className="w-full p-4 border border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-[#007fff] focus:border-transparent text-gray-700 placeholder-gray-500 text-base"
-                    rows={3}
-                    disabled={isPosting}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                  <Avatar
+                    src={profile?.avatar_url}
+                    name={profile?.full_name || user?.email || 'User'}
+                    size="md"
                   />
+                  <div>
+                    <h4 className="font-medium text-gray-900">{profile?.full_name || 'Institution'}</h4>
+                    {selectedTemplate && (
+                      <div className="flex items-center space-x-2">
+                        <div className={`p-1 rounded ${getCurrentTemplate().color} text-white`}>
+                          <getCurrentTemplate().icon className="w-3 h-3" />
+                        </div>
+                        <span className="text-sm text-gray-600">{getCurrentTemplate().title}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <button
+                  onClick={resetPostForm}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <XMarkIcon className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+              
+              <div className="flex-1">
+                <textarea
+                  placeholder={getCurrentTemplate().placeholder}
+                  value={postContent}
+                  onChange={(e) => setPostContent(e.target.value)}
+                  className="w-full p-4 border border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-[#007fff] focus:border-transparent text-gray-700 placeholder-gray-500 text-base"
+                  rows={4}
+                  disabled={isPosting}
+                />
 
                   {/* Image Preview */}
                   {imagePreview && (
@@ -272,47 +474,59 @@ export default function InstitutionFeedPage() {
                     </div>
                   )}
 
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-4 pt-4 border-t border-gray-100 space-y-3 sm:space-y-0">
-                    <div className="flex items-center space-x-4">
-                      <button 
-                        onClick={handleMediaButtonClick}
-                        disabled={isPosting || isUploadingImage}
-                        className="flex items-center space-x-2 text-gray-500 hover:text-[#007fff] transition-colors p-2 rounded-lg hover:bg-[#007fff]/5 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <PhotoIcon className="w-5 h-5" />
-                        <span className="text-sm font-medium">Media</span>
-                      </button>
-                      
-                      {/* Hidden file input */}
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageSelect}
-                        className="hidden"
-                      />
-                    </div>
-                    <div className="flex space-x-3">
-                      <button
-                        onClick={() => {
-                          setShowCreatePost(false);
-                          setPostContent('');
-                          setSelectedImage(null);
-                          setImagePreview(null);
-                        }}
-                        className="px-6 py-3 text-gray-600 hover:text-gray-800 transition-colors font-medium"
-                      >
-                        Cancel
-                      </button>
-                      <button 
-                        onClick={() => handleCreatePost(postContent)}
-                        disabled={isPosting || isUploadingImage || (!postContent.trim() && !selectedImage)}
-                        className="bg-[#007fff] text-white px-6 py-3 rounded-xl hover:bg-[#007fff]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                      >
-                        {isPosting ? (isUploadingImage ? 'Uploading...' : 'Posting...') : 'Post'}
-                      </button>
-                    </div>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-4 pt-4 border-t border-gray-100 space-y-3 sm:space-y-0">
+                  <div className="flex items-center space-x-4">
+                    <button 
+                      onClick={handleMediaButtonClick}
+                      disabled={isPosting || isUploadingImage}
+                      className="flex items-center space-x-2 text-gray-500 hover:text-[#007fff] transition-colors p-2 rounded-lg hover:bg-[#007fff]/5 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <PhotoIcon className="w-5 h-5" />
+                      <span className="text-sm font-medium">Media</span>
+                    </button>
+                    
+                    <button
+                      onClick={() => setShowTemplates(true)}
+                      className="flex items-center space-x-2 text-gray-500 hover:text-[#007fff] transition-colors p-2 rounded-lg hover:bg-[#007fff]/5"
+                    >
+                      <SparklesIcon className="w-5 h-5" />
+                      <span className="text-sm font-medium">Templates</span>
+                    </button>
+                    
+                    {/* Hidden file input */}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageSelect}
+                      className="hidden"
+                    />
                   </div>
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={resetPostForm}
+                      className="px-6 py-3 text-gray-600 hover:text-gray-800 transition-colors font-medium"
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      onClick={() => handleCreatePost(postContent)}
+                      disabled={isPosting || isUploadingImage || (!postContent.trim() && !selectedImage)}
+                      className="bg-[#007fff] text-white px-6 py-3 rounded-xl hover:bg-[#007fff]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium flex items-center space-x-2"
+                    >
+                      {isPosting ? (
+                        <>
+                          {isUploadingImage ? 'Uploading...' : 'Posting...'}
+                        </>
+                      ) : (
+                        <>
+                          <span>Post</span>
+                          <ArrowRightIcon className="w-4 h-4" />
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
                 </div>
               </div>
             </div>
