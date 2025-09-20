@@ -7,7 +7,6 @@ import { getPosts, createPost, getConnections, getSuggestedConnections, getProfi
 import type { Post, Profile } from '@/types/database.types';
 import { 
   PhotoIcon,
-  DocumentIcon,
   PlusIcon
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
@@ -99,10 +98,6 @@ export default function FeedPage() {
                 <button className="flex items-center space-x-2 text-gray-500 hover:text-[#007fff] transition-colors p-2 rounded-lg hover:bg-[#007fff]/5">
                   <PhotoIcon className="w-5 h-5" />
                   <span className="text-sm font-medium">Media</span>
-                </button>
-                <button className="flex items-center space-x-2 text-gray-500 hover:text-[#007fff] transition-colors p-2 rounded-lg hover:bg-[#007fff]/5">
-                  <DocumentIcon className="w-5 h-5" />
-                  <span className="text-sm font-medium">Article</span>
                 </button>
               </div>
               <button 
