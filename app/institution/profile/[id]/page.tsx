@@ -659,18 +659,25 @@ export default function PublicInstitutionProfilePage() {
 
     console.log('Attempting to follow institution:', { userId: user.id, profileId: profile.id });
 
+    // Optimistically update the UI
+    const previousStatus = followStatus;
+    setFollowStatus('following');
+
     try {
       const success = await followInstitution(user.id, profile.id);
       if (success) {
-        setFollowStatus('following');
         toast.success('Successfully followed institution');
         // Refresh the page data to update follower count
         fetchProfileData();
       } else {
+        // Revert the optimistic update
+        setFollowStatus(previousStatus);
         toast.error('Failed to follow institution');
       }
     } catch (error: any) {
       console.error('Error following institution:', error);
+      // Revert the optimistic update
+      setFollowStatus(previousStatus);
       const errorMessage = error?.message || error?.toString() || 'Failed to follow institution';
       toast.error(errorMessage);
     }
@@ -682,12 +689,25 @@ export default function PublicInstitutionProfilePage() {
       return;
     }
 
+    // Optimistically update the UI
+    const previousStatus = followStatus;
+    setFollowStatus('none');
+
     try {
-      await unfollowInstitution(user.id, profile.id);
-      setFollowStatus('none');
-      toast.success('Unfollowed successfully');
+      const success = await unfollowInstitution(user.id, profile.id);
+      if (success) {
+        toast.success('Unfollowed successfully');
+        // Refresh the page data to update follower count
+        fetchProfileData();
+      } else {
+        // Revert the optimistic update
+        setFollowStatus(previousStatus);
+        toast.error('Failed to unfollow');
+      }
     } catch (error) {
       console.error('Error unfollowing:', error);
+      // Revert the optimistic update
+      setFollowStatus(previousStatus);
       toast.error('Failed to unfollow');
     }
   };

@@ -15,8 +15,7 @@ import {
   HeartIcon
 } from '@heroicons/react/24/outline';
 import { 
-  getConnections,
-  getFollowStatus,
+  getFollowing,
   unfollowUser,
   unfollowInstitution
 } from '@/lib/queries';
@@ -50,21 +49,17 @@ export default function FollowingPage() {
     setLoading(true);
     
     try {
-      const connectionsData = await getConnections(user.id);
+      const followingData = await getFollowing(user.id);
       
-      // Enrich with follow status
-      const enrichedFollowing = await Promise.all(
-        connectionsData.map(async (profile) => {
-          const isFollowing = await getFollowStatus(user.id, profile.id);
-          return {
-            ...profile,
-            follow_status: (isFollowing ? 'following' : 'not_following') as 'following' | 'not_following'
-          };
-        })
-      );
+      // Extract profiles from the follow relationships
+      const followingProfiles = followingData.map(follow => ({
+        ...follow.following,
+        follow_status: 'following' as const
+      }));
 
-      setFollowing(enrichedFollowing);
+      setFollowing(followingProfiles);
     } catch (error) {
+      console.error('Error fetching following data:', error);
       toast.error('Failed to load following data');
     } finally {
       setLoading(false);
