@@ -23,20 +23,13 @@ export async function uploadToSupabaseStorage(
     console.log('Uploading to bucket:', bucket, 'with path:', path);
     const supabase = getSupabase();
     
-    // First, let's check if the bucket exists and is accessible
-    const { data: buckets, error: listError } = await supabase.storage.listBuckets();
-    if (listError) {
-      console.error('Error listing buckets:', listError);
-    } else {
-      console.log('Available buckets:', buckets?.map(b => b.name));
-      const bucketExists = buckets?.some(b => b.name === bucket);
-      if (!bucketExists) {
-        console.error(`Bucket '${bucket}' does not exist. Available buckets:`, buckets?.map(b => b.name));
-        return { url: '', error: new Error(`Bucket '${bucket}' does not exist`) };
-      }
+    if (!supabase) {
+      console.error('Supabase client not available');
+      return { url: '', error: new Error('Supabase client not available') };
     }
     
-    const { error: uploadError } = await supabase.storage
+    // Try to upload directly - if bucket doesn't exist, we'll get a clear error
+    const { data, error: uploadError } = await supabase.storage
       .from(bucket)
       .upload(path, file, {
         cacheControl: '3600',
@@ -48,16 +41,17 @@ export async function uploadToSupabaseStorage(
       return { url: '', error: uploadError };
     }
 
-    const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+    // Get the public URL for the uploaded file
+    const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path);
     
-    if (!data.publicUrl) {
+    if (!urlData.publicUrl) {
       const urlError = new Error('Upload successful, but could not get public URL.');
       console.error(urlError.message);
       return { url: '', error: urlError };
     }
 
-    console.log('Upload successful, URL:', data.publicUrl);
-    return { url: data.publicUrl, error: null };
+    console.log('Upload successful, URL:', urlData.publicUrl);
+    return { url: urlData.publicUrl, error: null };
     
   } catch (error) {
     console.error('Unexpected error in uploadToSupabaseStorage:', error);
