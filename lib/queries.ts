@@ -1084,7 +1084,14 @@ export async function followInstitution(followerId: string, institutionId: strin
       throw new Error('Follower profile not found');
     }
     
+    // Get following profile to determine following type
+    const followingProfile = await getProfile(institutionId);
+    if (!followingProfile) {
+      throw new Error('Institution profile not found');
+    }
+    
     const followerType = followerProfile.user_type === 'institution' ? 'institution' : 'individual';
+    const followingType = followingProfile.user_type === 'institution' ? 'institution' : 'individual';
     
     // Create follow relationship
     const { data: insertData, error: insertError } = await getSupabase()
@@ -1093,6 +1100,7 @@ export async function followInstitution(followerId: string, institutionId: strin
         follower_id: followerId,
         following_id: institutionId,
         follower_type: followerType,
+        following_type: followingType,
         created_at: new Date().toISOString(),
       })
       .select()
