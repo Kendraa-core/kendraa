@@ -1,13 +1,15 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { getPosts, createPost, getConnections, getSuggestedConnections, getProfile } from '@/lib/queries';
+import { uploadToSupabaseStorage } from '@/lib/utils';
 import type { Post, Profile } from '@/types/database.types';
 import { 
   PhotoIcon,
-  PlusIcon
+  PlusIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import PostCard from '@/components/post/PostCard';
@@ -21,6 +23,11 @@ export default function FeedPage() {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'posts' | 'medical'>('posts');
   const [postContent, setPostContent] = useState('');
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [isPosting, setIsPosting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
 
   const handlePostDeleted = (deletedPostId: string) => {
@@ -58,22 +65,93 @@ export default function FeedPage() {
   const handleCreatePost = useCallback(async (content: string, imageUrl?: string) => {
     if (!user?.id) return;
 
+    if (!content.trim() && !selectedImage) {
+      toast.error('Please add some content or an image to your post');
+      return;
+    }
+
+    setIsPosting(true);
+
     try {
-      const post = await createPost(user.id, content, imageUrl);
+      let finalImageUrl = imageUrl;
+
+      // Upload image if selected
+      if (selectedImage) {
+        setIsUploadingImage(true);
+        const fileExt = selectedImage.name.split('.').pop();
+        const fileName = `post_${user.id}_${Date.now()}.${fileExt}`;
+        const filePath = `posts/${user.id}/${fileName}`;
+
+        const result = await uploadToSupabaseStorage('post-images', filePath, selectedImage);
+        
+        if (result.error) {
+          throw new Error('Failed to upload image');
+        }
+        
+        finalImageUrl = result.url;
+        setIsUploadingImage(false);
+      }
+
+      const post = await createPost(user.id, content.trim(), finalImageUrl);
       if (post) {
         setPosts(prev => [post, ...prev]);
         setPostContent('');
+        setSelectedImage(null);
+        setImagePreview(null);
         toast.success('Post created successfully!');
+      } else {
+        toast.error('Failed to create post. Please try again.');
       }
     } catch (error) {
       console.error('Error creating post:', error);
-      toast.error('Failed to create post');
+      toast.error('Failed to create post. Please try again.');
+    } finally {
+      setIsPosting(false);
+      setIsUploadingImage(false);
     }
-  }, [user?.id]);
+  }, [user?.id, selectedImage]);
 
   useEffect(() => {
     fetchPosts();
   }, [fetchPosts]);
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select an image file');
+        return;
+      }
+
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image size must be less than 5MB');
+        return;
+      }
+
+      setSelectedImage(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleMediaButtonClick = () => {
+    fileInputRef.current?.click();
+  };
 
   return (
     <div className="space-y-8">
@@ -92,20 +170,52 @@ export default function FeedPage() {
               onChange={(e) => setPostContent(e.target.value)}
               className="w-full p-4 border border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-[#007fff] focus:border-transparent text-gray-700 placeholder-gray-500 text-base"
               rows={3}
+              disabled={isPosting}
             />
+
+            {/* Image Preview */}
+            {imagePreview && (
+              <div className="mt-4 relative">
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="w-full max-w-md h-48 object-cover rounded-xl border border-gray-200"
+                />
+                <button
+                  onClick={handleRemoveImage}
+                  className="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
+                >
+                  <XMarkIcon className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-4 pt-4 border-t border-gray-100 space-y-3 sm:space-y-0">
               <div className="flex items-center space-x-4">
-                <button className="flex items-center space-x-2 text-gray-500 hover:text-[#007fff] transition-colors p-2 rounded-lg hover:bg-[#007fff]/5">
+                <button 
+                  onClick={handleMediaButtonClick}
+                  disabled={isPosting || isUploadingImage}
+                  className="flex items-center space-x-2 text-gray-500 hover:text-[#007fff] transition-colors p-2 rounded-lg hover:bg-[#007fff]/5 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   <PhotoIcon className="w-5 h-5" />
                   <span className="text-sm font-medium">Media</span>
                 </button>
+                
+                {/* Hidden file input */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageSelect}
+                  className="hidden"
+                />
               </div>
               <button 
                 onClick={() => handleCreatePost(postContent)}
-                disabled={!postContent.trim()}
+                disabled={isPosting || isUploadingImage || (!postContent.trim() && !selectedImage)}
                 className="w-full sm:w-auto bg-[#007fff] text-white px-6 py-3 rounded-xl hover:bg-[#007fff]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
               >
-                Post
+                {isPosting ? (isUploadingImage ? 'Uploading...' : 'Posting...') : 'Post'}
               </button>
             </div>
           </div>
