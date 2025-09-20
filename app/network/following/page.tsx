@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Avatar from '@/components/common/Avatar';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import Header from '@/components/layout/Header';
+import { useFollowing } from '@/hooks/useFollowing';
 import { 
   ArrowLeftIcon,
   UserIcon,
@@ -12,14 +13,9 @@ import {
   MapPinIcon,
   MagnifyingGlassIcon,
   CheckIcon,
-  HeartIcon
+  HeartIcon,
+  ArrowPathIcon
 } from '@heroicons/react/24/outline';
-import { 
-  getFollowing,
-  unfollowUser,
-  unfollowInstitution
-} from '@/lib/queries';
-import { Profile } from '@/types/database.types';
 import { 
   BACKGROUNDS, 
   TEXT_COLORS, 
@@ -31,59 +27,20 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 
-interface FollowingProfile extends Profile {
-  follow_status: 'following' | 'not_following';
-}
-
 export default function FollowingPage() {
   const { user } = useAuth();
   const router = useRouter();
-  const [following, setFollowing] = useState<FollowingProfile[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { following, loading, fetchFollowing, unfollowProfile } = useFollowing();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'individuals' | 'institutions'>('individuals');
-
-  const fetchFollowingData = useCallback(async () => {
-    if (!user?.id) return;
-    
-    setLoading(true);
-    
-    try {
-      const followingData = await getFollowing(user.id);
-      
-      // Extract profiles from the follow relationships
-      const followingProfiles = followingData.map(follow => ({
-        ...follow.following,
-        follow_status: 'following' as const
-      }));
-
-      setFollowing(followingProfiles);
-    } catch (error) {
-      console.error('Error fetching following data:', error);
-      toast.error('Failed to load following data');
-    } finally {
-      setLoading(false);
-    }
-  }, [user?.id]);
-
-  useEffect(() => {
-    fetchFollowingData();
-  }, [fetchFollowingData]);
 
   const handleUnfollow = async (profileId: string, profileType: 'individual' | 'institution') => {
     if (!user?.id) return;
     
     try {
-      let success = false;
-      
-      if (profileType === 'institution') {
-        success = await unfollowInstitution(user.id, profileId);
-      } else {
-        success = await unfollowUser(user.id, profileId);
-      }
+      const success = await unfollowProfile(profileId, profileType);
       
       if (success) {
-        setFollowing(prev => prev.filter(p => p.id !== profileId));
         toast.success('Unfollowed successfully');
       } else {
         toast.error('Failed to unfollow');
@@ -140,19 +97,29 @@ export default function FollowingPage() {
           transition={{ duration: 0.6 }}
         >
           {/* Header */}
-          <div className="flex items-center space-x-4 mb-6">
-            <button
-              onClick={() => router.back()}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <ArrowLeftIcon className="w-5 h-5 text-gray-600" />
-            </button>
-            <div>
-              <h1 className={`${TYPOGRAPHY.heading.h1}`}>Following</h1>
-              <p className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary}`}>
-                {following.length} people and institutions
-              </p>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => router.back()}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <ArrowLeftIcon className="w-5 h-5 text-gray-600" />
+              </button>
+              <div>
+                <h1 className={`${TYPOGRAPHY.heading.h1}`}>Following</h1>
+                <p className={`${TYPOGRAPHY.body.medium} ${TEXT_COLORS.secondary}`}>
+                  {following.length} people and institutions
+                </p>
+              </div>
             </div>
+            <button
+              onClick={fetchFollowing}
+              disabled={loading}
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Refresh following list"
+            >
+              <ArrowPathIcon className={`w-5 h-5 text-gray-600 ${loading ? 'animate-spin' : ''}`} />
+            </button>
           </div>
 
           {/* Tabs */}

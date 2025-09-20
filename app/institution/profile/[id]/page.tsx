@@ -669,6 +669,10 @@ export default function PublicInstitutionProfilePage() {
         toast.success('Successfully followed institution');
         // Refresh the page data to update follower count
         fetchProfileData();
+        // Trigger a custom event to notify other components about the follow action
+        window.dispatchEvent(new CustomEvent('following-updated', { 
+          detail: { action: 'follow', profileId: profile.id, profileType: 'institution' } 
+        }));
       } else {
         // Revert the optimistic update
         setFollowStatus(previousStatus);
@@ -699,6 +703,10 @@ export default function PublicInstitutionProfilePage() {
         toast.success('Unfollowed successfully');
         // Refresh the page data to update follower count
         fetchProfileData();
+        // Trigger a custom event to notify other components about the unfollow action
+        window.dispatchEvent(new CustomEvent('following-updated', { 
+          detail: { action: 'unfollow', profileId: profile.id, profileType: 'institution' } 
+        }));
       } else {
         // Revert the optimistic update
         setFollowStatus(previousStatus);
