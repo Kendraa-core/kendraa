@@ -89,7 +89,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-2">
-              <Logo size="sm" className="h-8" />
+              <Logo size="sm" className="h-3" />
               <span className="text-sm text-gray-500 hidden sm:inline">🏥</span>
             </div>
             <div className="hidden md:flex items-center space-x-8">
@@ -347,7 +347,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="col-span-1 md:col-span-2">
               <div className="mb-4">
-                <Logo size="sm" className="h-8 filter brightness-0 invert" />
+                <Logo size="sm" className="h-3 filter brightness-0 invert" />
               </div>
               <p className="text-gray-400 mb-6 max-w-md">
                 Connecting healthcare professionals worldwide to advance medicine and improve patient care.

@@ -132,6 +132,18 @@ CREATE TABLE IF NOT EXISTS follows (
     UNIQUE(follower_id, following_id)
 );
 
+-- Post Comments table
+CREATE TABLE IF NOT EXISTS post_comments (
+    id SERIAL PRIMARY KEY,
+    post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+    author_id TEXT NOT NULL,
+    content TEXT NOT NULL,
+    parent_comment_id INTEGER REFERENCES post_comments(id) ON DELETE CASCADE,
+    likes_count INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- ==============================================
 -- 2. CREATE TRIGGERS FOR UPDATED_AT
 -- ==============================================
@@ -243,6 +255,7 @@ ALTER TABLE institutions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE jobs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE follows ENABLE ROW LEVEL SECURITY;
+ALTER TABLE post_comments ENABLE ROW LEVEL SECURITY;
 
 -- ==============================================
 -- 6. DROP ALL EXISTING POLICIES
@@ -325,6 +338,19 @@ CREATE POLICY "institutions_update_policy" ON institutions
     FOR UPDATE USING (true);
 
 CREATE POLICY "institutions_delete_policy" ON institutions
+    FOR DELETE USING (true);
+
+-- Post Comments policies (allow all operations for authenticated users)
+CREATE POLICY "post_comments_select_policy" ON post_comments
+    FOR SELECT USING (true);
+
+CREATE POLICY "post_comments_insert_policy" ON post_comments
+    FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "post_comments_update_policy" ON post_comments
+    FOR UPDATE USING (true);
+
+CREATE POLICY "post_comments_delete_policy" ON post_comments
     FOR DELETE USING (true);
 
 -- Jobs policies (allow all operations for authenticated users)

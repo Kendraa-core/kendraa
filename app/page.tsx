@@ -14,7 +14,9 @@ import {
   HeartIcon, 
   BeakerIcon,
   RocketLaunchIcon,
-  CheckCircleIcon
+  CheckCircleIcon,
+  SparklesIcon,
+  AcademicCapIcon
 } from '@heroicons/react/24/outline';
 
 export default function LandingPage() {
@@ -67,27 +69,27 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-100">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-14">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div className="flex items-center">
-              <Logo size="md" className="h-7 w-7" />
+              <Logo size="md" />
             </div>
             
             {/* Action Buttons */}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-4">
               <Link 
                 href="/signin"
-                className="border border-gray-300 text-gray-700 hover:text-orange-600 hover:border-orange-600 px-4 py-2 rounded-lg transition-all duration-300 font-medium text-sm"
+                className="text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200 px-3 py-2 rounded-lg hover:bg-primary-50"
               >
                 Login
               </Link>
               <Link 
                 href="/signup"
-                className="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-all duration-300 font-medium shadow-lg hover:shadow-xl text-sm"
+                className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-2.5 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl"
               >
                 Sign up
               </Link>
@@ -97,100 +99,56 @@ export default function LandingPage() {
       </nav>
 
       {/* Main Content - Single Viewport */}
-      <div className="min-h-screen flex items-center justify-center pt-14">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-8 items-center">
-            
-            {/* Left Content */}
+      <div className="min-h-screen flex items-center justify-center pt-16">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
-              className="text-center lg:text-left"
+              className="mb-8"
             >
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 leading-tight">
-                One app for
-                <span className="text-orange-500"> healthcare,</span><br />
-                <span className="text-orange-500">networking</span> & more
-                <span className="text-gray-900"> in minutes!</span>
+              
+              {/* Main Heading */}
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6">
+                <span className="text-gradient bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">
+                  WELCOME TO PROFESSIONAL NETWORKING
+                </span>
+                <br />
+                <span className="text-gray-800">
+                  OF LIFE SCIENCES PROFESSIONALS AND ORGANIZATIONS
+                </span>
               </h1>
               
-              <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto lg:mx-0">
-                Connect with healthcare professionals, find opportunities, and advance your career in life sciences.
+              {/* Subtitle */}
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-12 leading-relaxed">
+                Connect, collaborate, and advance your career in the life sciences industry. 
+                Join thousands of healthcare professionals, researchers, and organizations worldwide.
               </p>
-              
-              <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start mb-6">
-                <Link
-                  href="/signup"
-                  className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl inline-flex items-center justify-center text-base"
-                >
-                  Get Started
-                </Link>
-              </div>
+            </motion.div>
 
-              {/* Key Benefits */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto lg:mx-0">
-                <div className="flex items-center space-x-2 text-sm text-gray-600">
-                  <CheckCircleIcon className="w-4 h-4 text-green-500" />
-                  <span>Free to join</span>
-                </div>
-                <div className="flex items-center space-x-2 text-sm text-gray-600">
-                  <CheckCircleIcon className="w-4 h-4 text-green-500" />
-                  <span>Verified professionals</span>
-                </div>
-                <div className="flex items-center space-x-2 text-sm text-gray-600">
-                  <CheckCircleIcon className="w-4 h-4 text-green-500" />
-                  <span>Industry focused</span>
-                </div>
-              </div>
-            </motion.div>
-            
-            {/* Right Content - Visual */}
+            {/* Action Buttons */}
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="relative"
+              className="flex flex-col sm:flex-row gap-4 justify-center mb-16"
             >
-              <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6">
-                <div className="text-center mb-6">
-                  <div className="w-16 h-16 bg-orange-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <BeakerIcon className="w-8 h-8 text-orange-500" />
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Healthcare Network</h3>
-                  <p className="text-gray-600 text-sm">Connect with professionals worldwide</p>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-3 mb-4">
-                  <div className="bg-orange-50 rounded-lg p-3 text-center">
-                    <UsersIcon className="w-6 h-6 text-orange-500 mx-auto mb-1" />
-                    <div className="text-xs font-medium text-gray-900">Networking</div>
-                  </div>
-                  <div className="bg-blue-50 rounded-lg p-3 text-center">
-                    <BuildingOfficeIcon className="w-6 h-6 text-blue-600 mx-auto mb-1" />
-                    <div className="text-xs font-medium text-gray-900">Companies</div>
-                  </div>
-                  <div className="bg-green-50 rounded-lg p-3 text-center">
-                    <HeartIcon className="w-6 h-6 text-green-600 mx-auto mb-1" />
-                    <div className="text-xs font-medium text-gray-900">Research</div>
-                  </div>
-                  <div className="bg-purple-50 rounded-lg p-3 text-center">
-                    <BeakerIcon className="w-6 h-6 text-purple-600 mx-auto mb-1" />
-                    <div className="text-xs font-medium text-gray-900">Careers</div>
-                  </div>
-                </div>
-                
-                <div className="text-center">
-                  <Link
-                    href="/signup"
-                    className="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors font-medium inline-flex items-center text-sm"
-                  >
-                    <ArrowRightIcon className="w-4 h-4 mr-2" />
-                    Join Now
-                  </Link>
-                </div>
-              </div>
+              <Link
+                href="/signup"
+                className="bg-primary-500 hover:bg-primary-600 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl inline-flex items-center justify-center text-lg group"
+              >
+                Get Started Free
+                <ArrowRightIcon className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <Link
+                href="/signin"
+                className="border-2 border-primary-200 text-primary-700 hover:text-primary-800 hover:border-primary-300 hover:bg-primary-50 px-8 py-4 rounded-xl transition-all duration-300 font-semibold inline-flex items-center justify-center text-lg"
+              >
+                Sign In
+              </Link>
             </motion.div>
+
           </div>
         </div>
       </div>

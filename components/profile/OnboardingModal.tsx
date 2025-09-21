@@ -720,11 +720,11 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
             {/* Logo Section */}
             <div className="mb-8">
               <Image 
-                src="/Kendraa Logo (1).png" 
+                src="/Kendraa Logo (5).png" 
                 alt="Kendraa Logo" 
-                width={120}
-                height={120}
-                className="h-20 md:h-24 lg:h-28 w-auto mx-auto drop-shadow-lg"
+                width={12}
+                height={12}
+                className="h-2 md:h-2.5 lg:h-3 w-auto mx-auto drop-shadow-lg"
               />
             </div>
             
@@ -810,27 +810,6 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
               </p>
             </div>
             
-            {/* Save Button - positioned below the info text */}
-            <div className="mt-6 pt-6 border-t border-[#007fff]/20">
-              <button
-                onClick={handleSave}
-                disabled={loading}
-                className={`w-full px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 ${
-                  !loading
-                    ? 'bg-[#007fff] text-white hover:bg-[#007fff]/90 hover:shadow-md transform hover:scale-105'
-                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                }`}
-              >
-                {loading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Saving...</span>
-                  </>
-                ) : (
-                  <span>Save Progress</span>
-                )}
-              </button>
-            </div>
           </div>
         );
 
@@ -877,27 +856,6 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                 </motion.div>
             )}
             
-            {/* Save Button - positioned below the input field */}
-            <div className="mt-6 pt-6 border-t border-[#007fff]/20">
-              <button
-                onClick={handleSave}
-                disabled={loading}
-                className={`w-full px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 ${
-                  !loading
-                    ? 'bg-[#007fff] text-white hover:bg-[#007fff]/90 hover:shadow-md transform hover:scale-105'
-                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                }`}
-              >
-                {loading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Saving...</span>
-                  </>
-                ) : (
-                  <span>Save Progress</span>
-                )}
-              </button>
-            </div>
             </motion.div>
           </div>
         );
@@ -944,27 +902,6 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                 </motion.div>
             )}
             
-            {/* Save Button - positioned below the textarea field */}
-            <div className="mt-6 pt-6 border-t border-[#007fff]/20">
-              <button
-                onClick={handleSave}
-                disabled={loading}
-                className={`w-full px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 ${
-                  !loading
-                    ? 'bg-[#007fff] text-white hover:bg-[#007fff]/90 hover:shadow-md transform hover:scale-105'
-                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                }`}
-              >
-                {loading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Saving...</span>
-                </>
-                ) : (
-                  <span>Save Progress</span>
-                )}
-              </button>
-            </div>
             </motion.div>
           </div>
         );
@@ -1035,28 +972,20 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                 {avatarPreview ? 'Change Photo' : 'Upload Photo'}
               </label>
                 
-                {/* Save and Edit buttons - only show when photo is uploaded */}
+                {/* Remove button - only show when photo is uploaded */}
                 {avatarPreview && (
-                  <div className="flex space-x-4 mt-6">
-                    <button
-                      onClick={handleSave}
-                      disabled={loading}
-                      className="flex-1 px-6 py-3 bg-[#007fff] text-white rounded-xl hover:bg-[#007fff]/90 transition-colors font-semibold flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-                    >
-                      <CheckCircleIcon className="w-5 h-5" />
-                      <span>Save Photo</span>
-                    </button>
+                  <div className="flex justify-center mt-6">
                     <button
                       onClick={() => {
                         setAvatarFile(null);
                         setAvatarPreview(null);
                       }}
-                      className="flex-1 px-6 py-3 bg-[#007fff]/20 text-black rounded-xl hover:bg-[#007fff]/30 transition-colors font-semibold flex items-center justify-center space-x-2 shadow-lg"
+                      className="px-6 py-3 bg-[#007fff]/20 text-black rounded-xl hover:bg-[#007fff]/30 transition-colors font-semibold flex items-center justify-center space-x-2 shadow-lg"
                     >
                       <XMarkIcon className="w-5 h-5" />
                       <span>Remove Photo</span>
                     </button>
-            </div>
+                  </div>
                 )}
               </div>
               
@@ -1303,30 +1232,6 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                 </motion.div>
               )}
               
-              {/* Save Progress Button */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="mt-6 flex justify-center"
-              >
-                <button
-                  onClick={handleSave}
-                  disabled={loading}
-                  className="px-8 py-3 bg-[#007fff] text-white font-semibold rounded-xl hover:bg-[#007fff]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center space-x-2"
-                >
-                  {loading ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span>Saving...</span>
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircleIcon className="w-5 h-5" />
-                      <span>Save Progress</span>
-                    </>
-                  )}
-                </button>
-              </motion.div>
             </div>
             
             {step.required && (
@@ -1583,30 +1488,6 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                 </motion.div>
               )}
               
-              {/* Save Progress Button */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="mt-6 flex justify-center"
-              >
-                <button
-                  onClick={handleSave}
-                  disabled={loading}
-                  className="px-8 py-3 bg-[#007fff] text-white font-semibold rounded-xl hover:bg-[#007fff]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center space-x-2"
-                >
-                  {loading ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span>Saving...</span>
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircleIcon className="w-5 h-5" />
-                      <span>Save Progress</span>
-                    </>
-                  )}
-                </button>
-              </motion.div>
             </div>
             
             {step.required && (
@@ -1908,27 +1789,6 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
             </div>
             
             
-            {/* Save Button - positioned below the contact fields */}
-            <div className="mt-6 pt-6 border-t border-[#007fff]/20">
-              <button
-                onClick={handleSave}
-                disabled={loading}
-                className={`w-full px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 ${
-                  !loading
-                    ? 'bg-[#007fff] text-white hover:bg-[#007fff]/90 hover:shadow-md transform hover:scale-105'
-                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                }`}
-              >
-                {loading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Saving...</span>
-                  </>
-                ) : (
-                  <span>Save Progress</span>
-                )}
-              </button>
-            </div>
             </motion.div>
           </div>
         );
@@ -2003,78 +1863,77 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
               className="flex items-center justify-center min-h-[500px]"
             >
               <div className="w-full bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/30 p-6 md:p-8">
-              {renderStep()}
+                {renderStep()}
+                
+                {/* Navigation Buttons - Inside Container */}
+                <div className="mt-8 pt-6 border-t border-gray-200">
+                  <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-3">
+                    <div className="flex justify-center space-x-3 w-full">
+                      {currentStep < filteredSteps.length - 1 ? (
+                        <>
+                          <button
+                            onClick={handlePrevious}
+                            disabled={currentStep === 0}
+                            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
+                              currentStep === 0
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md'
+                            }`}
+                          >
+                            Previous
+                          </button>
+                          <button
+                            onClick={handleNext}
+                            disabled={!canProceed() || loading || uploading}
+                            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg ${
+                              canProceed() && !loading
+                                ? 'bg-[#007fff] text-white hover:bg-[#007fff]/90 hover:shadow-xl transform hover:scale-105'
+                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            }`}
+                          >
+                            {loading ? (
+                              <>
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                <span>Saving...</span>
+                              </>
+                            ) : (
+                              <>
+                                <span>{currentStep === filteredSteps.length - 2 ? 'Complete' : 'Next'}</span>
+                                <ArrowRightIcon className="w-4 h-4" />
+                              </>
+                            )}
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          onClick={async () => {
+                            setLoading(true);
+                            try {
+                              // Save all data AND mark as completed
+                              await saveAllData(true);
+                              toast.success('Welcome to Kendraa!');
+                              router.push('/feed');
+                            } catch (error) {
+                              toast.error('Failed to complete onboarding.');
+                            } finally {
+                              setLoading(false);
+                            }
+                          }}
+                          disabled={loading}
+                          className="px-8 py-3 bg-[#007fff] text-white rounded-xl font-semibold hover:bg-[#007fff]/90 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                        >
+                          {loading || uploading ? 'Completing...' : 'Get Started'}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
             </motion.div>
           </AnimatePresence>
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="bg-white/90 backdrop-blur-md border-t border-gray-100">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
-          <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-3">
-            <div className="flex justify-center space-x-3 w-full">
-              {currentStep < filteredSteps.length - 1 ? (
-                <>
-                  <button
-                    onClick={handlePrevious}
-                    disabled={currentStep === 0}
-                    className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
-                      currentStep === 0
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md'
-                    }`}
-                  >
-                    Previous
-                  </button>
-                  <button
-                    onClick={handleNext}
-                    disabled={!canProceed() || loading || uploading}
-                    className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg ${
-                      canProceed() && !loading
-                        ? 'bg-[#007fff] text-white hover:bg-[#007fff]/90 hover:shadow-xl transform hover:scale-105'
-                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    }`}
-                  >
-                    {loading ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        <span>Saving...</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>{currentStep === filteredSteps.length - 2 ? 'Complete' : 'Next'}</span>
-                        <ArrowRightIcon className="w-4 h-4" />
-                      </>
-                    )}
-                  </button>
-                </>
-              ) : (
-                <button
-                  onClick={async () => {
-                    setLoading(true);
-                    try {
-                      // Save all data AND mark as completed
-                      await saveAllData(true);
-                      toast.success('Welcome to Kendraa!');
-                      router.push('/feed');
-                        } catch (error) {
-      toast.error('Failed to complete onboarding.');
-    } finally {
-                      setLoading(false);
-                    }
-                  }}
-                  disabled={loading}
-                  className="px-8 py-3 bg-[#007fff] text-white rounded-xl font-semibold hover:bg-[#007fff]/90 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                >
-                   {loading || uploading ? 'Completing...' : 'Get Started'}
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Edit Profile Modal */}
       {showEditModal && profile && (

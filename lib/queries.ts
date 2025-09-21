@@ -187,7 +187,7 @@ export async function ensureProfileExists(
 }
 
 // Post queries
-export async function getPosts(limit = 10, offset = 0): Promise<Post[]> {
+export async function getPosts(limit = 10, offset = 0): Promise<PostWithAuthor[]> {
   try {
 
     
@@ -224,7 +224,7 @@ export async function getPosts(limit = 10, offset = 0): Promise<Post[]> {
     
     // For institution users, also fetch institution data
     const institutionAuthorIds = authors?.filter(author => 
-      author.user_type === 'institution' || author.profile_type === 'institution'
+      author.user_type === 'organization' || author.profile_type === 'organization'
     ).map(author => author.id) || [];
     
     let institutionMap = new Map();
@@ -245,7 +245,7 @@ export async function getPosts(limit = 10, offset = 0): Promise<Post[]> {
       if (!author) {
         return {
           ...post,
-          profiles: null
+          author: null
         };
       }
       
@@ -255,7 +255,7 @@ export async function getPosts(limit = 10, offset = 0): Promise<Post[]> {
         if (institution) {
           return {
             ...post,
-            profiles: {
+            author: {
               ...author,
               full_name: institution.name || author.full_name,
               avatar_url: institution.logo_url || author.avatar_url
@@ -266,7 +266,7 @@ export async function getPosts(limit = 10, offset = 0): Promise<Post[]> {
       
       return {
         ...post,
-        profiles: author
+        author: author
       };
     });
 
@@ -934,8 +934,8 @@ export async function getSuggestedConnections(userId: string, limit = 10): Promi
       .from('profiles')
       .select('*')
       .not('id', 'in', `(${excludeUserIds.join(',')})`)
-      .neq('user_type', 'institution') // Exclude institutions
-      .neq('profile_type', 'institution') // Also exclude by profile_type
+    .neq('user_type', 'organization') // Exclude organizations
+    .neq('profile_type', 'organization') // Also exclude by profile_type
       .eq('onboarding_completed', true) // Only show users who completed onboarding
       .limit(limit);
 
@@ -1048,18 +1048,18 @@ export async function rejectConnectionRequest(connectionId: string): Promise<boo
   }
 }
 
-// Follow system for institutions (automatic acceptance)
-export async function followInstitution(followerId: string, institutionId: string): Promise<boolean> {
+// Follow system for organizations (automatic acceptance)
+export async function followOrganization(followerId: string, organizationId: string): Promise<boolean> {
   try {
-    console.log('followInstitution called with:', { followerId, institutionId });
+    console.log('followOrganization called with:', { followerId, organizationId });
     
     // Validate input parameters
-    if (!followerId || !institutionId) {
-      console.error('Invalid parameters:', { followerId, institutionId });
-      throw new Error('Follower ID and Institution ID are required');
+    if (!followerId || !organizationId) {
+      console.error('Invalid parameters:', { followerId, organizationId });
+      throw new Error('Follower ID and Organization ID are required');
     }
-    
-    if (followerId === institutionId) {
+
+    if (followerId === organizationId) {
       console.error('Cannot follow yourself');
       throw new Error('Cannot follow yourself');
     }
@@ -1069,7 +1069,7 @@ export async function followInstitution(followerId: string, institutionId: strin
       .from('follows')
       .select('id')
       .eq('follower_id', followerId)
-      .eq('following_id', institutionId)
+      .eq('following_id', organizationId)
       .maybeSingle(); // Use maybeSingle instead of single to avoid error when no match
     
     if (checkError) {
@@ -1089,9 +1089,9 @@ export async function followInstitution(followerId: string, institutionId: strin
     }
     
     // Get following profile to determine following type
-    const followingProfile = await getProfile(institutionId);
+    const followingProfile = await getProfile(organizationId);
     if (!followingProfile) {
-      throw new Error('Institution profile not found');
+      throw new Error('Organization profile not found');
     }
     
     const followerType = followerProfile.user_type === 'institution' ? 'institution' : 'individual';
@@ -1102,7 +1102,7 @@ export async function followInstitution(followerId: string, institutionId: strin
       .from('follows')
       .insert({
         follower_id: followerId,
-        following_id: institutionId,
+        following_id: organizationId,
         follower_type: followerType,
         following_type: followingType,
         created_at: new Date().toISOString(),
@@ -1121,10 +1121,10 @@ export async function followInstitution(followerId: string, institutionId: strin
     try {
       if (followerProfile) {
         await createNotification({
-          user_id: institutionId,
+          user_id: organizationId,
           type: 'connection_accepted',
           title: 'New Follower',
-          message: `${followerProfile.full_name || 'Someone'} started following your institution`,
+          message: `${followerProfile.full_name || 'Someone'} started following your organization`,
           read: false,
           data: { profileId: followerId },
           action_url: null,
@@ -1140,17 +1140,17 @@ export async function followInstitution(followerId: string, institutionId: strin
     
     return true;
   } catch (error) {
-    console.error('Error following institution:', error);
+    console.error('Error following organization:', error);
     // Re-throw the error with more context
     if (error instanceof Error) {
       throw error;
     } else {
-      throw new Error(`Unknown error occurred while following institution: ${JSON.stringify(error)}`);
+      throw new Error(`Unknown error occurred while following organization: ${JSON.stringify(error)}`);
     }
   }
 }
 
-export async function unfollowInstitution(followerId: string, institutionId: string): Promise<boolean> {
+export async function unfollowOrganization(followerId: string, organizationId: string): Promise<boolean> {
   try {
     const schemaExists = await true;
     if (!schemaExists) {
@@ -1161,7 +1161,7 @@ export async function unfollowInstitution(followerId: string, institutionId: str
       .from('follows')
       .delete()
       .eq('follower_id', followerId)
-      .eq('following_id', institutionId);
+      .eq('following_id', organizationId);
 
     if (error) throw error;
     
@@ -1172,7 +1172,7 @@ export async function unfollowInstitution(followerId: string, institutionId: str
   }
 }
 
-export async function getInstitutionFollowers(institutionId: string): Promise<Profile[]> {
+export async function getOrganizationFollowers(organizationId: string): Promise<Profile[]> {
   try {
     const schemaExists = await true;
     if (!schemaExists) {
@@ -1185,7 +1185,7 @@ export async function getInstitutionFollowers(institutionId: string): Promise<Pr
         requester_id,
         requester:profiles!connections_requester_id_fkey(*)
       `)
-      .eq('recipient_id', institutionId)
+      .eq('recipient_id', organizationId)
       .eq('status', 'accepted')
       .order('created_at', { ascending: false });
 
@@ -1206,13 +1206,13 @@ export async function getInstitutionFollowers(institutionId: string): Promise<Pr
   }
 }
 
-export async function getFollowStatus(followerId: string, institutionId: string): Promise<boolean> {
+export async function getFollowStatus(followerId: string, organizationId: string): Promise<boolean> {
   try {
-    console.log('Checking follow status:', { followerId, institutionId });
+    console.log('Checking follow status:', { followerId, organizationId });
     
     // Validate input parameters
-    if (!followerId || !institutionId) {
-      console.error('Invalid parameters for getFollowStatus:', { followerId, institutionId });
+    if (!followerId || !organizationId) {
+      console.error('Invalid parameters for getFollowStatus:', { followerId, organizationId });
       return false;
     }
     
@@ -1220,7 +1220,7 @@ export async function getFollowStatus(followerId: string, institutionId: string)
       .from('follows')
       .select('id')
       .eq('follower_id', followerId)
-      .eq('following_id', institutionId)
+      .eq('following_id', organizationId)
       .maybeSingle(); // Use maybeSingle to avoid error when no record found
 
     if (error) {
@@ -1917,6 +1917,49 @@ export async function getInstitutions(): Promise<Institution[]> {
   }
 }
 
+// Follow/Unfollow Institution functions
+export async function followInstitution(userId: string, institutionId: string): Promise<boolean> {
+  try {
+    const { error } = await getSupabase()
+      .from('institution_follows')
+      .insert({
+        user_id: userId,
+        institution_id: institutionId,
+        created_at: new Date().toISOString()
+      });
+
+    if (error) {
+      console.error('Error following institution:', error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error following institution:', error);
+    return false;
+  }
+}
+
+export async function unfollowInstitution(userId: string, institutionId: string): Promise<boolean> {
+  try {
+    const { error } = await getSupabase()
+      .from('institution_follows')
+      .delete()
+      .eq('user_id', userId)
+      .eq('institution_id', institutionId);
+
+    if (error) {
+      console.error('Error unfollowing institution:', error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error unfollowing institution:', error);
+    return false;
+  }
+}
+
 // Get institution by user ID (for users who manage institutions)
 export async function getInstitutionByUserId(userId: string): Promise<Institution | null> {
   try {
@@ -1956,6 +1999,12 @@ export async function getInstitutionByUserId(userId: string): Promise<Institutio
     if (error) {
       if (error.code === 'PGRST116') {
         console.log('Institution not found for user');
+        // Let's also check what institutions exist for debugging
+        const { data: allInstitutions } = await getSupabase()
+          .from('institutions')
+          .select('id, name, admin_user_id')
+          .limit(5);
+        console.log('Available institutions:', allInstitutions);
         return null;
       }
       console.log('Error fetching institution by user ID', error);
@@ -3377,7 +3426,7 @@ export async function getSavedPosts(userId: string): Promise<Post[]> {
     
     // For institution users, also fetch institution data
     const institutionAuthorIds = authors?.filter(author => 
-      author.user_type === 'institution' || author.profile_type === 'institution'
+      author.user_type === 'organization' || author.profile_type === 'organization'
     ).map(author => author.id) || [];
     
     let institutionMap = new Map();

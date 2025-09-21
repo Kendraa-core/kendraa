@@ -74,6 +74,25 @@ export default function SignUp() {
     setError('');
     setLoading(true);
 
+    // Basic validation
+    if (!formData.fullName.trim()) {
+      setError('Please enter your full name');
+      setLoading(false);
+      return;
+    }
+
+    if (!formData.email.trim()) {
+      setError('Please enter your email address');
+      setLoading(false);
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      setLoading(false);
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       setLoading(false);
@@ -82,9 +101,9 @@ export default function SignUp() {
 
     try {
       await signUp(
-        formData.email,
+        formData.email.trim(),
         formData.password,
-        formData.fullName,
+        formData.fullName.trim(),
         profileType
       );
       
@@ -92,6 +111,7 @@ export default function SignUp() {
       // Redirect will be handled by useEffect when profile is loaded
     } catch (error: any) {
       console.error('Error signing up:', error);
+      setError(error.message || 'An error occurred during sign up');
       toast.error(error.message || 'An error occurred during sign up');
     } finally {
       setLoading(false);
@@ -104,11 +124,11 @@ export default function SignUp() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-[#007fff]/5 flex items-center justify-center px-4 py-4">
+    <div className="min-h-screen bg-white flex items-center justify-center px-6 py-8">
       <div className="w-full max-w-4xl">
         {/* Logo */}
-        <div className="flex justify-center items-center mb-3">
-          <Logo size="lg" />
+        <div className="flex justify-center items-center mb-6">
+          <Logo size="sm" />
         </div>
 
         <AnimatePresence mode="wait">
@@ -121,16 +141,8 @@ export default function SignUp() {
               transition={{ duration: 0.3 }}
               className="text-center"
             >
-              <div className="mb-6">
-                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-                  Join the healthcare community
-                </h1>
-                <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                  Choose your account type to get started with the right experience
-                </p>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
                 {PROFILE_TYPES.map((type, index) => {
                   const IconComponent = type.icon;
                   return (
@@ -142,7 +154,7 @@ export default function SignUp() {
                       className="group cursor-pointer"
                       onClick={() => handleTypeSelection(type.id as 'individual' | 'institution')}
                     >
-                      <div className="bg-white rounded-3xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-gray-100">
+                      <div className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-gray-100">
                         <div className={`w-16 h-16 bg-gradient-to-br ${type.color} rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300`}>
                           <IconComponent className="w-8 h-8 text-white" />
                         </div>
@@ -151,18 +163,9 @@ export default function SignUp() {
                           {type.name}
                         </h3>
                         
-                        <p className="text-gray-600 mb-4 leading-relaxed text-sm">
+                        <p className="text-gray-600 mb-6 text-sm">
                           {type.description}
                         </p>
-
-                        <div className="space-y-1.5 mb-4">
-                          {type.features.map((feature, featureIndex) => (
-                            <div key={featureIndex} className="flex items-center text-xs text-gray-600">
-                              <CheckCircleIcon className="w-3 h-3 text-green-500 mr-2 flex-shrink-0" />
-                              <span>{feature}</span>
-                            </div>
-                          ))}
-                        </div>
 
                         <div className="flex items-center justify-center text-[#007fff] font-semibold group-hover:text-blue-600 transition-colors">
                           <span>Get Started</span>
@@ -174,7 +177,7 @@ export default function SignUp() {
                 })}
               </div>
 
-              <div className="mt-8 text-center">
+              <div className="mt-12 text-center">
                 <p className="text-gray-600 text-sm">
                   Already have an account?{' '}
                   <Link
@@ -209,7 +212,7 @@ export default function SignUp() {
               </div>
 
               {/* Form Card */}
-              <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-6">
+              <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
                 <div className="text-center mb-6">
                   <div className={`w-14 h-14 bg-gradient-to-br ${PROFILE_TYPES.find(t => t.id === profileType)?.color} rounded-2xl flex items-center justify-center mx-auto mb-3`}>
                     {React.createElement(PROFILE_TYPES.find(t => t.id === profileType)?.icon || UserIcon, { className: "w-7 h-7 text-white" })}
@@ -219,8 +222,8 @@ export default function SignUp() {
                   </h1>
                   <p className="text-gray-600 text-sm">
                     {profileType === 'institution' 
-                      ? 'Connect with healthcare professionals and build institutional partnerships'
-                      : 'Join thousands of healthcare professionals'
+                      ? 'Build institutional partnerships'
+                      : 'Join healthcare professionals'
                     }
                   </p>
                 </div>

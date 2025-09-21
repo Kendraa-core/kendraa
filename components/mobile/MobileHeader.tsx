@@ -75,7 +75,7 @@ export default function MobileHeader({
               </button>
               
               <Link href={baseRoute} className="flex items-center">
-                <Logo size="sm" className="h-8" />
+                <Logo size="sm" className="h-3" />
               </Link>
             </div>
 

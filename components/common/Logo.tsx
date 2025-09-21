@@ -15,10 +15,10 @@ export default function Logo({
   variant = 'default' 
 }: LogoProps) {
   const sizeClasses = {
-    sm: 'h-32 w-auto',
-    md: 'h-40 w-auto',
-    lg: 'h-48 w-auto',
-    xl: 'h-56 w-auto'
+    sm: 'h-9 w-auto',
+    md: 'h-12 w-auto',
+    lg: 'h-15 w-auto',
+    xl: 'h-18 w-auto'
   };
 
   // If text-only variant, use CSS-based text
@@ -29,8 +29,8 @@ export default function Logo({
   return (
     <div className={`${sizeClasses[size]} ${className} flex items-center`}>
       <Image
-        src="/Kendraa Logo (1).png"
-        alt="Kendraa - Healthcare Professional Networking"
+        src="/Kendraa Logo (5).png"
+        alt="Kendraa - Professional Networking for Medical Sciences"
         width={1000}
         height={240}
         className="h-full w-auto object-contain"
@@ -47,10 +47,10 @@ export function LogoText({
   variant = 'default' 
 }: LogoProps) {
   const sizeClasses = {
-    sm: 'text-2xl font-bold',
-    md: 'text-3xl font-bold',
-    lg: 'text-4xl font-bold',
-    xl: 'text-5xl font-bold'
+    sm: 'text-sm font-bold',
+    md: 'text-lg font-bold',
+    lg: 'text-xl font-bold',
+    xl: 'text-2xl font-bold'
   };
 
   const variantClasses = {

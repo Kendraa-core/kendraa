@@ -197,15 +197,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error("Account created, but user data not available immediately. Please try signing in.");
       }
 
-      // Use ensureProfileExists to create the profile if it doesn't exist
-      // The trigger should create the profile automatically, but we'll update it with the correct data
+      // Use upsert to handle both insert and update cases
       try {
-        const { ensureProfileExists } = await import('@/lib/queries');
-        await ensureProfileExists(data.user.id, email, fullName, profileType);
+        const { error: upsertError } = await supabase
+          .from('profiles')
+          .upsert({
+            id: data.user.id,
+            email: email,
+            full_name: fullName,
+            user_type: profileType,
+            profile_type: profileType,
+            headline: '',
+            bio: '',
+            location: '',
+            avatar_url: '',
+            banner_url: '',
+            website: '',
+            phone: '',
+            specialization: [],
+            is_premium: false,
+            onboarding_completed: false,
+            updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'id'
+          });
+
+        if (upsertError) {
+          console.error("Error upserting profile after signup:", upsertError);
+        }
+        
         toast.success('Account created successfully! Please check your email to verify your account.');
       } catch (profileError) {
-        console.error("Error creating profile after signup:", profileError);
-        // Don't show error to user if profile creation fails - the trigger should handle it
+        console.error("Error handling profile after signup:", profileError);
+        // Don't show error to user if profile creation fails
         toast.success('Account created successfully! Please check your email to verify your account.');
       }
       

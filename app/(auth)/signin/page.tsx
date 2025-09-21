@@ -32,15 +32,15 @@ export default function SignIn() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-4 py-4">
+    <div className="min-h-screen bg-white flex items-center justify-center px-6 py-8">
       <div className="w-full max-w-md">
         {/* Logo */}
-        <div className="flex justify-center items-center mb-4">
-          <Logo size="lg" />
+        <div className="flex justify-center items-center mb-6">
+          <Logo size="sm" />
         </div>
 
         {/* Form Card */}
-        <div className="bg-white rounded-2xl shadow-xl border border-[#007fff]/10 p-6">
+        <div className="bg-white rounded-2xl shadow-xl border border-[#007fff]/10 p-8">
           <div className="text-center mb-6">
             <h1 className="text-xl font-bold text-black mb-1">
               Welcome back

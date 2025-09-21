@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
-import { uploadToSupabaseStorage, validateFile } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
 import { 
   BuildingOfficeIcon, 
@@ -13,7 +12,6 @@ import {
   ExclamationTriangleIcon,
   XMarkIcon,
   ArrowRightIcon,
-  PhotoIcon,
   ChevronLeftIcon, 
   ChevronRightIcon,
   GlobeAltIcon,
@@ -90,13 +88,6 @@ const ONBOARDING_STEPS = [
     required: true
   },
   {
-    id: 'branding',
-    title: 'Branding & Visual Identity',
-    subtitle: 'Add your logo and brand colors',
-    type: 'branding',
-    required: true
-  },
-  {
     id: 'completion',
     title: 'You\'re All Set!',
     subtitle: 'Your institution profile is ready to connect with healthcare professionals',
@@ -135,10 +126,6 @@ export default function InstitutionOnboardingPage() {
     specialties: ''
   });
   
-  const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [bannerFile, setBannerFile] = useState<File | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [existingInstitution, setExistingInstitution] = useState<any>(null);
@@ -186,12 +173,6 @@ export default function InstitutionOnboardingPage() {
             specialties: institution.specialties?.join(', ') || ''
           });
           
-          if (institution.logo_url) {
-            setLogoPreview(institution.logo_url);
-          }
-          if (institution.banner_url) {
-            setBannerPreview(institution.banner_url);
-          }
         }
       } catch (error) {
         console.error('Error loading institution data:', error);
@@ -229,78 +210,20 @@ export default function InstitutionOnboardingPage() {
     }));
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'banner') => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const validation = validateFile(file, 5);
-      if (!validation.valid) {
-        toast.error(validation.error || 'Invalid file');
-            return;
-          }
-          
-      if (type === 'logo') {
-        setLogoFile(file);
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setLogoPreview(reader.result as string);
-        };
-        reader.readAsDataURL(file);
-      } else {
-        setBannerFile(file);
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setBannerPreview(reader.result as string);
-        };
-        reader.readAsDataURL(file);
-      }
-    }
-  };
 
   const saveInstitutionData = async (markCompleted = false) => {
-    if (!user?.id || !supabase) return;
+    if (!user?.id || !supabase) {
+      console.error('Missing user or supabase client:', { user: !!user, supabase: !!supabase });
+      return;
+    }
 
     try {
       setUploading(true);
+      console.log('Saving institution data:', { formData, markCompleted });
 
-      // Handle logo upload
-      let logoUrl = formData.logoUrl;
-      if (logoFile) {
-        const fileExt = logoFile.name.split('.').pop();
-        const fileName = `logo_${user.id}_${Date.now()}.${fileExt}`;
-        const filePath = `institutions/${user.id}/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-          .from('institution-assets')
-          .upload(filePath, logoFile, { upsert: true });
-
-        if (uploadError) throw uploadError;
-
-        const { data } = supabase.storage
-          .from('institution-assets')
-          .getPublicUrl(filePath);
-
-        logoUrl = data.publicUrl;
-      }
-
-      // Handle banner upload
-      let bannerUrl = formData.bannerUrl;
-      if (bannerFile) {
-        const fileExt = bannerFile.name.split('.').pop();
-        const fileName = `banner_${user.id}_${Date.now()}.${fileExt}`;
-        const filePath = `institutions/${user.id}/${fileName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('institution-assets')
-          .upload(filePath, bannerFile, { upsert: true });
-
-        if (uploadError) throw uploadError;
-
-        const { data } = supabase.storage
-          .from('institution-assets')
-          .getPublicUrl(filePath);
-
-        bannerUrl = data.publicUrl;
-      }
+      // Use existing URLs or empty strings
+      let logoUrl = formData.logoUrl || '';
+      let bannerUrl = formData.bannerUrl || '';
 
       // Map institution type to database format
       const mapInstitutionType = (formType: string): string => {
@@ -346,7 +269,7 @@ export default function InstitutionOnboardingPage() {
         banner_url: bannerUrl,
         established_year: formData.establishedYear ? parseInt(formData.establishedYear, 10) : null,
         size: mapOrganizationSize(formData.size),
-        short_description: formData.shortDescription,
+        short_description: formData.detailedDescription.substring(0, 200), // Use first 200 chars of detailed description as short description
         theme_color: formData.themeColor,
         accreditation: formData.accreditation ? formData.accreditation.split(',').map(a => a.trim()) : [],
         specialties: formData.specialties ? formData.specialties.split(',').map(s => s.trim()) : [],
@@ -354,24 +277,63 @@ export default function InstitutionOnboardingPage() {
         updated_at: new Date().toISOString()
       };
 
-      if (existingInstitution) {
-        // Update existing institution
-        const { error: updateError } = await supabase
-          .from('institutions')
-          .update(institutionData)
-          .eq('id', existingInstitution.id);
+      // Try to save to institutions table first
+      try {
+        if (existingInstitution) {
+          // Update existing institution
+          console.log('Updating existing institution:', existingInstitution.id);
+          const { error: updateError } = await supabase
+            .from('institutions')
+            .update(institutionData)
+            .eq('id', existingInstitution.id);
+          
+          if (updateError) {
+            console.error('Update error:', updateError);
+            throw updateError;
+          }
+          console.log('Institution updated successfully');
+        } else {
+          // Create new institution
+          console.log('Creating new institution for user:', user.id);
+          const { error: insertError } = await supabase
+            .from('institutions')
+            .insert({
+              ...institutionData,
+              admin_user_id: user.id
+            });
+          
+          if (insertError) {
+            console.error('Insert error:', insertError);
+            throw insertError;
+          }
+          console.log('Institution created successfully');
+          
+          // Add a small delay to ensure the database is updated
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+      } catch (institutionError) {
+        console.warn('Failed to save to institutions table, trying profiles table:', institutionError);
         
-        if (updateError) throw updateError;
-      } else {
-        // Create new institution
-        const { error: insertError } = await supabase
-          .from('institutions')
-          .insert({
-            ...institutionData,
-            admin_user_id: user.id
-          });
+        // Fallback: save basic info to profiles table
+        const { error: profileUpdateError } = await supabase
+          .from('profiles')
+          .update({
+            full_name: formData.name,
+            location: formData.location,
+            bio: formData.detailedDescription,
+            phone: formData.phone,
+            email: formData.email,
+            website: formData.website,
+            avatar_url: logoUrl,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', user.id);
         
-        if (insertError) throw insertError;
+        if (profileUpdateError) {
+          console.error('Profile update error:', profileUpdateError);
+          throw profileUpdateError;
+        }
+        console.log('Saved to profiles table as fallback');
       }
 
       // Update profile if needed
@@ -389,7 +351,11 @@ export default function InstitutionOnboardingPage() {
         await updateProfile({ onboarding_completed: true });
       }
 
-      toast.success('Institution data saved successfully!');
+      // Only show success toast if not auto-saving (when markCompleted is false, it's auto-save)
+      if (markCompleted) {
+        toast.success('Institution data saved successfully!');
+      }
+      console.log('Institution data saved successfully');
     } catch (error: any) {
       console.error('Error saving institution data:', error);
       toast.error('Failed to save institution data');
@@ -400,9 +366,22 @@ export default function InstitutionOnboardingPage() {
   };
 
   const handleNext = async () => {
-    await saveInstitutionData(false);
-    const nextStep = Math.min(currentStep + 1, ONBOARDING_STEPS.length - 1);
-    setCurrentStep(nextStep);
+    try {
+      console.log('handleNext called, current step:', currentStep);
+      console.log('Form data:', formData);
+      console.log('Can proceed:', canProceed());
+      
+      // Always try to save data, even if validation doesn't pass
+      // This allows partial saves for non-required fields
+      await saveInstitutionData(false);
+      
+      const nextStep = Math.min(currentStep + 1, ONBOARDING_STEPS.length - 1);
+      console.log('Moving to next step:', nextStep);
+      setCurrentStep(nextStep);
+    } catch (error) {
+      console.error('Error saving data:', error);
+      toast.error('Failed to save progress. Please try again.');
+    }
   };
 
   const handlePrevious = () => {
@@ -422,11 +401,11 @@ export default function InstitutionOnboardingPage() {
       case 'institution-type':
         return !!(formData.type && formData.establishedYear && formData.size);
       case 'description':
-        return !!(formData.shortDescription && formData.detailedDescription);
+        return !!(formData.detailedDescription);
       case 'contact':
         return !!(formData.email && formData.phone);
       case 'branding':
-        return !!(formData.logoUrl || logoPreview);
+        return true; // Skip validation for now since we removed image upload
       default:
         return true;
     }
@@ -441,11 +420,11 @@ export default function InstitutionOnboardingPage() {
           <div className="text-center max-w-4xl mx-auto px-6">
             <div className="mb-8">
               <Image 
-                src="/Kendraa Logo (1).png" 
+                src="/Kendraa Logo (5).png" 
                 alt="Kendraa Logo" 
-                width={120}
-                height={120}
-                className="h-20 md:h-24 lg:h-28 w-auto mx-auto drop-shadow-lg"
+                width={12}
+                height={12}
+                className="h-2 md:h-2.5 lg:h-3 w-auto mx-auto drop-shadow-lg"
               />
             </div>
             
@@ -458,12 +437,6 @@ export default function InstitutionOnboardingPage() {
               </p>
             </div>
             
-            <div className="mt-8">
-              <div className="inline-flex items-center space-x-2 text-[#007fff] font-semibold text-base">
-                <span>Let&apos;s get started</span>
-                <ArrowRightIcon className="w-4 h-4" />
-              </div>
-            </div>
           </div>
         );
 
@@ -628,22 +601,6 @@ export default function InstitutionOnboardingPage() {
               className="bg-white border-2 border-[#007fff]/10 rounded-2xl p-6 hover:border-[#007fff]/20 hover:shadow-lg transition-all duration-300"
             >
           <div className="space-y-6">
-            <div>
-                  <label className="block text-sm font-semibold text-[#007fff] mb-2">
-                    Short Description (Max 200 Characters) *
-              </label>
-                  <textarea
-                    value={formData.shortDescription}
-                    onChange={(e) => handleInputChange('shortDescription', e.target.value)}
-                    placeholder="Brief description shown in search results..."
-                    maxLength={200}
-                    rows={3}
-                    className="w-full px-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 bg-white transition-all duration-200 hover:border-[#007fff]/40 resize-none"
-                  />
-              <p className="text-sm text-gray-500 mt-1">
-                    {formData.shortDescription.length}/200 characters
-              </p>
-            </div>
 
             <div>
                   <label className="block text-sm font-semibold text-[#007fff] mb-2">
@@ -762,150 +719,6 @@ export default function InstitutionOnboardingPage() {
           </div>
         );
 
-      case 'branding':
-        return (
-          <div className="max-w-3xl mx-auto">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center mb-8"
-            >
-              <div className="w-16 h-16 bg-[#007fff] rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <PhotoIcon className="w-8 h-8 text-white" />
-              </div>
-              <h2 className="text-3xl font-bold text-black mb-2">{step.title}</h2>
-              <p className="text-lg text-gray-700 max-w-2xl mx-auto">{step.subtitle}</p>
-            </motion.div>
-            
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white border-2 border-[#007fff]/10 rounded-2xl p-6 hover:border-[#007fff]/20 hover:shadow-lg transition-all duration-300"
-            >
-              <div className="space-y-8">
-                {/* Logo Upload */}
-            <div>
-                  <label className="block text-sm font-semibold text-[#007fff] mb-3">
-                    Institution Logo *
-              </label>
-                  <div className="space-y-4">
-                    {logoPreview ? (
-                      <div className="relative w-32 h-32 mx-auto">
-                        <Image
-                          src={logoPreview}
-                          alt="Logo preview"
-                          width={128}
-                          height={128}
-                          className="w-full h-full object-contain border-2 border-[#007fff] rounded-xl"
-                        />
-                        <button
-                          onClick={() => {
-                            setLogoFile(null);
-                            setLogoPreview(null);
-                            handleInputChange('logoUrl', '');
-                          }}
-                          className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
-                        >
-                          <XMarkIcon className="w-4 h-4" />
-                        </button>
-            </div>
-                    ) : (
-                      <div className="w-32 h-32 mx-auto border-2 border-dashed border-[#007fff]/30 rounded-xl flex items-center justify-center">
-                        <PhotoIcon className="w-8 h-8 text-gray-400" />
-                      </div>
-                    )}
-                    
-              <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleImageUpload(e, 'logo')}
-                      className="hidden"
-                      id="logo-upload"
-                    />
-                    
-                    <label
-                      htmlFor="logo-upload"
-                      className="block w-full px-4 py-3 bg-[#007fff] text-white text-center rounded-xl hover:bg-[#007fff]/90 transition-colors cursor-pointer font-semibold"
-                    >
-                      {logoPreview ? 'Change Logo' : 'Upload Logo'}
-                    </label>
-            </div>
-                </div>
-
-                {/* Banner Upload */}
-            <div>
-                  <label className="block text-sm font-semibold text-[#007fff] mb-3">
-                    Banner Image
-              </label>
-                  <div className="space-y-4">
-                    {bannerPreview ? (
-                      <div className="relative w-full h-32">
-                        <Image
-                          src={bannerPreview}
-                          alt="Banner preview"
-                          width={512}
-                          height={128}
-                          className="w-full h-full object-cover border-2 border-[#007fff] rounded-xl"
-                        />
-                  <button
-                          onClick={() => {
-                            setBannerFile(null);
-                            setBannerPreview(null);
-                            handleInputChange('bannerUrl', '');
-                          }}
-                          className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
-                        >
-                          <XMarkIcon className="w-4 h-4" />
-                  </button>
-              </div>
-                    ) : (
-                      <div className="w-full h-32 border-2 border-dashed border-[#007fff]/30 rounded-xl flex items-center justify-center">
-                        <PhotoIcon className="w-8 h-8 text-gray-400" />
-            </div>
-                    )}
-                    
-                <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleImageUpload(e, 'banner')}
-                      className="hidden"
-                      id="banner-upload"
-                    />
-                    
-                    <label
-                      htmlFor="banner-upload"
-                      className="block w-full px-4 py-3 bg-[#007fff]/20 text-[#007fff] text-center rounded-xl hover:bg-[#007fff]/30 transition-colors cursor-pointer font-semibold"
-                    >
-                      {bannerPreview ? 'Change Banner' : 'Upload Banner'}
-                    </label>
-              </div>
-                </div>
-
-                {/* Theme Color */}
-              <div>
-                  <label className="block text-sm font-semibold text-[#007fff] mb-3">
-                    Brand Color
-                </label>
-                  <div className="flex items-center space-x-4">
-                <input
-                      type="color"
-                      value={formData.themeColor}
-                      onChange={(e) => handleInputChange('themeColor', e.target.value)}
-                      className="w-12 h-12 border-2 border-gray-300 rounded-lg cursor-pointer"
-                    />
-                    <input
-                      type="text"
-                      value={formData.themeColor}
-                      onChange={(e) => handleInputChange('themeColor', e.target.value)}
-                      className="flex-1 px-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 bg-white transition-all duration-200 hover:border-[#007fff]/40"
-                />
-              </div>
-            </div>
-              </div>
-            </motion.div>
-          </div>
-        );
 
       case 'completion':
         return (
@@ -1024,76 +837,75 @@ export default function InstitutionOnboardingPage() {
             >
               <div className="w-full bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/30 p-6 md:p-8">
                 {renderStep()}
-          </div>
+                
+                {/* Navigation Buttons - Inside Container */}
+                <div className="mt-8 pt-6 border-t border-gray-200">
+                  <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-3">
+                    <div className="flex justify-center space-x-3 w-full">
+                      {currentStep < ONBOARDING_STEPS.length - 1 ? (
+                        <>
+                          <button
+                            onClick={handlePrevious}
+                            disabled={currentStep === 0}
+                            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
+                              currentStep === 0
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md'
+                            }`}
+                          >
+                            Previous
+                          </button>
+                          <button
+                            onClick={handleNext}
+                            disabled={!canProceed() || loading || uploading}
+                            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg ${
+                              canProceed() && !loading && !uploading
+                                ? 'bg-[#007fff] text-white hover:bg-[#007fff]/90 hover:shadow-xl transform hover:scale-105'
+                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            }`}
+                          >
+                            {loading || uploading ? (
+                              <>
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                <span>Saving...</span>
+                              </>
+                            ) : (
+                              <>
+                                <span>{currentStep === ONBOARDING_STEPS.length - 2 ? 'Complete' : 'Next'}</span>
+                                <ArrowRightIcon className="w-4 h-4" />
+                              </>
+                            )}
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          onClick={async () => {
+                            setLoading(true);
+                            try {
+                              await saveInstitutionData(true);
+                              toast.success('Welcome to Kendraa!');
+                              router.push('/institution/feed');
+                            } catch (error) {
+                              toast.error('Failed to complete onboarding.');
+                            } finally {
+                              setLoading(false);
+                            }
+                          }}
+                          disabled={loading || uploading}
+                          className="px-8 py-3 bg-[#007fff] text-white rounded-xl font-semibold hover:bg-[#007fff]/90 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                        >
+                          {loading || uploading ? 'Completing...' : 'Get Started'}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </motion.div>
           </AnimatePresence>
         </div>
-          </div>
-
-      {/* Footer */}
-      <div className="bg-white/90 backdrop-blur-md border-t border-gray-100">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
-          <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-3">
-            <div className="flex justify-center space-x-3 w-full">
-              {currentStep < ONBOARDING_STEPS.length - 1 ? (
-                <>
-              <button
-                onClick={handlePrevious}
-                    disabled={currentStep === 0}
-                    className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
-                      currentStep === 0
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md'
-                    }`}
-                  >
-                Previous
-              </button>
-              <button
-                onClick={handleNext}
-                    disabled={!canProceed() || loading || uploading}
-                    className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg ${
-                      canProceed() && !loading && !uploading
-                        ? 'bg-[#007fff] text-white hover:bg-[#007fff]/90 hover:shadow-xl transform hover:scale-105'
-                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    }`}
-                  >
-                    {loading || uploading ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        <span>Saving...</span>
-                  </>
-                ) : (
-                  <>
-                        <span>{currentStep === ONBOARDING_STEPS.length - 2 ? 'Complete' : 'Next'}</span>
-                        <ArrowRightIcon className="w-4 h-4" />
-                  </>
-                )}
-              </button>
-                </>
-              ) : (
-                <button
-                  onClick={async () => {
-                    setLoading(true);
-                    try {
-                      await saveInstitutionData(true);
-                      toast.success('Welcome to Kendraa!');
-                      router.push('/institution/feed');
-                    } catch (error) {
-                      toast.error('Failed to complete onboarding.');
-                    } finally {
-                      setLoading(false);
-                    }
-                  }}
-                  disabled={loading || uploading}
-                  className="px-8 py-3 bg-[#007fff] text-white rounded-xl font-semibold hover:bg-[#007fff]/90 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                >
-                  {loading || uploading ? 'Completing...' : 'Get Started'}
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
       </div>
+
     </div>
   );
 }

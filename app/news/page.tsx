@@ -150,7 +150,7 @@ export default function NewsPage() {
             {/* Logo Section - Just Logo */}
             <div className="flex items-center">
               <Link href="/">
-                <Logo size="md" className="h-10 w-10" />
+                <Logo size="md" className="h-3 w-3" />
               </Link>
             </div>
             
