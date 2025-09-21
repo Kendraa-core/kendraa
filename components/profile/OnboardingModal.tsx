@@ -718,31 +718,31 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         return (
           <div className="text-center max-w-4xl mx-auto px-6">
             {/* Logo Section */}
-            <div className="mb-12">
+            <div className="mb-8">
               <Image 
                 src="/Kendraa Logo (1).png" 
                 alt="Kendraa Logo" 
-                width={160}
-                height={160}
-                className="h-24 md:h-32 lg:h-40 w-auto mx-auto drop-shadow-lg"
+                width={120}
+                height={120}
+                className="h-20 md:h-24 lg:h-28 w-auto mx-auto drop-shadow-lg"
               />
             </div>
             
             {/* Typography */}
-            <div className="space-y-6">
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight" 
+            <div className="space-y-4">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight" 
                   dangerouslySetInnerHTML={{ __html: step.title }}>
               </h2>
-              <p className="text-xl md:text-2xl text-gray-600 leading-relaxed max-w-3xl mx-auto">
+              <p className="text-lg md:text-xl text-gray-600 leading-relaxed max-w-3xl mx-auto">
                 {step.subtitle}
               </p>
             </div>
             
             {/* Call to Action */}
-            <div className="mt-12">
-              <div className="inline-flex items-center space-x-2 text-[#007fff] font-semibold text-lg">
+            <div className="mt-8">
+              <div className="inline-flex items-center space-x-2 text-[#007fff] font-semibold text-base">
                 <span>Let&apos;s get started</span>
-                <ArrowRightIcon className="w-5 h-5" />
+                <ArrowRightIcon className="w-4 h-4" />
               </div>
             </div>
           </div>
@@ -861,7 +861,7 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
               value={formData[step.field as keyof typeof formData] as string || ''}
               onChange={(e) => handleInputChange(step.field!, e.target.value)}
               placeholder={step.placeholder}
-                className="w-full px-6 py-4 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 bg-white text-xl transition-all duration-200 hover:border-[#007fff]/40"
+                className="w-full px-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 bg-white text-lg transition-all duration-200 hover:border-[#007fff]/40"
               autoFocus
             />
             {step.required && (
@@ -928,7 +928,7 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
               onChange={(e) => handleInputChange(step.field!, e.target.value)}
               placeholder={step.placeholder}
               rows={6}
-                className="w-full px-6 py-4 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 bg-white text-lg resize-none transition-all duration-200 hover:border-[#007fff]/40"
+                className="w-full px-4 py-3 border-2 border-[#007fff]/20 rounded-xl focus:outline-none focus:border-[#007fff] focus:ring-2 focus:ring-[#007fff]/10 bg-white text-base resize-none transition-all duration-200 hover:border-[#007fff]/40"
               autoFocus
             />
             {step.required && (
@@ -1956,7 +1956,7 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-[#007fff]/5 flex flex-col">
       {/* Header */}
       <div className="bg-white/90 backdrop-blur-md shadow-sm border-b border-gray-100">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <button
@@ -1991,7 +1991,7 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
       </div>
 
       {/* Content */}
-      <div className="flex-1 flex items-center justify-center py-16 px-4 sm:px-6">
+      <div className="flex-1 flex items-center justify-center py-8 px-4 sm:px-6">
         <div className="w-full max-w-5xl">
           <AnimatePresence mode="wait">
             <motion.div
@@ -2000,9 +2000,9 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.4, ease: "easeOut" }}
-              className="flex items-center justify-center min-h-[600px]"
+              className="flex items-center justify-center min-h-[500px]"
             >
-              <div className="w-full bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/30 p-8 md:p-12">
+              <div className="w-full bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/30 p-6 md:p-8">
               {renderStep()}
               </div>
             </motion.div>
@@ -2012,7 +2012,7 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
 
       {/* Footer */}
       <div className="bg-white/90 backdrop-blur-md border-t border-gray-100">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-3">
             <div className="flex justify-center space-x-3 w-full">
               {currentStep < filteredSteps.length - 1 ? (

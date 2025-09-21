@@ -20,8 +20,16 @@ export async function uploadToSupabaseStorage(
   file: File
 ): Promise<{ url: string; error: any | null }> {
   try {
+    console.log('Uploading to bucket:', bucket, 'with path:', path);
     const supabase = getSupabase();
-    const { error: uploadError } = await supabase.storage
+    
+    if (!supabase) {
+      console.error('Supabase client not available');
+      return { url: '', error: new Error('Supabase client not available') };
+    }
+    
+    // Try to upload directly - if bucket doesn't exist, we'll get a clear error
+    const { data, error: uploadError } = await supabase.storage
       .from(bucket)
       .upload(path, file, {
         cacheControl: '3600',
@@ -33,15 +41,17 @@ export async function uploadToSupabaseStorage(
       return { url: '', error: uploadError };
     }
 
-    const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+    // Get the public URL for the uploaded file
+    const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path);
     
-    if (!data.publicUrl) {
+    if (!urlData.publicUrl) {
       const urlError = new Error('Upload successful, but could not get public URL.');
       console.error(urlError.message);
       return { url: '', error: urlError };
     }
 
-    return { url: data.publicUrl, error: null };
+    console.log('Upload successful, URL:', urlData.publicUrl);
+    return { url: urlData.publicUrl, error: null };
     
   } catch (error) {
     console.error('Unexpected error in uploadToSupabaseStorage:', error);

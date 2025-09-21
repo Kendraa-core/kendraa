@@ -47,7 +47,9 @@ export async function getProfile(userId: string): Promise<Profile | null> {
 
     return data;
   } catch (error) {
-    console.error('Error fetching profile:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error fetching profile:', error);
+    }
     throw error;
   }
 }
@@ -67,7 +69,9 @@ export async function updateProfile(userId: string, updates: Partial<Profile>): 
 
     return data as Profile;
   } catch (error) {
-    console.error('Error updating profile:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error updating profile:', error);
+    }
     throw error;
   }
 }
@@ -840,9 +844,9 @@ export async function getConnectionStatus(userId: string, targetUserId: string):
       .select('status')
       .eq('requester_id', userId)
       .eq('recipient_id', targetUserId)
-      .single();
+      .maybeSingle();
 
-    if (data1) {
+    if (data1 && !error1) {
       return data1.status;
     }
 
@@ -851,9 +855,9 @@ export async function getConnectionStatus(userId: string, targetUserId: string):
       .select('status')
       .eq('requester_id', targetUserId)
       .eq('recipient_id', userId)
-      .single();
+      .maybeSingle();
 
-    if (data2) {
+    if (data2 && !error2) {
       return data2.status;
     }
 
@@ -1078,12 +1082,29 @@ export async function followInstitution(followerId: string, institutionId: strin
       return true; // Already following
     }
     
+    // Get follower profile to determine follower type
+    const followerProfile = await getProfile(followerId);
+    if (!followerProfile) {
+      throw new Error('Follower profile not found');
+    }
+    
+    // Get following profile to determine following type
+    const followingProfile = await getProfile(institutionId);
+    if (!followingProfile) {
+      throw new Error('Institution profile not found');
+    }
+    
+    const followerType = followerProfile.user_type === 'institution' ? 'institution' : 'individual';
+    const followingType = followingProfile.user_type === 'institution' ? 'institution' : 'individual';
+    
     // Create follow relationship
     const { data: insertData, error: insertError } = await getSupabase()
       .from('follows')
       .insert({
         follower_id: followerId,
         following_id: institutionId,
+        follower_type: followerType,
+        following_type: followingType,
         created_at: new Date().toISOString(),
       })
       .select()
@@ -1098,7 +1119,6 @@ export async function followInstitution(followerId: string, institutionId: strin
     
     // Create notification for institution (non-blocking)
     try {
-      const followerProfile = await getProfile(followerId);
       if (followerProfile) {
         await createNotification({
           user_id: institutionId,
@@ -1913,7 +1933,7 @@ export async function getInstitutionByUserId(userId: string): Promise<Institutio
       .from('profiles')
       .select('id, user_type, profile_type, institution_type')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
 
     if (profileError || !profile) {
       console.log('User profile not found or not an institution user');
@@ -1931,7 +1951,7 @@ export async function getInstitutionByUserId(userId: string): Promise<Institutio
       .from('institutions')
       .select('*')
       .eq('admin_user_id', userId)
-      .single();
+      .maybeSingle();
 
     if (error) {
       if (error.code === 'PGRST116') {

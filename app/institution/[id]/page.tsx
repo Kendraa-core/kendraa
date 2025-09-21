@@ -436,18 +436,34 @@ export default function PublicInstitutionProfilePage() {
       return;
     }
 
+    // Optimistically update the UI
+    const previousStatus = followStatus;
+    const newStatus = followStatus === 'following' ? 'none' : 'following';
+    setFollowStatus(newStatus);
+
     try {
       if (followStatus === 'following') {
-        await unfollowInstitution(user.id, profile.id);
-        setFollowStatus('none');
-        toast.success('Unfollowed successfully');
+        const success = await unfollowInstitution(user.id, profile.id);
+        if (success) {
+          toast.success('Unfollowed successfully');
+          fetchProfileData(); // Refresh data
+        } else {
+          setFollowStatus(previousStatus);
+          toast.error('Failed to unfollow');
+        }
       } else {
-        await followInstitution(user.id, profile.id);
-        setFollowStatus('following');
-        toast.success('Following successfully');
+        const success = await followInstitution(user.id, profile.id);
+        if (success) {
+          toast.success('Following successfully');
+          fetchProfileData(); // Refresh data
+        } else {
+          setFollowStatus(previousStatus);
+          toast.error('Failed to follow');
+        }
       }
     } catch (error) {
       console.error('Error following/unfollowing:', error);
+      setFollowStatus(previousStatus);
       toast.error('Failed to update follow status');
     }
   };

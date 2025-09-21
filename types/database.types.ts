@@ -390,6 +390,8 @@ export interface Follow {
   created_at: string;
   follower_id: string; // User who is following
   following_id: string; // User being followed (usually institution)
+  follower_type: 'individual' | 'institution'; // Type of follower
+  following_type: 'individual' | 'institution'; // Type of user being followed
 }
 
 export interface FollowWithProfile extends Follow {

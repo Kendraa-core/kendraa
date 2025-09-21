@@ -33,7 +33,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const profileData = await getProfile(userId);
       setProfile(profileData);
     } catch (error: any) {
-      console.error('[Auth] Error loading profile:', error);
+      // Suppress console error for better UX - handle silently
+      if (process.env.NODE_ENV === 'development') {
+        console.error('[Auth] Error loading profile:', error);
+      }
       
       // Handle specific error types
       if (error.message.includes('Authentication error')) {

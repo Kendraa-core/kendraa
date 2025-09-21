@@ -104,11 +104,11 @@ export default function SignUp() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-[#007fff]/5 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-[#007fff]/5 flex items-center justify-center px-4 py-4">
       <div className="w-full max-w-4xl">
         {/* Logo */}
-        <div className="flex justify-center items-center mb-8">
-          <Logo size="xl" />
+        <div className="flex justify-center items-center mb-3">
+          <Logo size="lg" />
         </div>
 
         <AnimatePresence mode="wait">
@@ -121,16 +121,16 @@ export default function SignUp() {
               transition={{ duration: 0.3 }}
               className="text-center"
             >
-              <div className="mb-12">
-                <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              <div className="mb-6">
+                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
                   Join the healthcare community
                 </h1>
-                <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                   Choose your account type to get started with the right experience
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
                 {PROFILE_TYPES.map((type, index) => {
                   const IconComponent = type.icon;
                   return (
@@ -142,23 +142,23 @@ export default function SignUp() {
                       className="group cursor-pointer"
                       onClick={() => handleTypeSelection(type.id as 'individual' | 'institution')}
                     >
-                      <div className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-gray-100">
-                        <div className={`w-20 h-20 bg-gradient-to-br ${type.color} rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                          <IconComponent className="w-10 h-10 text-white" />
+                      <div className="bg-white rounded-3xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-gray-100">
+                        <div className={`w-16 h-16 bg-gradient-to-br ${type.color} rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                          <IconComponent className="w-8 h-8 text-white" />
                         </div>
                         
-                        <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                        <h3 className="text-xl font-bold text-gray-900 mb-2">
                           {type.name}
                         </h3>
                         
-                        <p className="text-gray-600 mb-6 leading-relaxed">
+                        <p className="text-gray-600 mb-4 leading-relaxed text-sm">
                           {type.description}
                         </p>
 
-                        <div className="space-y-2 mb-6">
+                        <div className="space-y-1.5 mb-4">
                           {type.features.map((feature, featureIndex) => (
-                            <div key={featureIndex} className="flex items-center text-sm text-gray-600">
-                              <CheckCircleIcon className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
+                            <div key={featureIndex} className="flex items-center text-xs text-gray-600">
+                              <CheckCircleIcon className="w-3 h-3 text-green-500 mr-2 flex-shrink-0" />
                               <span>{feature}</span>
                             </div>
                           ))}
@@ -174,8 +174,8 @@ export default function SignUp() {
                 })}
               </div>
 
-              <div className="mt-12 text-center">
-                <p className="text-gray-600">
+              <div className="mt-8 text-center">
+                <p className="text-gray-600 text-sm">
                   Already have an account?{' '}
                   <Link
                     href="/signin"
@@ -209,15 +209,15 @@ export default function SignUp() {
               </div>
 
               {/* Form Card */}
-              <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
-                <div className="text-center mb-8">
-                  <div className={`w-16 h-16 bg-gradient-to-br ${PROFILE_TYPES.find(t => t.id === profileType)?.color} rounded-2xl flex items-center justify-center mx-auto mb-4`}>
-                    {React.createElement(PROFILE_TYPES.find(t => t.id === profileType)?.icon || UserIcon, { className: "w-8 h-8 text-white" })}
+              <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-6">
+                <div className="text-center mb-6">
+                  <div className={`w-14 h-14 bg-gradient-to-br ${PROFILE_TYPES.find(t => t.id === profileType)?.color} rounded-2xl flex items-center justify-center mx-auto mb-3`}>
+                    {React.createElement(PROFILE_TYPES.find(t => t.id === profileType)?.icon || UserIcon, { className: "w-7 h-7 text-white" })}
                   </div>
-                  <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                  <h1 className="text-xl font-bold text-gray-900 mb-1">
                     Create your {profileType} account
                   </h1>
-                  <p className="text-gray-600">
+                  <p className="text-gray-600 text-sm">
                     {profileType === 'institution' 
                       ? 'Connect with healthcare professionals and build institutional partnerships'
                       : 'Join thousands of healthcare professionals'
@@ -225,7 +225,7 @@ export default function SignUp() {
                   </p>
                 </div>
                 
-                <form className="space-y-6" onSubmit={handleSubmit}>
+                <form className="space-y-4" onSubmit={handleSubmit}>
                   {error && (
                     <motion.div
                       initial={{ opacity: 0, y: -10 }}
@@ -334,7 +334,7 @@ export default function SignUp() {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full py-4 px-6 bg-[#007fff] text-white rounded-xl font-semibold hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#007fff] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
+                      className="w-full py-3 px-6 bg-[#007fff] text-white rounded-xl font-semibold hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#007fff] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
                     >
                       {loading ? (
                         <div className="flex items-center justify-center space-x-2">

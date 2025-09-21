@@ -110,20 +110,40 @@ export default function MobileProfilePage() {
 
     try {
       if (actionType === 'follow') {
+        // Optimistically update the UI
+        const previousStatus = followStatus;
+        setFollowStatus('following');
+        
         const success = await followInstitution(user.id, profile.id);
         if (success) {
-          setFollowStatus('following');
           toast.success('Successfully followed institution');
+          fetchProfileData(); // Refresh data
+        } else {
+          setFollowStatus(previousStatus);
+          toast.error('Failed to follow institution');
         }
       } else if (actionType === 'connect') {
+        // Optimistically update the UI
+        const previousStatus = connectionStatus;
+        setConnectionStatus('pending');
+        
         const result = await sendConnectionRequest(user.id, profile.id);
         if (result) {
-          setConnectionStatus('pending');
           toast.success('Connection request sent');
+          fetchProfileData(); // Refresh data
+        } else {
+          setConnectionStatus(previousStatus);
+          toast.error('Failed to send connection request');
         }
       }
     } catch (error) {
       console.error('Error connecting:', error);
+      // Revert optimistic updates
+      if (actionType === 'follow') {
+        setFollowStatus('none');
+      } else if (actionType === 'connect') {
+        setConnectionStatus('none');
+      }
       toast.error('Failed to send request');
     }
   };
@@ -131,14 +151,22 @@ export default function MobileProfilePage() {
   const handleUnfollow = async () => {
     if (!profile || !user) return;
 
+    // Optimistically update the UI
+    const previousStatus = followStatus;
+    setFollowStatus('none');
+
     try {
       const success = await unfollowInstitution(user.id, profile.id);
       if (success) {
-        setFollowStatus('none');
         toast.success('Unfollowed institution');
+        fetchProfileData(); // Refresh data
+      } else {
+        setFollowStatus(previousStatus);
+        toast.error('Failed to unfollow');
       }
     } catch (error) {
       console.error('Error unfollowing:', error);
+      setFollowStatus(previousStatus);
       toast.error('Failed to unfollow');
     }
   };

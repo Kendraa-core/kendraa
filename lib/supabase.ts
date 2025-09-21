@@ -12,13 +12,17 @@ const getSupabaseClient = () => {
   if (typeof window !== 'undefined') {
     // Client-side: validate environment variables
     if (!supabaseUrl || supabaseUrl === 'your_supabase_url_here') {
-        // NEXT_PUBLIC_SUPABASE_URL is not properly configured
-  return null;
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('NEXT_PUBLIC_SUPABASE_URL is not properly configured');
+        }
+        return null;
     }
     
     if (!supabaseAnonKey || supabaseAnonKey === 'your_supabase_anon_key_here') {
-        // NEXT_PUBLIC_SUPABASE_ANON_KEY is not properly configured
-  return null;
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('NEXT_PUBLIC_SUPABASE_ANON_KEY is not properly configured');
+        }
+        return null;
     }
   }
 
@@ -45,8 +49,10 @@ const getSupabaseClient = () => {
         },
       });
     } catch (error) {
-          // Failed to create Supabase client
-    return null;
+          if (process.env.NODE_ENV === 'development') {
+            console.error('Failed to create Supabase client:', error);
+          }
+          return null;
     }
   }
   return supabaseInstance;

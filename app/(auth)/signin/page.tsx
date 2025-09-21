@@ -32,25 +32,25 @@ export default function SignIn() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-4">
+    <div className="min-h-screen bg-white flex items-center justify-center px-4 py-4">
       <div className="w-full max-w-md">
         {/* Logo */}
-        <div className="flex justify-center items-center mb-12">
-          <Logo size="xl" />
+        <div className="flex justify-center items-center mb-4">
+          <Logo size="lg" />
         </div>
 
         {/* Form Card */}
-        <div className="bg-white rounded-2xl shadow-xl border border-[#007fff]/10 p-8">
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-black mb-2">
+        <div className="bg-white rounded-2xl shadow-xl border border-[#007fff]/10 p-6">
+          <div className="text-center mb-6">
+            <h1 className="text-xl font-bold text-black mb-1">
               Welcome back
             </h1>
-            <p className="text-gray-600">
+            <p className="text-gray-600 text-sm">
               Sign in to your account
             </p>
           </div>
 
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-4" onSubmit={handleSubmit}>
             {/* Email Field */}
             <div>
               <input
@@ -61,7 +61,7 @@ export default function SignIn() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-[#007fff]/20 rounded-xl text-black focus:outline-none focus:ring-2 focus:ring-[#007fff]/10 focus:border-[#007fff] transition-all duration-200 placeholder:text-gray-400"
+                  className="w-full px-4 py-2.5 border border-[#007fff]/20 rounded-xl text-black focus:outline-none focus:ring-2 focus:ring-[#007fff]/10 focus:border-[#007fff] transition-all duration-200 placeholder:text-gray-400"
                 placeholder="Email"
               />
             </div>
@@ -77,7 +77,7 @@ export default function SignIn() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 pr-12 border border-[#007fff]/20 rounded-xl text-black focus:outline-none focus:ring-2 focus:ring-[#007fff]/10 focus:border-[#007fff] transition-all duration-200 placeholder:text-gray-400"
+                  className="w-full px-4 py-2.5 pr-12 border border-[#007fff]/20 rounded-xl text-black focus:outline-none focus:ring-2 focus:ring-[#007fff]/10 focus:border-[#007fff] transition-all duration-200 placeholder:text-gray-400"
                   placeholder="Password"
                 />
                 <button
@@ -108,7 +108,7 @@ export default function SignIn() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 bg-[#007fff] text-white rounded-xl font-medium hover:bg-[#007fff]/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#007fff] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              className="w-full py-2.5 px-4 bg-[#007fff] text-white rounded-xl font-medium hover:bg-[#007fff]/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#007fff] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
               {loading ? (
                 <div className="flex items-center justify-center space-x-2">
@@ -122,7 +122,7 @@ export default function SignIn() {
           </form>
 
           {/* Divider */}
-          <div className="mt-8">
+          <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-200" />
@@ -133,10 +133,10 @@ export default function SignIn() {
             </div>
 
             {/* Sign Up Link */}
-            <div className="mt-6">
+            <div className="mt-4">
               <Link
                 href="/signup"
-                className="w-full flex justify-center py-3 px-4 border border-[#007fff]/20 rounded-xl text-[#007fff] font-medium hover:bg-[#007fff]/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#007fff] transition-all duration-200"
+                className="w-full flex justify-center py-2.5 px-4 border border-[#007fff]/20 rounded-xl text-[#007fff] font-medium hover:bg-[#007fff]/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#007fff] transition-all duration-200"
               >
                 Create account
               </Link>

@@ -46,6 +46,12 @@ async function setupStorageBuckets() {
       public: true,
       fileSizeLimit: 10485760, // 10MB
       allowedMimeTypes: ['image/*']
+    },
+    {
+      name: 'post-images',
+      public: true,
+      fileSizeLimit: 5242880, // 5MB
+      allowedMimeTypes: ['image/*']
     }
   ];
 
