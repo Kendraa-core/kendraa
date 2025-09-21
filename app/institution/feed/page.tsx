@@ -404,7 +404,10 @@ export default function InstitutionFeedPage() {
                   >
                     <div className="flex items-center space-x-3 mb-2">
                       <div className={`p-2 rounded-lg ${template.color} text-white`}>
-                        <template.icon className="w-5 h-5" />
+                        {(() => {
+                          const IconComponent = template.icon;
+                          return <IconComponent className="w-5 h-5" />;
+                        })()}
                       </div>
                       <span className={`font-medium ${template.textColor}`}>{template.title}</span>
                     </div>
@@ -432,7 +435,10 @@ export default function InstitutionFeedPage() {
                     {selectedTemplate && (
                       <div className="flex items-center space-x-2">
                         <div className={`p-1 rounded ${getCurrentTemplate().color} text-white`}>
-                          <getCurrentTemplate().icon className="w-3 h-3" />
+                          {(() => {
+                            const IconComponent = getCurrentTemplate().icon;
+                            return <IconComponent className="w-3 h-3" />;
+                          })()}
                         </div>
                         <span className="text-sm text-gray-600">{getCurrentTemplate().title}</span>
                       </div>
@@ -526,7 +532,6 @@ export default function InstitutionFeedPage() {
                       )}
                     </button>
                   </div>
-                </div>
                 </div>
               </div>
             </div>
