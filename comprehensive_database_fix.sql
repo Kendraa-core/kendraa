@@ -475,10 +475,10 @@ CREATE TRIGGER on_auth_user_created
 DO $$
 DECLARE
     missing_tables TEXT[] := ARRAY[]::TEXT[];
-    table_name TEXT;
+    tbl_name TEXT;
 BEGIN
     -- List of required tables
-    FOR table_name IN 
+    FOR tbl_name IN 
         SELECT unnest(ARRAY[
             'profiles', 'experiences', 'education', 'posts', 'institutions', 
             'jobs', 'events', 'follows', 'institution_follows', 'post_comments', 
@@ -486,8 +486,8 @@ BEGIN
             'event_registrations'
         ])
     LOOP
-        IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = table_name AND table_schema = 'public') THEN
-            missing_tables := array_append(missing_tables, table_name);
+        IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = tbl_name AND table_schema = 'public') THEN
+            missing_tables := array_append(missing_tables, tbl_name);
         END IF;
     END LOOP;
     
@@ -502,9 +502,9 @@ END $$;
 DO $$
 DECLARE
     tables_without_rls TEXT[] := ARRAY[]::TEXT[];
-    table_name TEXT;
+    tbl_name TEXT;
 BEGIN
-    FOR table_name IN 
+    FOR tbl_name IN 
         SELECT unnest(ARRAY[
             'profiles', 'experiences', 'education', 'posts', 'institutions', 
             'jobs', 'events', 'follows', 'institution_follows', 'post_comments', 
@@ -514,11 +514,11 @@ BEGIN
     LOOP
         IF NOT EXISTS (
             SELECT 1 FROM pg_tables 
-            WHERE tablename = table_name 
+            WHERE tablename = tbl_name 
             AND schemaname = 'public' 
             AND rowsecurity = true
         ) THEN
-            tables_without_rls := array_append(tables_without_rls, table_name);
+            tables_without_rls := array_append(tables_without_rls, tbl_name);
         END IF;
     END LOOP;
     
