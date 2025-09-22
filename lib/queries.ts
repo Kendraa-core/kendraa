@@ -1465,7 +1465,7 @@ export async function getNotifications(userId: string): Promise<Notification[]> 
     const { data, error } = await getSupabase()
       .from('notifications')
       .select('*')
-      .eq('recipient_id', userId) // Use recipient_id instead of user_id
+      .eq('user_id', userId) // Use user_id (correct field name)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -1511,13 +1511,13 @@ export async function getNotifications(userId: string): Promise<Notification[]> 
     return (data || []).map(notification => ({
       id: notification.id,
       created_at: notification.created_at,
-      user_id: notification.recipient_id, // Map recipient_id back to user_id
+      user_id: notification.user_id, // Use user_id directly (correct field name)
       type: notification.type,
       title: notification.title,
       message: notification.message,
       read: notification.read,
       data: notification.data,
-      action_url: null, // Add this field as it's not in the database
+      action_url: notification.action_url || null, // Use action_url from database
     }));
   } catch (error) {
     console.log('Error fetching notifications', error);

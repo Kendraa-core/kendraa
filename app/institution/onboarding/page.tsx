@@ -186,22 +186,28 @@ export default function InstitutionOnboardingPage() {
 
   // Redirect if not logged in or not an institution user
   useEffect(() => {
-      if (!user) {
-        router.push('/signin');
-        return;
-      }
+    // Only run redirects if we have both user and profile data
+    if (!user || !profile) return;
 
-      if (profile && (profile.user_type !== 'institution' && profile.profile_type !== 'institution')) {
-        router.push('/onboarding');
-        return;
-      }
+    // If not an institution user, redirect to individual onboarding
+    if (profile.user_type !== 'institution' && profile.profile_type !== 'institution') {
+      router.push('/onboarding');
+      return;
+    }
 
-      // If onboarding already completed, go to institution feed
-      if (profile?.onboarding_completed) {
-        router.push('/institution/feed');
-        return;
-      }
+    // If onboarding already completed, go to institution feed
+    if (profile.onboarding_completed) {
+      router.push('/institution/feed');
+      return;
+    }
   }, [user, profile, router]);
+
+  // Separate effect for handling unauthenticated users
+  useEffect(() => {
+    if (!user && !loading) {
+      router.push('/signin');
+    }
+  }, [user, loading, router]);
 
   const handleInputChange = (field: string, value: any) => {
         setFormData(prev => ({
