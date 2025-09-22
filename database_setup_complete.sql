@@ -458,16 +458,16 @@ CREATE POLICY "follows_delete_policy" ON follows
 
 -- Institution Follows policies (allow all operations for authenticated users)
 CREATE POLICY "institution_follows_select_policy" ON institution_follows
-    FOR SELECT USING (true);
+    FOR SELECT USING (auth.role() = 'authenticated');
 
 CREATE POLICY "institution_follows_insert_policy" ON institution_follows
-    FOR INSERT WITH CHECK (true);
+    FOR INSERT WITH CHECK (auth.role() = 'authenticated');
 
 CREATE POLICY "institution_follows_update_policy" ON institution_follows
-    FOR UPDATE USING (true);
+    FOR UPDATE USING (auth.role() = 'authenticated');
 
 CREATE POLICY "institution_follows_delete_policy" ON institution_follows
-    FOR DELETE USING (true);
+    FOR DELETE USING (auth.role() = 'authenticated');
 
 -- Post Analytics policies (allow all operations for authenticated users)
 CREATE POLICY "post_analytics_select_policy" ON post_analytics

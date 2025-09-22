@@ -1,4 +1,7 @@
 -- Fix database errors by adding missing tables and policies
+-- This script addresses permission issues and missing tables
+
+-- First, ensure the institution_follows table exists and has proper permissions
 
 -- Create post_comments table if it doesn't exist
 CREATE TABLE IF NOT EXISTS post_comments (
@@ -111,17 +114,18 @@ DROP POLICY IF EXISTS "institution_follows_insert_policy" ON institution_follows
 DROP POLICY IF EXISTS "institution_follows_update_policy" ON institution_follows;
 DROP POLICY IF EXISTS "institution_follows_delete_policy" ON institution_follows;
 
+-- Create more permissive policies for institution_follows
 CREATE POLICY "institution_follows_select_policy" ON institution_follows
-    FOR SELECT USING (true);
+    FOR SELECT USING (auth.role() = 'authenticated');
 
 CREATE POLICY "institution_follows_insert_policy" ON institution_follows
-    FOR INSERT WITH CHECK (true);
+    FOR INSERT WITH CHECK (auth.role() = 'authenticated');
 
 CREATE POLICY "institution_follows_update_policy" ON institution_follows
-    FOR UPDATE USING (true);
+    FOR UPDATE USING (auth.role() = 'authenticated');
 
 CREATE POLICY "institution_follows_delete_policy" ON institution_follows
-    FOR DELETE USING (true);
+    FOR DELETE USING (auth.role() = 'authenticated');
 
 -- Create policies for post_analytics table
 -- Drop existing policies if they exist, then create new ones
@@ -179,3 +183,22 @@ CREATE POLICY "institutions_update_policy" ON institutions
 
 CREATE POLICY "institutions_delete_policy" ON institutions
     FOR DELETE USING (true);
+
+-- Additional verification and permission fixes
+-- Ensure institution_follows table has proper permissions
+DO $$
+BEGIN
+    -- Check if institution_follows table exists
+    IF EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'institution_follows') THEN
+        -- Grant permissions to authenticated users
+        GRANT ALL ON institution_follows TO authenticated;
+        GRANT ALL ON institution_follows TO anon;
+        
+        -- Ensure RLS is enabled
+        ALTER TABLE institution_follows ENABLE ROW LEVEL SECURITY;
+        
+        RAISE NOTICE 'institution_follows table permissions updated successfully';
+    ELSE
+        RAISE NOTICE 'institution_follows table does not exist - will be created above';
+    END IF;
+END $$;
