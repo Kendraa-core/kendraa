@@ -117,16 +117,16 @@ export function FollowProvider({ children }: { children: React.ReactNode }) {
     setFollowStates({});
   }, []);
 
-  // Listen for global status change events
+  // Listen for global status change events (but don't update state to avoid infinite loops)
   useEffect(() => {
     const handleFollowStatusChanged = (event: CustomEvent) => {
-      const { targetUserId, followStatus } = event.detail;
-      updateFollowStatus(targetUserId, followStatus);
+      // Just log the event, don't update state to avoid infinite loops
+      console.log('Follow status changed:', event.detail);
     };
 
     const handleConnectionStatusChanged = (event: CustomEvent) => {
-      const { targetUserId, connectionStatus } = event.detail;
-      updateConnectionStatus(targetUserId, connectionStatus);
+      // Just log the event, don't update state to avoid infinite loops
+      console.log('Connection status changed:', event.detail);
     };
 
     window.addEventListener('follow-status-changed', handleFollowStatusChanged as EventListener);
@@ -136,7 +136,7 @@ export function FollowProvider({ children }: { children: React.ReactNode }) {
       window.removeEventListener('follow-status-changed', handleFollowStatusChanged as EventListener);
       window.removeEventListener('connection-status-changed', handleConnectionStatusChanged as EventListener);
     };
-  }, [updateFollowStatus, updateConnectionStatus]);
+  }, []);
 
   const value: FollowContextType = {
     getFollowStatus: getFollowStatusCached,
