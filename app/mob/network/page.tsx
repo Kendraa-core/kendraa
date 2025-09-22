@@ -5,6 +5,7 @@ import MobileLayout from '@/components/mobile/MobileLayout';
 import Avatar from '@/components/common/Avatar';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { useAuth } from '@/contexts/AuthContext';
+import { useFollowContext } from '@/contexts/FollowContext';
 import { usePageRefresh } from '@/hooks/usePageRefresh';
 import {
   getSuggestedConnectionsWithMutualCounts,
@@ -38,6 +39,7 @@ interface ProfilePreview extends Profile {
 
 export default function MobileNetworkPage() {
   const { user } = useAuth();
+  const { updateFollowStatus, updateConnectionStatus } = useFollowContext();
   const [suggestions, setSuggestions] = useState<ProfilePreview[]>([]);
   const [individuals, setIndividuals] = useState<ProfilePreview[]>([]);
   const [institutions, setInstitutions] = useState<ProfilePreview[]>([]);
@@ -144,7 +146,13 @@ export default function MobileNetworkPage() {
           setSuggestions(prev => prev.map(p => 
             p.id === profileId ? { ...p, follow_status: 'following' } : p
           ));
+          setInstitutions(prev => prev.map(p => 
+            p.id === profileId ? { ...p, follow_status: 'following' } : p
+          ));
           toast.success('Now following this institution!');
+          
+          // Update global context
+          updateFollowStatus(profileId, 'following');
           
           // Dispatch event to trigger page refresh
           window.dispatchEvent(new CustomEvent('follow-status-updated', {
@@ -158,7 +166,13 @@ export default function MobileNetworkPage() {
           setSuggestions(prev => prev.map(p => 
             p.id === profileId ? { ...p, connection_status: 'pending' } : p
           ));
+          setIndividuals(prev => prev.map(p => 
+            p.id === profileId ? { ...p, connection_status: 'pending' } : p
+          ));
           toast.success('Connection request sent!');
+          
+          // Update global context
+          updateConnectionStatus(profileId, 'pending');
           
           // Dispatch event to trigger page refresh
           window.dispatchEvent(new CustomEvent('connection-request-sent', {

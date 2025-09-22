@@ -4,6 +4,7 @@ import './globals.css';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
+import { FollowProvider } from '@/contexts/FollowContext';
 import ClientOnly from '@/components/common/ClientOnly';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -62,30 +63,32 @@ export default function RootLayout({
       <body className={`${mulish.className} h-full bg-white`} suppressHydrationWarning={true}>
         <ClientOnly>
           <AuthProvider>
-            <NotificationProvider>
-              {children}
-              <Toaster
-                position="top-right"
-                toastOptions={{
-                  duration: 4000,
-                  style: {
-                    background: '#007FFF',
-                    color: '#fff',
-                    maxWidth: '400px',
-                  },
-                  success: {
+            <FollowProvider>
+              <NotificationProvider>
+                {children}
+                <Toaster
+                  position="top-right"
+                  toastOptions={{
+                    duration: 4000,
                     style: {
                       background: '#007FFF',
+                      color: '#fff',
+                      maxWidth: '400px',
                     },
-                  },
-                  error: {
-                    style: {
-                      background: '#007FFF',
+                    success: {
+                      style: {
+                        background: '#007FFF',
+                      },
                     },
-                  },
-                }}
-              />
-            </NotificationProvider>
+                    error: {
+                      style: {
+                        background: '#007FFF',
+                      },
+                    },
+                  }}
+                />
+              </NotificationProvider>
+            </FollowProvider>
           </AuthProvider>
         </ClientOnly>
       </body>

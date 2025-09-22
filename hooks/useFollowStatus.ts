@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useFollowContext } from '@/contexts/FollowContext';
 import { 
   getConnectionStatus, 
   sendConnectionRequest, 
@@ -26,6 +27,13 @@ export function useFollowStatus({
   currentUserType 
 }: UseFollowStatusProps) {
   const { user } = useAuth();
+  const { 
+    getFollowStatus: getCachedFollowStatus, 
+    getConnectionStatus: getCachedConnectionStatus,
+    updateFollowStatus,
+    updateConnectionStatus,
+    refreshUserStatus
+  } = useFollowContext();
   const [status, setStatus] = useState<FollowStatus>('none');
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
@@ -42,12 +50,25 @@ export function useFollowStatus({
     try {
       if (actionType === 'follow') {
         // For follow relationships (institution to institution or individual to institution)
-        const isUserFollowing = await isFollowing(user.id, targetUserId);
-        setStatus(isUserFollowing ? 'following' : 'none');
+        const cachedFollowStatus = getCachedFollowStatus(targetUserId);
+        if (cachedFollowStatus !== 'none') {
+          setStatus(cachedFollowStatus === 'following' ? 'following' : 'none');
+        } else {
+          const isUserFollowing = await isFollowing(user.id, targetUserId);
+          const followStatus = isUserFollowing ? 'following' : 'not_following';
+          updateFollowStatus(targetUserId, followStatus);
+          setStatus(isUserFollowing ? 'following' : 'none');
+        }
       } else {
         // For connection relationships (individual to individual)
-        const connectionStatus = await getConnectionStatus(user.id, targetUserId);
-        setStatus(connectionStatus as FollowStatus);
+        const cachedConnectionStatus = getCachedConnectionStatus(targetUserId);
+        if (cachedConnectionStatus !== 'none') {
+          setStatus(cachedConnectionStatus as FollowStatus);
+        } else {
+          const connectionStatus = await getConnectionStatus(user.id, targetUserId);
+          updateConnectionStatus(targetUserId, connectionStatus as 'none' | 'pending' | 'connected');
+          setStatus(connectionStatus as FollowStatus);
+        }
       }
     } catch (error) {
       console.error('Error fetching follow/connection status:', error);
@@ -55,7 +76,7 @@ export function useFollowStatus({
     } finally {
       setLoading(false);
     }
-  }, [user?.id, targetUserId, actionType]);
+  }, [user?.id, targetUserId, actionType, getCachedFollowStatus, getCachedConnectionStatus, updateFollowStatus, updateConnectionStatus]);
 
   // Handle follow/connect action
   const handleAction = useCallback(async () => {
@@ -79,6 +100,7 @@ export function useFollowStatus({
           
           if (success) {
             setStatus('none');
+            updateFollowStatus(targetUserId, 'not_following');
             toast.success('Unfollowed successfully');
           } else {
             setStatus(previousStatus);
@@ -92,6 +114,7 @@ export function useFollowStatus({
           
           if (success) {
             setStatus('following');
+            updateFollowStatus(targetUserId, 'following');
             toast.success('Following successfully');
           } else {
             setStatus(previousStatus);
@@ -110,6 +133,7 @@ export function useFollowStatus({
           const result = await sendConnectionRequest(user.id, targetUserId);
           if (result) {
             setStatus('pending');
+            updateConnectionStatus(targetUserId, 'pending');
             toast.success('Connection request sent');
           } else {
             setStatus(previousStatus);
@@ -202,11 +226,30 @@ export function useFollowStatus({
       }
     };
 
+    const handleFollowStatusChanged = (event: CustomEvent) => {
+      const { targetUserId: eventTargetId, followStatus } = event.detail;
+      if (eventTargetId === targetUserId && actionType === 'follow') {
+        setStatus(followStatus === 'following' ? 'following' : 'none');
+      }
+    };
+
+    const handleConnectionStatusChanged = (event: CustomEvent) => {
+      const { targetUserId: eventTargetId, connectionStatus } = event.detail;
+      if (eventTargetId === targetUserId && actionType === 'connect') {
+        setStatus(connectionStatus as FollowStatus);
+      }
+    };
+
     window.addEventListener('follow-status-updated', handleStatusUpdate as EventListener);
+    window.addEventListener('follow-status-changed', handleFollowStatusChanged as EventListener);
+    window.addEventListener('connection-status-changed', handleConnectionStatusChanged as EventListener);
+    
     return () => {
       window.removeEventListener('follow-status-updated', handleStatusUpdate as EventListener);
+      window.removeEventListener('follow-status-changed', handleFollowStatusChanged as EventListener);
+      window.removeEventListener('connection-status-changed', handleConnectionStatusChanged as EventListener);
     };
-  }, [targetUserId]);
+  }, [targetUserId, actionType]);
 
   // Initial fetch
   useEffect(() => {
