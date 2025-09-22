@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS posts (
 -- 2. FIX SCHEMA INCONSISTENCIES
 -- ==============================================
 
--- Fix events table schema if it has UUID instead of INTEGER
+-- Fix events table schema issues
 DO $$
 BEGIN
     -- Check if events table exists and has UUID id
@@ -60,6 +60,28 @@ BEGIN
         DROP TABLE IF EXISTS events CASCADE;
         
         RAISE NOTICE 'Recreated events table with INTEGER id - existing data was cleared';
+    END IF;
+    
+    -- Check if events table exists but missing organizer_id column
+    IF EXISTS (
+        SELECT 1 FROM information_schema.tables 
+        WHERE table_name = 'events' 
+        AND table_schema = 'public'
+    ) AND NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'events' 
+        AND column_name = 'organizer_id'
+    ) THEN
+        -- Add missing organizer_id column
+        ALTER TABLE events ADD COLUMN organizer_id TEXT;
+        
+        -- Copy created_by to organizer_id for existing records
+        UPDATE events SET organizer_id = created_by WHERE organizer_id IS NULL;
+        
+        -- Make organizer_id NOT NULL after populating it
+        ALTER TABLE events ALTER COLUMN organizer_id SET NOT NULL;
+        
+        RAISE NOTICE 'Added organizer_id column to existing events table';
     END IF;
 END $$;
 
@@ -162,6 +184,7 @@ CREATE TABLE IF NOT EXISTS jobs (
 CREATE TABLE IF NOT EXISTS events (
     id SERIAL PRIMARY KEY,
     created_by TEXT NOT NULL,
+    organizer_id TEXT NOT NULL REFERENCES profiles(id),  -- Foreign key to profiles
     institution_id UUID REFERENCES institutions(id),
     title TEXT NOT NULL,
     description TEXT,
@@ -260,7 +283,28 @@ CREATE TABLE IF NOT EXISTS event_registrations (
 );
 
 -- ==============================================
--- 4. GRANT ALL NECESSARY PERMISSIONS
+-- 4. ADD MISSING FOREIGN KEY CONSTRAINTS
+-- ==============================================
+
+-- Add foreign key constraint for events.organizer_id if it doesn't exist
+DO $$
+BEGIN
+    -- Check if the foreign key constraint doesn't exist
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints 
+        WHERE constraint_name = 'events_organizer_id_fkey' 
+        AND table_name = 'events'
+    ) THEN
+        -- Add the foreign key constraint
+        ALTER TABLE events ADD CONSTRAINT events_organizer_id_fkey 
+        FOREIGN KEY (organizer_id) REFERENCES profiles(id);
+        
+        RAISE NOTICE 'Added foreign key constraint for events.organizer_id';
+    END IF;
+END $$;
+
+-- ==============================================
+-- 5. GRANT ALL NECESSARY PERMISSIONS
 -- ==============================================
 
 -- Grant permissions to all roles for all tables
@@ -289,7 +333,7 @@ GRANT ALL ON saved_posts TO postgres, anon, authenticated, service_role;
 GRANT ALL ON event_registrations TO postgres, anon, authenticated, service_role;
 
 -- ==============================================
--- 5. ENABLE ROW LEVEL SECURITY
+-- 6. ENABLE ROW LEVEL SECURITY
 -- ==============================================
 
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
@@ -309,7 +353,7 @@ ALTER TABLE saved_posts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE event_registrations ENABLE ROW LEVEL SECURITY;
 
 -- ==============================================
--- 6. DROP ALL EXISTING POLICIES
+-- 7. DROP ALL EXISTING POLICIES
 -- ==============================================
 
 DO $$ 
@@ -323,7 +367,7 @@ BEGIN
 END $$;
 
 -- ==============================================
--- 7. CREATE PERMISSIVE RLS POLICIES FOR ALL TABLES
+-- 8. CREATE PERMISSIVE RLS POLICIES FOR ALL TABLES
 -- ==============================================
 
 -- Profiles policies
@@ -372,7 +416,7 @@ CREATE POLICY "saved_posts_all_access" ON saved_posts FOR ALL USING (true) WITH 
 CREATE POLICY "event_registrations_all_access" ON event_registrations FOR ALL USING (true) WITH CHECK (true);
 
 -- ==============================================
--- 8. CREATE TRIGGERS FOR UPDATED_AT
+-- 9. CREATE TRIGGERS FOR UPDATED_AT
 -- ==============================================
 
 -- Function to update updated_at timestamp
@@ -440,7 +484,7 @@ CREATE TRIGGER update_post_analytics_updated_at
     EXECUTE FUNCTION update_updated_at_column();
 
 -- ==============================================
--- 9. CREATE PROFILE TRIGGER FOR SIGNUP
+-- 10. CREATE PROFILE TRIGGER FOR SIGNUP
 -- ==============================================
 
 -- Function to handle new user creation
@@ -468,7 +512,7 @@ CREATE TRIGGER on_auth_user_created
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- ==============================================
--- 10. VERIFICATION AND CLEANUP
+-- 11. VERIFICATION AND CLEANUP
 -- ==============================================
 
 -- Verify all tables exist
@@ -530,7 +574,7 @@ BEGIN
 END $$;
 
 -- ==============================================
--- 11. FINAL SUCCESS MESSAGE
+-- 12. FINAL SUCCESS MESSAGE
 -- ==============================================
 
 DO $$
