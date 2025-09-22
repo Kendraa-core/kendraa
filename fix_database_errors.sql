@@ -16,6 +16,12 @@ CREATE TABLE IF NOT EXISTS post_comments (
 ALTER TABLE post_comments ENABLE ROW LEVEL SECURITY;
 
 -- Create policies for post_comments table
+-- Drop existing policies if they exist, then create new ones
+DROP POLICY IF EXISTS "post_comments_select_policy" ON post_comments;
+DROP POLICY IF EXISTS "post_comments_insert_policy" ON post_comments;
+DROP POLICY IF EXISTS "post_comments_update_policy" ON post_comments;
+DROP POLICY IF EXISTS "post_comments_delete_policy" ON post_comments;
+
 CREATE POLICY "post_comments_select_policy" ON post_comments
     FOR SELECT USING (true);
 
@@ -29,14 +35,20 @@ CREATE POLICY "post_comments_delete_policy" ON post_comments
     FOR DELETE USING (true);
 
 -- Ensure institutions table has proper policies (in case they were missing)
-CREATE POLICY IF NOT EXISTS "institutions_select_policy" ON institutions
+-- Drop existing policies if they exist, then create new ones
+DROP POLICY IF EXISTS "institutions_select_policy" ON institutions;
+DROP POLICY IF EXISTS "institutions_insert_policy" ON institutions;
+DROP POLICY IF EXISTS "institutions_update_policy" ON institutions;
+DROP POLICY IF EXISTS "institutions_delete_policy" ON institutions;
+
+CREATE POLICY "institutions_select_policy" ON institutions
     FOR SELECT USING (true);
 
-CREATE POLICY IF NOT EXISTS "institutions_insert_policy" ON institutions
+CREATE POLICY "institutions_insert_policy" ON institutions
     FOR INSERT WITH CHECK (true);
 
-CREATE POLICY IF NOT EXISTS "institutions_update_policy" ON institutions
+CREATE POLICY "institutions_update_policy" ON institutions
     FOR UPDATE USING (true);
 
-CREATE POLICY IF NOT EXISTS "institutions_delete_policy" ON institutions
+CREATE POLICY "institutions_delete_policy" ON institutions
     FOR DELETE USING (true);
