@@ -163,6 +163,34 @@ CREATE TABLE IF NOT EXISTS post_likes (
     UNIQUE(user_id, post_id)
 );
 
+-- Post Analytics table
+CREATE TABLE IF NOT EXISTS post_analytics (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+    impressions INTEGER DEFAULT 0,
+    unique_impressions INTEGER DEFAULT 0,
+    profile_views INTEGER DEFAULT 0,
+    followers_gained INTEGER DEFAULT 0,
+    video_views INTEGER DEFAULT 0,
+    total_watch_time INTEGER DEFAULT 0,
+    average_watch_time DECIMAL(5,2) DEFAULT 0,
+    shares_count INTEGER DEFAULT 0,
+    saves_count INTEGER DEFAULT 0,
+    UNIQUE(post_id)
+);
+
+-- Comment Likes table
+CREATE TABLE IF NOT EXISTS comment_likes (
+    id SERIAL PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    comment_id INTEGER NOT NULL REFERENCES post_comments(id) ON DELETE CASCADE,
+    reaction_type TEXT NOT NULL DEFAULT 'like',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(user_id, comment_id)
+);
+
 -- ==============================================
 -- 2. CREATE TRIGGERS FOR UPDATED_AT
 -- ==============================================
@@ -277,6 +305,8 @@ ALTER TABLE follows ENABLE ROW LEVEL SECURITY;
 ALTER TABLE institution_follows ENABLE ROW LEVEL SECURITY;
 ALTER TABLE post_comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE post_likes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE post_analytics ENABLE ROW LEVEL SECURITY;
+ALTER TABLE comment_likes ENABLE ROW LEVEL SECURITY;
 
 -- ==============================================
 -- 6. DROP ALL EXISTING POLICIES
@@ -437,6 +467,32 @@ CREATE POLICY "institution_follows_update_policy" ON institution_follows
     FOR UPDATE USING (true);
 
 CREATE POLICY "institution_follows_delete_policy" ON institution_follows
+    FOR DELETE USING (true);
+
+-- Post Analytics policies (allow all operations for authenticated users)
+CREATE POLICY "post_analytics_select_policy" ON post_analytics
+    FOR SELECT USING (true);
+
+CREATE POLICY "post_analytics_insert_policy" ON post_analytics
+    FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "post_analytics_update_policy" ON post_analytics
+    FOR UPDATE USING (true);
+
+CREATE POLICY "post_analytics_delete_policy" ON post_analytics
+    FOR DELETE USING (true);
+
+-- Comment Likes policies (allow all operations for authenticated users)
+CREATE POLICY "comment_likes_select_policy" ON comment_likes
+    FOR SELECT USING (true);
+
+CREATE POLICY "comment_likes_insert_policy" ON comment_likes
+    FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "comment_likes_update_policy" ON comment_likes
+    FOR UPDATE USING (true);
+
+CREATE POLICY "comment_likes_delete_policy" ON comment_likes
     FOR DELETE USING (true);
 
 -- ==============================================
