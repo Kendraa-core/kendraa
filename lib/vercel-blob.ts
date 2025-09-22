@@ -16,19 +16,20 @@ export async function uploadToVercelBlob(
   pathname?: string,
   options?: {
     access?: 'public';
-    addRandomSuffix?: boolean;
     allowOverwrite?: boolean;
   }
 ): Promise<{ url: string; error: any | null }> {
   try {
     console.log('Uploading to Vercel Blob:', { fileName: file.name, pathname });
     
-    // Generate pathname if not provided
-    const finalPathname = pathname || `uploads/${Date.now()}-${file.name}`;
+    // Generate pathname with random suffix manually to avoid CORS issues
+    const randomSuffix = Math.random().toString(36).substring(2, 15);
+    const fileExt = file.name.split('.').pop();
+    const baseName = file.name.replace(/\.[^/.]+$/, '');
+    const finalPathname = pathname || `uploads/${Date.now()}-${baseName}-${randomSuffix}.${fileExt}`;
     
     const blob = await put(finalPathname, file, {
       access: 'public',
-      addRandomSuffix: true, // Add random suffix to prevent conflicts
       token: process.env.NEXT_PUBLIC_BLOB_READ_WRITE_TOKEN,
       ...options
     });
@@ -50,49 +51,55 @@ export async function uploadToVercelBlob(
 
 // Specialized upload functions for different use cases
 export async function uploadPostImage(file: File): Promise<{ url: string; error: any | null }> {
-  return uploadToVercelBlob(file, `posts/${Date.now()}-${file.name}`, {
-    access: 'public',
-    addRandomSuffix: true
-    // Removed cacheControlMaxAge to avoid CORS issues
+  const randomSuffix = Math.random().toString(36).substring(2, 15);
+  const fileExt = file.name.split('.').pop();
+  const baseName = file.name.replace(/\.[^/.]+$/, '');
+  return uploadToVercelBlob(file, `posts/${Date.now()}-${baseName}-${randomSuffix}.${fileExt}`, {
+    access: 'public'
   });
 }
 
 export async function uploadProfileImage(file: File, userId: string): Promise<{ url: string; error: any | null }> {
-  return uploadToVercelBlob(file, `profiles/${userId}/avatar-${Date.now()}.${file.name.split('.').pop()}`, {
-    access: 'public',
-    addRandomSuffix: true
-    // Removed cacheControlMaxAge to avoid CORS issues
+  const randomSuffix = Math.random().toString(36).substring(2, 15);
+  const fileExt = file.name.split('.').pop();
+  const baseName = file.name.replace(/\.[^/.]+$/, '');
+  return uploadToVercelBlob(file, `profiles/${userId}/avatar-${Date.now()}-${baseName}-${randomSuffix}.${fileExt}`, {
+    access: 'public'
   });
 }
 
 export async function uploadInstitutionLogo(file: File, institutionId: string): Promise<{ url: string; error: any | null }> {
-  return uploadToVercelBlob(file, `institutions/${institutionId}/logo-${Date.now()}.${file.name.split('.').pop()}`, {
-    access: 'public',
-    addRandomSuffix: true
-    // Removed cacheControlMaxAge to avoid CORS issues
+  const randomSuffix = Math.random().toString(36).substring(2, 15);
+  const fileExt = file.name.split('.').pop();
+  const baseName = file.name.replace(/\.[^/.]+$/, '');
+  return uploadToVercelBlob(file, `institutions/${institutionId}/logo-${Date.now()}-${baseName}-${randomSuffix}.${fileExt}`, {
+    access: 'public'
   });
 }
 
 export async function uploadInstitutionBanner(file: File, institutionId: string): Promise<{ url: string; error: any | null }> {
-  return uploadToVercelBlob(file, `institutions/${institutionId}/banner-${Date.now()}.${file.name.split('.').pop()}`, {
-    access: 'public',
-    addRandomSuffix: true
-    // Removed cacheControlMaxAge to avoid CORS issues
+  const randomSuffix = Math.random().toString(36).substring(2, 15);
+  const fileExt = file.name.split('.').pop();
+  const baseName = file.name.replace(/\.[^/.]+$/, '');
+  return uploadToVercelBlob(file, `institutions/${institutionId}/banner-${Date.now()}-${baseName}-${randomSuffix}.${fileExt}`, {
+    access: 'public'
   });
 }
 
 export async function uploadEventImage(file: File, eventId: string): Promise<{ url: string; error: any | null }> {
-  return uploadToVercelBlob(file, `events/${eventId}/image-${Date.now()}.${file.name.split('.').pop()}`, {
-    access: 'public',
-    addRandomSuffix: true
-    // Removed cacheControlMaxAge to avoid CORS issues
+  const randomSuffix = Math.random().toString(36).substring(2, 15);
+  const fileExt = file.name.split('.').pop();
+  const baseName = file.name.replace(/\.[^/.]+$/, '');
+  return uploadToVercelBlob(file, `events/${eventId}/image-${Date.now()}-${baseName}-${randomSuffix}.${fileExt}`, {
+    access: 'public'
   });
 }
 
 export async function uploadJobImage(file: File, jobId: string): Promise<{ url: string; error: any | null }> {
-  return uploadToVercelBlob(file, `jobs/${jobId}/image-${Date.now()}.${file.name.split('.').pop()}`, {
-    access: 'public',
-    addRandomSuffix: true
-    // Removed cacheControlMaxAge to avoid CORS issues
+  const randomSuffix = Math.random().toString(36).substring(2, 15);
+  const fileExt = file.name.split('.').pop();
+  const baseName = file.name.replace(/\.[^/.]+$/, '');
+  return uploadToVercelBlob(file, `jobs/${jobId}/image-${Date.now()}-${baseName}-${randomSuffix}.${fileExt}`, {
+    access: 'public'
   });
 }
