@@ -39,14 +39,6 @@ ALTER TABLE conversation_participants ENABLE ROW LEVEL SECURITY;
 ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 
--- Analytics tables (currently unrestricted)
-ALTER TABLE post_analytics ENABLE ROW LEVEL SECURITY;
-ALTER TABLE post_impressions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE post_shares ENABLE ROW LEVEL SECURITY;
-ALTER TABLE post_views ENABLE ROW LEVEL SECURITY;
-ALTER TABLE post_share_analytics ENABLE ROW LEVEL SECURITY;
-ALTER TABLE post_view_analytics ENABLE ROW LEVEL SECURITY;
-ALTER TABLE profile_views ENABLE ROW LEVEL SECURITY;
 
 -- ========================================================
 -- 2. DROP ALL EXISTING POLICIES
@@ -96,11 +88,6 @@ DROP POLICY IF EXISTS "conversation_participants_all_access" ON conversation_par
 DROP POLICY IF EXISTS "messages_all_access" ON messages;
 DROP POLICY IF EXISTS "notifications_all_access" ON notifications;
 
--- Analytics policies
-DROP POLICY IF EXISTS "post_analytics_select" ON post_analytics;
-DROP POLICY IF EXISTS "post_analytics_insert" ON post_analytics;
-DROP POLICY IF EXISTS "post_analytics_update" ON post_analytics;
-DROP POLICY IF EXISTS "post_analytics_delete" ON post_analytics;
 
 -- ========================================================
 -- 3. CREATE COMPREHENSIVE RLS POLICIES
@@ -242,34 +229,6 @@ CREATE POLICY "notifications_insert_system" ON notifications FOR INSERT WITH CHE
 CREATE POLICY "notifications_update_own" ON notifications FOR UPDATE USING (auth.uid()::text = recipient_id);
 CREATE POLICY "notifications_delete_own" ON notifications FOR DELETE USING (auth.uid()::text = recipient_id);
 
--- ANALYTICS TABLES: Permissive policies for system analytics
-CREATE POLICY "post_analytics_select_public" ON post_analytics FOR SELECT USING (true);
-CREATE POLICY "post_analytics_insert_system" ON post_analytics FOR INSERT WITH CHECK (true);
-CREATE POLICY "post_analytics_update_system" ON post_analytics FOR UPDATE USING (true);
-
-CREATE POLICY "post_impressions_select_public" ON post_impressions FOR SELECT USING (true);
-CREATE POLICY "post_impressions_insert_system" ON post_impressions FOR INSERT WITH CHECK (true);
-CREATE POLICY "post_impressions_update_system" ON post_impressions FOR UPDATE USING (true);
-
-CREATE POLICY "post_shares_select_public" ON post_shares FOR SELECT USING (true);
-CREATE POLICY "post_shares_insert_system" ON post_shares FOR INSERT WITH CHECK (true);
-CREATE POLICY "post_shares_update_system" ON post_shares FOR UPDATE USING (true);
-
-CREATE POLICY "post_views_select_public" ON post_views FOR SELECT USING (true);
-CREATE POLICY "post_views_insert_system" ON post_views FOR INSERT WITH CHECK (true);
-CREATE POLICY "post_views_update_system" ON post_views FOR UPDATE USING (true);
-
-CREATE POLICY "post_share_analytics_select_public" ON post_share_analytics FOR SELECT USING (true);
-CREATE POLICY "post_share_analytics_insert_system" ON post_share_analytics FOR INSERT WITH CHECK (true);
-CREATE POLICY "post_share_analytics_update_system" ON post_share_analytics FOR UPDATE USING (true);
-
-CREATE POLICY "post_view_analytics_select_public" ON post_view_analytics FOR SELECT USING (true);
-CREATE POLICY "post_view_analytics_insert_system" ON post_view_analytics FOR INSERT WITH CHECK (true);
-CREATE POLICY "post_view_analytics_update_system" ON post_view_analytics FOR UPDATE USING (true);
-
-CREATE POLICY "profile_views_select_public" ON profile_views FOR SELECT USING (true);
-CREATE POLICY "profile_views_insert_system" ON profile_views FOR INSERT WITH CHECK (true);
-CREATE POLICY "profile_views_update_system" ON profile_views FOR UPDATE USING (true);
 
 -- ========================================================
 -- 4. GRANT COMPREHENSIVE PERMISSIONS
@@ -309,14 +268,6 @@ GRANT ALL ON conversation_participants TO postgres, anon, authenticated, service
 GRANT ALL ON messages TO postgres, anon, authenticated, service_role;
 GRANT ALL ON notifications TO postgres, anon, authenticated, service_role;
 
--- Analytics tables
-GRANT ALL ON post_analytics TO postgres, anon, authenticated, service_role;
-GRANT ALL ON post_impressions TO postgres, anon, authenticated, service_role;
-GRANT ALL ON post_shares TO postgres, anon, authenticated, service_role;
-GRANT ALL ON post_views TO postgres, anon, authenticated, service_role;
-GRANT ALL ON post_share_analytics TO postgres, anon, authenticated, service_role;
-GRANT ALL ON post_view_analytics TO postgres, anon, authenticated, service_role;
-GRANT ALL ON profile_views TO postgres, anon, authenticated, service_role;
 
 -- ========================================================
 -- 5. FIX NOTIFICATIONS TABLE STRUCTURE
@@ -423,8 +374,7 @@ BEGIN
             'institutions', 'institution_follows', 'connections', 'follows',
             'jobs', 'job_applications', 'events', 'event_attendees',
             'experiences', 'education', 'conversations', 'conversation_participants', 
-            'messages', 'notifications', 'post_analytics', 'post_impressions',
-            'post_shares', 'post_views', 'post_share_analytics', 'post_view_analytics', 'profile_views'
+            'messages', 'notifications'
         )
     LOOP
         total_tables := total_tables + 1;
@@ -481,7 +431,7 @@ BEGIN
     RAISE NOTICE '🎉 ALL RLS POLICIES AND PERMISSIONS CONFIGURED!';
     RAISE NOTICE '✅ All tables have proper RLS policies';
     RAISE NOTICE '✅ All permissions granted to required roles';
-    RAISE NOTICE '✅ Analytics tables no longer unrestricted';
+    RAISE NOTICE '✅ All analytics tables removed from database';
     RAISE NOTICE '✅ Signup process should work smoothly';
     RAISE NOTICE '✅ App connectivity fully restored';
     RAISE NOTICE '========================================';

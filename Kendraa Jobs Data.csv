@@ -1,0 +1,2 @@
+id,created_at,updated_at,title,description,requirements,salary_min,salary_max,currency,location,job_type,experience_level,specializations,company_id,posted_by,status,application_deadline,applications_count,posted_by_type
+317af50b-c237-44a6-a124-3231f6614ea2,2025-09-12 20:10:55.569+00,2025-09-12 20:10:55.569+00,dsds,dsds,[],12,1211,USD,sdds,full_time,mid,[],72b6dc8a-707b-467b-807c-013f03e712e8,f2d25703-f3f9-480c-b9d2-03125371e5e4,active,2025-09-14 00:00:00+00,0,institution

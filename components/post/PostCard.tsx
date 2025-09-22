@@ -14,7 +14,6 @@ import {
   BookmarkIcon,
   EllipsisHorizontalIcon,
   TrashIcon,
-  ChartBarIcon,
   FlagIcon,
   EyeSlashIcon,
   UserMinusIcon,
@@ -45,13 +44,6 @@ import {
   validateStringLength
 } from '@/utils/errorHandler';
 import { cn } from '@/lib/utils';
-import { 
-  trackPostImpression, 
-  trackPostView, 
-  trackPostShare,
-  trackProfileView 
-} from '@/lib/queries';
-import { getDeviceType } from '@/lib/analytics';
 
 interface PostCardProps {
   post: Post & {
@@ -295,18 +287,9 @@ export default function PostCard({ post, onInteraction,onPostDeleted }: PostCard
   };
 
   const handlePostClick = async () => {
-    // Track post view
-    if (user?.id) {
-      const deviceType = getDeviceType();
-      await trackPostView(post.id, user.id, 5, deviceType); // Assume 5 seconds view duration
-    }
-    
     router.push(`/post/${post.id}`);
   };
 
-  const handleViewAnalytics = () => {
-    router.push(`/post/${post.id}/analytics`);
-  };
 
   const handleReportPost = () => {
     // TODO: Implement report functionality
@@ -407,13 +390,6 @@ export default function PostCard({ post, onInteraction,onPostDeleted }: PostCard
             <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-10 min-w-[160px]">
               {isOwnPost ? (
                 <>
-                  <button
-                    onClick={handleViewAnalytics}
-                    className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                  >
-                    <ChartBarIcon className="w-4 h-4" />
-                    View Analytics
-                  </button>
                   <button
                     onClick={handleCopyLink}
                     className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"

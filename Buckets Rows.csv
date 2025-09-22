@@ -1,0 +1,4 @@
+id,name,owner,created_at,updated_at,public,avif_autodetection,file_size_limit,allowed_mime_types,owner_id,type
+avatars,avatars,,2025-09-03 13:13:40.085784+00,2025-09-03 13:13:40.085784+00,true,false,,,,STANDARD
+banners,banners,,2025-08-25 06:05:49.823354+00,2025-08-25 06:05:49.823354+00,true,false,10485760,"[""image/*""]",,STANDARD
+post-images,post-images,,2025-09-17 09:16:09.199663+00,2025-09-17 09:16:09.199663+00,true,false,,,,STANDARD

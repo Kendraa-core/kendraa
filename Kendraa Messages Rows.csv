@@ -1,0 +1,6 @@
+id,conversation_id,sender_id,sender_type,content,message_type,encryption_level,retention_policy,is_read,audit_trail,created_at,updated_at
+3b339582-4b24-44b6-9cbb-928e0b4dd486,c2602f22-8e34-4c5c-9096-14396be6ee17,27f2aec2-daf1-46e2-a06e-f77ba1d332a0,individual,Hello! This is a test message.,text,standard,standard,false,{},2025-08-15 09:10:17.168517+00,2025-08-15 09:10:17.168517+00
+4d057124-d867-40bb-a6a3-d49817b026b9,d31adc03-25be-465a-8175-ba117acef9ef,27f2aec2-daf1-46e2-a06e-f77ba1d332a0,individual,Hello! This is a test message.,text,standard,standard,false,{},2025-08-15 09:10:59.618931+00,2025-08-15 09:10:59.618931+00
+5fc9e892-c147-451b-8484-f17fd8108b84,ae3ea4cf-d325-43f7-b481-a7b1cc930c20,27f2aec2-daf1-46e2-a06e-f77ba1d332a0,individual,Hello! This is a test message.,text,standard,standard,false,{},2025-08-15 14:14:36.653903+00,2025-08-15 14:14:36.653903+00
+8e4a1890-ee9c-4bc1-af3a-af1d120bf827,e80acbc8-3002-4d3e-9606-6ee54859412f,27f2aec2-daf1-46e2-a06e-f77ba1d332a0,individual,Hello! This is a test message.,text,standard,standard,false,{},2025-08-15 09:28:57.808306+00,2025-08-15 09:28:57.808306+00
+ea21004b-5e90-49e1-b31d-3666d3b06b9b,0239185c-c9ad-4a02-a331-8adc5c4802e1,27f2aec2-daf1-46e2-a06e-f77ba1d332a0,individual,Hello! This is a test message.,text,standard,standard,false,{},2025-08-15 09:10:34.239944+00,2025-08-15 09:10:34.239944+00
