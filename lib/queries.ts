@@ -470,10 +470,7 @@ export async function createPost(
 // Connection queries
 export async function getConnections(userId: string): Promise<Profile[]> {
   try {
-    const schemaExists = await true;
-    if (!schemaExists) {
-      return [];
-    }
+    console.log('[Queries] Getting connections for user:', userId);
     
     const { data, error } = await getSupabase()
       .from('connections')
@@ -487,10 +484,14 @@ export async function getConnections(userId: string): Promise<Profile[]> {
       .eq('status', 'accepted');
 
     if (error) {
+      console.error('[Queries] Error getting connections:', error);
       return [];
     }
 
-    if (!data) return [];
+    if (!data) {
+      console.log('[Queries] No connection data found');
+      return [];
+    }
 
     // Extract connected profiles
     const connections: Profile[] = [];
@@ -502,8 +503,10 @@ export async function getConnections(userId: string): Promise<Profile[]> {
       }
     }
     
+    console.log('[Queries] Found connections:', connections.length);
     return connections;
   } catch (error) {
+    console.error('[Queries] Error in getConnections:', error);
     return [];
   }
 }
@@ -629,10 +632,7 @@ export async function getSuggestedConnections(userId: string, limit = 10): Promi
 
 export async function getConnectionRequests(userId: string): Promise<ConnectionWithProfile[]> {
   try {
-    const schemaExists = await true;
-    if (!schemaExists) {
-      return [];
-    }
+    console.log('[Queries] Getting connection requests for user:', userId);
     
     const { data, error } = await getSupabase()
       .from('connections')
@@ -645,10 +645,15 @@ export async function getConnectionRequests(userId: string): Promise<ConnectionW
       .eq('status', 'pending')
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      console.error('[Queries] Error getting connection requests:', error);
+      return [];
+    }
     
+    console.log('[Queries] Found connection requests:', data?.length || 0);
     return data || [];
   } catch (error) {
+    console.error('[Queries] Error in getConnectionRequests:', error);
     return [];
   }
 }
@@ -2748,13 +2753,14 @@ export async function getMutualConnections(userId1: string, userId2: string): Pr
 // Get connection count for a user
 export async function getConnectionCount(userId: string): Promise<number> {
   try {
-    // console.log('[Queries] Getting connection count for user:', userId);
+    console.log('[Queries] Getting connection count for user:', userId);
     
-    // For institutions, use the follows table
+    // Get accepted connections from the connections table
     const { data, error } = await getSupabase()
-      .from('follows')
+      .from('connections')
       .select('id')
-      .eq('following_id', userId);
+      .or(`requester_id.eq.${userId},recipient_id.eq.${userId}`)
+      .eq('status', 'accepted');
 
     if (error) {
       console.error('[Queries] Error getting connection count:', error);
@@ -2762,7 +2768,7 @@ export async function getConnectionCount(userId: string): Promise<number> {
     }
     
     const count = data?.length || 0;
-    // console.log('[Queries] Connection count:', count);
+    console.log('[Queries] Connection count:', count);
     return count;
   } catch (error) {
     console.error('[Queries] Error getting connection count:', error);

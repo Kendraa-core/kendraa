@@ -56,6 +56,7 @@ export default function MobileNetworkPage() {
     if (!user?.id) return;
     
     setLoading(true);
+    console.log('[Mobile Network] Fetching network data for user:', user.id);
     
     try {
       const [individualsData, institutionsData, requestsData, connectionsData] = await Promise.all([
@@ -64,6 +65,13 @@ export default function MobileNetworkPage() {
         getConnectionRequests(user.id),
         getConnections(user.id)
       ]);
+
+      console.log('[Mobile Network] Fetched data:', {
+        individuals: individualsData.length,
+        institutions: institutionsData.length,
+        requests: requestsData.length,
+        connections: connectionsData.length
+      });
 
       setCanSendRequests(true);
 
@@ -120,7 +128,7 @@ export default function MobileNetworkPage() {
       setConnectionRequests(requestsData);
       setConnections(connectionsData);
     } catch (error) {
-      console.error('Error fetching network data:', error);
+      console.error('[Mobile Network] Error fetching network data:', error);
       toast.error('Failed to load network data');
     } finally {
       setLoading(false);

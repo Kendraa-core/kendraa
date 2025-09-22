@@ -102,6 +102,7 @@ export default function NetworkPage() {
     if (!user?.id) return;
     
     setLoading(true);
+    console.log('[Network] Fetching network data for user:', user.id);
     
     try {
       const [individualsData, institutionsData, requestsData, connectionsData, statsData, canSend] = await Promise.all([
@@ -118,6 +119,14 @@ export default function NetworkPage() {
         ]),
         true // Assume user can send requests
       ]);
+
+      console.log('[Network] Fetched data:', {
+        individuals: individualsData.length,
+        institutions: institutionsData.length,
+        requests: requestsData.length,
+        connections: connectionsData.length,
+        stats: statsData
+      });
 
       setCanSendRequests(canSend);
 
@@ -176,6 +185,7 @@ export default function NetworkPage() {
         newsletters: statsData[4]
       });
     } catch (error) {
+      console.error('[Network] Error fetching network data:', error);
       toast.error('Failed to load network data');
     } finally {
       setLoading(false);
