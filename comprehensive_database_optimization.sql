@@ -2,46 +2,51 @@
 -- This script fixes all RLS policies, optimizes schema, and ensures proper application connectivity
 
 -- ========================================================
--- 1. ENABLE RLS ON ALL TABLES FIRST
+-- 1. ENABLE RLS ON ALL TABLES (SKIP VIEWS)
 -- ========================================================
 
--- Core tables
-ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
-ALTER TABLE post_comments ENABLE ROW LEVEL SECURITY;
-ALTER TABLE post_likes ENABLE ROW LEVEL SECURITY;
-ALTER TABLE comment_likes ENABLE ROW LEVEL SECURITY;
-ALTER TABLE institutions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE institution_follows ENABLE ROW LEVEL SECURITY;
-ALTER TABLE follows ENABLE ROW LEVEL SECURITY;
-ALTER TABLE connections ENABLE ROW LEVEL SECURITY;
-ALTER TABLE saved_posts ENABLE ROW LEVEL SECURITY;
+-- Enable RLS on all tables that exist, skip views
+DO $$
+DECLARE
+    table_name text;
+    tables text[] := ARRAY[
+        'profiles', 'posts', 'post_comments', 'post_likes', 'comment_likes',
+        'institutions', 'institution_follows', 'follows', 'connections', 'saved_posts',
+        'post_analytics', 'post_impressions', 'post_views', 'post_shares',
+        'jobs', 'job_applications', 'events', 'event_attendees', 'event_registrations',
+        'experiences', 'education', 'profile_views',
+        'conversations', 'conversation_participants', 'messages', 'notifications'
+    ];
+BEGIN
+    FOREACH table_name IN ARRAY tables
+    LOOP
+        -- Check if it's a table (not a view) before enabling RLS
+        IF EXISTS (
+            SELECT 1 FROM information_schema.tables 
+            WHERE table_name = table_name 
+            AND table_schema = 'public' 
+            AND table_type = 'BASE TABLE'
+        ) THEN
+            BEGIN
+                EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', table_name);
+                RAISE NOTICE 'Enabled RLS on table: %', table_name;
+            EXCEPTION
+                WHEN OTHERS THEN
+                    RAISE NOTICE 'Could not enable RLS on %: %', table_name, SQLERRM;
+            END;
+        ELSE
+            RAISE NOTICE 'Skipping % (not a table or does not exist)', table_name;
+        END IF;
+    END LOOP;
+END $$;
 
--- Analytics and tracking tables (currently unrestricted)
-ALTER TABLE post_analytics ENABLE ROW LEVEL SECURITY;
-ALTER TABLE post_impressions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE post_views ENABLE ROW LEVEL SECURITY;
-ALTER TABLE post_shares ENABLE ROW LEVEL SECURITY;
-ALTER TABLE post_share_analytics ENABLE ROW LEVEL SECURITY;
-ALTER TABLE post_view_analytics ENABLE ROW LEVEL SECURITY;
+-- ========================================================
+-- 1.5. HANDLE VIEWS PROPERLY
+-- ========================================================
 
--- Job and event tables
-ALTER TABLE jobs ENABLE ROW LEVEL SECURITY;
-ALTER TABLE job_applications ENABLE ROW LEVEL SECURITY;
-ALTER TABLE events ENABLE ROW LEVEL SECURITY;
-ALTER TABLE event_attendees ENABLE ROW LEVEL SECURITY;
-ALTER TABLE event_registrations ENABLE ROW LEVEL SECURITY;
-
--- Profile related tables
-ALTER TABLE experiences ENABLE ROW LEVEL SECURITY;
-ALTER TABLE education ENABLE ROW LEVEL SECURITY;
-ALTER TABLE profile_views ENABLE ROW LEVEL SECURITY;
-
--- Communication tables
-ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
-ALTER TABLE conversation_participants ENABLE ROW LEVEL SECURITY;
-ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
-ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+-- Views inherit RLS from their underlying tables, so we don't need to enable RLS on views
+-- But we should ensure the underlying tables have proper RLS policies
+-- post_share_analytics and post_view_analytics are likely views that depend on post_shares and post_views tables
 
 -- ========================================================
 -- 2. DROP ALL EXISTING POLICIES
@@ -267,7 +272,7 @@ CREATE POLICY "messages_insert_participant" ON messages FOR INSERT WITH CHECK (
 -- 4. GRANT PERMISSIONS TO ALL ROLES
 -- ========================================================
 
--- Grant permissions on all tables
+-- Grant permissions on all tables and views
 DO $$
 DECLARE
     table_name text;
@@ -275,7 +280,7 @@ DECLARE
         'profiles', 'posts', 'post_comments', 'post_likes', 'comment_likes',
         'institutions', 'institution_follows', 'follows', 'connections', 'saved_posts',
         'post_analytics', 'post_impressions', 'post_views', 'post_shares',
-        'post_share_analytics', 'post_view_analytics',
+        'post_share_analytics', 'post_view_analytics', -- These are views
         'jobs', 'job_applications', 'events', 'event_attendees', 'event_registrations',
         'experiences', 'education', 'profile_views',
         'conversations', 'conversation_participants', 'messages', 'notifications'
@@ -283,7 +288,15 @@ DECLARE
 BEGIN
     FOREACH table_name IN ARRAY tables
     LOOP
-        EXECUTE format('GRANT ALL ON %I TO postgres, anon, authenticated, service_role', table_name);
+        -- Try to grant permissions, but don't fail if table/view doesn't exist
+        BEGIN
+            EXECUTE format('GRANT ALL ON %I TO postgres, anon, authenticated, service_role', table_name);
+        EXCEPTION
+            WHEN undefined_table THEN
+                RAISE NOTICE 'Table/view % does not exist, skipping permissions', table_name;
+            WHEN OTHERS THEN
+                RAISE NOTICE 'Could not grant permissions on %: %', table_name, SQLERRM;
+        END;
     END LOOP;
 END $$;
 
