@@ -30,6 +30,7 @@ export async function uploadToVercelBlob(
     const blob = await put(finalPathname, file, {
       access: 'public',
       addRandomSuffix: true, // Add random suffix to prevent conflicts
+      token: process.env.NEXT_PUBLIC_BLOB_READ_WRITE_TOKEN,
       ...options
     });
 
