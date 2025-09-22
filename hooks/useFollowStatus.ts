@@ -128,6 +128,20 @@ export function useFollowStatus({
         }
       }));
 
+      // Dispatch specific events based on action type
+      if (actionType === 'connect') {
+        window.dispatchEvent(new CustomEvent('connection-request-sent', {
+          detail: { targetUserId, targetUserType }
+        }));
+      } else if (actionType === 'follow') {
+        window.dispatchEvent(new CustomEvent('follow-status-updated', {
+          detail: { targetUserId, targetUserType, newStatus: status }
+        }));
+      }
+
+      // Dispatch general network update event
+      window.dispatchEvent(new CustomEvent('network-updated'));
+
     } catch (error: any) {
       console.error('Error in follow/connect action:', error);
       setStatus(previousStatus);

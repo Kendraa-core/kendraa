@@ -63,12 +63,19 @@ export default function InstitutionFeedPage() {
     setIsPosting(true);
     try {
       // Create post without image upload
-      await createPost(user?.id!, postContent);
+      const post = await createPost(user?.id!, postContent);
       
       setPostContent('');
       setShowCreatePost(false);
       
       toast.success('Post created successfully!');
+      
+      // Dispatch event to notify other components
+      if (post) {
+        window.dispatchEvent(new CustomEvent('post-created', {
+          detail: { postId: post.id, authorId: user?.id }
+        }));
+      }
       
       // Refresh posts
       await fetchPosts();

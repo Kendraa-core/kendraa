@@ -171,6 +171,24 @@ export default function NetworkPage() {
     fetchNetworkData();
   }, [fetchNetworkData]);
 
+  // Listen for network updates and refresh data
+  useEffect(() => {
+    const handleNetworkUpdate = () => {
+      fetchNetworkData();
+    };
+
+    // Listen for custom events
+    window.addEventListener('network-updated', handleNetworkUpdate);
+    window.addEventListener('connection-request-sent', handleNetworkUpdate);
+    window.addEventListener('follow-status-updated', handleNetworkUpdate);
+
+    return () => {
+      window.removeEventListener('network-updated', handleNetworkUpdate);
+      window.removeEventListener('connection-request-sent', handleNetworkUpdate);
+      window.removeEventListener('follow-status-updated', handleNetworkUpdate);
+    };
+  }, [fetchNetworkData]);
+
   const handleConnect = async (profileId: string, profileType: 'individual' | 'institution') => {
     if (!user?.id) return;
     
@@ -463,18 +481,66 @@ export default function NetworkPage() {
                       <div className="flex-1">
                         <h3 className={`${TYPOGRAPHY.body.medium} font-semibold`}>Your Network Overview</h3>
                         <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
-                          {networkStats.connections} connections • {connections.length} following • {networkStats.groups} groups
+                          {networkStats.connections} connections • {networkStats.groups} groups
                         </p>
                       </div>
+                    </div>
+                    
+                    {/* Network Management Links */}
+                    <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
                       <Link 
                         href="/network/connections"
-                        className={`px-4 py-2 ${COMPONENTS.button.primary} rounded-lg hover:bg-blue-700 transition-colors font-medium`}
+                        className={`p-4 ${COMPONENTS.card.base} hover:shadow-md transition-shadow`}
                       >
-                        Manage Network
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                            <UserIcon className="w-5 h-5 text-green-600" />
+                          </div>
+                          <div>
+                            <h4 className={`${TYPOGRAPHY.body.small} font-semibold`}>Connections</h4>
+                            <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                              {networkStats.connections} connected
+                            </p>
+                          </div>
+                        </div>
+                      </Link>
+                      
+                      <Link 
+                        href="/network/followers"
+                        className={`p-4 ${COMPONENTS.card.base} hover:shadow-md transition-shadow`}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <HeartIcon className="w-5 h-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <h4 className={`${TYPOGRAPHY.body.small} font-semibold`}>Followers</h4>
+                            <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                              People following you
+                            </p>
+                          </div>
+                        </div>
+                      </Link>
+                      
+                      <Link 
+                        href="/network/following"
+                        className={`p-4 ${COMPONENTS.card.base} hover:shadow-md transition-shadow`}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <UserGroupIcon className="w-5 h-5 text-purple-600" />
+                          </div>
+                          <div>
+                            <h4 className={`${TYPOGRAPHY.body.small} font-semibold`}>Following</h4>
+                            <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
+                              People & institutions you follow
+                            </p>
+                          </div>
+                        </div>
                       </Link>
                     </div>
-        </div>
-      </div>
+                  </div>
+                </div>
 
         {/* Invitations Section */}
         {connectionRequests.length > 0 && (

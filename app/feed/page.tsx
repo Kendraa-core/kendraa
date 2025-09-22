@@ -97,6 +97,11 @@ export default function FeedPage() {
         setSelectedImage(null);
         setImagePreview(null);
         toast.success('Post created successfully!');
+        
+        // Dispatch event to notify other components
+        window.dispatchEvent(new CustomEvent('post-created', {
+          detail: { postId: post.id, authorId: user.id }
+        }));
       } else {
         toast.error('Failed to create post. Please try again.');
       }
