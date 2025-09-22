@@ -50,11 +50,10 @@ export async function uploadToVercelBlob(
 }
 
 // Specialized upload functions for different use cases
-export async function uploadPostImage(file: File): Promise<{ url: string; error: any | null }> {
-  const randomSuffix = Math.random().toString(36).substring(2, 15);
+export async function uploadPostImage(file: File, profileId: string, postId?: string): Promise<{ url: string; error: any | null }> {
   const fileExt = file.name.split('.').pop();
-  const baseName = file.name.replace(/\.[^/.]+$/, '');
-  return uploadToVercelBlob(file, `posts/${Date.now()}-${baseName}-${randomSuffix}.${fileExt}`, {
+  const filename = postId ? `${profileId}_${postId}.${fileExt}` : `${profileId}_${Date.now()}.${fileExt}`;
+  return uploadToVercelBlob(file, `posts/${filename}`, {
     access: 'public'
   });
 }

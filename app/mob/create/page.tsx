@@ -63,7 +63,7 @@ export default function MobileCreatePostPage() {
       if (selectedImage) {
         setIsUploadingImage(true);
         try {
-          const uploadResult = await uploadPostImage(selectedImage);
+          const uploadResult = await uploadPostImage(selectedImage, user.id);
           if (uploadResult.error) {
             throw new Error(uploadResult.error);
           }

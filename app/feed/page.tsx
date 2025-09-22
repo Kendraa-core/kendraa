@@ -80,11 +80,7 @@ export default function FeedPage() {
       // Upload image if selected
       if (selectedImage) {
         setIsUploadingImage(true);
-        const fileExt = selectedImage.name.split('.').pop();
-        const fileName = `post_${user.id}_${Date.now()}.${fileExt}`;
-        const filePath = fileName;
-
-        const result = await uploadPostImage(selectedImage);
+        const result = await uploadPostImage(selectedImage, user.id);
         
         if (result.error) {
           throw new Error('Failed to upload image');

@@ -3,6 +3,13 @@ const nextConfig = {
   // Optimize images with remotePatterns (replaces deprecated domains)
   images: {
     remotePatterns: [
+      // Vercel Blob storage
+      {
+        protocol: 'https',
+        hostname: '*.public.blob.vercel-storage.com',
+        port: '',
+        pathname: '/**',
+      },
       // Supabase storage
       {
         protocol: 'https',
@@ -59,6 +66,16 @@ const nextConfig = {
             chunks: 'all',
           },
         },
+      };
+    }
+
+    // Handle SSL certificate issues in development
+    if (dev) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
       };
     }
 

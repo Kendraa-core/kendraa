@@ -46,7 +46,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
       if (selectedImage) {
         setIsUploadingImage(true);
         
-        const result = await uploadPostImage(selectedImage);
+        const result = await uploadPostImage(selectedImage, user.id);
         
         if (result.error) {
           throw new Error('Failed to upload image');
