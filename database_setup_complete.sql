@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS education (
 
 -- Posts table
 CREATE TABLE IF NOT EXISTS posts (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     author_id TEXT NOT NULL,
     content TEXT NOT NULL,
     image_url TEXT,
@@ -144,7 +144,7 @@ CREATE TABLE IF NOT EXISTS institution_follows (
 -- Post Comments table
 CREATE TABLE IF NOT EXISTS post_comments (
     id SERIAL PRIMARY KEY,
-    post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+    post_id UUID NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
     author_id TEXT NOT NULL,
     content TEXT NOT NULL,
     parent_comment_id INTEGER REFERENCES post_comments(id) ON DELETE CASCADE,
@@ -157,7 +157,7 @@ CREATE TABLE IF NOT EXISTS post_comments (
 CREATE TABLE IF NOT EXISTS post_likes (
     id SERIAL PRIMARY KEY,
     user_id TEXT NOT NULL,
-    post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+    post_id UUID NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
     reaction_type TEXT NOT NULL DEFAULT 'like',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     UNIQUE(user_id, post_id)

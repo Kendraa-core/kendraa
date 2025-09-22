@@ -1,12 +1,38 @@
 -- Fix database errors by adding missing tables and policies
 -- This script addresses permission issues and missing tables
 
--- First, ensure the institution_follows table exists and has proper permissions
+-- CRITICAL FIX: Update posts table to use UUID instead of SERIAL
+-- This fixes the 406 Not Acceptable error for post_likes queries
+
+-- First, check if posts table needs to be updated to use UUID
+DO $$
+BEGIN
+    -- Check if posts table exists and has SERIAL id
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'posts' 
+        AND column_name = 'id' 
+        AND data_type = 'integer'
+    ) THEN
+        -- Update posts table to use UUID
+        ALTER TABLE posts ALTER COLUMN id TYPE UUID USING gen_random_uuid();
+        ALTER TABLE posts ALTER COLUMN id SET DEFAULT gen_random_uuid();
+        
+        -- Update all related tables to use UUID for post_id
+        ALTER TABLE post_comments ALTER COLUMN post_id TYPE UUID;
+        ALTER TABLE post_likes ALTER COLUMN post_id TYPE UUID;
+        ALTER TABLE post_analytics ALTER COLUMN post_id TYPE UUID;
+        
+        RAISE NOTICE 'Updated posts table and related tables to use UUID';
+    ELSE
+        RAISE NOTICE 'Posts table already uses UUID or does not exist';
+    END IF;
+END $$;
 
 -- Create post_comments table if it doesn't exist
 CREATE TABLE IF NOT EXISTS post_comments (
     id SERIAL PRIMARY KEY,
-    post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+    post_id UUID NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
     author_id TEXT NOT NULL,
     content TEXT NOT NULL,
     parent_comment_id INTEGER REFERENCES post_comments(id) ON DELETE CASCADE,
@@ -19,7 +45,7 @@ CREATE TABLE IF NOT EXISTS post_comments (
 CREATE TABLE IF NOT EXISTS post_likes (
     id SERIAL PRIMARY KEY,
     user_id TEXT NOT NULL,
-    post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+    post_id UUID NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
     reaction_type TEXT NOT NULL DEFAULT 'like',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     UNIQUE(user_id, post_id)
@@ -39,7 +65,7 @@ CREATE TABLE IF NOT EXISTS post_analytics (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+    post_id UUID NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
     impressions INTEGER DEFAULT 0,
     unique_impressions INTEGER DEFAULT 0,
     profile_views INTEGER DEFAULT 0,

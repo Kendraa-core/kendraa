@@ -1963,7 +1963,7 @@ export async function unfollowInstitution(userId: string, institutionId: string)
 // Get institution by user ID (for users who manage institutions)
 export async function getInstitutionByUserId(userId: string): Promise<Institution | null> {
   try {
-    console.log('Getting institution by user ID', { userId });
+    // console.log('Getting institution by user ID', { userId });
     
     const schemaExists = await true;
     if (!schemaExists) {
@@ -1998,7 +1998,7 @@ export async function getInstitutionByUserId(userId: string): Promise<Institutio
 
     if (error) {
       if (error.code === 'PGRST116') {
-        console.log('Institution not found for user');
+        // console.log('Institution not found for user');
         // Let's also check what institutions exist for debugging
         const { data: allInstitutions } = await getSupabase()
           .from('institutions')
@@ -2995,7 +2995,7 @@ export async function getMutualConnections(userId1: string, userId2: string): Pr
 // Get connection count for a user
 export async function getConnectionCount(userId: string): Promise<number> {
   try {
-    console.log('[Queries] Getting connection count for user:', userId);
+    // console.log('[Queries] Getting connection count for user:', userId);
     
     // For institutions, use the follows table
     const { data, error } = await getSupabase()
@@ -3009,7 +3009,7 @@ export async function getConnectionCount(userId: string): Promise<number> {
     }
     
     const count = data?.length || 0;
-    console.log('[Queries] Connection count:', count);
+    // console.log('[Queries] Connection count:', count);
     return count;
   } catch (error) {
     console.error('[Queries] Error getting connection count:', error);
