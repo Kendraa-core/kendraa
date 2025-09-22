@@ -8,7 +8,7 @@
 -- Enable RLS on all tables that exist, skip views
 DO $$
 DECLARE
-    table_name text;
+    tbl_name text;
     tables text[] := ARRAY[
         'profiles', 'posts', 'post_comments', 'post_likes', 'comment_likes',
         'institutions', 'institution_follows', 'follows', 'connections', 'saved_posts',
@@ -18,24 +18,24 @@ DECLARE
         'conversations', 'conversation_participants', 'messages', 'notifications'
     ];
 BEGIN
-    FOREACH table_name IN ARRAY tables
+    FOREACH tbl_name IN ARRAY tables
     LOOP
         -- Check if it's a table (not a view) before enabling RLS
         IF EXISTS (
             SELECT 1 FROM information_schema.tables 
-            WHERE table_name = table_name 
+            WHERE table_name = tbl_name 
             AND table_schema = 'public' 
             AND table_type = 'BASE TABLE'
         ) THEN
             BEGIN
-                EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', table_name);
-                RAISE NOTICE 'Enabled RLS on table: %', table_name;
+                EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', tbl_name);
+                RAISE NOTICE 'Enabled RLS on table: %', tbl_name;
             EXCEPTION
                 WHEN OTHERS THEN
-                    RAISE NOTICE 'Could not enable RLS on %: %', table_name, SQLERRM;
+                    RAISE NOTICE 'Could not enable RLS on %: %', tbl_name, SQLERRM;
             END;
         ELSE
-            RAISE NOTICE 'Skipping % (not a table or does not exist)', table_name;
+            RAISE NOTICE 'Skipping % (not a table or does not exist)', tbl_name;
         END IF;
     END LOOP;
 END $$;
@@ -275,7 +275,7 @@ CREATE POLICY "messages_insert_participant" ON messages FOR INSERT WITH CHECK (
 -- Grant permissions on all tables and views
 DO $$
 DECLARE
-    table_name text;
+    tbl_name text;
     tables text[] := ARRAY[
         'profiles', 'posts', 'post_comments', 'post_likes', 'comment_likes',
         'institutions', 'institution_follows', 'follows', 'connections', 'saved_posts',
@@ -286,16 +286,16 @@ DECLARE
         'conversations', 'conversation_participants', 'messages', 'notifications'
     ];
 BEGIN
-    FOREACH table_name IN ARRAY tables
+    FOREACH tbl_name IN ARRAY tables
     LOOP
         -- Try to grant permissions, but don't fail if table/view doesn't exist
         BEGIN
-            EXECUTE format('GRANT ALL ON %I TO postgres, anon, authenticated, service_role', table_name);
+            EXECUTE format('GRANT ALL ON %I TO postgres, anon, authenticated, service_role', tbl_name);
         EXCEPTION
             WHEN undefined_table THEN
-                RAISE NOTICE 'Table/view % does not exist, skipping permissions', table_name;
+                RAISE NOTICE 'Table/view % does not exist, skipping permissions', tbl_name;
             WHEN OTHERS THEN
-                RAISE NOTICE 'Could not grant permissions on %: %', table_name, SQLERRM;
+                RAISE NOTICE 'Could not grant permissions on %: %', tbl_name, SQLERRM;
         END;
     END LOOP;
 END $$;
@@ -410,7 +410,7 @@ DECLARE
     rls_enabled_tables INTEGER;
     total_policies INTEGER;
     unrestricted_tables text[];
-    table_name text;
+    tbl_name text;
 BEGIN
     -- Count total tables
     SELECT COUNT(*) INTO total_tables
