@@ -132,6 +132,15 @@ CREATE TABLE IF NOT EXISTS follows (
     UNIQUE(follower_id, following_id)
 );
 
+-- Institution Follows table
+CREATE TABLE IF NOT EXISTS institution_follows (
+    id SERIAL PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    institution_id TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(user_id, institution_id)
+);
+
 -- Post Comments table
 CREATE TABLE IF NOT EXISTS post_comments (
     id SERIAL PRIMARY KEY,
@@ -265,6 +274,7 @@ ALTER TABLE institutions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE jobs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE follows ENABLE ROW LEVEL SECURITY;
+ALTER TABLE institution_follows ENABLE ROW LEVEL SECURITY;
 ALTER TABLE post_comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE post_likes ENABLE ROW LEVEL SECURITY;
 
@@ -414,6 +424,19 @@ CREATE POLICY "follows_update_policy" ON follows
     FOR UPDATE USING (true);
 
 CREATE POLICY "follows_delete_policy" ON follows
+    FOR DELETE USING (true);
+
+-- Institution Follows policies (allow all operations for authenticated users)
+CREATE POLICY "institution_follows_select_policy" ON institution_follows
+    FOR SELECT USING (true);
+
+CREATE POLICY "institution_follows_insert_policy" ON institution_follows
+    FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "institution_follows_update_policy" ON institution_follows
+    FOR UPDATE USING (true);
+
+CREATE POLICY "institution_follows_delete_policy" ON institution_follows
     FOR DELETE USING (true);
 
 -- ==============================================

@@ -22,9 +22,19 @@ CREATE TABLE IF NOT EXISTS post_likes (
     UNIQUE(user_id, post_id)
 );
 
+-- Create institution_follows table if it doesn't exist
+CREATE TABLE IF NOT EXISTS institution_follows (
+    id SERIAL PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    institution_id TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(user_id, institution_id)
+);
+
 -- Enable RLS on tables
 ALTER TABLE post_comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE post_likes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE institution_follows ENABLE ROW LEVEL SECURITY;
 
 -- Create policies for post_comments table
 -- Drop existing policies if they exist, then create new ones
@@ -62,6 +72,25 @@ CREATE POLICY "post_likes_update_policy" ON post_likes
     FOR UPDATE USING (true);
 
 CREATE POLICY "post_likes_delete_policy" ON post_likes
+    FOR DELETE USING (true);
+
+-- Create policies for institution_follows table
+-- Drop existing policies if they exist, then create new ones
+DROP POLICY IF EXISTS "institution_follows_select_policy" ON institution_follows;
+DROP POLICY IF EXISTS "institution_follows_insert_policy" ON institution_follows;
+DROP POLICY IF EXISTS "institution_follows_update_policy" ON institution_follows;
+DROP POLICY IF EXISTS "institution_follows_delete_policy" ON institution_follows;
+
+CREATE POLICY "institution_follows_select_policy" ON institution_follows
+    FOR SELECT USING (true);
+
+CREATE POLICY "institution_follows_insert_policy" ON institution_follows
+    FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "institution_follows_update_policy" ON institution_follows
+    FOR UPDATE USING (true);
+
+CREATE POLICY "institution_follows_delete_policy" ON institution_follows
     FOR DELETE USING (true);
 
 -- Ensure institutions table has proper policies (in case they were missing)
