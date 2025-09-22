@@ -15,6 +15,8 @@ import {
   followInstitution,
   acceptConnectionRequest,
   rejectConnectionRequest,
+  getConnectionStatus,
+  getFollowStatus,
 } from '@/lib/queries';
 import { Profile, ConnectionWithProfile } from '@/types/database.types';
 import {
@@ -63,12 +65,51 @@ export default function MobileNetworkPage() {
 
       setCanSendRequests(true);
 
-      // Set separate state variables
-      setIndividuals(individualsData);
-      setInstitutions(institutionsData);
+      // Enrich individuals with connection status
+      const enrichedIndividuals = await Promise.all(
+        individualsData.map(async (profile) => {
+          const status = await getConnectionStatus(user.id, profile.id);
+          const connectionStatus = (status as 'none' | 'pending' | 'connected') || 'none';
+          
+          return {
+            ...profile,
+            connection_status: connectionStatus,
+            follow_status: 'not_following' as const,
+            mutual_connections: (profile as any).mutual_connections || 0,
+          };
+        })
+      );
+
+      // Enrich institutions with follow status
+      const enrichedInstitutions = await Promise.all(
+        institutionsData.map(async (profile) => {
+          const isFollowingUser = await getFollowStatus(user.id, profile.id);
+          const followStatus: 'following' | 'not_following' = isFollowingUser ? 'following' : 'not_following';
+          
+          return {
+            ...profile,
+            connection_status: 'none' as const,
+            follow_status: followStatus,
+            mutual_connections: 0,
+          };
+        })
+      );
+
+      // Filter out already connected individuals and already followed institutions
+      const filteredIndividuals = enrichedIndividuals.filter(profile => 
+        profile.connection_status === 'none'
+      );
       
-      // Combine individuals and institutions for backward compatibility
-      const allSuggestions = [...individualsData, ...institutionsData];
+      const filteredInstitutions = enrichedInstitutions.filter(profile => 
+        profile.follow_status === 'not_following'
+      );
+
+      // Set separate state variables with filtered data
+      setIndividuals(filteredIndividuals);
+      setInstitutions(filteredInstitutions);
+      
+      // Combine filtered suggestions for backward compatibility
+      const allSuggestions = [...filteredIndividuals, ...filteredInstitutions];
       const uniqueSuggestions = allSuggestions.filter((profile, index, self) => 
         index === self.findIndex(p => p.id === profile.id)
       );

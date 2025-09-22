@@ -119,7 +119,7 @@ export default function NetworkPage() {
 
       setCanSendRequests(canSend);
 
-      // Separate individuals and institutions
+      // Separate individuals and institutions, filtering out already connected/followed
       const enrichedIndividuals = await Promise.all(
         individualsData.map(async (profile) => {
             const status = await getConnectionStatus(user.id, profile.id);
@@ -148,12 +148,21 @@ export default function NetworkPage() {
         })
       );
 
-      // Set separate state variables
-      setIndividuals(enrichedIndividuals);
-      setInstitutions(enrichedInstitutions);
+      // Filter out already connected individuals and already followed institutions
+      const filteredIndividuals = enrichedIndividuals.filter(profile => 
+        profile.connection_status === 'none'
+      );
       
-      // Combine all suggestions for backward compatibility
-      const allSuggestions = [...enrichedIndividuals, ...enrichedInstitutions];
+      const filteredInstitutions = enrichedInstitutions.filter(profile => 
+        profile.follow_status === 'not_following'
+      );
+
+      // Set separate state variables with filtered data
+      setIndividuals(filteredIndividuals);
+      setInstitutions(filteredInstitutions);
+      
+      // Combine filtered suggestions for backward compatibility
+      const allSuggestions = [...filteredIndividuals, ...filteredInstitutions];
       setSuggestions(allSuggestions);
       setConnectionRequests(requestsData);
       setConnections(connectionsData);
