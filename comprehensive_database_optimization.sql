@@ -102,64 +102,64 @@ DROP POLICY IF EXISTS "institutions_delete" ON institutions;
 
 -- PROFILES: Users can manage their own profiles, public read access
 CREATE POLICY "profiles_select_public" ON profiles FOR SELECT USING (true);
-CREATE POLICY "profiles_insert_own" ON profiles FOR INSERT WITH CHECK (auth.uid() = id::uuid);
-CREATE POLICY "profiles_update_own" ON profiles FOR UPDATE USING (auth.uid() = id::uuid);
-CREATE POLICY "profiles_delete_own" ON profiles FOR DELETE USING (auth.uid() = id::uuid);
+CREATE POLICY "profiles_insert_own" ON profiles FOR INSERT WITH CHECK (auth.uid()::text = id);
+CREATE POLICY "profiles_update_own" ON profiles FOR UPDATE USING (auth.uid()::text = id);
+CREATE POLICY "profiles_delete_own" ON profiles FOR DELETE USING (auth.uid()::text = id);
 
 -- POSTS: Public read, authenticated users can create, authors can manage
 CREATE POLICY "posts_select_public" ON posts FOR SELECT USING (true);
 CREATE POLICY "posts_insert_authenticated" ON posts FOR INSERT WITH CHECK (auth.role() = 'authenticated');
-CREATE POLICY "posts_update_author" ON posts FOR UPDATE USING (auth.uid() = author_id::uuid);
-CREATE POLICY "posts_delete_author" ON posts FOR DELETE USING (auth.uid() = author_id::uuid);
+CREATE POLICY "posts_update_author" ON posts FOR UPDATE USING (auth.uid()::text = author_id);
+CREATE POLICY "posts_delete_author" ON posts FOR DELETE USING (auth.uid()::text = author_id);
 
 -- POST COMMENTS: Public read, authenticated users can create, authors can manage
 CREATE POLICY "post_comments_select_public" ON post_comments FOR SELECT USING (true);
 CREATE POLICY "post_comments_insert_authenticated" ON post_comments FOR INSERT WITH CHECK (auth.role() = 'authenticated');
-CREATE POLICY "post_comments_update_author" ON post_comments FOR UPDATE USING (auth.uid() = author_id::uuid);
-CREATE POLICY "post_comments_delete_author" ON post_comments FOR DELETE USING (auth.uid() = author_id::uuid);
+CREATE POLICY "post_comments_update_author" ON post_comments FOR UPDATE USING (auth.uid()::text = author_id);
+CREATE POLICY "post_comments_delete_author" ON post_comments FOR DELETE USING (auth.uid()::text = author_id);
 
 -- POST LIKES: Public read, users can manage their own likes
 CREATE POLICY "post_likes_select_public" ON post_likes FOR SELECT USING (true);
-CREATE POLICY "post_likes_insert_own" ON post_likes FOR INSERT WITH CHECK (auth.uid() = user_id::uuid);
-CREATE POLICY "post_likes_update_own" ON post_likes FOR UPDATE USING (auth.uid() = user_id::uuid);
-CREATE POLICY "post_likes_delete_own" ON post_likes FOR DELETE USING (auth.uid() = user_id::uuid);
+CREATE POLICY "post_likes_insert_own" ON post_likes FOR INSERT WITH CHECK (auth.uid()::text = user_id);
+CREATE POLICY "post_likes_update_own" ON post_likes FOR UPDATE USING (auth.uid()::text = user_id);
+CREATE POLICY "post_likes_delete_own" ON post_likes FOR DELETE USING (auth.uid()::text = user_id);
 
 -- COMMENT LIKES: Public read, users can manage their own likes
 CREATE POLICY "comment_likes_select_public" ON comment_likes FOR SELECT USING (true);
-CREATE POLICY "comment_likes_insert_own" ON comment_likes FOR INSERT WITH CHECK (auth.uid() = user_id::uuid);
-CREATE POLICY "comment_likes_update_own" ON comment_likes FOR UPDATE USING (auth.uid() = user_id::uuid);
-CREATE POLICY "comment_likes_delete_own" ON comment_likes FOR DELETE USING (auth.uid() = user_id::uuid);
+CREATE POLICY "comment_likes_insert_own" ON comment_likes FOR INSERT WITH CHECK (auth.uid()::text = user_id);
+CREATE POLICY "comment_likes_update_own" ON comment_likes FOR UPDATE USING (auth.uid()::text = user_id);
+CREATE POLICY "comment_likes_delete_own" ON comment_likes FOR DELETE USING (auth.uid()::text = user_id);
 
 -- INSTITUTIONS: Public read, admins can manage their institutions
 CREATE POLICY "institutions_select_public" ON institutions FOR SELECT USING (true);
-CREATE POLICY "institutions_insert_admin" ON institutions FOR INSERT WITH CHECK (auth.uid() = admin_user_id::uuid);
-CREATE POLICY "institutions_update_admin" ON institutions FOR UPDATE USING (auth.uid() = admin_user_id::uuid);
-CREATE POLICY "institutions_delete_admin" ON institutions FOR DELETE USING (auth.uid() = admin_user_id::uuid);
+CREATE POLICY "institutions_insert_admin" ON institutions FOR INSERT WITH CHECK (auth.uid()::text = admin_user_id);
+CREATE POLICY "institutions_update_admin" ON institutions FOR UPDATE USING (auth.uid()::text = admin_user_id);
+CREATE POLICY "institutions_delete_admin" ON institutions FOR DELETE USING (auth.uid()::text = admin_user_id);
 
 -- INSTITUTION FOLLOWS: Public read, users can manage their own follows
 CREATE POLICY "institution_follows_select_public" ON institution_follows FOR SELECT USING (true);
-CREATE POLICY "institution_follows_insert_own" ON institution_follows FOR INSERT WITH CHECK (auth.uid() = user_id::uuid);
-CREATE POLICY "institution_follows_delete_own" ON institution_follows FOR DELETE USING (auth.uid() = user_id::uuid);
+CREATE POLICY "institution_follows_insert_own" ON institution_follows FOR INSERT WITH CHECK (auth.uid()::text = user_id);
+CREATE POLICY "institution_follows_delete_own" ON institution_follows FOR DELETE USING (auth.uid()::text = user_id);
 
 -- FOLLOWS: Public read, users can manage their own follows
 CREATE POLICY "follows_select_public" ON follows FOR SELECT USING (true);
-CREATE POLICY "follows_insert_own" ON follows FOR INSERT WITH CHECK (auth.uid() = follower_id::uuid);
-CREATE POLICY "follows_delete_own" ON follows FOR DELETE USING (auth.uid() = follower_id::uuid);
+CREATE POLICY "follows_insert_own" ON follows FOR INSERT WITH CHECK (auth.uid()::text = follower_id);
+CREATE POLICY "follows_delete_own" ON follows FOR DELETE USING (auth.uid()::text = follower_id);
 
 -- CONNECTIONS: Users can see and manage their own connections
 CREATE POLICY "connections_select_own" ON connections FOR SELECT USING (
-    auth.uid() = requester_id::uuid OR auth.uid() = recipient_id::uuid
+    auth.uid()::text = requester_id OR auth.uid()::text = recipient_id
 );
-CREATE POLICY "connections_insert_own" ON connections FOR INSERT WITH CHECK (auth.uid() = requester_id::uuid);
+CREATE POLICY "connections_insert_own" ON connections FOR INSERT WITH CHECK (auth.uid()::text = requester_id);
 CREATE POLICY "connections_update_involved" ON connections FOR UPDATE USING (
-    auth.uid() = requester_id::uuid OR auth.uid() = recipient_id::uuid
+    auth.uid()::text = requester_id OR auth.uid()::text = recipient_id
 );
-CREATE POLICY "connections_delete_own" ON connections FOR DELETE USING (auth.uid() = requester_id::uuid);
+CREATE POLICY "connections_delete_own" ON connections FOR DELETE USING (auth.uid()::text = requester_id);
 
 -- SAVED POSTS: Users can manage their own saved posts
-CREATE POLICY "saved_posts_select_own" ON saved_posts FOR SELECT USING (auth.uid() = user_id::uuid);
-CREATE POLICY "saved_posts_insert_own" ON saved_posts FOR INSERT WITH CHECK (auth.uid() = user_id::uuid);
-CREATE POLICY "saved_posts_delete_own" ON saved_posts FOR DELETE USING (auth.uid() = user_id::uuid);
+CREATE POLICY "saved_posts_select_own" ON saved_posts FOR SELECT USING (auth.uid()::text = user_id);
+CREATE POLICY "saved_posts_insert_own" ON saved_posts FOR INSERT WITH CHECK (auth.uid()::text = user_id);
+CREATE POLICY "saved_posts_delete_own" ON saved_posts FOR DELETE USING (auth.uid()::text = user_id);
 
 -- POST ANALYTICS: System managed, public read for basic analytics
 CREATE POLICY "post_analytics_select_public" ON post_analytics FOR SELECT USING (true);
@@ -180,49 +180,49 @@ CREATE POLICY "post_shares_insert_system" ON post_shares FOR INSERT WITH CHECK (
 
 -- JOBS: Public read, institution admins can manage
 CREATE POLICY "jobs_select_public" ON jobs FOR SELECT USING (true);
-CREATE POLICY "jobs_insert_poster" ON jobs FOR INSERT WITH CHECK (auth.uid() = posted_by::uuid);
-CREATE POLICY "jobs_update_poster" ON jobs FOR UPDATE USING (auth.uid() = posted_by::uuid);
-CREATE POLICY "jobs_delete_poster" ON jobs FOR DELETE USING (auth.uid() = posted_by::uuid);
+CREATE POLICY "jobs_insert_poster" ON jobs FOR INSERT WITH CHECK (auth.uid()::text = posted_by);
+CREATE POLICY "jobs_update_poster" ON jobs FOR UPDATE USING (auth.uid()::text = posted_by);
+CREATE POLICY "jobs_delete_poster" ON jobs FOR DELETE USING (auth.uid()::text = posted_by);
 
 -- JOB APPLICATIONS: Applicants and job posters can see applications
 CREATE POLICY "job_applications_select_involved" ON job_applications FOR SELECT USING (
-    auth.uid() = applicant_id::uuid OR 
+    auth.uid()::text = applicant_id OR 
     EXISTS (SELECT 1 FROM jobs WHERE jobs.id = job_applications.job_id AND jobs.posted_by = auth.uid()::text)
 );
-CREATE POLICY "job_applications_insert_own" ON job_applications FOR INSERT WITH CHECK (auth.uid() = applicant_id::uuid);
+CREATE POLICY "job_applications_insert_own" ON job_applications FOR INSERT WITH CHECK (auth.uid()::text = applicant_id);
 CREATE POLICY "job_applications_update_involved" ON job_applications FOR UPDATE USING (
-    auth.uid() = applicant_id::uuid OR 
+    auth.uid()::text = applicant_id OR 
     EXISTS (SELECT 1 FROM jobs WHERE jobs.id = job_applications.job_id AND jobs.posted_by = auth.uid()::text)
 );
 
 -- EVENTS: Public read, organizers can manage
 CREATE POLICY "events_select_public" ON events FOR SELECT USING (true);
-CREATE POLICY "events_insert_organizer" ON events FOR INSERT WITH CHECK (auth.uid() = organizer_id::uuid);
-CREATE POLICY "events_update_organizer" ON events FOR UPDATE USING (auth.uid() = organizer_id::uuid);
-CREATE POLICY "events_delete_organizer" ON events FOR DELETE USING (auth.uid() = organizer_id::uuid);
+CREATE POLICY "events_insert_organizer" ON events FOR INSERT WITH CHECK (auth.uid()::text = organizer_id);
+CREATE POLICY "events_update_organizer" ON events FOR UPDATE USING (auth.uid()::text = organizer_id);
+CREATE POLICY "events_delete_organizer" ON events FOR DELETE USING (auth.uid()::text = organizer_id);
 
 -- EVENT ATTENDEES: Public read, attendees can manage their attendance
 CREATE POLICY "event_attendees_select_public" ON event_attendees FOR SELECT USING (true);
-CREATE POLICY "event_attendees_insert_own" ON event_attendees FOR INSERT WITH CHECK (auth.uid() = attendee_id::uuid);
-CREATE POLICY "event_attendees_delete_own" ON event_attendees FOR DELETE USING (auth.uid() = attendee_id::uuid);
+CREATE POLICY "event_attendees_insert_own" ON event_attendees FOR INSERT WITH CHECK (auth.uid()::text = attendee_id);
+CREATE POLICY "event_attendees_delete_own" ON event_attendees FOR DELETE USING (auth.uid()::text = attendee_id);
 
 -- EXPERIENCES: Public read, users can manage their own
 CREATE POLICY "experiences_select_public" ON experiences FOR SELECT USING (true);
-CREATE POLICY "experiences_insert_own" ON experiences FOR INSERT WITH CHECK (auth.uid() = profile_id::uuid);
-CREATE POLICY "experiences_update_own" ON experiences FOR UPDATE USING (auth.uid() = profile_id::uuid);
-CREATE POLICY "experiences_delete_own" ON experiences FOR DELETE USING (auth.uid() = profile_id::uuid);
+CREATE POLICY "experiences_insert_own" ON experiences FOR INSERT WITH CHECK (auth.uid()::text = profile_id);
+CREATE POLICY "experiences_update_own" ON experiences FOR UPDATE USING (auth.uid()::text = profile_id);
+CREATE POLICY "experiences_delete_own" ON experiences FOR DELETE USING (auth.uid()::text = profile_id);
 
 -- EDUCATION: Public read, users can manage their own
 CREATE POLICY "education_select_public" ON education FOR SELECT USING (true);
-CREATE POLICY "education_insert_own" ON education FOR INSERT WITH CHECK (auth.uid() = profile_id::uuid);
-CREATE POLICY "education_update_own" ON education FOR UPDATE USING (auth.uid() = profile_id::uuid);
-CREATE POLICY "education_delete_own" ON education FOR DELETE USING (auth.uid() = profile_id::uuid);
+CREATE POLICY "education_insert_own" ON education FOR INSERT WITH CHECK (auth.uid()::text = profile_id);
+CREATE POLICY "education_update_own" ON education FOR UPDATE USING (auth.uid()::text = profile_id);
+CREATE POLICY "education_delete_own" ON education FOR DELETE USING (auth.uid()::text = profile_id);
 
 -- NOTIFICATIONS: Users can only see their own notifications
-CREATE POLICY "notifications_select_own" ON notifications FOR SELECT USING (auth.uid() = recipient_id::uuid);
+CREATE POLICY "notifications_select_own" ON notifications FOR SELECT USING (auth.uid()::text = recipient_id);
 CREATE POLICY "notifications_insert_system" ON notifications FOR INSERT WITH CHECK (true);
-CREATE POLICY "notifications_update_own" ON notifications FOR UPDATE USING (auth.uid() = recipient_id::uuid);
-CREATE POLICY "notifications_delete_own" ON notifications FOR DELETE USING (auth.uid() = recipient_id::uuid);
+CREATE POLICY "notifications_update_own" ON notifications FOR UPDATE USING (auth.uid()::text = recipient_id);
+CREATE POLICY "notifications_delete_own" ON notifications FOR DELETE USING (auth.uid()::text = recipient_id);
 
 -- CONVERSATIONS: Users can only see conversations they participate in
 CREATE POLICY "conversations_select_participant" ON conversations FOR SELECT USING (
@@ -243,7 +243,7 @@ CREATE POLICY "conversations_update_participant" ON conversations FOR UPDATE USI
 
 -- CONVERSATION PARTICIPANTS: Users can see participants of their conversations
 CREATE POLICY "conversation_participants_select_involved" ON conversation_participants FOR SELECT USING (
-    auth.uid() = user_id::uuid OR
+    auth.uid()::text = user_id OR
     EXISTS (
         SELECT 1 FROM conversation_participants cp2
         WHERE cp2.conversation_id = conversation_participants.conversation_id 
