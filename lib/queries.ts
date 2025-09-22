@@ -1900,27 +1900,49 @@ export async function createJob(job: Omit<Job, 'id' | 'created_at' | 'updated_at
       return null;
     }
     
+    // Filter out fields that don't exist in the jobs table
+    const validJobFields = {
+      title: job.title,
+      description: job.description,
+      requirements: job.requirements,
+      salary_min: job.salary_min,
+      salary_max: job.salary_max,
+      currency: job.currency,
+      location: job.location,
+      job_type: job.job_type,
+      experience_level: job.experience_level,
+      specializations: job.specializations,
+      company_id: job.company_id,
+      posted_by: job.posted_by,
+      status: job.status,
+      application_deadline: job.application_deadline,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      applications_count: 0,
+    };
+
     const { data, error } = await getSupabase()
       .from('jobs')
-      .insert({
-        ...job,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        applications_count: 0, // Set default value
-      })
+      .insert(validJobFields)
       .select()
       .single();
 
     if (error) {
-      console.log('Error creating job', error);
+      console.error('Error creating job:', error);
       
       // Handle specific error cases
       if (error.code === '409') {
         toast.error('A job with similar details already exists.');
+      } else if (error.code === '23505') {
+        toast.error('A job with this title already exists for this company.');
       } else if (error.code === '23503') {
         toast.error('Invalid company or user reference. Please check your profile.');
+      } else if (error.code === '400') {
+        toast.error('Invalid job data. Please check all required fields.');
+      } else if (error.code === '42501') {
+        toast.error('Permission denied. Please check your account permissions.');
       } else {
-        toast.error('Failed to create job. Please try again.');
+        toast.error(`Failed to create job: ${error.message || 'Unknown error'}`);
       }
       
       return null;

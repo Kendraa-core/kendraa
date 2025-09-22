@@ -211,19 +211,14 @@ export default function CreateJobPage() {
         experience_level: formData.experience_level as Job['experience_level'],
         salary_min: formData.salary_min ? parseInt(formData.salary_min) : null,
         salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
+        currency: formData.currency || null,
         requirements: formData.requirements,
         specializations: formData.specializations,
-        benefits: formData.benefits,
         company_id: companyId,
         posted_by: profile?.id || user.id,
         status: 'active' as const,
         application_deadline: formData.application_deadline || null,
-        currency: formData.currency,
         applications_count: 0,
-        max_applications: formData.max_applications ? parseInt(formData.max_applications) : null,
-        contact_email: formData.contact_email || null,
-        contact_phone: formData.contact_phone || null,
-        company_website: formData.company_website || null,
       };
 
       const result = await createJob(jobData);
