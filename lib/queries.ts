@@ -893,6 +893,20 @@ export async function getFollowStatus(followerId: string, organizationId: string
       return false;
     }
     
+    // Check in institution_follows table first
+    const { data: institutionFollow, error: institutionError } = await getSupabase()
+      .from('institution_follows')
+      .select('id')
+      .eq('user_id', followerId)
+      .eq('institution_id', organizationId)
+      .maybeSingle();
+
+    if (!institutionError && institutionFollow) {
+      console.log('Follow status result (institution_follows):', true);
+      return true;
+    }
+    
+    // Fallback to general follows table
     const { data, error } = await getSupabase()
       .from('follows')
       .select('id')
@@ -906,7 +920,7 @@ export async function getFollowStatus(followerId: string, organizationId: string
     }
     
     const isFollowing = !!data;
-    console.log('Follow status result:', isFollowing);
+    console.log('Follow status result (follows):', isFollowing);
     return isFollowing;
   } catch (error) {
     console.error('Exception in getFollowStatus:', error);
@@ -1597,43 +1611,105 @@ export async function getInstitutions(): Promise<Institution[]> {
 // Follow/Unfollow Institution functions
 export async function followInstitution(userId: string, institutionId: string): Promise<boolean> {
   try {
-    const { error } = await getSupabase()
+    console.log('followInstitution called with:', { userId, institutionId });
+    
+    // Validate input parameters
+    if (!userId || !institutionId) {
+      console.error('Invalid parameters:', { userId, institutionId });
+      throw new Error('User ID and Institution ID are required');
+    }
+
+    if (userId === institutionId) {
+      console.error('Cannot follow yourself');
+      throw new Error('Cannot follow yourself');
+    }
+    
+    // Check if already following
+    const { data: existingFollow, error: checkError } = await getSupabase()
+      .from('institution_follows')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('institution_id', institutionId)
+      .maybeSingle(); // Use maybeSingle instead of single to avoid error when no match
+    
+    if (checkError) {
+      console.error('Error checking existing follow:', checkError);
+      throw new Error(`Database error checking existing follow: ${checkError.message}`);
+    }
+    
+    if (existingFollow) {
+      console.log('Already following this institution');
+      return true; // Already following
+    }
+    
+    // Create follow relationship
+    const { data: insertData, error: insertError } = await getSupabase()
       .from('institution_follows')
       .insert({
         user_id: userId,
         institution_id: institutionId,
         created_at: new Date().toISOString()
-      });
+      })
+      .select()
+      .single();
 
-    if (error) {
-      console.error('Error following institution:', error);
-      return false;
+    if (insertError) {
+      console.error('Error inserting follow relationship:', insertError);
+      
+      // Handle specific error cases
+      if (insertError.code === '23505') { // Unique constraint violation
+        console.log('Already following this institution (constraint violation)');
+        return true; // Already following
+      }
+      
+      throw new Error(`Failed to create follow relationship: ${insertError.message}`);
     }
-
+    
+    console.log('Follow relationship created:', insertData);
     return true;
   } catch (error) {
     console.error('Error following institution:', error);
-    return false;
+    // Re-throw the error with more context
+    if (error instanceof Error) {
+      throw error;
+    } else {
+      throw new Error(`Unknown error occurred while following institution: ${JSON.stringify(error)}`);
+    }
   }
 }
 
 export async function unfollowInstitution(userId: string, institutionId: string): Promise<boolean> {
   try {
-    const { error } = await getSupabase()
+    console.log('unfollowInstitution called with:', { userId, institutionId });
+    
+    // Validate input parameters
+    if (!userId || !institutionId) {
+      console.error('Invalid parameters:', { userId, institutionId });
+      throw new Error('User ID and Institution ID are required');
+    }
+    
+    const { data, error } = await getSupabase()
       .from('institution_follows')
       .delete()
       .eq('user_id', userId)
-      .eq('institution_id', institutionId);
+      .eq('institution_id', institutionId)
+      .select();
 
     if (error) {
       console.error('Error unfollowing institution:', error);
-      return false;
+      throw new Error(`Failed to unfollow institution: ${error.message}`);
     }
-
+    
+    console.log('Unfollow relationship deleted:', data);
     return true;
   } catch (error) {
     console.error('Error unfollowing institution:', error);
-    return false;
+    // Re-throw the error with more context
+    if (error instanceof Error) {
+      throw error;
+    } else {
+      throw new Error(`Unknown error occurred while unfollowing institution: ${JSON.stringify(error)}`);
+    }
   }
 }
 
