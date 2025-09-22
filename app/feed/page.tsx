@@ -14,14 +14,12 @@ import {
 import toast from 'react-hot-toast';
 import PostCard from '@/components/post/PostCard';
 import Avatar from '@/components/common/Avatar';
-import MedicalFeed from '@/components/feed/MedicalFeed';
 
 export default function FeedPage() {
   const { user, profile } = useAuth();
   const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'posts' | 'medical'>('posts');
   const [postContent, setPostContent] = useState('');
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -222,86 +220,58 @@ export default function FeedPage() {
         </div>
       </div>
 
-      {/* Tab Navigation */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-1">
-        <div className="flex">
-          <button
-            onClick={() => setActiveTab('posts')}
-            className={`flex-1 px-4 py-3 text-sm font-medium rounded-xl transition-colors ${
-              activeTab === 'posts'
-                ? 'bg-[#007fff] text-white shadow-sm'
-                : 'text-gray-600 hover:text-black hover:bg-gray-50'
-            }`}
-          >
-            Posts
-          </button>
-          <button
-            onClick={() => setActiveTab('medical')}
-            className={`flex-1 px-4 py-3 text-sm font-medium rounded-xl transition-colors ${
-              activeTab === 'medical'
-                ? 'bg-[#007fff] text-white shadow-sm'
-                : 'text-gray-600 hover:text-black hover:bg-gray-50'
-            }`}
-          >
-            Medical Feed
-          </button>
-        </div>
-      </div>
 
-      {/* Content based on active tab */}
-      <div>
-        {activeTab === 'posts' ? (
+      {/* Posts Feed */}
+      <div className="space-y-8">
+        {loading ? (
           <div className="space-y-8">
-            {loading ? (
-              <div className="space-y-8">
-                {/* Loading skeleton */}
-                {[...Array(3)].map((_, index) => (
-                  <div key={index} className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 animate-pulse">
-                    <div className="flex items-start space-x-4">
-                      <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
-                      <div className="flex-1 space-y-3">
-                        <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-                        <div className="space-y-2">
-                          <div className="h-4 bg-gray-200 rounded"></div>
-                          <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-                        </div>
-                      </div>
+            {/* Loading skeleton */}
+            {[...Array(3)].map((_, index) => (
+              <div key={index} className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 animate-pulse">
+                <div className="flex items-start space-x-4">
+                  <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
+                  <div className="flex-1 space-y-3">
+                    <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                    <div className="space-y-2">
+                      <div className="h-4 bg-gray-200 rounded"></div>
+                      <div className="h-4 bg-gray-200 rounded w-5/6"></div>
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : posts.length > 0 ? (
-              <div className="space-y-8">
-                {posts.map((post) => (
-                  <PostCard 
-                    key={post.id} 
-                    post={post} 
-                    onPostDeleted={handlePostDeleted} 
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
-                <div className="max-w-md mx-auto">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <PlusIcon className="w-8 h-8 text-gray-400" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-black mb-2">No posts yet</h3>
-                  <p className="text-gray-600 mb-6">
-                    Be the first to share your thoughts and insights with the community.
-                  </p>
-                  <button
-                    onClick={() => setShowCreatePost(true)}
-                    className="bg-[#007fff] text-white px-6 py-3 rounded-xl hover:bg-[#007fff]/90 transition-colors font-medium"
-                  >
-                    Create your first post
-                  </button>
                 </div>
               </div>
-            )}
+            ))}
+          </div>
+        ) : posts.length > 0 ? (
+          <div className="space-y-8">
+            {posts.map((post) => (
+              <PostCard 
+                key={post.id} 
+                post={post} 
+                onPostDeleted={handlePostDeleted} 
+              />
+            ))}
           </div>
         ) : (
-          <MedicalFeed />
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
+            <div className="max-w-md mx-auto">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <PlusIcon className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-black mb-2">No posts yet</h3>
+              <p className="text-gray-600 mb-6">
+                Be the first to share your thoughts and insights with the community.
+              </p>
+              <button
+                onClick={() => {
+                  // Scroll to the create post section at the top
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="bg-[#007fff] text-white px-6 py-3 rounded-xl hover:bg-[#007fff]/90 transition-colors font-medium"
+              >
+                Create your first post
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </div>
