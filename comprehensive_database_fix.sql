@@ -40,7 +40,31 @@ CREATE TABLE IF NOT EXISTS posts (
 );
 
 -- ==============================================
--- 2. CREATE ALL MISSING TABLES WITH CORRECT SCHEMA
+-- 2. FIX SCHEMA INCONSISTENCIES
+-- ==============================================
+
+-- Fix events table schema if it has UUID instead of INTEGER
+DO $$
+BEGIN
+    -- Check if events table exists and has UUID id
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'events' 
+        AND column_name = 'id' 
+        AND data_type = 'uuid'
+    ) THEN
+        -- Drop dependent tables first
+        DROP TABLE IF EXISTS event_registrations CASCADE;
+        
+        -- Drop and recreate events table with INTEGER
+        DROP TABLE IF EXISTS events CASCADE;
+        
+        RAISE NOTICE 'Recreated events table with INTEGER id - existing data was cleared';
+    END IF;
+END $$;
+
+-- ==============================================
+-- 3. CREATE ALL MISSING TABLES WITH CORRECT SCHEMA
 -- ==============================================
 
 -- Profiles table
@@ -236,7 +260,7 @@ CREATE TABLE IF NOT EXISTS event_registrations (
 );
 
 -- ==============================================
--- 3. GRANT ALL NECESSARY PERMISSIONS
+-- 4. GRANT ALL NECESSARY PERMISSIONS
 -- ==============================================
 
 -- Grant permissions to all roles for all tables
@@ -265,7 +289,7 @@ GRANT ALL ON saved_posts TO postgres, anon, authenticated, service_role;
 GRANT ALL ON event_registrations TO postgres, anon, authenticated, service_role;
 
 -- ==============================================
--- 4. ENABLE ROW LEVEL SECURITY
+-- 5. ENABLE ROW LEVEL SECURITY
 -- ==============================================
 
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
@@ -285,7 +309,7 @@ ALTER TABLE saved_posts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE event_registrations ENABLE ROW LEVEL SECURITY;
 
 -- ==============================================
--- 5. DROP ALL EXISTING POLICIES
+-- 6. DROP ALL EXISTING POLICIES
 -- ==============================================
 
 DO $$ 
@@ -299,7 +323,7 @@ BEGIN
 END $$;
 
 -- ==============================================
--- 6. CREATE PERMISSIVE RLS POLICIES FOR ALL TABLES
+-- 7. CREATE PERMISSIVE RLS POLICIES FOR ALL TABLES
 -- ==============================================
 
 -- Profiles policies
@@ -348,7 +372,7 @@ CREATE POLICY "saved_posts_all_access" ON saved_posts FOR ALL USING (true) WITH 
 CREATE POLICY "event_registrations_all_access" ON event_registrations FOR ALL USING (true) WITH CHECK (true);
 
 -- ==============================================
--- 7. CREATE TRIGGERS FOR UPDATED_AT
+-- 8. CREATE TRIGGERS FOR UPDATED_AT
 -- ==============================================
 
 -- Function to update updated_at timestamp
@@ -416,7 +440,7 @@ CREATE TRIGGER update_post_analytics_updated_at
     EXECUTE FUNCTION update_updated_at_column();
 
 -- ==============================================
--- 8. CREATE PROFILE TRIGGER FOR SIGNUP
+-- 9. CREATE PROFILE TRIGGER FOR SIGNUP
 -- ==============================================
 
 -- Function to handle new user creation
@@ -444,7 +468,7 @@ CREATE TRIGGER on_auth_user_created
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- ==============================================
--- 9. VERIFICATION AND CLEANUP
+-- 10. VERIFICATION AND CLEANUP
 -- ==============================================
 
 -- Verify all tables exist
@@ -506,7 +530,7 @@ BEGIN
 END $$;
 
 -- ==============================================
--- 10. FINAL SUCCESS MESSAGE
+-- 11. FINAL SUCCESS MESSAGE
 -- ==============================================
 
 DO $$
