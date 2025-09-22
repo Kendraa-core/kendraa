@@ -95,9 +95,9 @@ DROP POLICY IF EXISTS "notifications_all_access" ON notifications;
 
 -- PROFILES: Allow users to manage their own profiles, public read access
 CREATE POLICY "profiles_select_public" ON profiles FOR SELECT USING (true);
-CREATE POLICY "profiles_insert_own" ON profiles FOR INSERT WITH CHECK (auth.uid()::text = id);
-CREATE POLICY "profiles_update_own" ON profiles FOR UPDATE USING (auth.uid()::text = id);
-CREATE POLICY "profiles_delete_own" ON profiles FOR DELETE USING (auth.uid()::text = id);
+CREATE POLICY "profiles_insert_own" ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
+CREATE POLICY "profiles_update_own" ON profiles FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "profiles_delete_own" ON profiles FOR DELETE USING (auth.uid() = id);
 
 -- POSTS: Public read, authenticated users can create, authors can manage their own
 CREATE POLICY "posts_select_public" ON posts FOR SELECT USING (true);

@@ -36,7 +36,7 @@ import {
   unlikePost,
   isPostLiked,
 } from '@/lib/queries';
-import type { Post, CommentWithAuthor, Profile } from '@/types/database.types';
+import type { Post, CommentWithAuthor, Profile, Institution } from '@/types/database.types';
 import { 
   handleSupabaseError, 
   logError, 
@@ -48,7 +48,7 @@ import { cn } from '@/lib/utils';
 interface PostCardProps {
   post: Post & {
     profiles?: Profile;
-    author?: Profile;
+    author?: Profile | Institution;
   };
   onInteraction?: () => void;
   onPostDeleted: (postId: string) => void; 
@@ -104,12 +104,7 @@ export default function PostCard({ post, onInteraction,onPostDeleted }: PostCard
           setUserReaction(reactionType);
         }
 
-        // Track post impression
-        const deviceType = getDeviceType();
-        const source = window.location.pathname.includes('/profile/') ? 'profile' : 
-                      window.location.pathname.includes('/search') ? 'search' : 'feed';
-        
-        await trackPostImpression(post.id, user?.id || null, source, deviceType);
+        // Analytics tracking removed
       } catch (error) {
         // Silently fail, UI will just show default state
       }
@@ -265,29 +260,57 @@ export default function PostCard({ post, onInteraction,onPostDeleted }: PostCard
 
 
   const getAuthorName = () => {
-    return post.author?.full_name || post.profiles?.full_name || 'Unknown User';
+    if (post.author) {
+      // Check if it's an Institution (has 'name' property) or Profile (has 'full_name' property)
+      if ('name' in post.author) {
+        return post.author.name;
+      } else {
+        return post.author.full_name;
+      }
+    }
+    return post.profiles?.full_name || 'Unknown User';
   };
 
   const getAuthorAvatar = () => {
-    return post.author?.avatar_url || post.profiles?.avatar_url || '';
+    if (post.author) {
+      // Check if it's an Institution (has 'logo_url' property) or Profile (has 'avatar_url' property)
+      if ('logo_url' in post.author) {
+        return post.author.logo_url;
+      } else {
+        return post.author.avatar_url;
+      }
+    }
+    return post.profiles?.avatar_url || '';
   };
 
   const getAuthorHeadline = () => {
     // If there's a custom headline, use it
-    if (post.author?.headline) {
+    if (post.author && 'headline' in post.author) {
       return post.author.headline;
     }
     if (post.profiles?.headline) {
       return post.profiles.headline;
     }
     
-    // For institutions, show appropriate institution type
-    if (post.author?.user_type === 'institution' || post.author?.profile_type === 'institution' ||
-        post.profiles?.user_type === 'institution' || post.profiles?.profile_type === 'institution') {
-      return 'Healthcare Organization';
+    // Default based on user type or institution type
+    if (post.author) {
+      if ('type' in post.author) {
+        // It's an Institution
+        return 'Healthcare Institution';
+      } else {
+        // It's a Profile
+        const userType = (post.author as Profile).user_type;
+        if (userType === 'institution') {
+          return 'Healthcare Institution';
+        }
+        return 'Healthcare Professional';
+      }
     }
     
-    // Default fallback for individuals
+    const userType = post.profiles?.user_type;
+    if (userType === 'institution') {
+      return 'Healthcare Institution';
+    }
     return 'Healthcare Professional';
   };
 
@@ -373,8 +396,10 @@ export default function PostCard({ post, onInteraction,onPostDeleted }: PostCard
             <div className="flex items-center space-x-2">
               <ClickableProfileName
                 userId={post.author_id}
-                name={getAuthorName()}
-                userType={post.author?.user_type || post.profiles?.user_type}
+                name={getAuthorName() || 'Unknown User'}
+                userType={post.author && 'user_type' in post.author ? (post.author as Profile).user_type : 
+                          post.author && 'type' in post.author ? 'institution' : 
+                          post.profiles?.user_type}
               />
             </div>
             <p className="text-sm text-gray-500 truncate">{getAuthorHeadline()}</p>
@@ -506,9 +531,7 @@ export default function PostCard({ post, onInteraction,onPostDeleted }: PostCard
           title={`Post by ${getAuthorName()}`} 
           url={`${window.location.origin}/post/${post.id}`}
           onShare={async (shareType, platform) => {
-            if (user?.id) {
-              await trackPostShare(post.id, user.id, shareType, platform);
-            }
+            // Analytics tracking removed
           }}
         />
         <button

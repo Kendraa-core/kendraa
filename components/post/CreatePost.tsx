@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { createPost } from '@/lib/queries';
-import { uploadToSupabaseStorage } from '@/lib/utils';
+import { uploadToCloudinary } from '@/lib/cloudinary-client';
 import Avatar from '@/components/common/Avatar';
 import {
   PhotoIcon,
@@ -45,11 +45,8 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
       // Upload image if selected
       if (selectedImage) {
         setIsUploadingImage(true);
-        const fileExt = selectedImage.name.split('.').pop();
-        const fileName = `post_${user.id}_${Date.now()}.${fileExt}`;
-        const filePath = fileName;
-
-        const result = await uploadToSupabaseStorage('avatars', filePath, selectedImage);
+        
+        const result = await uploadToCloudinary(selectedImage, 'posts');
         
         if (result.error) {
           throw new Error('Failed to upload image');

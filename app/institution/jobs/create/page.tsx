@@ -133,7 +133,7 @@ export default function InstitutionCreateJobPage() {
         experience_level: formData.experience_level as Job['experience_level'],
         salary_min: formData.salary_min ? parseInt(formData.salary_min) : null,
         salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
-        currency: formData.currency || null,
+        currency: formData.salary_currency || null,
         requirements: formData.requirements,
         specializations: formData.specializations,
         application_deadline: formData.application_deadline ? new Date(formData.application_deadline).toISOString() : null,

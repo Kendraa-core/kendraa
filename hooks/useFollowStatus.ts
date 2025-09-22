@@ -124,10 +124,10 @@ export function useFollowStatus({
       } else {
         // Connection request
         if (status === 'connected') {
-          toast.info('Already connected');
+          toast('Already connected');
           return;
         } else if (status === 'pending') {
-          toast.info('Connection request already pending');
+          toast('Connection request already pending');
           return;
         } else {
           const result = await sendConnectionRequest(user.id, targetUserId);

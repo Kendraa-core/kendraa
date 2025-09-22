@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { createPost } from '@/lib/queries';
-import { uploadToSupabaseStorage } from '@/lib/utils';
+import { uploadToCloudinary } from '@/lib/cloudinary-client';
 import { 
   PhotoIcon,
   XMarkIcon,
@@ -63,7 +63,11 @@ export default function MobileCreatePostPage() {
       if (selectedImage) {
         setIsUploadingImage(true);
         try {
-          imageUrl = await uploadToSupabaseStorage(selectedImage, 'posts');
+          const uploadResult = await uploadToCloudinary(selectedImage, 'posts');
+          if (uploadResult.error) {
+            throw new Error(uploadResult.error);
+          }
+          imageUrl = uploadResult.url;
         } catch (error) {
           console.error('Error uploading image:', error);
           toast.error('Failed to upload image');
@@ -74,7 +78,7 @@ export default function MobileCreatePostPage() {
       }
 
       // Create post
-      await createPost(user.id, content, imageUrl);
+      await createPost(user.id, content, imageUrl || undefined);
       
       toast.success('Post created successfully!');
       router.push('/mob/feed');
