@@ -22,6 +22,7 @@ import {
   type Education,
   type PostWithAuthor
 } from '@/lib/queries';
+import FollowButton from '@/components/common/FollowButton';
 import {
   UserPlusIcon,
   CheckIcon,
@@ -251,17 +252,12 @@ export default function MobileProfilePage() {
               {/* Action Button */}
               {!isOwnProfile && user && actionType !== 'none' && (
                 <div className="mt-4">
-                  <button
-                    onClick={getButtonAction()}
-                    disabled={isButtonDisabled()}
-                    className={`w-full px-4 py-2 rounded-lg font-medium transition-colors ${
-                      isButtonDisabled()
-                        ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
-                        : 'bg-blue-600 text-white hover:bg-blue-700'
-                    }`}
-                  >
-                    {getButtonText()}
-                  </button>
+                  <FollowButton
+                    targetUserId={profile.id}
+                    targetUserType={profile.user_type as 'individual' | 'institution'}
+                    currentUserType={user?.user_metadata?.user_type || 'individual'}
+                    size="md"
+                  />
                 </div>
               )}
               

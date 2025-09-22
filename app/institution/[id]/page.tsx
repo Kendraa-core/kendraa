@@ -52,6 +52,7 @@ import {
   getInstitutionById,
   getInstitutionByUserId,
 } from '@/lib/queries';
+import FollowButton from '@/components/common/FollowButton';
 import type { Profile, Institution, Experience, Education, Post, JobWithCompany, EventWithOrganizer } from '@/types/database.types';
 
 interface ActivityCardProps {
@@ -527,13 +528,12 @@ export default function PublicInstitutionProfilePage() {
               </div>
               <div className="flex items-center space-x-3">
                 {!isOwnProfile && user?.id && (
-                  <Button
-                    onClick={handleFollow}
-                    variant={followStatus === 'following' ? 'outline' : 'default'}
+                  <FollowButton
+                    targetUserId={profile.id}
+                    targetUserType="institution"
+                    currentUserType={user?.user_metadata?.user_type || 'individual'}
                     className="min-w-[120px]"
-                  >
-                    {followStatus === 'following' ? 'Following' : 'Follow'}
-                  </Button>
+                  />
                 )}
                 {!user?.id && (
                   <Button onClick={() => router.push('/signin')}>

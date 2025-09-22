@@ -82,6 +82,7 @@ import {
   type Education,
   type PostWithAuthor,
 } from '@/lib/queries';
+import FollowButton from '@/components/common/FollowButton';
 
 // Helper function to format dates to month/year
 const formatDateToMonthYear = (dateString: string | null): string => {
@@ -1731,59 +1732,11 @@ export default function ProfilePage() {
                       {user ? (
                         // Logged in user actions
                         <>
-                          {!canSendRequests ? (
-                            // Institution users cannot send requests
-                            <div className="inline-flex items-center justify-center px-6 py-3 bg-gray-100 text-gray-600 rounded-lg text-sm font-semibold border border-gray-200 w-full">
-                              <XCircleIcon className="w-4 h-4 mr-2" />
-                              Institutions Cannot Send Requests
-                            </div>
-                          ) : actionType === 'follow' ? (
-                            // Follow logic for institutions
-                            followStatus === 'following' ? (
-                              <button
-                                onClick={handleUnfollow}
-                                className="inline-flex items-center justify-center px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 text-sm font-semibold border border-gray-200 w-full group hover:scale-[1.02]"
-                              >
-                                <CheckIcon className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
-                                Following
-                              </button>
-                            ) : (
-                              <button
-                                onClick={handleConnect}
-                                className="inline-flex items-center justify-center px-6 py-3 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-semibold w-full group hover:scale-[1.02] shadow-lg hover:shadow-xl"
-                              >
-                                <PlusIcon className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
-                                Follow
-                              </button>
-                            )
-                          ) : actionType === 'connect' ? (
-                            // Connection logic for individuals
-                            connectionStatus === 'connected' ? (
-                              <span className="inline-flex items-center justify-center px-6 py-3 bg-green-100 text-green-700 rounded-lg text-sm font-semibold border border-green-200 w-full">
-                                <CheckIcon className="w-4 h-4 mr-2" />
-                                Connected
-                              </span>
-                            ) : connectionStatus === 'pending' ? (
-                              <span className="inline-flex items-center justify-center px-6 py-3 bg-yellow-100 text-yellow-700 rounded-lg text-sm font-semibold border border-yellow-200 w-full">
-                                <ClockIcon className="w-4 h-4 mr-2" />
-                                Pending
-                              </span>
-                            ) : (
-                              <button
-                                onClick={handleConnect}
-                                className="inline-flex items-center justify-center px-6 py-3 bg-[#007fff] text-white rounded-lg hover:bg-[#007fff]/90 transition-all duration-200 text-sm font-semibold w-full group hover:scale-[1.02] shadow-lg hover:shadow-xl"
-                              >
-                                <UserPlusIcon className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
-                                Connect
-                              </button>
-                            )
-                          ) : (
-                            // No action available
-                            <div className="inline-flex items-center justify-center px-6 py-3 bg-gray-100 text-gray-600 rounded-lg text-sm font-semibold border border-gray-200 w-full">
-                              <XCircleIcon className="w-4 h-4 mr-2" />
-                              No Action Available
-                            </div>
-                          )}
+                          <FollowButton
+                            targetUserId={profile.id}
+                            targetUserType={profile.user_type as 'individual' | 'institution'}
+                            currentUserType={user?.user_metadata?.user_type || 'individual'}
+                          />
                           <button 
                             onClick={() => router.push(`/messages?user=${profile.id}`)}
                             className="inline-flex items-center justify-center px-6 py-3 bg-white text-[#007fff] border-2 border-[#007fff] rounded-lg hover:bg-[#007fff]/5 transition-all duration-200 text-sm font-semibold w-full group hover:scale-[1.02] hover:border-[#007fff]/80"
