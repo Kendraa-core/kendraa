@@ -144,6 +144,16 @@ CREATE TABLE IF NOT EXISTS post_comments (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Post Likes table
+CREATE TABLE IF NOT EXISTS post_likes (
+    id SERIAL PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+    reaction_type TEXT NOT NULL DEFAULT 'like',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(user_id, post_id)
+);
+
 -- ==============================================
 -- 2. CREATE TRIGGERS FOR UPDATED_AT
 -- ==============================================
@@ -256,6 +266,7 @@ ALTER TABLE jobs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE follows ENABLE ROW LEVEL SECURITY;
 ALTER TABLE post_comments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE post_likes ENABLE ROW LEVEL SECURITY;
 
 -- ==============================================
 -- 6. DROP ALL EXISTING POLICIES
@@ -351,6 +362,19 @@ CREATE POLICY "post_comments_update_policy" ON post_comments
     FOR UPDATE USING (true);
 
 CREATE POLICY "post_comments_delete_policy" ON post_comments
+    FOR DELETE USING (true);
+
+-- Post Likes policies (allow all operations for authenticated users)
+CREATE POLICY "post_likes_select_policy" ON post_likes
+    FOR SELECT USING (true);
+
+CREATE POLICY "post_likes_insert_policy" ON post_likes
+    FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "post_likes_update_policy" ON post_likes
+    FOR UPDATE USING (true);
+
+CREATE POLICY "post_likes_delete_policy" ON post_likes
     FOR DELETE USING (true);
 
 -- Jobs policies (allow all operations for authenticated users)
