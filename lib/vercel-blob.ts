@@ -18,7 +18,6 @@ export async function uploadToVercelBlob(
     access?: 'public';
     addRandomSuffix?: boolean;
     allowOverwrite?: boolean;
-    cacheControlMaxAge?: number;
   }
 ): Promise<{ url: string; error: any | null }> {
   try {
@@ -53,47 +52,47 @@ export async function uploadToVercelBlob(
 export async function uploadPostImage(file: File): Promise<{ url: string; error: any | null }> {
   return uploadToVercelBlob(file, `posts/${Date.now()}-${file.name}`, {
     access: 'public',
-    addRandomSuffix: true,
-    cacheControlMaxAge: 2592000 // 30 days
+    addRandomSuffix: true
+    // Removed cacheControlMaxAge to avoid CORS issues
   });
 }
 
 export async function uploadProfileImage(file: File, userId: string): Promise<{ url: string; error: any | null }> {
   return uploadToVercelBlob(file, `profiles/${userId}/avatar-${Date.now()}.${file.name.split('.').pop()}`, {
     access: 'public',
-    addRandomSuffix: true,
-    cacheControlMaxAge: 2592000 // 30 days
+    addRandomSuffix: true
+    // Removed cacheControlMaxAge to avoid CORS issues
   });
 }
 
 export async function uploadInstitutionLogo(file: File, institutionId: string): Promise<{ url: string; error: any | null }> {
   return uploadToVercelBlob(file, `institutions/${institutionId}/logo-${Date.now()}.${file.name.split('.').pop()}`, {
     access: 'public',
-    addRandomSuffix: true,
-    cacheControlMaxAge: 2592000 // 30 days
+    addRandomSuffix: true
+    // Removed cacheControlMaxAge to avoid CORS issues
   });
 }
 
 export async function uploadInstitutionBanner(file: File, institutionId: string): Promise<{ url: string; error: any | null }> {
   return uploadToVercelBlob(file, `institutions/${institutionId}/banner-${Date.now()}.${file.name.split('.').pop()}`, {
     access: 'public',
-    addRandomSuffix: true,
-    cacheControlMaxAge: 2592000 // 30 days
+    addRandomSuffix: true
+    // Removed cacheControlMaxAge to avoid CORS issues
   });
 }
 
 export async function uploadEventImage(file: File, eventId: string): Promise<{ url: string; error: any | null }> {
   return uploadToVercelBlob(file, `events/${eventId}/image-${Date.now()}.${file.name.split('.').pop()}`, {
     access: 'public',
-    addRandomSuffix: true,
-    cacheControlMaxAge: 2592000 // 30 days
+    addRandomSuffix: true
+    // Removed cacheControlMaxAge to avoid CORS issues
   });
 }
 
 export async function uploadJobImage(file: File, jobId: string): Promise<{ url: string; error: any | null }> {
   return uploadToVercelBlob(file, `jobs/${jobId}/image-${Date.now()}.${file.name.split('.').pop()}`, {
     access: 'public',
-    addRandomSuffix: true,
-    cacheControlMaxAge: 2592000 // 30 days
+    addRandomSuffix: true
+    // Removed cacheControlMaxAge to avoid CORS issues
   });
 }
