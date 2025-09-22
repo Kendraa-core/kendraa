@@ -48,6 +48,7 @@ import { cn } from '@/lib/utils';
 interface PostCardProps {
   post: Post & {
     profiles?: Profile;
+    author?: Profile;
   };
   onInteraction?: () => void;
   onPostDeleted: (postId: string) => void; 
@@ -264,21 +265,25 @@ export default function PostCard({ post, onInteraction,onPostDeleted }: PostCard
 
 
   const getAuthorName = () => {
-    return post.profiles?.full_name || 'Unknown User';
+    return post.author?.full_name || post.profiles?.full_name || 'Unknown User';
   };
 
   const getAuthorAvatar = () => {
-    return post.profiles?.avatar_url || '';
+    return post.author?.avatar_url || post.profiles?.avatar_url || '';
   };
 
   const getAuthorHeadline = () => {
     // If there's a custom headline, use it
+    if (post.author?.headline) {
+      return post.author.headline;
+    }
     if (post.profiles?.headline) {
       return post.profiles.headline;
     }
     
     // For institutions, show appropriate institution type
-    if (post.profiles?.user_type === 'institution' || post.profiles?.profile_type === 'institution') {
+    if (post.author?.user_type === 'institution' || post.author?.profile_type === 'institution' ||
+        post.profiles?.user_type === 'institution' || post.profiles?.profile_type === 'institution') {
       return 'Healthcare Organization';
     }
     
@@ -369,7 +374,7 @@ export default function PostCard({ post, onInteraction,onPostDeleted }: PostCard
               <ClickableProfileName
                 userId={post.author_id}
                 name={getAuthorName()}
-                userType={post.profiles?.user_type}
+                userType={post.author?.user_type || post.profiles?.user_type}
               />
             </div>
             <p className="text-sm text-gray-500 truncate">{getAuthorHeadline()}</p>

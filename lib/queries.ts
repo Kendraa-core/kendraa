@@ -224,7 +224,7 @@ export async function getPosts(limit = 10, offset = 0): Promise<PostWithAuthor[]
     
     // For institution users, also fetch institution data
     const institutionAuthorIds = authors?.filter(author => 
-      author.user_type === 'organization' || author.profile_type === 'organization'
+      author.user_type === 'institution' || author.profile_type === 'institution'
     ).map(author => author.id) || [];
     
     let institutionMap = new Map();
@@ -3103,7 +3103,7 @@ export async function getSavedPosts(userId: string): Promise<Post[]> {
     
     // For institution users, also fetch institution data
     const institutionAuthorIds = authors?.filter(author => 
-      author.user_type === 'organization' || author.profile_type === 'organization'
+      author.user_type === 'institution' || author.profile_type === 'institution'
     ).map(author => author.id) || [];
     
     let institutionMap = new Map();
