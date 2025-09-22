@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import Avatar from '@/components/common/Avatar';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import Header from '@/components/layout/Header';
+import { usePageRefresh } from '@/hooks/usePageRefresh';
 import { 
   UserGroupIcon,
   UserIcon,
@@ -91,6 +92,9 @@ export default function NetworkPage() {
   });
   const [loading, setLoading] = useState(true);
   const [canSendRequests, setCanSendRequests] = useState(true);
+  
+  // Initialize page refresh hook
+  usePageRefresh();
 
   const fetchNetworkData = useCallback(async () => {
     if (!user?.id) return;
@@ -171,24 +175,6 @@ export default function NetworkPage() {
     fetchNetworkData();
   }, [fetchNetworkData]);
 
-  // Listen for network updates and refresh data
-  useEffect(() => {
-    const handleNetworkUpdate = () => {
-      fetchNetworkData();
-    };
-
-    // Listen for custom events
-    window.addEventListener('network-updated', handleNetworkUpdate);
-    window.addEventListener('connection-request-sent', handleNetworkUpdate);
-    window.addEventListener('follow-status-updated', handleNetworkUpdate);
-
-    return () => {
-      window.removeEventListener('network-updated', handleNetworkUpdate);
-      window.removeEventListener('connection-request-sent', handleNetworkUpdate);
-      window.removeEventListener('follow-status-updated', handleNetworkUpdate);
-    };
-  }, [fetchNetworkData]);
-
   const handleConnect = async (profileId: string, profileType: 'individual' | 'institution') => {
     if (!user?.id) return;
     
@@ -208,6 +194,11 @@ export default function NetworkPage() {
             p.id === profileId ? { ...p, follow_status: 'following' } : p
           ));
           toast.success('Now following this institution!');
+          
+          // Dispatch event to trigger page refresh
+          window.dispatchEvent(new CustomEvent('follow-status-updated', {
+            detail: { targetUserId: profileId, targetUserType: 'institution' }
+          }));
         } else {
           toast.error('Failed to follow institution');
         }
@@ -221,6 +212,11 @@ export default function NetworkPage() {
             p.id === profileId ? { ...p, connection_status: 'pending' } : p
           ));
           toast.success('Connection request sent!');
+          
+          // Dispatch event to trigger page refresh
+          window.dispatchEvent(new CustomEvent('connection-request-sent', {
+            detail: { targetUserId: profileId, targetUserType: 'individual' }
+          }));
         } else {
           toast.error('Failed to send connection request');
         }
@@ -240,6 +236,11 @@ export default function NetworkPage() {
         toast.success('Connection accepted!');
         // Refresh network data
         fetchNetworkData();
+        
+        // Dispatch event to trigger page refresh
+        window.dispatchEvent(new CustomEvent('connection-accepted', {
+          detail: { requestId }
+        }));
       } else {
         toast.error('Failed to accept connection');
       }
@@ -256,6 +257,11 @@ export default function NetworkPage() {
       if (success) {
         setConnectionRequests(prev => prev.filter(req => req.id !== requestId));
         toast.success('Connection request declined');
+        
+        // Dispatch event to trigger page refresh
+        window.dispatchEvent(new CustomEvent('connection-rejected', {
+          detail: { requestId }
+        }));
       } else {
         toast.error('Failed to decline connection');
       }
@@ -481,66 +487,18 @@ export default function NetworkPage() {
                       <div className="flex-1">
                         <h3 className={`${TYPOGRAPHY.body.medium} font-semibold`}>Your Network Overview</h3>
                         <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
-                          {networkStats.connections} connections • {networkStats.groups} groups
+                          {networkStats.connections} connections • {connections.length} following • {networkStats.groups} groups
                         </p>
                       </div>
-                    </div>
-                    
-                    {/* Network Management Links */}
-                    <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
                       <Link 
                         href="/network/connections"
-                        className={`p-4 ${COMPONENTS.card.base} hover:shadow-md transition-shadow`}
+                        className={`px-4 py-2 ${COMPONENTS.button.primary} rounded-lg hover:bg-blue-700 transition-colors font-medium`}
                       >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                            <UserIcon className="w-5 h-5 text-green-600" />
-                          </div>
-                          <div>
-                            <h4 className={`${TYPOGRAPHY.body.small} font-semibold`}>Connections</h4>
-                            <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
-                              {networkStats.connections} connected
-                            </p>
-                          </div>
-                        </div>
-                      </Link>
-                      
-                      <Link 
-                        href="/network/followers"
-                        className={`p-4 ${COMPONENTS.card.base} hover:shadow-md transition-shadow`}
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <HeartIcon className="w-5 h-5 text-blue-600" />
-                          </div>
-                          <div>
-                            <h4 className={`${TYPOGRAPHY.body.small} font-semibold`}>Followers</h4>
-                            <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
-                              People following you
-                            </p>
-                          </div>
-                        </div>
-                      </Link>
-                      
-                      <Link 
-                        href="/network/following"
-                        className={`p-4 ${COMPONENTS.card.base} hover:shadow-md transition-shadow`}
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                            <UserGroupIcon className="w-5 h-5 text-purple-600" />
-                          </div>
-                          <div>
-                            <h4 className={`${TYPOGRAPHY.body.small} font-semibold`}>Following</h4>
-                            <p className={`${TYPOGRAPHY.body.small} ${TEXT_COLORS.secondary}`}>
-                              People & institutions you follow
-                            </p>
-                          </div>
-                        </div>
+                        Manage Network
                       </Link>
                     </div>
-                  </div>
-                </div>
+        </div>
+      </div>
 
         {/* Invitations Section */}
         {connectionRequests.length > 0 && (

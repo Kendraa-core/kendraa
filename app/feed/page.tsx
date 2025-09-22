@@ -14,6 +14,7 @@ import {
 import toast from 'react-hot-toast';
 import PostCard from '@/components/post/PostCard';
 import Avatar from '@/components/common/Avatar';
+import { usePageRefresh } from '@/hooks/usePageRefresh';
 
 export default function FeedPage() {
   const { user, profile } = useAuth();
@@ -26,6 +27,9 @@ export default function FeedPage() {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isPosting, setIsPosting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Initialize page refresh hook
+  usePageRefresh();
 
 
   const handlePostDeleted = (deletedPostId: string) => {
@@ -98,7 +102,7 @@ export default function FeedPage() {
         setImagePreview(null);
         toast.success('Post created successfully!');
         
-        // Dispatch event to notify other components
+        // Dispatch event to trigger page refresh
         window.dispatchEvent(new CustomEvent('post-created', {
           detail: { postId: post.id, authorId: user.id }
         }));

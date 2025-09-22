@@ -5,6 +5,7 @@ import MobileLayout from '@/components/mobile/MobileLayout';
 import Avatar from '@/components/common/Avatar';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePageRefresh } from '@/hooks/usePageRefresh';
 import {
   getSuggestedConnectionsWithMutualCounts,
   getSuggestedInstitutions,
@@ -43,6 +44,9 @@ export default function MobileNetworkPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'suggestions' | 'requests' | 'connections'>('suggestions');
   const [canSendRequests, setCanSendRequests] = useState(true);
+  
+  // Initialize page refresh hook
+  usePageRefresh();
 
   const fetchNetworkData = useCallback(async () => {
     if (!user?.id) return;
@@ -100,6 +104,11 @@ export default function MobileNetworkPage() {
             p.id === profileId ? { ...p, follow_status: 'following' } : p
           ));
           toast.success('Now following this institution!');
+          
+          // Dispatch event to trigger page refresh
+          window.dispatchEvent(new CustomEvent('follow-status-updated', {
+            detail: { targetUserId: profileId, targetUserType: 'institution' }
+          }));
         }
       } else {
         const result = await sendConnectionRequest(user.id, profileId);
@@ -109,6 +118,11 @@ export default function MobileNetworkPage() {
             p.id === profileId ? { ...p, connection_status: 'pending' } : p
           ));
           toast.success('Connection request sent!');
+          
+          // Dispatch event to trigger page refresh
+          window.dispatchEvent(new CustomEvent('connection-request-sent', {
+            detail: { targetUserId: profileId, targetUserType: 'individual' }
+          }));
         }
       }
       
@@ -127,6 +141,11 @@ export default function MobileNetworkPage() {
         setConnectionRequests(prev => prev.filter(req => req.id !== requestId));
         toast.success('Connection accepted!');
         fetchNetworkData();
+        
+        // Dispatch event to trigger page refresh
+        window.dispatchEvent(new CustomEvent('connection-accepted', {
+          detail: { requestId }
+        }));
       } else {
         toast.error('Failed to accept connection');
       }
@@ -141,6 +160,11 @@ export default function MobileNetworkPage() {
       if (success) {
         setConnectionRequests(prev => prev.filter(req => req.id !== requestId));
         toast.success('Connection request rejected');
+        
+        // Dispatch event to trigger page refresh
+        window.dispatchEvent(new CustomEvent('connection-rejected', {
+          detail: { requestId }
+        }));
       } else {
         toast.error('Failed to reject connection');
       }
