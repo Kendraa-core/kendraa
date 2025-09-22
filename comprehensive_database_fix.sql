@@ -72,16 +72,35 @@ BEGIN
         WHERE table_name = 'events' 
         AND column_name = 'organizer_id'
     ) THEN
-        -- Add missing organizer_id column
-        ALTER TABLE events ADD COLUMN organizer_id TEXT;
-        
-        -- Copy created_by to organizer_id for existing records
-        UPDATE events SET organizer_id = created_by WHERE organizer_id IS NULL;
-        
-        -- Make organizer_id NOT NULL after populating it
-        ALTER TABLE events ALTER COLUMN organizer_id SET NOT NULL;
-        
-        RAISE NOTICE 'Added organizer_id column to existing events table';
+        -- Check if profiles.id is UUID or TEXT
+        IF EXISTS (
+            SELECT 1 FROM information_schema.columns 
+            WHERE table_name = 'profiles' 
+            AND column_name = 'id' 
+            AND data_type = 'uuid'
+        ) THEN
+            -- Profiles.id is UUID, so organizer_id should be UUID
+            ALTER TABLE events ADD COLUMN organizer_id UUID;
+            
+            -- Copy created_by to organizer_id for existing records (convert TEXT to UUID)
+            UPDATE events SET organizer_id = created_by::UUID WHERE organizer_id IS NULL;
+            
+            -- Make organizer_id NOT NULL after populating it
+            ALTER TABLE events ALTER COLUMN organizer_id SET NOT NULL;
+            
+            RAISE NOTICE 'Added organizer_id column (UUID) to existing events table';
+        ELSE
+            -- Profiles.id is TEXT, so organizer_id should be TEXT
+            ALTER TABLE events ADD COLUMN organizer_id TEXT;
+            
+            -- Copy created_by to organizer_id for existing records
+            UPDATE events SET organizer_id = created_by WHERE organizer_id IS NULL;
+            
+            -- Make organizer_id NOT NULL after populating it
+            ALTER TABLE events ALTER COLUMN organizer_id SET NOT NULL;
+            
+            RAISE NOTICE 'Added organizer_id column (TEXT) to existing events table';
+        END IF;
     END IF;
 END $$;
 
@@ -91,7 +110,7 @@ END $$;
 
 -- Profiles table
 CREATE TABLE IF NOT EXISTS profiles (
-    id TEXT PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     email TEXT UNIQUE,
     full_name TEXT,
     headline TEXT,
@@ -110,7 +129,7 @@ CREATE TABLE IF NOT EXISTS profiles (
 -- Experiences table
 CREATE TABLE IF NOT EXISTS experiences (
     id SERIAL PRIMARY KEY,
-    profile_id TEXT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    profile_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
     title TEXT NOT NULL,
     company TEXT,
     location TEXT,
@@ -125,7 +144,7 @@ CREATE TABLE IF NOT EXISTS experiences (
 -- Education table
 CREATE TABLE IF NOT EXISTS education (
     id SERIAL PRIMARY KEY,
-    profile_id TEXT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    profile_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
     school TEXT NOT NULL,
     degree TEXT,
     field_of_study TEXT,
@@ -184,7 +203,7 @@ CREATE TABLE IF NOT EXISTS jobs (
 CREATE TABLE IF NOT EXISTS events (
     id SERIAL PRIMARY KEY,
     created_by TEXT NOT NULL,
-    organizer_id TEXT NOT NULL REFERENCES profiles(id),  -- Foreign key to profiles
+    organizer_id UUID NOT NULL REFERENCES profiles(id),  -- Foreign key to profiles
     institution_id UUID REFERENCES institutions(id),
     title TEXT NOT NULL,
     description TEXT,
@@ -295,11 +314,28 @@ BEGIN
         WHERE constraint_name = 'events_organizer_id_fkey' 
         AND table_name = 'events'
     ) THEN
-        -- Add the foreign key constraint
-        ALTER TABLE events ADD CONSTRAINT events_organizer_id_fkey 
-        FOREIGN KEY (organizer_id) REFERENCES profiles(id);
-        
-        RAISE NOTICE 'Added foreign key constraint for events.organizer_id';
+        -- Check the actual data type of profiles.id
+        IF EXISTS (
+            SELECT 1 FROM information_schema.columns 
+            WHERE table_name = 'profiles' 
+            AND column_name = 'id' 
+            AND data_type = 'uuid'
+        ) THEN
+            -- Profiles.id is UUID, so we need to change organizer_id to UUID
+            ALTER TABLE events ALTER COLUMN organizer_id TYPE UUID USING organizer_id::UUID;
+            
+            -- Add the foreign key constraint
+            ALTER TABLE events ADD CONSTRAINT events_organizer_id_fkey 
+            FOREIGN KEY (organizer_id) REFERENCES profiles(id);
+            
+            RAISE NOTICE 'Added foreign key constraint for events.organizer_id (UUID type)';
+        ELSE
+            -- Profiles.id is TEXT, so organizer_id can stay as TEXT
+            ALTER TABLE events ADD CONSTRAINT events_organizer_id_fkey 
+            FOREIGN KEY (organizer_id) REFERENCES profiles(id);
+            
+            RAISE NOTICE 'Added foreign key constraint for events.organizer_id (TEXT type)';
+        END IF;
     END IF;
 END $$;
 
