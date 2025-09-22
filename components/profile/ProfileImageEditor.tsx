@@ -12,7 +12,8 @@ import {
   CheckIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
-import { validateFile, uploadToSupabaseStorage, deleteFromSupabaseStorage, generateFilePath } from '@/lib/utils';
+import { uploadProfileImage } from '@/lib/vercel-blob';
+import { validateFile, generateFilePath } from '@/lib/utils';
 
 interface ProfileImageEditorProps {
   isOpen: boolean;
@@ -94,11 +95,12 @@ export default function ProfileImageEditor({
       if (path) {
         const bucket = type === 'avatar' ? 'avatars' : 'banners';
         const folder = type === 'avatar' ? 'avatars' : 'banners';
-        const result = await deleteFromSupabaseStorage(bucket, `${folder}/${path}`);
+        // Note: Vercel Blob doesn't support client-side deletion
+        // const result = await deleteFromSupabaseStorage(bucket, `${folder}/${path}`);
         
-        if (result.error) {
-          throw new Error(result.error);
-        }
+        // if (result.error) {
+        //   throw new Error(result.error);
+        // }
       }
 
       // Update profile
@@ -137,9 +139,8 @@ export default function ProfileImageEditor({
       const folder = isAvatar ? 'avatars' : 'banners';
       const filePath = generateFilePath(user.id, file.name);
 
-      // Upload to Supabase storage
-      const bucket = isAvatar ? 'avatars' : 'banners';
-      const result = await uploadToSupabaseStorage(bucket, filePath, file);
+      // Upload to Vercel Blob
+      const result = await uploadProfileImage(file, user.id);
 
       if (result.error) {
         throw new Error(result.error);
@@ -177,7 +178,7 @@ export default function ProfileImageEditor({
       // Upload avatar if changed
       if (avatarFile) {
         const filePath = generateFilePath(user.id, avatarFile.name);
-        const result = await uploadToSupabaseStorage('avatars', filePath, avatarFile);
+        const result = await uploadProfileImage(avatarFile, user.id);
         if (result.error) {
           throw new Error(result.error);
         }
@@ -187,7 +188,7 @@ export default function ProfileImageEditor({
       // Upload banner if changed
       if (bannerFile) {
         const filePath = generateFilePath(user.id, bannerFile.name);
-        const result = await uploadToSupabaseStorage('banners', filePath, bannerFile);
+        const result = await uploadProfileImage(bannerFile, user.id);
         if (result.error) {
           throw new Error(result.error);
         }

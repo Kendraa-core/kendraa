@@ -27,6 +27,7 @@
   "dependencies": {
     "@heroicons/react": "^2.0.18",
     "@supabase/supabase-js": "^2.38.4",
+    "@vercel/blob": "^2.0.0",
     "class-variance-authority": "^0.7.1",
     "cloudinary": "^2.7.0",
     "clsx": "^2.1.1",

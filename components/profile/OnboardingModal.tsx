@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import EditProfileModal from './EditProfileModal';
-import { uploadToSupabaseStorage, validateFile, generateFilePath } from '@/lib/utils';
+import { uploadProfileImage } from '@/lib/vercel-blob';
+import { validateFile, generateFilePath } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
 import {
   UserIcon,
@@ -507,37 +508,23 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
       setUploading(true);
       toast.loading('Uploading photo...');
 
-      // Use a unique path (user id + timestamp), with upsert
-      const fileExt = avatarFile.name.split('.').pop();
-      const fileName = `${user.id}_${Date.now()}.${fileExt}`;
-      const filePath = `${user.id}/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, avatarFile, { upsert: true });
-
-      if (uploadError) {
+      try {
+        const result = await uploadProfileImage(avatarFile, user.id);
+        
+        if (result.error) {
+          throw new Error(result.error);
+        }
+        
+        // Set in your formData before upserting user profile
+        formData.avatar_url = result.url;
+        
         toast.dismiss();
         setUploading(false);
-        throw uploadError;
-      }
-
-      // Get the public URL of the uploaded file
-      const { data } = supabase
-        .storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-
-      if (!data?.publicUrl) {
+      } catch (error) {
         toast.dismiss();
         setUploading(false);
-        throw new Error("Failed to get public avatar URL.");
+        throw error;
       }
-      // Set in your formData before upserting user profile
-      formData.avatar_url = data.publicUrl;
-
-      toast.dismiss();
-      setUploading(false);
     }
 
     const sb = supabase;

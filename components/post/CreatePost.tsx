@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { createPost } from '@/lib/queries';
-import { uploadToCloudinary } from '@/lib/cloudinary-client';
+import { uploadPostImage } from '@/lib/vercel-blob';
 import Avatar from '@/components/common/Avatar';
 import {
   PhotoIcon,
@@ -46,7 +46,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
       if (selectedImage) {
         setIsUploadingImage(true);
         
-        const result = await uploadToCloudinary(selectedImage, 'posts');
+        const result = await uploadPostImage(selectedImage);
         
         if (result.error) {
           throw new Error('Failed to upload image');

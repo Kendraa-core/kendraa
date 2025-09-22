@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { getPosts, createPost, getConnections, getSuggestedConnections, getProfile } from '@/lib/queries';
-import { uploadToSupabaseStorage } from '@/lib/utils';
+import { uploadPostImage } from '@/lib/vercel-blob';
 import type { Post, Profile } from '@/types/database.types';
 import { 
   PhotoIcon,
@@ -84,7 +84,7 @@ export default function FeedPage() {
         const fileName = `post_${user.id}_${Date.now()}.${fileExt}`;
         const filePath = fileName;
 
-        const result = await uploadToSupabaseStorage('avatars', filePath, selectedImage);
+        const result = await uploadPostImage(selectedImage);
         
         if (result.error) {
           throw new Error('Failed to upload image');

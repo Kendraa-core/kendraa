@@ -17,7 +17,8 @@ import {
   ArrowsPointingOutIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
-import { validateFile, uploadToSupabaseStorage, deleteFromSupabaseStorage, generateFilePath } from '@/lib/utils';
+import { uploadProfileImage } from '@/lib/vercel-blob';
+import { validateFile, generateFilePath } from '@/lib/utils';
 import { updateProfile } from '@/lib/queries';
 
 interface ProfileImageEditorProps {
@@ -208,7 +209,8 @@ export default function EnhancedProfileImageEditor({
         throw new Error("Could not extract file path from URL.");
       }
 
-      await deleteFromSupabaseStorage(bucket, path);
+      // Note: Vercel Blob doesn't support client-side deletion
+      // await deleteFromSupabaseStorage(bucket, path);
 
       await updateProfile(user.id, {
         [isAvatar ? 'avatar_url' : 'banner_url']: null,
@@ -243,14 +245,10 @@ export default function EnhancedProfileImageEditor({
     setLoadingState(true);
 
     try {
-      const folder = isAvatar ? 'avatars' : 'banners';
-      // Use the corrected generateFilePath function
-      const filePath = generateFilePath(user.id, file.name);
-      
-      const result = await uploadToSupabaseStorage(folder, filePath, file);
+      const result = await uploadProfileImage(file, user.id);
 
       if (result.error) {
-        // The error object from Supabase might have a 'message' property
+        // The error object from Vercel Blob might have a 'message' property
         const errorMessage = result.error.message || String(result.error);
         throw new Error(errorMessage);
       }
@@ -285,11 +283,7 @@ export default function EnhancedProfileImageEditor({
       const updates: { avatar_url?: string; banner_url?: string } = {};
 
       if (avatarFile) {
-        const result = await uploadToSupabaseStorage(
-          'avatars',
-          generateFilePath(user.id, avatarFile.name),
-          avatarFile
-        );
+        const result = await uploadProfileImage(avatarFile, user.id);
         const errorMessage = result.error?.message || result.error;
         if (errorMessage) throw new Error(`Avatar upload failed: ${errorMessage}`);
         if (!result.url) throw new Error('Avatar upload succeeded but no URL was returned.');
@@ -297,11 +291,7 @@ export default function EnhancedProfileImageEditor({
       }
 
       if (bannerFile) {
-        const result = await uploadToSupabaseStorage(
-          'banners',
-          generateFilePath(user.id, bannerFile.name),
-          bannerFile
-        );
+        const result = await uploadProfileImage(bannerFile, user.id);
         const errorMessage = result.error?.message || result.error;
         if (errorMessage) throw new Error(`Banner upload failed: ${errorMessage}`);
         if (!result.url) throw new Error('Banner upload succeeded but no URL was returned.');

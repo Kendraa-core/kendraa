@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { createPost } from '@/lib/queries';
-import { uploadToCloudinary } from '@/lib/cloudinary-client';
+import { uploadPostImage } from '@/lib/vercel-blob';
 import { 
   PhotoIcon,
   XMarkIcon,
@@ -63,7 +63,7 @@ export default function MobileCreatePostPage() {
       if (selectedImage) {
         setIsUploadingImage(true);
         try {
-          const uploadResult = await uploadToCloudinary(selectedImage, 'posts');
+          const uploadResult = await uploadPostImage(selectedImage);
           if (uploadResult.error) {
             throw new Error(uploadResult.error);
           }

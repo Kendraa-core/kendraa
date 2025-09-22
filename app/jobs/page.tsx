@@ -10,7 +10,7 @@ import {
   getJobApplications,
   getInstitutionByUserId
 } from '@/lib/queries';
-import { uploadToSupabaseStorage } from '@/lib/utils';
+import { uploadToVercelBlob } from '@/lib/vercel-blob';
 import { 
   BriefcaseIcon,
   MapPinIcon,
@@ -179,16 +179,16 @@ export default function JobsPage() {
       if (resumeFile) {
         setUploadingResume(true);
         const fileName = `resumes/${user.id}/${Date.now()}-${resumeFile.name}`;
-        const { url, error } = await uploadToSupabaseStorage('documents', fileName, resumeFile);
+        const result = await uploadToVercelBlob(resumeFile, fileName);
         
-        if (error) {
+        if (result.error) {
           toast.error('Failed to upload resume');
           setUploadingResume(false);
           setSubmittingApplication(false);
-      return;
-    }
+          return;
+        }
 
-        resumeUrl = url;
+        resumeUrl = result.url;
         setUploadingResume(false);
       }
       
