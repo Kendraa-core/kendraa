@@ -431,7 +431,6 @@ BEGIN
     RAISE NOTICE '🎉 ALL RLS POLICIES AND PERMISSIONS CONFIGURED!';
     RAISE NOTICE '✅ All tables have proper RLS policies';
     RAISE NOTICE '✅ All permissions granted to required roles';
-    RAISE NOTICE '✅ All analytics tables removed from database';
     RAISE NOTICE '✅ Signup process should work smoothly';
     RAISE NOTICE '✅ App connectivity fully restored';
     RAISE NOTICE '========================================';
