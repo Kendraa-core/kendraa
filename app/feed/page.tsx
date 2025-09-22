@@ -281,7 +281,6 @@ export default function FeedPage() {
                 ))}
               </div>
             ) : (
-
               <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
                 <div className="max-w-md mx-auto">
                   <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -292,23 +291,12 @@ export default function FeedPage() {
                     Be the first to share your thoughts and insights with the community.
                   </p>
                   <button
-                    onClick={() => setActiveTab('posts')}
+                    onClick={() => setShowCreatePost(true)}
                     className="bg-[#007fff] text-white px-6 py-3 rounded-xl hover:bg-[#007fff]/90 transition-colors font-medium"
                   >
                     Create your first post
                   </button>
-
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No posts yet</h3>
-                <p className="text-gray-600 mb-6">
-                  Be the first to share something with your network!
-                </p>
-                <button 
-                  onClick={() => document.querySelector('textarea')?.focus()}
-                  className="bg-[#007fff] text-white px-6 py-2 rounded-xl hover:bg-[#007fff]/90 transition-colors"
-                >
-                  Create your first post
-                </button>
               </div>
             )}
           </div>
