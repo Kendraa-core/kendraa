@@ -17,7 +17,7 @@ import {
   ArrowsPointingOutIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
-import { uploadProfileImage } from '@/lib/vercel-blob';
+import { uploadProfileImage, uploadProfileBanner } from '@/lib/vercel-blob';
 import { validateFile, generateFilePath } from '@/lib/utils';
 import { updateProfile } from '@/lib/queries';
 
@@ -291,7 +291,7 @@ export default function EnhancedProfileImageEditor({
       }
 
       if (bannerFile) {
-        const result = await uploadProfileImage(bannerFile, user.id);
+        const result = await uploadProfileBanner(bannerFile, user.id);
         const errorMessage = result.error?.message || result.error;
         if (errorMessage) throw new Error(`Banner upload failed: ${errorMessage}`);
         if (!result.url) throw new Error('Banner upload succeeded but no URL was returned.');

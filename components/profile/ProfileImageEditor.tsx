@@ -12,7 +12,7 @@ import {
   CheckIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
-import { uploadProfileImage } from '@/lib/vercel-blob';
+import { uploadProfileImage, uploadProfileBanner } from '@/lib/vercel-blob';
 import { validateFile, generateFilePath } from '@/lib/utils';
 
 interface ProfileImageEditorProps {
@@ -188,7 +188,7 @@ export default function ProfileImageEditor({
       // Upload banner if changed
       if (bannerFile) {
         const filePath = generateFilePath(user.id, bannerFile.name);
-        const result = await uploadProfileImage(bannerFile, user.id);
+        const result = await uploadProfileBanner(bannerFile, user.id);
         if (result.error) {
           throw new Error(result.error);
         }

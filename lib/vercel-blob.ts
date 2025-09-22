@@ -67,6 +67,15 @@ export async function uploadProfileImage(file: File, userId: string): Promise<{ 
   });
 }
 
+export async function uploadProfileBanner(file: File, userId: string): Promise<{ url: string; error: any | null }> {
+  const randomSuffix = Math.random().toString(36).substring(2, 15);
+  const fileExt = file.name.split('.').pop();
+  const baseName = file.name.replace(/\.[^/.]+$/, '');
+  return uploadToVercelBlob(file, `profiles/${userId}/banner-${Date.now()}-${baseName}-${randomSuffix}.${fileExt}`, {
+    access: 'public'
+  });
+}
+
 export async function uploadInstitutionLogo(file: File, institutionId: string): Promise<{ url: string; error: any | null }> {
   const randomSuffix = Math.random().toString(36).substring(2, 15);
   const fileExt = file.name.split('.').pop();
@@ -99,6 +108,15 @@ export async function uploadJobImage(file: File, jobId: string): Promise<{ url: 
   const fileExt = file.name.split('.').pop();
   const baseName = file.name.replace(/\.[^/.]+$/, '');
   return uploadToVercelBlob(file, `jobs/${jobId}/image-${Date.now()}-${baseName}-${randomSuffix}.${fileExt}`, {
+    access: 'public'
+  });
+}
+
+export async function uploadResume(file: File, userId: string): Promise<{ url: string; error: any | null }> {
+  const randomSuffix = Math.random().toString(36).substring(2, 15);
+  const fileExt = file.name.split('.').pop();
+  const baseName = file.name.replace(/\.[^/.]+$/, '');
+  return uploadToVercelBlob(file, `resumes/${userId}/${Date.now()}-${baseName}-${randomSuffix}.${fileExt}`, {
     access: 'public'
   });
 }

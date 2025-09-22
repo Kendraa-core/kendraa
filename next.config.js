@@ -3,13 +3,6 @@ const nextConfig = {
   // Optimize images with remotePatterns (replaces deprecated domains)
   images: {
     remotePatterns: [
-      // Vercel Blob storage
-      {
-        protocol: 'https',
-        hostname: '*.public.blob.vercel-storage.com',
-        port: '',
-        pathname: '/**',
-      },
       // Supabase storage
       {
         protocol: 'https',
@@ -37,13 +30,6 @@ const nextConfig = {
         port: '3000',
         pathname: '/**',
       },
-      // Fallback for any other HTTPS images (if needed)
-      {
-        protocol: 'https',
-        hostname: '**',
-        port: '',
-        pathname: '/**',
-      },
     ],
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
@@ -51,6 +37,8 @@ const nextConfig = {
     minimumCacheTTL: 60,
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    // Disable image optimization for Vercel Blob to avoid SSL issues
+    unoptimized: true,
   },
 
   // Webpack configuration
@@ -80,6 +68,11 @@ const nextConfig = {
     }
 
     return config;
+  },
+
+  // Environment variables configuration
+  env: {
+    NEXT_PUBLIC_BLOB_READ_WRITE_TOKEN: process.env.NEXT_PUBLIC_BLOB_READ_WRITE_TOKEN,
   },
 
   // Headers for better caching
