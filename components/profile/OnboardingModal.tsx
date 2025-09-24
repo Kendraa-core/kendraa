@@ -530,12 +530,27 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const sb = supabase;
     const uid = user.id;
 
-    // Save profile data
-    await sb.from('profiles').upsert({
+    // Save profile data - only include valid fields
+    const profileData = {
       id: uid,
-      ...formData,
+      first_name: formData.firstName || '',
+      last_name: formData.lastName || '',
+      bio: formData.bio || '',
+      location: formData.location || '',
+      website: formData.website || '',
+      specialization: formData.specialization || '',
+      experience_level: formData.experienceLevel || '',
+      user_type: 'individual',
+      is_public: true,
       updated_at: new Date().toISOString()
-    });
+    };
+
+    // Add avatar_url if it exists
+    if (formData.avatar_url) {
+      profileData.avatar_url = formData.avatar_url;
+    }
+
+    await sb.from('profiles').upsert(profileData);
 
       // Save valid experiences - replace all existing ones
       const validExperiences = experiences.filter(exp => 
@@ -709,9 +724,10 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
               <Image 
                 src="/Kendraa Logo (5).png" 
                 alt="Kendraa Logo" 
-                width={12}
-                height={12}
+                width={120}
+                height={120}
                 className="h-2 md:h-2.5 lg:h-3 w-auto mx-auto drop-shadow-lg"
+                style={{ width: 'auto', height: 'auto' }}
               />
             </div>
             
