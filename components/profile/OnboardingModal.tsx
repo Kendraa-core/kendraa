@@ -149,6 +149,7 @@ export default function OnboardingPage() {
   const [completionPercentage, setCompletionPercentage] = useState(0);
   const [hasSavedExperience, setHasSavedExperience] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [savingProgress, setSavingProgress] = useState(false);
 
   const router = useRouter();
 
@@ -491,12 +492,26 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
 
 
   const handleNext = async () => {
-    // Save ALL data on every Next click
-    await saveAllData(false); // false = don't mark as completed yet
+    if (savingProgress) return; // Prevent multiple clicks
     
-    // Advance to next step
-    const nextStep = Math.min(currentStep + 1, filteredSteps.length - 1);
-    setCurrentStep(nextStep);
+    try {
+      setSavingProgress(true);
+      
+      // Save ALL data on every Next click
+      await saveAllData(false); // false = don't mark as completed yet
+      
+      // Show success feedback
+      toast.success('Progress saved!', { duration: 2000 });
+      
+      // Advance to next step
+      const nextStep = Math.min(currentStep + 1, filteredSteps.length - 1);
+      setCurrentStep(nextStep);
+    } catch (error) {
+      console.error('Error saving progress:', error);
+      toast.error('Failed to save progress. Please try again.');
+    } finally {
+      setSavingProgress(false);
+    }
   };
 
   const saveAllData = async (markCompleted = false) => {
@@ -762,9 +777,9 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
             
             <div className="space-y-3">
               <button
-                onClick={() => {
+                onClick={async () => {
                   setIsStudent(true);
-                  handleNext();
+                  await handleNext();
                 }}
                 className={`w-full p-4 rounded-xl border-2 transition-all duration-200 ${
                   isStudent 
@@ -784,9 +799,9 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
               </button>
               
               <button
-                onClick={() => {
+                onClick={async () => {
                   setIsStudent(false);
-                  handleNext();
+                  await handleNext();
                 }}
                 className={`w-full p-4 rounded-xl border-2 transition-all duration-200 ${
                   !isStudent 
@@ -1887,17 +1902,22 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                           </button>
                           <button
                             onClick={handleNext}
-                            disabled={!canProceed() || loading || uploading}
+                            disabled={!canProceed() || loading || uploading || savingProgress}
                             className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg ${
-                              canProceed() && !loading
+                              canProceed() && !loading && !savingProgress
                                 ? 'bg-[#007fff] text-white hover:bg-[#007fff]/90 hover:shadow-xl transform hover:scale-105'
                                 : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                             }`}
                           >
-                            {loading ? (
+                            {savingProgress ? (
                               <>
                                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                                 <span>Saving...</span>
+                              </>
+                            ) : loading ? (
+                              <>
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                <span>Loading...</span>
                               </>
                             ) : (
                               <>
