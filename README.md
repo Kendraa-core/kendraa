@@ -356,15 +356,6 @@ Available at `/help` with comprehensive guides for:
 
 *Connecting healthcare professionals worldwide, one connection at a time.*
 
----
-
-## 📊 **Project Statistics**
-
-- **50+ Components**: Reusable React components
-- **100+ Pages**: Comprehensive application coverage  
-- **TypeScript**: 100% type-safe codebase
-- **Mobile-First**: Responsive design throughout
-- **Healthcare-Focused**: Built specifically for medical professionals
 
 ---
 
