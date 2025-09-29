@@ -548,22 +548,17 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Save profile data - only include valid fields
     const profileData = {
       id: uid,
-      first_name: formData.firstName || '',
-      last_name: formData.lastName || '',
+      full_name: formData.full_name || '',
       bio: formData.bio || '',
       location: formData.location || '',
       website: formData.website || '',
-      specialization: formData.specialization || '',
-      experience_level: formData.experienceLevel || '',
+      specialization: formData.specialization || [],
+      headline: formData.headline || '',
+      avatar_url: formData.avatar_url || '',
       user_type: 'individual',
       is_public: true,
       updated_at: new Date().toISOString()
     };
-
-    // Add avatar_url if it exists
-    if (formData.avatar_url) {
-      profileData.avatar_url = formData.avatar_url;
-    }
 
     await sb.from('profiles').upsert(profileData);
 
